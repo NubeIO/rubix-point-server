@@ -1,5 +1,8 @@
-# Flask-CRUD-REST-API
+# BACnet rest-api
 
+dev in py 3.7
+
+```bash
 sudo apt-get update
 sudo apt-get install build-essential python-dev python-setuptools python-pip python-smbus python3-pip virtualenv -y
 pip install -U pip setuptools wheel
@@ -9,28 +12,22 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 export FLASK_APP=app.py
 flask run
-
-Had to update the BBB from 3.5 to 3.7
-
 ```
+
+Had to update the BBB from 3.5 to 3.7 but didn't work
+
+```bash
 sudo apt update
 sudo apt install software-properties-common
-
 ## had issue on install and needed to install this
 sudo apt-get install dirmngr
-
 sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt install python3.7
+
 ```
 
 
-        self.bac_device_id = bac_device_id
-        self.ip = ip
-        self.mask = mask
-        self.port = port
-        self.network_id = network_id
-
-https://documenter.getpostman.com/view/5535522/RWgxtaCB
+```sql
  
 DROP TABLE devices
 
@@ -57,4 +54,4 @@ CREATE TABLE networks (
 	network_number INTEGER NOT NULL
 );
   
-
+```
