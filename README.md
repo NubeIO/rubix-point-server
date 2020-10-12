@@ -33,25 +33,29 @@ DROP TABLE devices
 
 CREATE TABLE devices (
 	id INTEGER PRIMARY KEY,
-	uuid TEXT NOT NULL,
-	mac INTEGER NOT NULL,
+	bac_device_uuid TEXT NOT NULL,
+	bac_device_mac INTEGER NOT NULL,
 	bac_device_id INTEGER NOT NULL,
-	ip INTEGER NOT NULL,
-	mask INTEGER NOT NULL,
-    port INTEGER NOT NULL,
+	bac_device_ip INTEGER NOT NULL,
+	bac_device_mask INTEGER NOT NULL,
+    bac_device_port INTEGER NOT NULL,
 	network_uuid TEXT NOT NULL,
-	FOREIGN KEY (network_uuid) REFERENCES networks(uuid)
+	 FOREIGN KEY (network_uuid)
+       REFERENCES networks (network_uuid) 
 );
  
 DROP TABLE networks
 
 CREATE TABLE networks (
 	id INTEGER PRIMARY KEY,
-	uuid TEXT NOT NULL,
-	ip INTEGER NOT NULL,
-	mask INTEGER NOT NULL,
-	port INTEGER NOT NULL,
+	network_uuid TEXT NOT NULL,
+	network_ip INTEGER NOT NULL,
+	network_mask INTEGER NOT NULL,
+	network_port INTEGER NOT NULL,
 	network_number INTEGER NOT NULL
 );
+  
+SELECT * FROM networks
+SELECT * FROM devices 
   
 ```

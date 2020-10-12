@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask
 from flask_restful import Api
 from resources.device import Device, DeviceList
 from resources.network import Network, NetworkList
@@ -7,6 +7,7 @@ from resources.network import Network, NetworkList
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = True  # for print the sql query
 
 api = Api(app)
 
@@ -25,3 +26,4 @@ if __name__ == '__main__':
     from db import db
     db.init_app(app)
     app.run(host=ip, port=port, debug=debug)
+
