@@ -1,3 +1,5 @@
+import time
+
 from models.network import NetworkModel
 from db import db
 import requests
@@ -10,8 +12,8 @@ def init_bac_network(ip, instance, name):
 
 
 def init_bac_device(ip, instance, net):
-    # controller = BAC0.device(ip, instance, net,poll=0, history_size=0)
-    controller = net.read("192.168.0.202 device 202 objectList")
+    controller = BAC0.device(ip, instance, net,poll=0, history_size=0)
+    # controller = net.read("192.168.0.202 device 202 objectList")
     return controller
 
 
@@ -129,7 +131,9 @@ class DeviceModel(db.Model):
         # dev = BAC0.device(bacnet_device['dev_url'], bacnet_device['bac_device_id'], net, poll=0, history_size=0)
 
         dev = init_bac_device(bacnet_device['dev_url'], bacnet_device['bac_device_id'], net)
-        # print(dev.points)
+        points = dev.points
+        print(type(points))
+        print(points)
         response = {
             'network_uuid': network_uuid,
             'bac_network_uuid': bac_network_uuid,
@@ -140,9 +144,9 @@ class DeviceModel(db.Model):
         print(11111)
         print(response)
         terminate_net(net)
-        # terminate_dev(dev)
+        print(4444)
         # print(bacnet_device['dev_url'])
-        return dev
+        return 222
 
     def save_to_db(self):
         db.session.add(self)

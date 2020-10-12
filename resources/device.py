@@ -107,4 +107,4 @@ class DevicePoints(Resource):
         # print(data)
         device = DeviceModel.join_net_device_rest(dev_uuid, net_uuid)
         print(device)
-        return jsonify(device)
+        return 222
