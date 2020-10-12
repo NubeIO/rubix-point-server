@@ -14,6 +14,17 @@ export FLASK_APP=app.py
 flask run
 ```
 
+```
+# Create DB
+$ python
+>> from app import db
+>> db.create_all()
+>> exit()
+```
+
+# Run Server (http://localhst:5000)
+python app.py
+
 Had to update the BBB from 3.5 to 3.7 but didn't work
 
 ```bash
