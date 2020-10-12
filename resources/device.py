@@ -1,3 +1,4 @@
+from flask import jsonify
 from flask_restful import Resource, reqparse
 from models.device import DeviceModel
 
@@ -106,4 +107,4 @@ class DevicePoints(Resource):
         # print(data)
         device = DeviceModel.join_net_device_rest(dev_uuid, net_uuid)
         print(device)
-        return {'dev_uuid': dev_uuid, 'net_uuid': net_uuid}
+        return 222
