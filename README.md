@@ -66,7 +66,7 @@ CREATE TABLE networks (
 	network_port INTEGER NOT NULL,
 	network_number INTEGER NOT NULL,
 	network_device_id INTEGER NOT NULL,
-	network_device_name TEXT NOT NULL,
+	network_device_name TEXT NOT NULL
 );
   
 SELECT * FROM networks
