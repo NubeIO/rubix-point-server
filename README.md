@@ -27,6 +27,7 @@ sudo apt install python3.7
 ```
 
 
+
 ```sql
  
 DROP TABLE devices
@@ -52,7 +53,9 @@ CREATE TABLE networks (
 	network_ip INTEGER NOT NULL,
 	network_mask INTEGER NOT NULL,
 	network_port INTEGER NOT NULL,
-	network_number INTEGER NOT NULL
+	network_number INTEGER NOT NULL,
+	network_device_id INTEGER NOT NULL,
+	network_device_name TEXT NOT NULL,
 );
   
 SELECT * FROM networks

@@ -37,15 +37,15 @@ class Device(Resource):
 
     # bac_device_mac, bac_device_id , bac_device_ip, bac_device_mask, bac_device_port, network_id
     # @jwt_required()
-    def get(self, name):
-        bac_device_uuid = name
+    def get(self, uuid):
+        bac_device_uuid = uuid
         device = DeviceModel.find_by_bac_device_uuid(bac_device_uuid)
         if device:
             return device.get_device()
         return {'message': 'device not found.'}, 404
 
-    def post(self, name):
-        bac_device_uuid = name
+    def post(self, uuid):
+        bac_device_uuid = uuid
         if DeviceModel.find_by_bac_device_uuid(bac_device_uuid):
             return {'message': "An device with bac_device_uuid '{}' already exists.".format(bac_device_uuid)}, 400
 
@@ -60,15 +60,15 @@ class Device(Resource):
             return {'message': 'An error occurred when inserting the device.'}, 500
         return device.get_device(), 201
 
-    def delete(self, name):
-        bac_device_uuid = name
+    def delete(self, uuid):
+        bac_device_uuid = uuid
         device = DeviceModel.find_by_bac_device_uuid(bac_device_uuid)
         if device:
             device.delete_from_db()
         return {'message': 'device deleted'}
 
-    def patch(self, name):
-        bac_device_uuid = name
+    def patch(self, uuid):
+        bac_device_uuid = uuid
         data = Device.parser.parse_args()
         print(data)
 
@@ -92,6 +92,18 @@ class Device(Resource):
 
 
 class DeviceList(Resource):
-
     def get(self):
         return {'devices': [device.get_device() for device in DeviceModel.query.all()]}
+
+
+class DevicePoints(Resource):
+    def get(self, dev_uuid, net_uuid):
+        print(2222222)
+        # , network_uuid)
+        print(dev_uuid, net_uuid)
+        # data = DevicePoints.parser.parse_args()
+        print(2222222)
+        # print(data)
+        device = DeviceModel.join_net_device_rest(dev_uuid, net_uuid)
+        print(device)
+        return {'dev_uuid': dev_uuid, 'net_uuid': net_uuid}
