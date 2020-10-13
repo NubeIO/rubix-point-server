@@ -1,8 +1,10 @@
-from bacnet import api
+from flask_restful import Api
+from bacnet import app
 from bacnet.resources.device import Device, DeviceList, DevicePoints
 from bacnet.resources.network import Network, NetworkList, NetworksIds
 
 api_ver = 'api/1.1'
+api = Api(app)
 
 api.add_resource(Device, f'/{api_ver}/device/<string:uuid>')
 api.add_resource(Network, f'/{api_ver}/network/<string:uuid>')
