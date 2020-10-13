@@ -13,3 +13,5 @@ db = SQLAlchemy(app)
 api = Api(app)
 
 from bacnet import routes
+
+db.create_all()
