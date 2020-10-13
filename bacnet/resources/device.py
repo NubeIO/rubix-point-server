@@ -1,4 +1,4 @@
-from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
+from flask_restful import Resource, reqparse, abort, fields, marshal_with
 from bacnet.models.device import DeviceModel
 from bacnet.resources.network import network_fields
 
@@ -115,6 +115,7 @@ class DevicePoints(Resource):
         response['network_uuid'] = device.network.network_uuid
         response['bac_device_uuid'] = device.bac_device_uuid
         response['bac_device_mac'] = device.bac_device_mac
-        # TODO: Add points
+        from bacnet.services.device import Device as DeviceService
+        response['points'] = DeviceService.get_instance().get_points(device)
 
         return response

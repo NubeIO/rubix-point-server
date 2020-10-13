@@ -10,7 +10,7 @@ class NetworkModel(db.Model):
     network_device_id = db.Column(db.Integer(), nullable=False)
     network_device_name = db.Column(db.String(80), nullable=False)
     network_number = db.Column(db.Integer())
-    devices = db.relationship('DeviceModel', backref='network', lazy=True)
+    devices = db.relationship('DeviceModel', cascade="all,delete", backref='network', lazy=True)
 
     def __repr__(self):
         return f"Network(network_uuid = {self.network_uuid})"

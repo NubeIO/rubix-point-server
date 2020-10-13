@@ -50,7 +50,7 @@ class Network(Resource):
         network = NetworkModel.find_by_network_uuid(uuid)
         if not network:
             abort(404, message='Network not found')
-        return network.get_network()
+        return network
 
     @marshal_with(network_fields)
     def post(self, uuid):
@@ -59,7 +59,9 @@ class Network(Resource):
         data = Network.parser.parse_args()
         network = Network.create_network_model_obj(uuid, data)
         network.save_to_db()
-        return network.get_network(), 201
+        from bacnet.services.network import Network as NetworkService
+        NetworkService.get_instance().add_network(network)
+        return network, 201
 
     @marshal_with(network_fields)
     def put(self, uuid):
@@ -75,6 +77,8 @@ class Network(Resource):
             network.network_device_id = data['network_device_id']
             network.network_device_name = data['network_device_name']
         network.save_to_db()
+        from bacnet.services.network import Network as NetworkService
+        NetworkService.get_instance().add_network(network)
         return network, 201
 
     def delete(self, uuid):
@@ -82,6 +86,8 @@ class Network(Resource):
         network = NetworkModel.find_by_network_uuid(network_uuid)
         if network:
             network.delete_from_db()
+            from bacnet.services.network import Network as NetworkService
+            NetworkService.get_instance().delete_network(network)
         return '', 204
 
     @staticmethod
