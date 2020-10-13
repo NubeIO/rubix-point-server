@@ -1,7 +1,5 @@
-import time
-
-from models.network import NetworkModel
-from db import db
+from bacnet.models.network import NetworkModel
+from bacnet import db
 import requests
 import BAC0
 
@@ -44,7 +42,6 @@ class DeviceModel(db.Model):
     bac_device_mask = db.Column(db.Integer(), nullable=False)
     bac_device_port = db.Column(db.Integer(), nullable=False)
     network_uuid = db.Column(db.Integer, db.ForeignKey('networks.network_uuid'))
-    network = db.relationship('NetworkModel')
 
     def __init__(self, bac_device_uuid, bac_device_mac, bac_device_id, bac_device_ip, bac_device_mask, bac_device_port,
                  network_uuid):
@@ -77,7 +74,8 @@ class DeviceModel(db.Model):
 
     @classmethod
     def join_net_device_rest(cls, dev_uuid, net_uuid):
-        from app import ip, port, api_ver
+        from bacnet.routes import api_ver
+        from run import ip, port
         url = f'http://{ip}:{port}/{api_ver}'
 
         network_uuid = net_uuid

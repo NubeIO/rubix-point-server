@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from models.network import NetworkModel
+from bacnet.models.network import NetworkModel
 
 
 class Network(Resource):

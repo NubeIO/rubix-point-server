@@ -1,5 +1,4 @@
-
-.idea
+.idea/
 .vscode/
 
 .DS_Store
@@ -8,13 +7,10 @@
 .env
 .venv
 env/
-venv/
 venv
-ENV/
 env.bak/
 venv.bak/
 data.db
-
 
 __pycache__/
 *.pyc

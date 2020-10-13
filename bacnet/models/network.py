@@ -1,4 +1,4 @@
-from db import db
+from bacnet import db
 
 
 class NetworkModel(db.Model):

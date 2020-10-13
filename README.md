@@ -1,6 +1,6 @@
-# BACnet rest-api
+# BACnet RESTful APIs
 
-dev in py 3.7
+#### How to run
 
 ```bash
 sudo apt-get update
@@ -10,20 +10,17 @@ rm -r venv
 virtualenv -p python3 venv
 source venv/bin/activate
 pip3 install -r requirements.txt
-export FLASK_APP=app.py
-flask run
+python3 run.py
 ```
 
-```
-# Create DB
+#### Create DB
+
+```bash
 $ python
->> from app import db
+>> from bacnet import db
 >> db.create_all()
 >> exit()
 ```
-
-# Run Server (http://localhst:5000)
-python app.py
 
 Had to update the BBB from 3.5 to 3.7 but didn't work
 
@@ -34,7 +31,6 @@ sudo apt install software-properties-common
 sudo apt-get install dirmngr
 sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt install python3.7
-
 ```
 
 Using the API
@@ -49,7 +45,6 @@ Using the API
 
 
 ```sql
- 
 DROP TABLE devices
 
 CREATE TABLE devices (
@@ -80,5 +75,4 @@ CREATE TABLE networks (
   
 SELECT * FROM networks
 SELECT * FROM devices 
-  
 ```

@@ -2,7 +2,8 @@
 import json
 
 import requests
-from app import ip, port, api_ver
+from bacnet.routes import api_ver
+from run import ip, port
 
 url = f'http://{ip}:{port}/{api_ver}'
 

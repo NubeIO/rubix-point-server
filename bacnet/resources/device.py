@@ -1,6 +1,5 @@
-from flask import jsonify
 from flask_restful import Resource, reqparse
-from models.device import DeviceModel
+from bacnet.models.device import DeviceModel
 
 
 class Device(Resource):
