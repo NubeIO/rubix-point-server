@@ -22,3 +22,9 @@ class Device:
 
         network = Network.get_instance().get_network(device.network)
         return network.read(f"{dev_url} device {bac_device_id} objectList")
+    def get_point(self, device):
+        dev_url = f"{device.bac_device_ip}:{device.bac_device_port}"
+        bac_device_id = device.bac_device_id
+
+        network = Network.get_instance().get_network(device.network)
+        return network.read(f"{dev_url} device {bac_device_id} objectList")

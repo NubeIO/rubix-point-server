@@ -2,6 +2,44 @@
 
 #### How to run
 
+### Installing (for linux)
+
+
+```
+cd bac-rest/
+```
+```
+python3 -m venv venv
+```
+```
+source venv/bin/activate
+```
+```
+pip install --upgrade pip
+```
+```
+pip install -r requirements.txt
+```
+```
+export FLASK_APP=app.py
+```
+```
+flask db init
+```
+```
+flask db migrate -m "entries table"
+```
+```
+flask db upgrade
+```
+```
+flask run
+```
+
+## License
+
+
+
 ```bash
 sudo apt-get update
 sudo apt-get install build-essential python-dev python-setuptools python-pip python-smbus python3-pip virtualenv -y

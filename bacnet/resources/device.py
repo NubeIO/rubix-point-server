@@ -102,7 +102,7 @@ class DeviceList(Resource):
 
 device_point_fields = network_fields
 updated_device_fields = device_fields.copy()
-updated_device_fields.update({'hello': fields.String});
+updated_device_fields.update({'hello': fields.String})
 device_point_fields['devices'] = fields.List(fields.Nested(updated_device_fields))
 
 
@@ -117,5 +117,19 @@ class DevicePoints(Resource):
         response['bac_device_mac'] = device.bac_device_mac
         from bacnet.services.device import Device as DeviceService
         response['points'] = DeviceService.get_instance().get_points(device)
+
+        return response
+
+class DevicePoint(Resource):
+    def get(self, dev_uuid):
+        response = {}
+        device = DeviceModel.find_by_bac_device_uuid(dev_uuid)
+        if not device:
+            abort(404, message='Device Not found')
+        response['network_uuid'] = device.network.network_uuid
+        response['bac_device_uuid'] = device.bac_device_uuid
+        response['bac_device_mac'] = device.bac_device_mac
+        from bacnet.services.device import Device as DeviceService
+        response['points'] = DeviceService.get_instance().get_point(device)
 
         return response
