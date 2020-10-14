@@ -18,7 +18,7 @@ class Services:
             self.networks = {}
 
     def add_network(self, network):
-        net_url = f'{network.network_ip}/{network.network_mask}:{network.network_port}'
+        net_url = f"{network.network_ip}/{network.network_mask}:{network.network_port}"
         network_device_id = network.network_device_id
         network_device_name = network.network_device_name
 
