@@ -1,4 +1,5 @@
 import BAC0
+from bacnet.models.network import NetworkModel
 
 
 class Network:
@@ -16,6 +17,12 @@ class Network:
         else:
             Network.__instance = self
             self.networks = {}
+
+    def start(self):
+        print("Network Start...")
+        network_service = Network.get_instance()
+        for network in NetworkModel.query.all():
+            network_service.add_network(network)
 
     def add_network(self, network):
         net_url = f"{network.network_ip}/{network.network_mask}:{network.network_port}"

@@ -33,7 +33,11 @@ class Device:
         dev_url = get_url["dev_url"]
         bac_device_id = get_url["bac_device_id"]
         read = f"{dev_url} device {bac_device_id} objectList"
-        return network.read(read)
+        # return network.read(read)
+        network = Network.get_instance().get_network(device.network)
+        if network:
+            return network.read(f"{dev_url} device {bac_device_id} objectList")
+        return []
 
       # example point/76e9b1e6-4f3e-4391-9aba-93e1881ecfe4/analogInput/1/presentValue  
     def get_point(self, device, obj, obj_instance, prop):
