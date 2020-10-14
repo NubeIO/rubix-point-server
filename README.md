@@ -4,41 +4,19 @@
 
 ### Installing (for linux)
 
-
 ```
 cd bac-rest/
-```
-```
 python3 -m venv venv
-```
-```
 source venv/bin/activate
-```
-```
 pip install --upgrade pip
-```
-```
 pip install -r requirements.txt
-```
-```
-export FLASK_APP=app.py
-```
-```
-flask db init
-```
-```
-flask db migrate -m "entries table"
-```
-```
-flask db upgrade
-```
-```
+export FLASK_APP=run.py
 flask run
 ```
 
 ## License
 
-
+### Installing (for BBB)
 
 ```bash
 sudo apt-get update
@@ -60,7 +38,7 @@ $ python
 >> exit()
 ```
 
-Had to update the BBB from 3.5 to 3.7 but didn't work
+### Had to update the BBB from 3.5 to 3.7 but didn't work
 
 ```bash
 sudo apt update

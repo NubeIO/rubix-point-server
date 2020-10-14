@@ -117,11 +117,12 @@ class DevicePoints(Resource):
         response['bac_device_mac'] = device.bac_device_mac
         from bacnet.services.device import Device as DeviceService
         response['points'] = DeviceService.get_instance().get_points(device)
-
         return response
 
 class DevicePoint(Resource):
-    def get(self, dev_uuid):
+    def get(self, dev_uuid, obj, obj_instance, prop):
+        # def get(self, dev_uuid, pnt_type, pnt_id):
+        print(222, obj, obj_instance, prop)
         response = {}
         device = DeviceModel.find_by_bac_device_uuid(dev_uuid)
         if not device:
@@ -129,7 +130,9 @@ class DevicePoint(Resource):
         response['network_uuid'] = device.network.network_uuid
         response['bac_device_uuid'] = device.bac_device_uuid
         response['bac_device_mac'] = device.bac_device_mac
+        response['pnt_type'] = obj
+        response['pnt_id'] = obj_instance
         from bacnet.services.device import Device as DeviceService
-        response['points'] = DeviceService.get_instance().get_point(device)
+        response['points'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
 
         return response
