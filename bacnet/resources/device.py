@@ -116,8 +116,12 @@ class DevicePoints(Resource):
         response['network_uuid'] = device.network.network_uuid
         response['bac_device_uuid'] = device.bac_device_uuid
         response['bac_device_mac'] = device.bac_device_mac
-        response['points'] = DeviceService.get_instance().get_points(device)
+        try:
+            response['points'] = DeviceService.get_instance().get_points(device)
+        except Exception as e:
+            abort(500, message=str(e))
         return response
+
 
 class DevicePoint(Resource):
     def get(self, dev_uuid, obj, obj_instance, prop):
@@ -130,7 +134,9 @@ class DevicePoint(Resource):
         response['bac_device_mac'] = device.bac_device_mac
         response['pnt_type'] = obj
         response['pnt_id'] = obj_instance
-        from bacnet.services.device import Device as DeviceService
-        response['points'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
+        try:
+            response['point'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
+        except Exception as e:
+            abort(500, message=str(e))
 
         return response
