@@ -121,8 +121,6 @@ class DevicePoints(Resource):
 
 class DevicePoint(Resource):
     def get(self, dev_uuid, obj, obj_instance, prop):
-        # def get(self, dev_uuid, pnt_type, pnt_id):
-        print(222, obj, obj_instance, prop)
         response = {}
         device = DeviceModel.find_by_bac_device_uuid(dev_uuid)
         if not device:

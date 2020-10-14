@@ -42,5 +42,4 @@ class Device:
         dev_url = get_url["dev_url"]
         read = f"{dev_url} {obj} {obj_instance} {prop}"
         print(read)
-
         return network.read(read)
