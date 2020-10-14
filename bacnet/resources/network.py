@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
 from bacnet.models.network import NetworkModel
+from bacnet.services.network import Network as NetworkService
 
 network_fields = {
     'network_uuid': fields.String,
@@ -59,7 +60,6 @@ class Network(Resource):
         data = Network.parser.parse_args()
         network = Network.create_network_model_obj(uuid, data)
         network.save_to_db()
-        from bacnet.services.network import Network as NetworkService
         NetworkService.get_instance().add_network(network)
         return network, 201
 
@@ -77,7 +77,6 @@ class Network(Resource):
             network.network_device_id = data['network_device_id']
             network.network_device_name = data['network_device_name']
         network.save_to_db()
-        from bacnet.services.network import Network as NetworkService
         NetworkService.get_instance().add_network(network)
         return network, 201
 
@@ -86,7 +85,6 @@ class Network(Resource):
         network = NetworkModel.find_by_network_uuid(network_uuid)
         if network:
             network.delete_from_db()
-            from bacnet.services.network import Network as NetworkService
             NetworkService.get_instance().delete_network(network)
         return '', 204
 

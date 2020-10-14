@@ -21,4 +21,6 @@ class Device:
         bac_device_id = device.bac_device_id
 
         network = Network.get_instance().get_network(device.network)
-        return network.read(f"{dev_url} device {bac_device_id} objectList")
+        if network:
+            return network.read(f"{dev_url} device {bac_device_id} objectList")
+        return []

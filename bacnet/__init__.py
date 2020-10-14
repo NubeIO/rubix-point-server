@@ -10,5 +10,7 @@ app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 db = SQLAlchemy(app)
 from bacnet import routes
 
-db.create_all()
-import bacnet.services
+if not not os.environ.get("WERKZEUG_RUN_MAIN"):
+    db.create_all()
+    from bacnet.services.network import Network
+    Network.get_instance().start()
