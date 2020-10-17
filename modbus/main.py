@@ -1,6 +1,7 @@
-from client import Client, Registers, Coils
+from modbus.client import Client, Registers, Coils
 import time
 import logging
+
 
 FORMAT = '%(asctime)-15s [%(levelname)s] %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -20,13 +21,6 @@ common_point_type = {
     "writeCoils": "writeCoils",
     "writeRegisters": "writeRegisters"
 }
-
-
-# def point_type(name: str) -> str:
-def point_type(x: str):
-    if common_point_type[x] == 'NY':
-        return x
-    return x
 
 
 common_data_type = {
@@ -96,6 +90,22 @@ tcp_network = {
     "port": 502,
 }
 
+
+def dict_exists_str(_val: str, _dict: dict) -> str:
+    for key, value in _dict.items():
+        if _val == value:
+            return _val
+
+
+def dict_exists_num(_val: int, _dict: dict) -> int:
+    for key, value in _dict.items():
+        print(key, value)
+        if _val == value:
+            return _val
+
+
+
+
 SLAVES = (1, 1)
 
 RTU_NETWORK = {
@@ -142,28 +152,27 @@ RTU_SLAVE = {
 POINTS = {
     "PNT_1": {
         "name": "name 111",
-        "point_type": point_type["readCoils"],
+        "point_type": common_point_type["readCoils"],
         "reg_start": 1,
         "reg_lenght": 2,
-        "data_type": data_type["float"],
-        "data_endian": data_endian["LEB_BEW"],
-        "timeout": data_endian["LEB_BEW"]
+        "data_type": common_data_type["float"],
+        "data_endian": common_data_endian["LEB_BEW"],
+        "timeout": 1
     },
     "PNT_2": {
-        "name": "name 332322",
-        "point_type": point_type["readCoils"],
+        "name": "name 111",
+        "point_type": common_point_type["readCoils"],
         "reg_start": 1,
         "reg_lenght": 2,
-        "data_type": data_type["float"],
-        "data_endian": data_endian["LEB_BEW"]
+        "data_type": common_data_type["float"],
+        "data_endian": common_data_endian["LEB_BEW"],
+        "timeout": 1
     }
 
 }
 
 client = modbus.make_client()
 print(modbus.get_parm())
-# reg = Registers(client, unit=1, reg_start=0, reg_lenght=2, data_type='float')
-# bol = Coils(client, unit=1, reg_start=1, reg_lenght=10)
 
 poll_count = 1
 
@@ -174,18 +183,20 @@ def print_data(ts, data):
 
 try:
     while True:
-        time.sleep(0.5)
+        time.sleep(2)
         for slave in SLAVES:
-            log.info("Handling slave=%s", slave)
+            # log.info("Handling slave=%s", slave)
             for key, point in POINTS.items():
                 try:
+                    reg = point["reg_start"]
                     # log.debug("Handling register=%s", reg_name)
                     # value = read_register(serial=serial, slave=slave, register=reg)
-                    print('key', key)
-                    print('point', point)
-                    print('point', point["name"])
-                    # regs = Registers(client, unit=slave, reg_start=reg, reg_lenght=2, data_type='float')
-                    # holding = regs.read_holding()
+                    # print('key', key)
+                    # print('point', point)
+                    # print('point', point["reg_start"])
+                    read = Registers(client, unit=slave, reg_start=reg, reg_length=2, data_type='float')
+                    holding = read.read_holding()
+                    print('slave', slave, 'holding', holding, 'reg', reg)
                     # print('slave',slave, 'holding', holding)
                     # log.debug("Register=%s value read=%f", reg_name, reg)
 

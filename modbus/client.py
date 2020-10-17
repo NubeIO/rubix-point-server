@@ -1,7 +1,5 @@
 import json
-import time
-
-from Modbus_API.modbus_master import TCP_Client, RTU_Client, Master
+from modbus.modbus_master import TCP_Client, RTU_Client, Master
 
 
 class Client:
@@ -32,37 +30,37 @@ class Client:
 # ===================================================================================================================
 
 class Reading:
-    def __init__(self, client, unit, reg_start, reg_lenght, **kwargs):
+    def __init__(self, client, unit, reg_start, reg_length, **kwargs):
         self.client = client
         self.unit = unit
         self.reg_start = reg_start
-        self.reg_lenght = reg_lenght
+        self.reg_length = reg_length
 
-    def reg_adress(self):
+    def reg_address(self):
         return self.reg_start
 
-    def set_reg_adress(self, adress):
-        self.reg_start = adress
+    def set_reg_address(self, address):
+        self.reg_start = address
 
-    def lenght_data(self):
-        return self.reg_lenght
+    def length_data(self):
+        return self.reg_length
 
-    def set_lenght_data(self, size):
-        self.reg_lenght = size
+    def set_length_data(self, size):
+        self.reg_length = size
 
 
 # ====================================================================================================================
 
 class Registers(Reading):
 
-    def __init__(self, client, unit, reg_start, reg_lenght, data_type, transp=True):
-        super().__init__(client, unit, reg_start, reg_lenght)
+    def __init__(self, client, unit, reg_start, reg_length, data_type, transp=True):
+        super().__init__(client, unit, reg_start, reg_length)
         self.data_type = data_type
         self.transp = transp
 
     def _read_reg(self):
         return self.client.read_register(self.unit, self.reg_start,
-                                         self.reg_lenght, self.reg_type,
+                                         self.reg_length, self.reg_type,
                                          self.data_type, self.transp)
 
     def read_holding(self):
@@ -78,50 +76,12 @@ class Registers(Reading):
 
 class Coils(Reading):
 
-    def __init__(self, client, unit, reg_start, reg_lenght):
-        super().__init__(client, unit, reg_start, reg_lenght)
+    def __init__(self, client, unit, reg_start, reg_length):
+        super().__init__(client, unit, reg_start, reg_length)
 
-    def _read_boll(self):
-        return self.client.read_bool(self.unit, self.reg_start, self.reg_lenght)
+    def _read_coil(self):
+        return self.client.read_coil(self.unit, self.reg_start, self.reg_length)
 
     def read_coil(self):
         self.reg_type = 'coil'
-        return self._read_boll()
-
-
-# ====================================================================================================================
-
-# if __name__ == '__main__':
-#
-#     modbus = Client('config.json', 'tcp')
-#     client = modbus.make_client()
-#     print(modbus.get_parm())
-#
-#     # reg_for_check = [30201, 30233, 30531, 30775, 30795, 30803, 30805, 30813, 30837, 30839, 30769, 30771, 30773,
-#     #                  30957, 30959, 30961, 30537, 30953, 40212, 40915]
-#
-#     reg = Registers(client, unit=1, reg_start=1000, reg_lenght=16, data_type='int')
-#     bol = Coils(client, unit=1, reg_start=0, reg_lenght=250)
-#
-#     reg_for_check = [i for i in range(1000, 1016)]
-#     nr = 1
-#
-#
-#     def print_data(time, data):
-#         return print("{} : {}".format(time, data), end=';\n')
-#
-#
-#     try:
-#         while True:
-#             # reg.set_reg_adress(0)
-#             # reg.set_lenght_data(nr)
-#             # bol.set_lenght_data(nr)
-#             holding = reg.read_holding()
-#             time.sleep(1)
-#             col = bol.read_coil()
-#             print_data(holding['Time'][1], holding['Data'])
-#             print_data(col['Time'][1], col['Data'])
-#             nr += 1
-#             time.sleep(1)
-#     except KeyboardInterrupt:
-#         print('\nEnd')
+        return self.read_coil()
