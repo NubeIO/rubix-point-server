@@ -1,7 +1,7 @@
 from bacnet import db
 
 
-class DeviceModel(db.Model):
+class ModDeviceModel(db.Model):
     __tablename__ = 'mod_devices'
     bac_device_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(), unique=False, nullable=False)

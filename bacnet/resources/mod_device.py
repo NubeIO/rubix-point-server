@@ -1,11 +1,9 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
-from bacnet.models.device import DeviceModel
-from bacnet.resources.network import network_fields
-from bacnet.services.device import Device as DeviceService
-from modbus.main import common_point_type
-from bacnet.resources.interfaces.modbus_device import interface_help, interface_unit, THIS, attributes
+from bacnet.models.mod_device import ModDeviceModel
+from bacnet.resources.mod_network import network_fields
+from bacnet.interfaces.modbus_device import interface_help, interface_unit, THIS, attributes
 
-# from bacnet.utils .data_checks import is_none
+# from modnet.utils .data_checks import is_none
 
 
 device_fields = {
@@ -34,7 +32,7 @@ class ModbusDevice(Resource):
 
     @marshal_with(device_fields)
     def get(self, uuid):
-        device = DeviceModel.find_by_bac_device_uuid(uuid)
+        device = ModDeviceModel.find_by_mod_device_uuid(uuid)
         if not device:
             abort(404, message=f'/{THIS} not found')
 
@@ -42,11 +40,11 @@ class ModbusDevice(Resource):
 
     @marshal_with(device_fields)
     def post(self, uuid):
-        if DeviceModel.find_by_bac_device_uuid(uuid):
-            return {'message': "An device with bac_device_uuid '{}' already exists.".format(uuid)}, 400
+        if ModDeviceModel.find_by_mod_device_uuid(uuid):
+            return {'message': "An device with mod_device_uuid '{}' already exists.".format(uuid)}, 400
         data = ModbusDevice.parser.parse_args()
         device = ModbusDevice.create_device_model_obj(uuid, data)
-        if device.find_by_bac_device_uuid(uuid) is not None:
+        if device.find_by_mod_device_uuid(uuid) is not None:
             abort(409, message=f'/{THIS} already exists')
         device.save_to_db()
         return device, 201
@@ -54,7 +52,7 @@ class ModbusDevice(Resource):
     @marshal_with(device_fields)
     def put(self, uuid):
         data = ModbusDevice.parser.parse_args()
-        device = DeviceModel.find_by_bac_device_uuid(uuid)
+        device = ModDeviceModel.find_by_mod_device_uuid(uuid)
         if device is None:
             device = ModbusDevice.create_device_model_obj(uuid, data)
         else:
@@ -64,26 +62,26 @@ class ModbusDevice(Resource):
         return device
 
     def delete(self, uuid):
-        device = DeviceModel.find_by_bac_device_uuid(uuid)
+        device = ModDeviceModel.find_by_mod_device_uuid(uuid)
         if device:
             device.delete_from_db()
         return '', 204
 
     @staticmethod
-    def create_device_model_obj(bac_device_uuid, data):
-        return DeviceModel(bac_device_uuid=bac_device_uuid, bac_device_mac=data['bac_device_mac'],
-                           bac_device_id=data['bac_device_id'], bac_device_ip=data['bac_device_ip'],
-                           bac_device_mask=data['bac_device_mask'], bac_device_port=data['bac_device_port'],
+    def create_mod_device_model_obj(mod_device_uuid, data):
+        return ModDeviceModel(mod_device_uuid=mod_device_uuid, mod_device_mac=data['mod_device_mac'],
+                           mod_device_id=data['mod_device_id'], mod_device_ip=data['mod_device_ip'],
+                           mod_device_mask=data['mod_device_mask'], mod_device_port=data['mod_device_port'],
                            network_uuid=data['network_uuid'])
 
 
-class DeviceList(Resource):
+class ModDeviceList(Resource):
     @marshal_with(device_fields, envelope="devices")
     def get(self):
-        return DeviceModel.query.all()
+        return ModDeviceModel.query.all()
 
 
-device_point_fields = network_fields
-updated_device_fields = device_fields.copy()
-updated_device_fields.update({'hello': fields.String})
-device_point_fields['devices'] = fields.List(fields.Nested(updated_device_fields))
+mod_device_point_fields = network_fields
+mod_updated_device_fields = device_fields.copy()
+mod_updated_device_fields.update({'hello': fields.String})
+mod_device_point_fields['devices'] = fields.List(fields.Nested(mod_updated_device_fields))
