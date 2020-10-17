@@ -2,7 +2,6 @@ from modbus.client import Client, Registers, Coils
 import time
 import logging
 
-
 FORMAT = '%(asctime)-15s [%(levelname)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger("SDM630_READER")
@@ -21,7 +20,6 @@ common_point_type = {
     "writeCoils": "writeCoils",
     "writeRegisters": "writeRegisters"
 }
-
 
 common_data_type = {
     "int16": "int16",
@@ -104,13 +102,12 @@ def dict_exists_num(_val: int, _dict: dict) -> int:
             return _val
 
 
-
-
 SLAVES = (1, 1)
 
 RTU_NETWORK = {
     "NET_1": {
         "name": "name 111",
+        "enable": True,
         "method": "rtu",
         "rs_port": "/dev/ttyUSB0",
         "speed": 9600,
@@ -120,14 +117,8 @@ RTU_NETWORK = {
         "timeout": 5,
         "global_device_timeout": 1,
         "global_point_timeout": 1,
-    },
-    "SLAVE_2": {
-        "name": "name 111",
-        "unit": 1,
-        "timeout": 1,
-        "ping_address": 1,
-        "ping_point_type": common_point_type['readHoldingRegisters'],
     }
+
 }
 
 RTU_SLAVE = {
