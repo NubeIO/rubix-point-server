@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
-from bacnet.models.network import NetworkModel
-from bacnet.services.network import Network as NetworkService
+from src.models.network import NetworkModel
+from src.services.network import Network as NetworkService
 
 network_fields = {
     'network_uuid': fields.String,

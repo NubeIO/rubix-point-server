@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
-from bacnet.models.mod_device import ModDeviceModel
-from bacnet.resources.mod_network import network_fields
-from bacnet.interfaces.modbus.modbus_device import interface_name, interface_ip, interface_port, attributes, THIS
+from src.models.mod_device import ModDeviceModel
+from src.resources.mod_network import network_fields
+from src.interfaces.modbus.modbus_device import interface_name, interface_ip, interface_port, attributes, THIS
 
 # from modnet.utils .data_checks import is_none
 

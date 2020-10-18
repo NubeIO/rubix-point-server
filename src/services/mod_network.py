@@ -1,4 +1,4 @@
-from bacnet.models.mod_network import ModNetworkModel
+from src.models.mod_network import ModNetworkModel
 
 class ModNetwork:
     __instance = None

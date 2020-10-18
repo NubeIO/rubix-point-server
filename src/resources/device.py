@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
-from bacnet.models.device import DeviceModel
-from bacnet.resources.network import network_fields
-from bacnet.services.device import Device as DeviceService
+from src.models.device import DeviceModel
+from src.resources.network import network_fields
+from src.services.device import Device as DeviceService
 
 device_fields = {
     'bac_device_uuid': fields.String,

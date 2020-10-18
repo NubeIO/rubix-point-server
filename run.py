@@ -1,4 +1,4 @@
-from bacnet import app
+from src import app
 
 ip = '0.0.0.0'
 port = 5000
