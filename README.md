@@ -1,4 +1,4 @@
-# BACnet RESTful APIs
+# BACnet/IP, Modbus Master and Modbus RTU RESTful APIs
 
 #### How to run
 
