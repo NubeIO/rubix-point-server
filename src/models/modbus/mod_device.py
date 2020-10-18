@@ -5,11 +5,19 @@ class ModbusDeviceModel(db.Model):
     __tablename__ = 'mod_devices'
     mod_device_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     mod_device_name = db.Column(db.String(80), nullable=False)
-    mod_device_ip = db.Column(db.String(80), nullable=False)
-    mod_device_port = db.Column(db.Integer(), nullable=False)
-    # network_device_id = db.Column(db.Integer(), nullable=False)
-    # network_device_name = db.Column(db.String(80), nullable=False)
+    mod_device_enable = db.Column(db.String(80), nullable=False)
+    mod_device_type = db.Column(db.String(80), nullable=False)
+    mod_device_addr = db.Column(db.Integer(), nullable=False)
+    mod_tcp_device_ip = db.Column(db.String(80), nullable=False)
+    mod_tcp_device_port = db.Column(db.Integer(), nullable=False)
+    mod_ping_point_type = db.Column(db.String(80), nullable=False)
+    mod_ping_point_address = db.Column(db.Integer(), nullable=False)
+    mod_network_zero_mode = db.Column(db.Boolean(), nullable=False)
+    mod_device_timeout = db.Column(db.Integer(), nullable=False)
+    mod_device_timeout_global = db.Column(db.Boolean(), nullable=False)
+
     # network_number = db.Column(db.Integer())
+
     # mod_network_uuid = db.Column(db.String, db.ForeignKey('mod_networks.mod_network_uuid'))
     # mod_devices = db.relationship('ModDeviceModel', cascade="all,delete", backref='mod_network', lazy=True)
 
