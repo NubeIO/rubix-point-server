@@ -60,20 +60,20 @@ class Master:
         self.client = client
 
     def _read_holding(self):
-        '''
+        """
         Auxiliary function
         :return:holding reg
-        '''
+        """
         self.reg_type = 'holding'
         read = self.client.read_holding_registers(self.reg_start, self.reg_length, unit=self.unit)
         if self._assertion(read) == False:  # checking for errors
             return read.registers[0:]
 
     def _read_input(self):
-        '''
+        """
         Auxiliary function
         :return:
-        '''
+        """
         self.reg_type = 'input'
         read = self.client.read_input_registers(self.reg_start, self.reg_length, unit=self.unit)
         if self._assertion(read) == False:  # checking for errors

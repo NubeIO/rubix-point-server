@@ -1,4 +1,4 @@
-from modbus.client import Client, Registers, Coils
+from bacnet.services.modbus.client import Client, Registers
 import time
 import logging
 
