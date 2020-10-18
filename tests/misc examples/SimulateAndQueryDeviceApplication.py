@@ -1,7 +1,7 @@
 import asyncio
 import threading
 
-from bacnet.local_device_applications import LocalDeviceApplication, ReadAllObjectPropertiesApp
+from src.local_device_applications import LocalDeviceApplication, ReadAllObjectPropertiesApp
 
 '''
 Class for simulating a BACnet device and then querying it of it's objects.

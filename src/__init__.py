@@ -8,9 +8,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 
 db = SQLAlchemy(app)
-from bacnet import routes
+from src import routes
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     db.create_all()
-    from bacnet.services.network import Network
+    from src.services.network import Network
     Network.get_instance().start()
