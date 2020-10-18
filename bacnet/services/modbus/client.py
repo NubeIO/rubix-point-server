@@ -1,5 +1,5 @@
 import json
-from modbus.modbus_master import TCP_Client, RTU_Client, Master
+from bacnet.services.modbus.modbus_master import TCP_Client, RTU_Client, Master
 
 
 class Client:

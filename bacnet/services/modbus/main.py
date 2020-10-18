@@ -1,4 +1,4 @@
-from modbus.client import Client, Registers, Coils
+from bacnet.services.modbus.client import Client, Registers
 import time
 import logging
 
@@ -7,7 +7,7 @@ logging.basicConfig(format=FORMAT)
 log = logging.getLogger("SDM630_READER")
 log.setLevel(logging.INFO)
 
-modbus = Client('config.json', 'rtu')
+
 
 # CLASS
 common_point_type = {
@@ -128,7 +128,7 @@ RTU_SLAVE = {
         "timeout": 1,
         "ping_address": 1,
         "ping_point_type": common_point_type['readHoldingRegisters'],
-        "ZeroMode": True
+        "zeroMode": True
         # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
     },
     "SLAVE_2": {
@@ -161,6 +161,9 @@ POINTS = {
     }
 
 }
+
+
+modbus = Client(tcp_network, 'tcp')
 
 client = modbus.make_client()
 print(modbus.get_parm())
