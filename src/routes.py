@@ -1,10 +1,10 @@
 from flask_restful import Api
 from src import app
-from src.resources.device import Device, DeviceList, DevicePoints, DevicePoint
-from src.resources.network import Network, NetworkList, NetworksIds
+from src.resources.bacnet.device import Device, DeviceList, DevicePoints, DevicePoint
+from src.resources.bacnet.network import Network, NetworkList, NetworksIds
 
-from src.resources.mod_network import ModNetwork, ModNetworkList, ModNetworksIds
-from src.resources.mod_device import ModDevice, ModDeviceList
+from src.resources.modbus.mod_network import ModNetwork, ModNetworkList
+from src.resources.modbus.mod_device import ModDevice, ModDeviceList
 
 api_ver = 'api'
 api = Api(app)
