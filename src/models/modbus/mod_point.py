@@ -1,5 +1,6 @@
 from src import db
 
+
 class ModbusPointModel(db.Model):
     __tablename__ = 'mod_points'
     mod_point_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
