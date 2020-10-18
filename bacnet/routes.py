@@ -4,6 +4,7 @@ from bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoin
 from bacnet.resources.network import Network, NetworkList, NetworksIds
 
 from bacnet.resources.mod_network import ModNetwork, ModNetworkList, ModNetworksIds
+from bacnet.resources.mod_device import ModDevice, ModDeviceList
 
 api_ver = 'api'
 api = Api(app)
@@ -17,7 +18,9 @@ api.add_resource(DevicePoint, f'/{api_ver}/bacnet/point/read/<string:dev_uuid>/<
 api.add_resource(NetworkList, f'/{api_ver}/bacnet/networks')  # get all networks
 api.add_resource(NetworksIds, f'/{api_ver}/bacnet/networks/ids')  # get all networks DevicePoints
 
-
 # modbus endpoints
 api.add_resource(ModNetwork, f'/{api_ver}/modbus/network/<string:uuid>')  # CRUD a modbus network
 api.add_resource(ModNetworkList, f'/{api_ver}/modbus/networks')  # get all modbus networks
+
+api.add_resource(ModDevice, f'/{api_ver}/modbus/device/<string:uuid>')  # CRUD a modbus device
+api.add_resource(ModDeviceList, f'/{api_ver}/modbus/devices')  # get all modbus devices
