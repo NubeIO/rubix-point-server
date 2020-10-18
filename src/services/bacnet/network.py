@@ -1,5 +1,5 @@
 import BAC0
-from src.models.network import NetworkModel
+from src.models.bacnet.network import NetworkModel
 
 
 class Network:

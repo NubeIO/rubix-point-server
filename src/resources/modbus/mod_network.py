@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
-from src.models.mod_network import ModNetworkModel
-from src.services.mod_network import ModNetwork as ModNetworkService
+from src.models.modbus.mod_network import ModNetworkModel
+from src.services.modbus.mod_network import ModNetwork as ModNetworkService
 
 network_fields = {
     'mod_network_uuid': fields.String,

@@ -1,2 +1,2 @@
-from src.models.device import *
-from src.models.network import *
+from src.models.bacnet.device import *
+from src.models.bacnet.network import *
