@@ -31,7 +31,7 @@ interface_mod_network_type = {
 
 }
 _interface_mod_network_enable = 'mod_network_enable'
-interface_name = {
+interface_mod_network_enable= {
     'name': _interface_mod_network_enable,
     'type': bool,
     'required': True,
@@ -50,7 +50,7 @@ interface_mod_network_timeout = {
 _interface_mod_network_device_timeout_global = 'mod_network_device_timeout_global'
 interface_mod_network_device_timeout_global = {
     'name': _interface_mod_network_device_timeout_global,
-    'type': bool,
+    'type': int,
     'required': True,
     'help': f'{THIS}, {_interface_mod_network_device_timeout_global} is required'
 
@@ -58,7 +58,7 @@ interface_mod_network_device_timeout_global = {
 _interface_mod_network_point_timeout_global = 'mod_network_point_timeout_global'
 interface_mod_network_point_timeout_global = {
     'name': _interface_mod_network_point_timeout_global,
-    'type': bool,
+    'type': int,
     'required': True,
     'help': f'{THIS}, {_interface_mod_network_point_timeout_global} is required'
 

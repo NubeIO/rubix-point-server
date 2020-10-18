@@ -20,7 +20,7 @@ attributes = {
 
 }
 _interface_mod_device_name = 'mod_device_name'
-interface_mod_network_name = {
+interface_mod_device_name = {
     'name': _interface_mod_device_name,
     'type': str,
     'required': True,
@@ -46,8 +46,8 @@ interface_mod_device_type = {
 _interface_mod_device_addr = 'mod_device_addr'
 interface_mod_device_addr = {
     'name': _interface_mod_device_addr,
-    'type': str,
-    'required': False,
+    'type': int,
+    'required': True,
     'help': f'{THIS}, {_interface_mod_device_addr} is required if its a tcp device'
 
 }
