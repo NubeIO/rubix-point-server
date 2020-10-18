@@ -1,25 +1,26 @@
-from src.models.modbus.mod_network import ModNetworkModel
+from src.models.modbus.mod_network import ModbusNetworkModel
 
-class ModNetwork:
+
+class ModbusNetworkService:
     __instance = None
 
     @staticmethod
     def get_instance():
-        if not ModNetwork.__instance:
-            ModNetwork()
-        return ModNetwork.__instance
+        if not ModbusNetworkService.__instance:
+            ModbusNetworkService()
+        return ModbusNetworkService.__instance
 
     def __init__(self):
-        if ModNetwork.__instance:
+        if ModbusNetworkService.__instance:
             raise Exception("Network class is a singleton!")
         else:
-            ModNetwork.__instance = self
+            ModbusNetworkService.__instance = self
             self.networks = {}
 
     def start(self):
         print("Network Start...")
-        network_service = ModNetwork.get_instance()
-        for network in ModNetworkModel.query.all():
+        network_service = ModbusNetworkService.get_instance()
+        for network in ModbusNetworkModel.query.all():
             network_service.add_network(network)
 
     def add_network(self, network):
@@ -29,7 +30,6 @@ class ModNetwork:
 
         if not self.networks.get(net_url):
             self.networks[net_url] = {}
-
 
         print('=====================================================')
         print('...........Creating Modbus network with..............')

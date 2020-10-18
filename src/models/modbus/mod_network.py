@@ -1,7 +1,7 @@
 from src import db
 
 
-class ModNetworkModel(db.Model):
+class ModbusNetworkModel(db.Model):
     __tablename__ = 'mod_networks'
     mod_network_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     mod_network_name = db.Column(db.String(80), nullable=False)

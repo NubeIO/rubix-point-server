@@ -1,7 +1,7 @@
 from src import db
 
 
-class ModDeviceModel(db.Model):
+class ModbusDeviceModel(db.Model):
     __tablename__ = 'mod_devices'
     mod_device_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     mod_device_name = db.Column(db.String(80), nullable=False)

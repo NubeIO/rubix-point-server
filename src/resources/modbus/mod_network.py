@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
-from src.models.modbus.mod_network import ModNetworkModel
-from src.services.modbus.mod_network import ModNetwork as ModNetworkService
+from src.models.modbus.mod_network import ModbusNetworkModel
+from src.services.modbus.mod_network import ModbusNetworkService
 
 network_fields = {
     'mod_network_uuid': fields.String,
@@ -33,25 +33,25 @@ class ModNetwork(Resource):
 
     @marshal_with(network_fields)
     def get(self, uuid):
-        network = ModNetworkModel.find_by_network_uuid(uuid)
+        network = ModbusNetworkModel.find_by_network_uuid(uuid)
         if not network:
             abort(404, message='Modbus Network not found')
         return network
 
     @marshal_with(network_fields)
     def post(self, uuid):
-        if ModNetworkModel.find_by_network_uuid(uuid):
+        if ModbusNetworkModel.find_by_network_uuid(uuid):
             return abort(409, message=f"An Modbus Network with network_uuid '{uuid}' already exists.")
         data = ModNetwork.parser.parse_args()
         network = ModNetwork.create_network_model_obj(uuid, data)
         network.save_to_db()
-        ModNetworkService.get_instance().add_network(network)
+        ModbusNetworkService.get_instance().add_network(network)
         return network, 201
 
     @marshal_with(network_fields)
     def put(self, uuid):
         data = ModNetwork.parser.parse_args()
-        network = ModNetworkModel.find_by_network_uuid(uuid)
+        network = ModbusNetworkModel.find_by_network_uuid(uuid)
         if network is None:
             network = ModNetwork.create_network_model_obj(uuid, data)
         else:
@@ -62,20 +62,20 @@ class ModNetwork(Resource):
             # network.network_device_id = data['network_device_id']
             # network.network_device_name = data['network_device_name']
         network.save_to_db()
-        ModNetworkService.get_instance().add_network(network)
+        ModbusNetworkService.get_instance().add_network(network)
         return network, 201
 
     def delete(self, uuid):
         mod_network_uuid = uuid
-        network = ModNetworkModel.find_by_network_uuid(mod_network_uuid)
+        network = ModbusNetworkModel.find_by_network_uuid(mod_network_uuid)
         if network:
             network.delete_from_db()
-            ModNetworkService.get_instance().delete_network(network)
+            ModbusNetworkService.get_instance().delete_network(network)
         return '', 204
 
     @staticmethod
     def create_network_model_obj(mod_network_uuid, data):
-        return ModNetworkModel(mod_network_uuid=mod_network_uuid, mod_network_name=data['mod_network_name'], mod_network_ip=data['mod_network_ip'], mod_network_port=data['mod_network_port'])
+        return ModbusNetworkModel(mod_network_uuid=mod_network_uuid, mod_network_name=data['mod_network_name'], mod_network_ip=data['mod_network_ip'], mod_network_port=data['mod_network_port'])
         # return ModNetworkModel(network_uuid=network_uuid, network_ip=data['network_ip'], network_mask=data['network_mask'],
         #                     network_port=data['network_port'], network_device_id=data['network_device_id'],
         #                     network_device_name=data['network_device_name'], network_number=data['network_number'])
@@ -84,10 +84,10 @@ class ModNetwork(Resource):
 class ModNetworkList(Resource):
     @marshal_with(network_fields, envelope="mod_networks")
     def get(self):
-        return ModNetworkModel.query.all()
+        return ModbusNetworkModel.query.all()
 
 
 class ModNetworksIds(Resource):
     @marshal_with({'mod_network_uuid': fields.String}, envelope="mod_networks")
     def get(self):
-        return ModNetworkModel.query.all()
+        return ModbusNetworkModel.query.all()
