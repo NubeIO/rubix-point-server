@@ -11,9 +11,6 @@ attributes = {
     'mod_rtu_network_stopbits': 'mod_rtu_network_stopbits',  # 1
     'mod_rtu_network_parity': 'mod_rtu_network_parity',  # O E N Odd, Even, None
     'mod_rtu_network_bytesize': 'mod_rtu_network_bytesize',  # 5, 6, 7, or 8. This defaults to 8.
-    'mod_network_fault': 'mod_network_fault',  # true
-    'mod_network_last_poll_timestamp': 'mod_network_last_poll_timestamp',
-    'mod_network_fault_timestamp': 'mod_network_fault_timestamp'
 
 }
 
@@ -105,29 +102,5 @@ interface_mod_rtu_network_bytesize = {
     'type': int,
     'required': False,
     'help': f'{THIS}, {_interface_mod_rtu_network_bytesize} is required'
-
-}
-_interface_mod_network_fault = 'mod_network_fault'
-interface_mod_network_fault = {
-    'name': _interface_mod_network_fault,
-    'type': str,
-    'required': False,
-    'help': f'{THIS}, {_interface_mod_network_fault} is required'
-
-}
-_interface_mod_network_last_poll_timestamp = 'mod_network_last_poll_timestamp'
-interface_mod_network_last_poll_timestamp = {
-    'name': _interface_mod_network_last_poll_timestamp,
-    'type': str,
-    'required': False,
-    'help': f'{THIS}, {_interface_mod_network_last_poll_timestamp} is required'
-
-}
-_interface_mod_network_fault_timestamp = 'mod_network_fault_timestamp'
-interface_mod_network_fault_timestamp = {
-    'name': _interface_mod_network_fault_timestamp,
-    'type': str,
-    'required': False,
-    'help': f'{THIS}, {_interface_mod_network_fault_timestamp} is required'
 
 }

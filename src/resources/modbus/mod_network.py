@@ -7,8 +7,7 @@ from src.interfaces.modbus.network.interface_modbus_network import THIS, \
     interface_mod_network_device_timeout_global, interface_mod_network_point_timeout_global, \
     interface_mod_rtu_network_port, interface_mod_rtu_network_speed, \
     interface_mod_rtu_network_stopbits, interface_mod_rtu_network_parity, \
-    interface_mod_rtu_network_bytesize, interface_mod_network_fault, \
-    interface_mod_network_last_poll_timestamp, interface_mod_network_fault_timestamp
+    interface_mod_rtu_network_bytesize
 
 network_fields = {
     'mod_network_uuid': fields.String,
@@ -86,22 +85,6 @@ class ModNetwork(Resource):
                         required=interface_mod_rtu_network_bytesize['required'],
                         help=interface_mod_rtu_network_bytesize['help'],
                         )
-    parser.add_argument(interface_mod_network_fault['name'],
-                        type=interface_mod_network_fault['type'],
-                        required=interface_mod_network_fault['required'],
-                        help=interface_mod_network_fault['help'],
-                        )
-    parser.add_argument(interface_mod_network_last_poll_timestamp['name'],
-                        type=interface_mod_network_last_poll_timestamp['type'],
-                        required=interface_mod_network_last_poll_timestamp['required'],
-                        help=interface_mod_network_last_poll_timestamp['help'],
-                        )
-    parser.add_argument(interface_mod_network_fault_timestamp['name'],
-                        type=interface_mod_network_fault_timestamp['type'],
-                        required=interface_mod_network_fault_timestamp['required'],
-                        help=interface_mod_network_fault_timestamp['help'],
-                        )
-
     @marshal_with(network_fields)
     def get(self, uuid):
         network = ModbusNetworkModel.find_by_network_uuid(uuid)
@@ -137,9 +120,6 @@ class ModNetwork(Resource):
             network.mod_network_port = data['mod_rtu_network_stopbits']
             network.mod_network_port = data['mod_rtu_network_parity']
             network.mod_network_port = data['mod_rtu_network_bytesize']
-            network.mod_network_fault = data['mod_network_fault']
-            network.mod_network_last_poll_timestamp = data['mod_network_last_poll_timestamp']
-            network.mod_network_fault_timestamp = data['mod_network_fault_timestamp']
         network.save_to_db()
         ModbusNetworkService.get_instance().add_network(network)
         return network, 201
@@ -165,11 +145,7 @@ class ModNetwork(Resource):
                                   mod_rtu_network_speed=data['mod_rtu_network_speed'],
                                   mod_rtu_network_stopbits=data['mod_rtu_network_stopbits'],
                                   mod_rtu_network_parity=data['mod_rtu_network_parity'],
-                                  mod_rtu_network_bytesize=data['mod_rtu_network_bytesize'],
-                                  mod_network_fault=data['mod_network_fault'],
-                                  mod_network_last_poll_timestamp=data['mod_network_last_poll_timestamp'],
-                                  mod_network_fault_timestamp=data['mod_network_fault_timestamp'])
-
+                                  mod_rtu_network_bytesize=data['mod_rtu_network_bytesize'])
 
 class ModNetworkList(Resource):
     @marshal_with(network_fields, envelope="mod_networks")

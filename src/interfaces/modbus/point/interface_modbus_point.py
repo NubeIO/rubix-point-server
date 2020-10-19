@@ -151,28 +151,3 @@ interface_interface_help_device_uuid = {
     'help': f'{THIS}, {_interface_help_device_uuid} is required'
 
 }
-# _interface_help_mod_point_write_ok = 'mod_point_write_ok'
-# interface_mod_point_write_ok = {
-#     'name': _interface_help_mod_point_write_ok,
-#     'type': bool,
-#     'required': True,
-#     'help': f'{THIS}, {_interface_help_mod_point_write_ok} is required'
-#
-# }
-#
-# _interface_mod_point_fault = 'mod_point_fault'
-# interface_mod_point_fault = {
-#     'name': _interface_mod_point_fault,
-#     'type': bool,
-#     'required': True,
-#     'help': f'{THIS}, {_interface_mod_point_fault} is required'
-#
-# }
-# _interface_mod_point_last_poll_timestamp = 'mod_point_last_poll_timestamp'
-# interface_mod_point_last_poll_timestamp = {
-#     'name': _interface_mod_point_last_poll_timestamp,
-#     'type': str,
-#     'required': True,
-#     'help': f'{THIS}, {_interface_mod_point_last_poll_timestamp} is required'
-#
-# }
