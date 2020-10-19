@@ -15,6 +15,8 @@ db = SQLAlchemy(app)
 from src import routes
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
+    from src.modbus.models.mod_point_store import ModbusPointStoreModel
+
     db.create_all()
     from src.bacnet.services.network import Network
     from src.modbus.services.tcp_registry import TcpRegistry

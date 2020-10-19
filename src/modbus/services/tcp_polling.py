@@ -1,6 +1,10 @@
 import time
 
-from src.modbus.models.mod_network import ModbusType, ModbusNetworkModel
+from src import db
+from src.modbus.models.mod_device import ModbusDeviceModel
+from src.modbus.models.mod_network import ModbusNetworkModel
+from src.modbus.models.mod_point import ModbusPointModel
+from src.modbus.models.mod_point_store import ModbusPointStoreModel
 from src.modbus.services.tcp_registry import TcpRegistry
 
 
@@ -22,14 +26,23 @@ class TcpPolling:
 
     def polling(self):
         print("TCP Polling started")
+        count = 0
         while True:
             time.sleep(2)
-            print('looping...')
-            for network in ModbusNetworkModel.query.filter_by(mod_network_type=ModbusType.TCP):
-                for device in network.mod_devices:
-                    if device.mod_device_type is ModbusType.TCP:
-                        for point in device.mod_points:
-                            self.poll_point(device, point)
+            count += 1
+            print(f'Looping {count}...')
+            results = db.session.query(ModbusNetworkModel, ModbusDeviceModel, ModbusPointModel). \
+                select_from(ModbusNetworkModel).join(ModbusDeviceModel).join(ModbusPointModel).all()
+            for network, device, point in results:
+                self.poll_point(device, point)
+
+            # for network in ModbusNetworkModel.query.filter_by(mod_network_type=ModbusType.TCP):
+            #     print("network", network)
+            #     for device in network.mod_devices:
+            #         print("device", device)
+            #         if device.mod_device_type is ModbusType.TCP:
+            #             for point in device.mod_points:
+            #                 self.poll_point(device, point)
 
     def poll_point(self, device, point):
         host = device.mod_tcp_device_ip
@@ -43,6 +56,8 @@ class TcpPolling:
         unit = 1
         try:
             val = tcp_connection.read_holding_registers(reg, 1, unit=unit)
-            print('val:', val.registers[0:], 'reg:', reg)
+            val = val.registers[0]
+            print('val:', val, 'reg:', reg)
+            ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
         except Exception as e:
             print(str(e))
