@@ -161,9 +161,12 @@ class ModPoint(Resource):
 
     @staticmethod
     def create_point_model_obj(mod_point_uuid, data):
-        return ModbusPointModel(mod_point_uuid=mod_point_uuid, mod_point_name=data['mod_point_name'],
-                                mod_point_reg=data['mod_point_reg'], mod_point_reg_length=data['mod_point_reg_length'],
-                                mod_point_type=data['mod_point_type'], mod_point_enable=data['mod_point_enable'],
+        return ModbusPointModel(mod_point_uuid=mod_point_uuid,
+                                mod_point_name=data['mod_point_name'],
+                                mod_point_reg=data['mod_point_reg'],
+                                mod_point_reg_length=data['mod_point_reg_length'],
+                                mod_point_type=data['mod_point_type'],
+                                mod_point_enable=data['mod_point_enable'],
                                 mod_point_write_value=data['mod_point_write_value'],
                                 mod_point_data_type=data['mod_point_data_type'],
                                 mod_point_data_endian=data['mod_point_data_endian'],
@@ -173,12 +176,7 @@ class ModPoint(Resource):
                                 mod_point_timeout_global=data['mod_point_timeout_global'],
                                 mod_point_prevent_duplicates=data['mod_point_prevent_duplicates'],
                                 mod_point_prevent_duplicates_global=data['mod_point_prevent_duplicates_global'],
-                                mod_device_uuid=data['mod_device_uuid'],
-                                mod_point_write_ok=data['mod_point_write_ok'],
-                                mod_point_fault=data['mod_point_fault'],
-                                mod_point_last_poll_timestamp=data['mod_point_last_poll_timestamp'],
-                                mod_point_value=data['mod_point_value'],
-                                mod_point_value_array=data['mod_point_value_array'])
+                                mod_device_uuid=data['mod_device_uuid'])
 
 
 class ModPointList(Resource):

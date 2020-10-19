@@ -32,9 +32,9 @@ class ModbusNetworkModel(db.Model):
     mod_rtu_network_stopbits = db.Column(db.Integer(), nullable=False)
     mod_rtu_network_parity = db.Column(db.String(10), nullable=False)
     mod_rtu_network_bytesize = db.Column(db.Integer(), nullable=False)
-    mod_network_fault = db.Column(db.Boolean(), nullable=False)
-    mod_network_last_poll_timestamp = db.Column(db.String(80), nullable=False)
-    mod_network_fault_timestamp = db.Column(db.String(80), nullable=False)
+    mod_network_fault = db.Column(db.Boolean(), nullable=True)
+    mod_network_last_poll_timestamp = db.Column(db.String(80), nullable=True)
+    mod_network_fault_timestamp = db.Column(db.String(80), nullable=True)
 
 
     # network_device_id = db.Column(db.Integer(), nullable=False)

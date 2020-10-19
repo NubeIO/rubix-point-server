@@ -12,12 +12,12 @@ class ModbusDeviceModel(db.Model):
     mod_tcp_device_port = db.Column(db.Integer(), nullable=False)
     mod_ping_point_type = db.Column(db.String(80), nullable=False)
     mod_ping_point_address = db.Column(db.Integer(), nullable=False)
-    mod_network_zero_mode = db.Column(db.Boolean(), nullable=False)
+    mod_device_zero_mode = db.Column(db.Boolean(), nullable=False)
     mod_device_timeout = db.Column(db.Integer(), nullable=False)
     mod_device_timeout_global = db.Column(db.Boolean(), nullable=False)
-    mod_device_fault = db.Column(db.Boolean(), nullable=False)
-    mod_device_last_poll_timestamp = db.Column(db.String(80), nullable=False)
-    mod_device_fault_timestamp = db.Column(db.String(80), nullable=False)
+    mod_device_fault = db.Column(db.Boolean(), nullable=True)
+    mod_device_last_poll_timestamp = db.Column(db.String(80), nullable=True)
+    mod_device_fault_timestamp = db.Column(db.String(80), nullable=True)
 
     # network_number = db.Column(db.Integer())
 
