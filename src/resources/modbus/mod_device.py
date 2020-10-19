@@ -7,9 +7,7 @@ from src.interfaces.modbus.device.interface_modbus_device import attributes, THI
     interface_mod_device_addr, interface_mod_tcp_device_ip, \
     interface_mod_tcp_device_port, interface_mod_ping_point_type, \
     interface_mod_ping_point_address, interface_mod_device_zero_mode, \
-    interface_mod_device_timeout, interface_mod_device_timeout_global, \
-    interface_mod_device_fault, interface_mod_device_last_poll_timestamp, \
-    interface_mod_device_fault_timestamp
+    interface_mod_device_timeout, interface_mod_device_timeout_global
 
 
 device_fields = {
@@ -88,22 +86,6 @@ class ModDevice(Resource):
                         required=interface_mod_device_timeout_global['required'],
                         help=interface_mod_device_timeout_global['help'],
                         )
-    parser.add_argument(interface_mod_device_fault['name'],
-                        type=interface_mod_device_fault['type'],
-                        required=interface_mod_device_fault['required'],
-                        help=interface_mod_device_fault['help'],
-                        )
-    parser.add_argument(interface_mod_device_last_poll_timestamp['name'],
-                        type=interface_mod_device_last_poll_timestamp['type'],
-                        required=interface_mod_device_last_poll_timestamp['required'],
-                        help=interface_mod_device_last_poll_timestamp['help'],
-                        )
-    parser.add_argument(interface_mod_device_fault_timestamp['name'],
-                        type=interface_mod_device_fault_timestamp['type'],
-                        required=interface_mod_device_fault_timestamp['required'],
-                        help=interface_mod_device_fault_timestamp['help'],
-                        )
-
     @marshal_with(device_fields)
     def get(self, uuid):
         device = ModbusDeviceModel.find_by_device_uuid(uuid)
@@ -140,9 +122,6 @@ class ModDevice(Resource):
             device.mod_network_zero_mode = data[attributes['mod_network_zero_mode']]
             device.mod_device_timeout = data[attributes['mod_device_timeout']]
             device.mod_device_timeout_global = data[attributes['mod_device_timeout_global']]
-            device.mod_device_fault = data[attributes['mod_device_fault']]
-            device.mod_device_last_poll_timestamp = data[attributes['mod_device_last_poll_timestamp']]
-            device.mod_device_fault_timestamp = data[attributes['mod_device_fault_timestamp']]
         device.save_to_db()
         return device
 
@@ -168,7 +147,6 @@ class ModDevice(Resource):
                                  mod_device_fault=data['mod_device_fault'],
                                  mod_device_last_poll_timestamp=data['mod_device_last_poll_timestamp'],
                                  mod_device_fault_timestamp=data['mod_device_fault_timestamp'])
-
 
 class ModDeviceList(Resource):
     @marshal_with(device_fields, envelope="mod_devices")

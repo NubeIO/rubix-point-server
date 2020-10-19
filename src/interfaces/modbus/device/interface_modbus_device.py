@@ -17,9 +17,9 @@ attributes = {
     'mod_network_zero_mode': 'mod_network_zero_mode', # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
     'mod_device_timeout': 'mod_device_timeout',
     'mod_device_timeout_global': 'mod_device_timeout_global',  # true
-    'mod_device_fault': 'mod_device_fault',  # true
-    'mod_device_last_poll_timestamp': 'mod_device_last_poll_timestamp',
-    'mod_device_fault_timestamp': 'mod_device_fault_timestamp',
+    # 'mod_device_fault': 'mod_device_fault',  # true
+    # 'mod_device_last_poll_timestamp': 'mod_device_last_poll_timestamp',
+    # 'mod_device_fault_timestamp': 'mod_device_fault_timestamp',
 
 }
 _interface_mod_device_name = 'mod_device_name'
@@ -108,29 +108,5 @@ interface_mod_device_timeout_global = {
     'type': bool,
     'required': True,
     'help': f'{THIS}, {_interface_mod_device_timeout_global} is required'
-
-}
-_interface_mod_device_fault = 'mod_device_fault'
-interface_mod_device_fault = {
-    'name': _interface_mod_device_fault,
-    'type': int,
-    'required': True,
-    'help': f'{THIS}, {_interface_mod_device_fault} is required'
-
-}
-_interface_mod_device_last_poll_timestamp = 'mod_device_last_poll_timestamp'
-interface_mod_device_last_poll_timestamp = {
-    'name': _interface_mod_device_last_poll_timestamp,
-    'type': bool,
-    'required': True,
-    'help': f'{THIS}, {_interface_mod_device_last_poll_timestamp} is required'
-
-}
-_interface_mod_device_fault_timestampp = 'mod_device_fault_timestamp'
-interface_mod_device_fault_timestamp = {
-    'name': _interface_mod_device_fault_timestampp,
-    'type': bool,
-    'required': True,
-    'help': f'{THIS}, {_interface_mod_device_fault_timestampp} is required'
 
 }

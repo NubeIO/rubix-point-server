@@ -21,6 +21,8 @@ class ModbusPointModel(db.Model):
     mod_point_write_ok = db.Column(db.Boolean(), nullable=False)
     mod_point_fault = db.Column(db.Boolean(), nullable=False)
     mod_point_last_poll_timestamp = db.Column(db.String(80), nullable=False)
+    mod_point_value = db.Column(db.Integer(), nullable=False)
+    mod_point_value_array = db.Column(db.String(), nullable=False)
 
     # devices = db.relationship('DeviceModel', cascade="all,delete", backref='network', lazy=True)
 
