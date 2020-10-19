@@ -10,7 +10,8 @@ from src.interfaces.modbus.device.interface_modbus_device import attributes, THI
     interface_mod_device_timeout, interface_mod_device_timeout_global
 
 
-device_fields = {
+
+device_fields= {
     'mod_device_uuid': fields.String,
     'mod_device_name': fields.String,
     'mod_device_enable': fields.Boolean,
@@ -20,7 +21,7 @@ device_fields = {
     'mod_tcp_device_port': fields.Integer,
     'mod_ping_point_type': fields.String,  # for ping a reg to see if the device is online
     'mod_ping_point_address': fields.Integer,
-    'mod_network_zero_mode': fields.Boolean,  # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
+    'mod_device_zero_mode': fields.Boolean,  # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
     'mod_device_timeout': fields.Integer,
     'mod_device_timeout_global': fields.Boolean,  # true
     'mod_device_fault': fields.Boolean,  # true
@@ -119,7 +120,7 @@ class ModDevice(Resource):
             device.mod_tcp_device_port = data[attributes['mod_tcp_device_port']]
             device.mod_ping_point_type = data[attributes['mod_ping_point_type']]
             device.mod_ping_point_address = data[attributes['mod_ping_point_address']]
-            device.mod_network_zero_mode = data[attributes['mod_network_zero_mode']]
+            device.mod_device_zero_mode = data[attributes['mod_device_zero_mode']]
             device.mod_device_timeout = data[attributes['mod_device_timeout']]
             device.mod_device_timeout_global = data[attributes['mod_device_timeout_global']]
         device.save_to_db()
@@ -141,12 +142,9 @@ class ModDevice(Resource):
                                  mod_tcp_device_port=data['mod_tcp_device_port'],
                                  mod_ping_point_type=data['mod_ping_point_type'],
                                  mod_ping_point_address=data['mod_ping_point_address'],
-                                 mod_network_zero_mode=data['mod_network_zero_mode'],
+                                 mod_device_zero_mode=data['mod_device_zero_mode'],
                                  mod_device_timeout=data['mod_device_timeout'],
-                                 mod_device_timeout_global=data['mod_device_timeout_global'],
-                                 mod_device_fault=data['mod_device_fault'],
-                                 mod_device_last_poll_timestamp=data['mod_device_last_poll_timestamp'],
-                                 mod_device_fault_timestamp=data['mod_device_fault_timestamp'])
+                                 mod_device_timeout_global=data['mod_device_timeout_global'])
 
 class ModDeviceList(Resource):
     @marshal_with(device_fields, envelope="mod_devices")

@@ -110,7 +110,7 @@ class ModNetwork(Resource):
             network = ModNetwork.create_network_model_obj(uuid, data)
         else:
             network.mod_network_name = data['mod_network_name']
-            network.mod_network_ip = data['mod_network_type']
+            network.mod_network_type = data['mod_network_type']
             network.mod_network_port = data['mod_network_enable']
             network.mod_network_port = data['mod_network_timeout']
             network.mod_network_port = data['mod_network_device_timeout_global']

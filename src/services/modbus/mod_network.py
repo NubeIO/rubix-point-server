@@ -24,7 +24,7 @@ class ModbusNetworkService:
             network_service.add_network(network)
 
     def add_network(self, network):
-        net_url = f"{network.mod_network_ip}:{network.mod_network_port}"
+        net_url = f"{network.mod_network_name}:{network.mod_network_name}"
         # mod_network_device_id = network.mod_network_device_id
         mod_network_name = network.mod_network_name
 
@@ -46,7 +46,7 @@ class ModbusNetworkService:
         #     print("Initialization error!")
 
     def delete_network(self, network):
-        net_url = f"{network.mod_network_ip}:{network.mod_network_port}"
+        net_url = f"{network.mod_network_name}:{network.mod_network_name}"
         # mod_network_device_id = network.mod_network_device_id
         mod_network_name = network.mod_network_name
 
@@ -58,7 +58,7 @@ class ModbusNetworkService:
             # del self.networks[net_url][network_device_id][network_device_name]
 
     def get_network(self, network):
-        net_url = f"{network.mod_network_ip}/{network.mod_network_port}"
+        net_url = f"{network.mod_network_name}/{network.mod_network_name}"
         # mod_network_device_id = network.mod_network_device_id
         mod_network_name = network.mod_network_name
         return self.networks.get(net_url, {}).get(mod_network_name)

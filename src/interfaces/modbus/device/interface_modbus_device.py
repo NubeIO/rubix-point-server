@@ -14,7 +14,7 @@ attributes = {
     'mod_tcp_device_port': 'mod_tcp_device_port',
     'mod_ping_point_type': 'mod_ping_point_type',  # for ping a reg to see if the device is online
     'mod_ping_point_address': 'mod_ping_point_address',
-    'mod_network_zero_mode': 'mod_network_zero_mode', # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
+    'mod_device_zero_mode': 'mod_device_zero_mode', # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
     'mod_device_timeout': 'mod_device_timeout',
     'mod_device_timeout_global': 'mod_device_timeout_global',  # true
     # 'mod_device_fault': 'mod_device_fault',  # true
