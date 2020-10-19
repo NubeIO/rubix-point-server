@@ -1,5 +1,6 @@
 from src import db
 
+
 class ModbusPointModel(db.Model):
     __tablename__ = 'mod_points'
     mod_point_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
@@ -17,14 +18,12 @@ class ModbusPointModel(db.Model):
     mod_point_timeout_global = db.Column(db.Boolean(), nullable=False)
     mod_point_prevent_duplicates = db.Column(db.Boolean(), nullable=False)
     mod_point_prevent_duplicates_global = db.Column(db.Boolean(), nullable=False)
-    mod_device_uuid = db.Column(db.String(80), nullable=False)
     mod_point_write_ok = db.Column(db.Boolean(), nullable=True)
     mod_point_fault = db.Column(db.Boolean(), nullable=True)
     mod_point_last_poll_timestamp = db.Column(db.String(80), nullable=True)
     mod_point_value = db.Column(db.Integer(), nullable=True)
     mod_point_value_array = db.Column(db.String(), nullable=True)
-
-    # devices = db.relationship('DeviceModel', cascade="all,delete", backref='network', lazy=True)
+    mod_device_uuid = db.Column(db.String, db.ForeignKey('mod_devices.mod_device_uuid'))
 
     def __repr__(self):
         return f"Point(mod_point_uuid = {self.mod_point_uuid})"

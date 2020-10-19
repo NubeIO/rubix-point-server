@@ -25,8 +25,6 @@ points_attributes = {
 
 }
 
-
-
 THIS = 'point'
 _interface_help_name = 'mod_point_name'
 interface_name = {

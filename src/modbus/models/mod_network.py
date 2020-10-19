@@ -1,3 +1,6 @@
+import enum
+from sqlalchemy.orm import validates
+
 from src import db
 
 attributes = {
@@ -18,11 +21,25 @@ attributes = {
     'mod_network_fault_timestamp': 'mod_network_fault_timestamp',
 }
 
+
+class ModbusType(enum.Enum):
+    RTU = 0
+    TCP = 1
+
+
+class Parity(enum.Enum):
+    O = "O"
+    E = "E"
+    N = "N"
+    Odd = "Odd"
+    Even = "Even"
+
+
 class ModbusNetworkModel(db.Model):
     __tablename__ = 'mod_networks'
     mod_network_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     mod_network_name = db.Column(db.String(80), nullable=False)
-    mod_network_type = db.Column(db.String(80), nullable=False)
+    mod_network_type = db.Column(db.Enum(ModbusType), nullable=False)
     mod_network_enable = db.Column(db.Boolean(), nullable=False)
     mod_network_timeout = db.Column(db.Integer(), nullable=False)
     mod_network_device_timeout_global = db.Column(db.Integer(), nullable=False)
@@ -30,20 +47,21 @@ class ModbusNetworkModel(db.Model):
     mod_rtu_network_port = db.Column(db.String(80), nullable=False)
     mod_rtu_network_speed = db.Column(db.Integer(), nullable=False)
     mod_rtu_network_stopbits = db.Column(db.Integer(), nullable=False)
-    mod_rtu_network_parity = db.Column(db.String(10), nullable=False)
-    mod_rtu_network_bytesize = db.Column(db.Integer(), nullable=False)
+    mod_rtu_network_parity = db.Column(db.Enum(Parity), nullable=True)
+    mod_rtu_network_bytesize = db.Column(db.Integer(), default=8)
     mod_network_fault = db.Column(db.Boolean(), nullable=True)
     mod_network_last_poll_timestamp = db.Column(db.String(80), nullable=True)
     mod_network_fault_timestamp = db.Column(db.String(80), nullable=True)
-
-
-    # network_device_id = db.Column(db.Integer(), nullable=False)
-    # network_device_name = db.Column(db.String(80), nullable=False)
-    # network_number = db.Column(db.Integer())
-    # mod_devices = db.relationship('ModDeviceModel', cascade="all,delete", backref='mod_network', lazy=True)
+    mod_devices = db.relationship('ModbusDeviceModel', cascade="all,delete", backref='mod_network', lazy=True)
 
     def __repr__(self):
         return f"Network(mod_network_uuid = {self.mod_network_uuid})"
+
+    @validates('mod_rtu_network_bytesize')
+    def validate_email(self, _, bytesize):
+        if bytesize not in range(5, 9):
+            raise ValueError("mod_rtu_network_bytesize should be on range (0-9)")
+        return bytesize
 
     @classmethod
     def find_by_network_uuid(cls, mod_network_uuid):

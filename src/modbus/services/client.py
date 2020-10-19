@@ -1,5 +1,5 @@
 import json
-from src.services.modbus.modbus_master import TCP_Client, RTU_Client, Master
+from src.modbus.services.modbus_master import TCP_Client, RTU_Client, Master
 
 
 class Client:

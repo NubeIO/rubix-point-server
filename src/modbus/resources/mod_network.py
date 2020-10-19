@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
-from src.models.modbus.mod_network import ModbusNetworkModel
-from src.services.modbus.mod_network import ModbusNetworkService
-from src.interfaces.modbus.network.interface_modbus_network import THIS, \
+from src.modbus.models.mod_network import ModbusNetworkModel
+from src.modbus.services.mod_network import ModbusNetworkService
+from src.modbus.interfaces.network.interface_modbus_network import \
     interface_mod_network_name, interface_mod_network_type, \
     interface_mod_network_enable, interface_mod_network_timeout, \
     interface_mod_network_device_timeout_global, interface_mod_network_point_timeout_global, \
@@ -85,6 +85,7 @@ class ModNetwork(Resource):
                         required=interface_mod_rtu_network_bytesize['required'],
                         help=interface_mod_rtu_network_bytesize['help'],
                         )
+
     @marshal_with(network_fields)
     def get(self, uuid):
         network = ModbusNetworkModel.find_by_network_uuid(uuid)
@@ -97,17 +98,23 @@ class ModNetwork(Resource):
         if ModbusNetworkModel.find_by_network_uuid(uuid):
             return abort(409, message=f"An Modbus Network with network_uuid '{uuid}' already exists.")
         data = ModNetwork.parser.parse_args()
-        network = ModNetwork.create_network_model_obj(uuid, data)
-        network.save_to_db()
-        ModbusNetworkService.get_instance().add_network(network)
-        return network, 201
+        try:
+            network = ModNetwork.create_network_model_obj(uuid, data)
+            network.save_to_db()
+            ModbusNetworkService.get_instance().add_network(network)
+            return network, 201
+        except Exception as e:
+            return abort(500, message=str(e))
 
     @marshal_with(network_fields)
     def put(self, uuid):
         data = ModNetwork.parser.parse_args()
         network = ModbusNetworkModel.find_by_network_uuid(uuid)
         if network is None:
-            network = ModNetwork.create_network_model_obj(uuid, data)
+            try:
+                network = ModNetwork.create_network_model_obj(uuid, data)
+            except Exception as e:
+                return abort(500, message=str(e))
         else:
             network.mod_network_name = data['mod_network_name']
             network.mod_network_type = data['mod_network_type']
@@ -146,6 +153,7 @@ class ModNetwork(Resource):
                                   mod_rtu_network_stopbits=data['mod_rtu_network_stopbits'],
                                   mod_rtu_network_parity=data['mod_rtu_network_parity'],
                                   mod_rtu_network_bytesize=data['mod_rtu_network_bytesize'])
+
 
 class ModNetworkList(Resource):
     @marshal_with(network_fields, envelope="mod_networks")

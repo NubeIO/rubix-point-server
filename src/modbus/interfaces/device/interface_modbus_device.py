@@ -110,3 +110,11 @@ interface_mod_device_timeout_global = {
     'help': f'{THIS}, {_interface_mod_device_timeout_global} is required'
 
 }
+_interface_mod_network_uuid = 'mod_network_uuid'
+interface_mod_network_uuid = {
+    'name': _interface_mod_network_uuid,
+    'type': str,
+    'required': True,
+    'help': f'{THIS}, {_interface_mod_network_uuid} is required'
+
+}

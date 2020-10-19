@@ -15,5 +15,6 @@ from src import routes
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     db.create_all()
-    from src.services.bacnet.network import Network
+    from src.bacnet.services.network import Network
+
     Network.get_instance().start()

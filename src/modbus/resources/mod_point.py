@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
-from src.models.modbus.mod_point import ModbusPointModel
-from src.interfaces.modbus.point.interface_modbus_point import points_attributes, THIS, interface_name, interface_reg, \
+from src.modbus.models.mod_point import ModbusPointModel
+from src.modbus.interfaces.point.interface_modbus_point import points_attributes, THIS, interface_name, interface_reg, \
     interface_reg_length, interface_point_type, interface_point_enable, interface_point_write_value, \
     interface_point_data_type, interface_point_data_endian, interface_point_data_round, interface_point_data_offset, \
     interface_point_timeout, interface_point_timeout_global, interface_point_prevent_duplicates, \
@@ -22,13 +22,12 @@ fields = {
     'mod_point_timeout_global': fields.Boolean,
     'mod_point_prevent_duplicates': fields.Boolean,
     'mod_point_prevent_duplicates_global': fields.Boolean,
-    'mod_device_uuid': fields.String,
     'mod_point_write_ok': fields.Boolean,
     'mod_point_fault': fields.Boolean,
     'mod_point_last_poll_timestamp': fields.String,
     'mod_point_value': fields.Float,
     'mod_point_value_array': fields.String,
-
+    'mod_device_uuid': fields.String,
 }
 
 

@@ -1,4 +1,4 @@
-from src.models.modbus.mod_network import ModbusNetworkModel
+from src.modbus.models.mod_network import ModbusNetworkModel
 
 
 class ModbusNetworkService:
