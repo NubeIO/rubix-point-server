@@ -10,3 +10,4 @@ pandas
 bacpypes
 pymodbus
 pendulum
+flask_cors
