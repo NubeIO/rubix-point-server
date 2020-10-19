@@ -57,37 +57,3 @@ Using the API
 4- once added copy the network_uuid and bacnet_network_uuid
 5- /devices/points/obj and paste in your UUIDs   http://127.0.0.1:5000/api/1.1/device/points/obj/d0554857-47df-4100-bf6c-43deafb9aa88,5430510a-f0d9-49be-abcc-ddcbf35eb21b
 ```
-
-
-```sql
-DROP TABLE devices
-
-CREATE TABLE devices (
-	id INTEGER PRIMARY KEY,
-	bac_device_uuid TEXT NOT NULL,
-	bac_device_mac INTEGER NOT NULL,
-	bac_device_id INTEGER NOT NULL,
-	bac_device_ip INTEGER NOT NULL,
-	bac_device_mask INTEGER NOT NULL,
-    bac_device_port INTEGER NOT NULL,
-	network_uuid TEXT NOT NULL,
-	 FOREIGN KEY (network_uuid)
-       REFERENCES networks (network_uuid) 
-);
- 
-DROP TABLE networks
-
-CREATE TABLE networks (
-	id INTEGER PRIMARY KEY,
-	network_uuid TEXT NOT NULL,
-	network_ip INTEGER NOT NULL,
-	network_mask INTEGER NOT NULL,
-	network_port INTEGER NOT NULL,
-	network_number INTEGER NOT NULL,
-	network_device_id INTEGER NOT NULL,
-	network_device_name TEXT NOT NULL
-);
-  
-SELECT * FROM networks
-SELECT * FROM devices 
-```
