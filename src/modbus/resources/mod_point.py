@@ -22,13 +22,12 @@ fields = {
     'mod_point_timeout_global': fields.Boolean,
     'mod_point_prevent_duplicates': fields.Boolean,
     'mod_point_prevent_duplicates_global': fields.Boolean,
-    'mod_device_uuid': fields.String,
     'mod_point_write_ok': fields.Boolean,
     'mod_point_fault': fields.Boolean,
     'mod_point_last_poll_timestamp': fields.String,
     'mod_point_value': fields.Float,
     'mod_point_value_array': fields.String,
-
+    'mod_device_uuid': fields.String,
 }
 
 

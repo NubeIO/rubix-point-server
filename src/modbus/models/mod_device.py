@@ -19,11 +19,8 @@ class ModbusDeviceModel(db.Model):
     mod_device_fault = db.Column(db.Boolean(), nullable=True)
     mod_device_last_poll_timestamp = db.Column(db.String(80), nullable=True)
     mod_device_fault_timestamp = db.Column(db.String(80), nullable=True)
-
-    # network_number = db.Column(db.Integer())
-
-    # mod_network_uuid = db.Column(db.String, db.ForeignKey('mod_networks.mod_network_uuid'))
-    # mod_devices = db.relationship('ModDeviceModel', cascade="all,delete", backref='mod_network', lazy=True)
+    mod_network_uuid = db.Column(db.String, db.ForeignKey('mod_networks.mod_network_uuid'))
+    mod_points = db.relationship('ModbusPointModel', cascade="all,delete", backref='mod_device', lazy=True)
 
     def __repr__(self):
         return f"Device(mod_device_uuid = {self.mod_device_uuid})"

@@ -1,13 +1,12 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
 from src.modbus.models.mod_device import ModbusDeviceModel
-from src.modbus.resources.mod_network import network_fields
 from src.modbus.interfaces.device.interface_modbus_device import attributes, THIS, \
     interface_mod_device_name, \
     interface_mod_device_enable, interface_mod_device_type, \
     interface_mod_device_addr, interface_mod_tcp_device_ip, \
     interface_mod_tcp_device_port, interface_mod_ping_point_type, \
     interface_mod_ping_point_address, interface_mod_device_zero_mode, \
-    interface_mod_device_timeout, interface_mod_device_timeout_global
+    interface_mod_device_timeout, interface_mod_device_timeout_global, interface_mod_network_uuid
 
 device_fields = {
     'mod_device_uuid': fields.String,
@@ -25,7 +24,8 @@ device_fields = {
     'mod_device_timeout_global': fields.Boolean,  # true
     'mod_device_fault': fields.Boolean,  # true
     'mod_device_last_poll_timestamp': fields.String,
-    'mod_device_fault_timestamp': fields.String
+    'mod_device_fault_timestamp': fields.String,
+    'mod_network_uuid': fields.String
 
 }
 
@@ -87,6 +87,11 @@ class ModDevice(Resource):
                         required=interface_mod_device_timeout_global['required'],
                         help=interface_mod_device_timeout_global['help'],
                         )
+    parser.add_argument(interface_mod_network_uuid['name'],
+                        type=interface_mod_network_uuid['type'],
+                        required=interface_mod_network_uuid['required'],
+                        help=interface_mod_network_uuid['help'],
+                        )
 
     @marshal_with(device_fields)
     def get(self, uuid):
@@ -101,18 +106,24 @@ class ModDevice(Resource):
         if ModbusDeviceModel.find_by_device_uuid(uuid):
             return {'message': "An device with mod_device_uuid '{}' already exists.".format(uuid)}, 400
         data = ModDevice.parser.parse_args()
-        device = ModDevice.create_device_model_obj(uuid, data)
-        if device.find_by_device_uuid(uuid) is not None:
-            abort(409, message=f'{THIS} already exists')
-        device.save_to_db()
-        return device, 201
+        try:
+            device = ModDevice.create_device_model_obj(uuid, data)
+            if device.find_by_device_uuid(uuid) is not None:
+                abort(409, message=f'{THIS} already exists')
+            device.save_to_db()
+            return device, 201
+        except Exception as e:
+            return abort(500, message=str(e))
 
     @marshal_with(device_fields)
     def put(self, uuid):
         data = ModDevice.parser.parse_args()
         device = ModbusDeviceModel.find_by_device_uuid(uuid)
         if device is None:
-            device = ModDevice.create_device_model_obj(uuid, data)
+            try:
+                device = ModDevice.create_device_model_obj(uuid, data)
+            except Exception as e:
+                return abort(500, message=str(e))
         else:
             device.mod_device_name = data[attributes['mod_device_name']]
             device.mod_device_enable = data[attributes['mod_device_enable']]
@@ -147,7 +158,8 @@ class ModDevice(Resource):
                                  mod_ping_point_address=data['mod_ping_point_address'],
                                  mod_device_zero_mode=data['mod_device_zero_mode'],
                                  mod_device_timeout=data['mod_device_timeout'],
-                                 mod_device_timeout_global=data['mod_device_timeout_global'])
+                                 mod_device_timeout_global=data['mod_device_timeout_global'],
+                                 mod_network_uuid=data['mod_network_uuid'])
 
 
 class ModDeviceList(Resource):
@@ -155,8 +167,7 @@ class ModDeviceList(Resource):
     def get(self):
         return ModbusDeviceModel.query.all()
 
-
-mod_device_point_fields = network_fields
-mod_updated_device_fields = device_fields.copy()
-mod_updated_device_fields.update({'hello': fields.String})
-mod_device_point_fields['devices'] = fields.List(fields.Nested(mod_updated_device_fields))
+# mod_device_point_fields = network_fields
+# mod_updated_device_fields = device_fields.copy()
+# mod_updated_device_fields.update({'hello': fields.String})
+# mod_device_point_fields['devices'] = fields.List(fields.Nested(mod_updated_device_fields))
