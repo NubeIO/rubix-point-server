@@ -1,4 +1,5 @@
 from src import db
+from src.modbus.models.mod_network import ModbusType
 
 
 class ModbusDeviceModel(db.Model):
@@ -6,7 +7,7 @@ class ModbusDeviceModel(db.Model):
     mod_device_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     mod_device_name = db.Column(db.String(80), nullable=False)
     mod_device_enable = db.Column(db.String(80), nullable=False)
-    mod_device_type = db.Column(db.String(80), nullable=False)
+    mod_device_type = db.Column(db.Enum(ModbusType), nullable=False)
     mod_device_addr = db.Column(db.Integer(), nullable=False)
     mod_tcp_device_ip = db.Column(db.String(80), nullable=False)
     mod_tcp_device_port = db.Column(db.Integer(), nullable=False)

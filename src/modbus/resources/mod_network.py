@@ -98,17 +98,23 @@ class ModNetwork(Resource):
         if ModbusNetworkModel.find_by_network_uuid(uuid):
             return abort(409, message=f"An Modbus Network with network_uuid '{uuid}' already exists.")
         data = ModNetwork.parser.parse_args()
-        network = ModNetwork.create_network_model_obj(uuid, data)
-        network.save_to_db()
-        ModbusNetworkService.get_instance().add_network(network)
-        return network, 201
+        try:
+            network = ModNetwork.create_network_model_obj(uuid, data)
+            network.save_to_db()
+            ModbusNetworkService.get_instance().add_network(network)
+            return network, 201
+        except Exception as e:
+            return abort(500, message=str(e))
 
     @marshal_with(network_fields)
     def put(self, uuid):
         data = ModNetwork.parser.parse_args()
         network = ModbusNetworkModel.find_by_network_uuid(uuid)
         if network is None:
-            network = ModNetwork.create_network_model_obj(uuid, data)
+            try:
+                network = ModNetwork.create_network_model_obj(uuid, data)
+            except Exception as e:
+                return abort(500, message=str(e))
         else:
             network.mod_network_name = data['mod_network_name']
             network.mod_network_type = data['mod_network_type']
