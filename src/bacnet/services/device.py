@@ -1,4 +1,4 @@
-from src.services.bacnet.network import Network
+from src.bacnet.services.network import Network
 
 
 class Device:

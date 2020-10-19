@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
-from src.models.modbus.mod_device import ModbusDeviceModel
-from src.resources.modbus.mod_network import network_fields
-from src.interfaces.modbus.device.interface_modbus_device import attributes, THIS, \
+from src.modbus.models.mod_device import ModbusDeviceModel
+from src.modbus.resources.mod_network import network_fields
+from src.modbus.interfaces.device.interface_modbus_device import attributes, THIS, \
     interface_mod_device_name, \
     interface_mod_device_enable, interface_mod_device_type, \
     interface_mod_device_addr, interface_mod_tcp_device_ip, \
@@ -9,9 +9,7 @@ from src.interfaces.modbus.device.interface_modbus_device import attributes, THI
     interface_mod_ping_point_address, interface_mod_device_zero_mode, \
     interface_mod_device_timeout, interface_mod_device_timeout_global
 
-
-
-device_fields= {
+device_fields = {
     'mod_device_uuid': fields.String,
     'mod_device_name': fields.String,
     'mod_device_enable': fields.Boolean,
@@ -21,7 +19,8 @@ device_fields= {
     'mod_tcp_device_port': fields.Integer,
     'mod_ping_point_type': fields.String,  # for ping a reg to see if the device is online
     'mod_ping_point_address': fields.Integer,
-    'mod_device_zero_mode': fields.Boolean,  # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
+    'mod_device_zero_mode': fields.Boolean,
+    # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
     'mod_device_timeout': fields.Integer,
     'mod_device_timeout_global': fields.Boolean,  # true
     'mod_device_fault': fields.Boolean,  # true
@@ -29,6 +28,7 @@ device_fields= {
     'mod_device_fault_timestamp': fields.String
 
 }
+
 
 class ModDevice(Resource):
     parser = reqparse.RequestParser()
@@ -87,6 +87,7 @@ class ModDevice(Resource):
                         required=interface_mod_device_timeout_global['required'],
                         help=interface_mod_device_timeout_global['help'],
                         )
+
     @marshal_with(device_fields)
     def get(self, uuid):
         device = ModbusDeviceModel.find_by_device_uuid(uuid)
@@ -105,6 +106,7 @@ class ModDevice(Resource):
             abort(409, message=f'{THIS} already exists')
         device.save_to_db()
         return device, 201
+
     @marshal_with(device_fields)
     def put(self, uuid):
         data = ModDevice.parser.parse_args()
@@ -131,6 +133,7 @@ class ModDevice(Resource):
         if device:
             device.delete_from_db()
         return '', 204
+
     @staticmethod
     def create_device_model_obj(mod_device_uuid, data):
         return ModbusDeviceModel(mod_device_uuid=mod_device_uuid,
@@ -145,6 +148,7 @@ class ModDevice(Resource):
                                  mod_device_zero_mode=data['mod_device_zero_mode'],
                                  mod_device_timeout=data['mod_device_timeout'],
                                  mod_device_timeout_global=data['mod_device_timeout_global'])
+
 
 class ModDeviceList(Resource):
     @marshal_with(device_fields, envelope="mod_devices")

@@ -1,7 +1,5 @@
-import logging
 import pendulum
 import time
-
 
 from pymodbus.client.sync import ModbusSerialClient as SerialClient
 from pymodbus.client.sync import ModbusTcpClient as TcpClient

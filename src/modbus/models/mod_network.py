@@ -18,6 +18,7 @@ attributes = {
     'mod_network_fault_timestamp': 'mod_network_fault_timestamp',
 }
 
+
 class ModbusNetworkModel(db.Model):
     __tablename__ = 'mod_networks'
     mod_network_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
@@ -35,7 +36,6 @@ class ModbusNetworkModel(db.Model):
     mod_network_fault = db.Column(db.Boolean(), nullable=True)
     mod_network_last_poll_timestamp = db.Column(db.String(80), nullable=True)
     mod_network_fault_timestamp = db.Column(db.String(80), nullable=True)
-
 
     # network_device_id = db.Column(db.Integer(), nullable=False)
     # network_device_name = db.Column(db.String(80), nullable=False)

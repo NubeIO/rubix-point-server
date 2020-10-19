@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
-from src.models.modbus.mod_network import ModbusNetworkModel
-from src.services.modbus.mod_network import ModbusNetworkService
-from src.interfaces.modbus.network.interface_modbus_network import THIS, \
+from src.modbus.models.mod_network import ModbusNetworkModel
+from src.modbus.services.mod_network import ModbusNetworkService
+from src.modbus.interfaces.network.interface_modbus_network import \
     interface_mod_network_name, interface_mod_network_type, \
     interface_mod_network_enable, interface_mod_network_timeout, \
     interface_mod_network_device_timeout_global, interface_mod_network_point_timeout_global, \
@@ -85,6 +85,7 @@ class ModNetwork(Resource):
                         required=interface_mod_rtu_network_bytesize['required'],
                         help=interface_mod_rtu_network_bytesize['help'],
                         )
+
     @marshal_with(network_fields)
     def get(self, uuid):
         network = ModbusNetworkModel.find_by_network_uuid(uuid)
@@ -146,6 +147,7 @@ class ModNetwork(Resource):
                                   mod_rtu_network_stopbits=data['mod_rtu_network_stopbits'],
                                   mod_rtu_network_parity=data['mod_rtu_network_parity'],
                                   mod_rtu_network_bytesize=data['mod_rtu_network_bytesize'])
+
 
 class ModNetworkList(Resource):
     @marshal_with(network_fields, envelope="mod_networks")
