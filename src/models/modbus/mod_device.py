@@ -15,6 +15,9 @@ class ModbusDeviceModel(db.Model):
     mod_network_zero_mode = db.Column(db.Boolean(), nullable=False)
     mod_device_timeout = db.Column(db.Integer(), nullable=False)
     mod_device_timeout_global = db.Column(db.Boolean(), nullable=False)
+    mod_device_fault = db.Column(db.Boolean(), nullable=False)
+    mod_device_last_poll_timestamp = db.Column(db.String(80), nullable=False)
+    mod_device_fault_timestamp = db.Column(db.String(80), nullable=False)
 
     # network_number = db.Column(db.Integer())
 

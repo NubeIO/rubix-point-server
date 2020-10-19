@@ -1,5 +1,8 @@
 # TODO: need to make a class and private
 
+# TODO: need to add in more things
+# write_ok, fault, last_poll_timestamp
+
 points_attributes = {
     'mod_point_uuid': 'mod_point_uuid',
     'mod_point_name': 'mod_point_name',
@@ -15,9 +18,14 @@ points_attributes = {
     'mod_point_timeout': 'mod_point_timeout',
     'mod_point_timeout_global': 'mod_point_timeout_global',
     'mod_point_prevent_duplicates': 'mod_point_prevent_duplicates',
-    'mod_point_prevent_duplicates_global': 'mod_point_prevent_duplicates_global',
     'mod_device_uuid': 'mod_device_uuid',
+    'mod_point_write_ok': 'mod_point_write_ok',
+    'mod_point_fault': 'mod_point_fault',
+    'mod_point_last_poll_timestamp': 'mod_point_last_poll_timestamp',
+
 }
+
+
 
 THIS = 'point'
 _interface_help_name = 'mod_point_name'
@@ -143,8 +151,28 @@ interface_interface_help_device_uuid = {
     'help': f'{THIS}, {_interface_help_device_uuid} is required'
 
 }
+_interface_help_mod_point_write_ok = 'mod_point_write_ok'
+interface_mod_point_write_ok = {
+    'name': _interface_help_mod_point_write_ok,
+    'type': bool,
+    'required': True,
+    'help': f'{THIS}, {_interface_help_mod_point_write_ok} is required'
 
+}
 
+_interface_mod_point_fault = 'mod_point_fault'
+interface_mod_point_fault = {
+    'name': _interface_mod_point_fault,
+    'type': bool,
+    'required': True,
+    'help': f'{THIS}, {_interface_mod_point_fault} is required'
 
+}
+_interface_mod_point_last_poll_timestamp = 'mod_point_last_poll_timestamp'
+interface_mod_point_last_poll_timestamp = {
+    'name': _interface_mod_point_last_poll_timestamp,
+    'type': str,
+    'required': True,
+    'help': f'{THIS}, {_interface_mod_point_last_poll_timestamp} is required'
 
-
+}

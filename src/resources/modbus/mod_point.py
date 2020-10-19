@@ -4,7 +4,10 @@ from src.interfaces.modbus.point.interface_modbus_point import points_attributes
     interface_reg_length, interface_point_type, interface_point_enable, interface_point_write_value, \
     interface_point_data_type, interface_point_data_endian, interface_point_data_round, interface_point_data_offset, \
     interface_point_timeout, interface_point_timeout_global, interface_point_prevent_duplicates, \
-    interface_point_prevent_duplicates_global, interface_interface_help_device_uuid
+    interface_point_prevent_duplicates_global, interface_interface_help_device_uuid, \
+    interface_mod_point_write_ok, interface_mod_point_fault, \
+    interface_mod_point_last_poll_timestamp
+
 
 fields = {
     'mod_point_uuid': fields.String,
@@ -23,6 +26,10 @@ fields = {
     'mod_point_prevent_duplicates': fields.Boolean,
     'mod_point_prevent_duplicates_global': fields.Boolean,
     'mod_device_uuid': fields.String,
+    'mod_point_write_ok': fields.Boolean,
+    'mod_point_fault': fields.Boolean,
+    'mod_point_last_poll_timestamp': fields.String,
+
 }
 
 
@@ -103,6 +110,21 @@ class ModPoint(Resource):
                         required=interface_interface_help_device_uuid['required'],
                         help=interface_interface_help_device_uuid['help'],
                         )
+    parser.add_argument(interface_mod_point_write_ok['name'],
+                        type=interface_mod_point_write_ok['type'],
+                        required=interface_mod_point_write_ok['required'],
+                        help=interface_mod_point_write_ok['help'],
+                        )
+    parser.add_argument(interface_mod_point_fault['name'],
+                        type=interface_mod_point_fault['type'],
+                        required=interface_mod_point_fault['required'],
+                        help=interface_mod_point_fault['help'],
+                        )
+    parser.add_argument(interface_mod_point_last_poll_timestamp['name'],
+                        type=interface_mod_point_last_poll_timestamp['type'],
+                        required=interface_mod_point_last_poll_timestamp['required'],
+                        help=interface_mod_point_last_poll_timestamp['help'],
+                        )
 
     @marshal_with(fields)
     def get(self, uuid):
@@ -144,6 +166,9 @@ class ModPoint(Resource):
             point.mod_point_prevent_duplicates = data[points_attributes['mod_point_prevent_duplicates']]
             point.mod_point_prevent_duplicates_global = data[points_attributes['mod_point_prevent_duplicates_global']]
             point.mod_device_uuid = data[points_attributes['mod_device_uuid']]
+            point.mod_point_write_ok = data[points_attributes['mod_point_write_ok']]
+            point.mod_point_fault = data[points_attributes['mod_point_fault']]
+            point.mod_point_last_poll_timestamp = data[points_attributes['mod_point_last_poll_timestamp']]
         point.save_to_db()
         return point
 
@@ -167,7 +192,10 @@ class ModPoint(Resource):
                                 mod_point_timeout_global=data['mod_point_timeout_global'],
                                 mod_point_prevent_duplicates=data['mod_point_prevent_duplicates'],
                                 mod_point_prevent_duplicates_global=data['mod_point_prevent_duplicates_global'],
-                                mod_device_uuid=data['mod_device_uuid'])
+                                mod_device_uuid=data['mod_device_uuid'],
+                                mod_point_write_ok=data['mod_point_write_ok'],
+                                mod_point_fault=data['mod_point_fault'],
+                                mod_point_last_poll_timestamp=data['mod_point_last_poll_timestamp'])
 
 
 class ModPointList(Resource):
