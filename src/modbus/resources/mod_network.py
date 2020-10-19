@@ -1,6 +1,5 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
 from src.modbus.models.mod_network import ModbusNetworkModel
-from src.modbus.services.mod_network import ModbusNetworkService
 from src.modbus.interfaces.network.interface_modbus_network import \
     interface_mod_network_name, interface_mod_network_type, \
     interface_mod_network_enable, interface_mod_network_timeout, \
@@ -101,7 +100,6 @@ class ModNetwork(Resource):
         try:
             network = ModNetwork.create_network_model_obj(uuid, data)
             network.save_to_db()
-            ModbusNetworkService.get_instance().add_network(network)
             return network, 201
         except Exception as e:
             return abort(500, message=str(e))
@@ -128,7 +126,6 @@ class ModNetwork(Resource):
             network.mod_network_port = data['mod_rtu_network_parity']
             network.mod_network_port = data['mod_rtu_network_bytesize']
         network.save_to_db()
-        ModbusNetworkService.get_instance().add_network(network)
         return network, 201
 
     def delete(self, uuid):
@@ -136,7 +133,6 @@ class ModNetwork(Resource):
         network = ModbusNetworkModel.find_by_network_uuid(mod_network_uuid)
         if network:
             network.delete_from_db()
-            ModbusNetworkService.get_instance().delete_network(network)
         return '', 204
 
     @staticmethod
