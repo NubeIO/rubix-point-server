@@ -166,8 +166,3 @@ class ModDeviceList(Resource):
     @marshal_with(device_fields, envelope="mod_devices")
     def get(self):
         return ModbusDeviceModel.query.all()
-
-# mod_device_point_fields = network_fields
-# mod_updated_device_fields = device_fields.copy()
-# mod_updated_device_fields.update({'hello': fields.String})
-# mod_device_point_fields['devices'] = fields.List(fields.Nested(mod_updated_device_fields))

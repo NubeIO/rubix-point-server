@@ -39,14 +39,6 @@ class TcpPolling:
             for network, device, point in results:
                 self.poll_point(device, point)
 
-            # for network in ModbusNetworkModel.query.filter_by(mod_network_type=ModbusType.TCP):
-            #     print("network", network)
-            #     for device in network.mod_devices:
-            #         print("device", device)
-            #         if device.mod_device_type is ModbusType.TCP:
-            #             for point in device.mod_points:
-            #                 self.poll_point(device, point)
-
     def poll_point(self, device, point):
         host = device.mod_tcp_device_ip
         port = device.mod_tcp_device_port
@@ -61,14 +53,16 @@ class TcpPolling:
         # TODO: Manually put 1 for now
         # unit = 1
         try:
-            if mod_point_type == ModbusFC.readCoils.value:
+            val = None
+            if mod_point_type == ModbusFC.readCoils:
                 val = tcp_connection.read_coils(reg, mod_point_reg_length, unit=mod_device_addr)
                 val = val.registers[0]
                 val = DataHelpers.bool_to_int(val)
-            if mod_point_type == ModbusFC.readHoldingRegisters.value:
+            if mod_point_type == ModbusFC.readHoldingRegisters:
                 val = tcp_connection.read_holding_registers(reg, mod_point_reg_length, unit=mod_device_addr)
                 val = val.registers[0]
-            print('val:', val, 'reg:', reg)
-            ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
+            if val:
+                print('val:', val, 'reg:', reg)
+                ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
         except Exception as e:
             print(str(e))

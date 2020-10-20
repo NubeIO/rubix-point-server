@@ -121,18 +121,24 @@ class ModPoint(Resource):
         if ModbusPointModel.find_by_uuid(uuid):
             return {'message': "An device with mod_device_uuid '{}' already exists.".format(uuid)}, 400
         data = ModPoint.parser.parse_args()
-        device = ModPoint.create_point_model_obj(uuid, data)
-        if device.find_by_uuid(uuid) is not None:
-            abort(409, message=f'{THIS} already exists')
-        device.save_to_db()
-        return device, 201
+        try:
+            point = ModPoint.create_point_model_obj(uuid, data)
+            if point.find_by_uuid(uuid) is not None:
+                abort(409, message=f'{THIS} already exists')
+            point.save_to_db()
+            return point, 201
+        except Exception as e:
+            abort(500, message=str(e))
 
     @marshal_with(fields)
     def put(self, uuid):
         data = ModPoint.parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)
         if point is None:
-            point = ModPoint.create_point_model_obj(uuid, data)
+            try:
+                point = ModPoint.create_point_model_obj(uuid, data)
+            except Exception as e:
+                abort(500, message=str(e))
         else:
             point.mod_point_name = data[points_attributes['mod_point_name']]
             point.mod_point_reg = data[points_attributes['mod_point_reg']]
@@ -182,8 +188,3 @@ class ModPointList(Resource):
     @marshal_with(fields, envelope="mod_points")
     def get(self):
         return ModbusPointModel.query.all()
-
-# mod_device_point_fields = network_fields
-# mod_updated_device_fields = fields.copy()
-# mod_updated_device_fields.update({'hello': fields.String})
-# mod_device_point_fields['points'] = fields.List(fields.Nested(mod_updated_device_fields))

@@ -23,7 +23,7 @@ class ModbusDeviceModel(db.Model):
     mod_points = db.relationship('ModbusPointModel', cascade="all,delete", backref='mod_device', lazy=True)
 
     def __repr__(self):
-        return f"Device(mod_device_uuid = {self.mod_device_uuid})"
+        return f"ModbusDeviceModel(mod_device_uuid = {self.mod_device_uuid})"
 
     @classmethod
     def find_by_device_uuid(cls, mod_device_uuid):
