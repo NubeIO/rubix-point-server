@@ -21,9 +21,15 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     from src.bacnet.services.network import Network
     from src.modbus.services.tcp_registry import TcpRegistry
     from src.modbus.services.tcp_polling import TcpPolling
+    from src.modbus.services.rtu_polling import RtuPolling
+    from src.modbus.services.rtu_registry import RtuRegistry
 
     Network.get_instance().start()
 
     TcpRegistry.get_instance().register()
     tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
     tcp_polling_thread.start()
+
+    RtuRegistry.get_instance().register()
+    rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
+    rtu_polling_thread.start()

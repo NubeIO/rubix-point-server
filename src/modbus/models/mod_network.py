@@ -55,7 +55,7 @@ class ModbusNetworkModel(db.Model):
     mod_devices = db.relationship('ModbusDeviceModel', cascade="all,delete", backref='mod_network', lazy=True)
 
     def __repr__(self):
-        return f"Network(mod_network_uuid = {self.mod_network_uuid})"
+        return f"ModbusNetworkModel(mod_network_uuid = {self.mod_network_uuid})"
 
     @validates('mod_rtu_network_bytesize')
     def validate_email(self, _, bytesize):

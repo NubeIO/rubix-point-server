@@ -1,4 +1,5 @@
 from src import db
+from src.modbus.interfaces.point.points import ModbusFC
 
 
 class ModbusPointModel(db.Model):
@@ -7,7 +8,7 @@ class ModbusPointModel(db.Model):
     mod_point_name = db.Column(db.String(80), nullable=False)
     mod_point_reg = db.Column(db.Integer(), nullable=False)
     mod_point_reg_length = db.Column(db.Integer(), nullable=False)
-    mod_point_type = db.Column(db.String(80), nullable=False)
+    mod_point_type = db.Column(db.Enum(ModbusFC), nullable=False)
     mod_point_enable = db.Column(db.Boolean(), nullable=False)
     mod_point_write_value = db.Column(db.Integer(), nullable=False)
     mod_point_data_type = db.Column(db.String(80), nullable=False)
@@ -26,7 +27,7 @@ class ModbusPointModel(db.Model):
     mod_device_uuid = db.Column(db.String, db.ForeignKey('mod_devices.mod_device_uuid'))
 
     def __repr__(self):
-        return f"Point(mod_point_uuid = {self.mod_point_uuid})"
+        return f"ModbusPointModel(mod_point_uuid = {self.mod_point_uuid})"
 
     @classmethod
     def find_by_uuid(cls, mod_point_uuid):
