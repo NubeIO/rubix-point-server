@@ -3,7 +3,6 @@
 # from device_test_settings import  test_device_url, net_url, test_device, test_device_id
 
 
-
 # bacnet = BAC0.lite(ip=net_url)
 
 # my_obj_list = [
@@ -27,10 +26,10 @@
 import BAC0
 import time
 
-def polling():
 
+def polling():
     bacnet = BAC0.connect(ip='192.168.0.100')
-    object_list= [('analogInput', 1), ('analogInput', 2)]
+    object_list = [('analogInput', 1), ('analogInput', 2)]
 
     # I tried both ways of changing the poll delay
     device = BAC0.device('192.168.0.202', 202, bacnet, object_list=object_list, poll=1)
@@ -43,6 +42,7 @@ def polling():
         time.sleep(1)
 
     # print(device['flowTemperature'].history)
+
 
 if __name__ == '__main__':
     polling()

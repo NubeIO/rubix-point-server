@@ -1,26 +1,24 @@
-
 from uuid import uuid4 as gen_uuid
 
-from bacpypes.debugging import bacpypes_debugging, ModuleLogger
-from bacpypes.consolelogging import ConfigArgumentParser
-
-from bacpypes.core import run
-
 from bacpypes.app import BIPSimpleApplication
-from bacpypes.local.device import LocalDeviceObject
-
-from bacpypes.constructeddata import ArrayOf
-from bacpypes.primitivedata import CharacterString
 from bacpypes.basetypes import NameValue
-# from bacpypes.service.semantic import SemanticQueryServices
+from bacpypes.consolelogging import ConfigArgumentParser
+from bacpypes.constructeddata import ArrayOf
+from bacpypes.core import run
+from bacpypes.local.device import LocalDeviceObject
+from bacpypes.primitivedata import CharacterString
 
-from random_objects import *
+from tests.bacnet.misc.random_objects import *
+
+# from bacpypes.service.semantic import SemanticQueryServices
 
 _debug = 1
 _log = ModuleLogger(globals())
 
+
 def get_obj_class(obj_type):
     ''.join(obj_type.split(' '))
+
 
 # VAV tags
 
@@ -59,6 +57,7 @@ value_type_rules = {
     ('brick:hasTag', 'bt:Temperature'): 'Analog',
 }
 
+
 class VavDevice(BIPSimpleApplication):
     def __init__(self, *args, vav_nums=1, **kwargs):
         super(VavDevice, self).__init__(*args, **kwargs)
@@ -74,13 +73,13 @@ class VavDevice(BIPSimpleApplication):
             idx += 1
             obj_point_type = None
             for point_type_rule, point_type in point_type_rules.items():
-                if point_type_rule in obj_template :
+                if point_type_rule in obj_template:
                     obj_point_type = point_type
             assert obj_point_type
 
             obj_value_type = None
             for value_type_rule, value_type in value_type_rules.items():
-                if value_type_rule in obj_template :
+                if value_type_rule in obj_template:
                     obj_value_type = value_type
             assert obj_value_type
             obj_typestr = obj_value_type + obj_point_type
@@ -96,6 +95,7 @@ class VavDevice(BIPSimpleApplication):
                 tags=tags,
             )
             self.add_object(obj)
+
 
 def main():
     args = ConfigArgumentParser(description=__doc__).parse_args()
@@ -113,6 +113,7 @@ def main():
 
     this_application = VavDevice(this_device, args.ini.address)
     run()
+
 
 if __name__ == '__main__':
     main()

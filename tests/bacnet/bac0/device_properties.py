@@ -1,6 +1,6 @@
 import BAC0
 
-from device_test_settings import test_device_url, net_url, test_device, test_device_id
+from tests.bacnet.bac0.device_test_settings import test_device_url, net_url, test_device, test_device_id
 
 bacnet = BAC0.lite(ip=net_url)
 print(test_device_url)
@@ -55,7 +55,7 @@ time.sleep(12)
 bacnet.unregister_device(device)
 print('device disconnect to get new points')
 device = BAC0.device(test_device_url, test_device, bacnet, poll=0, history_size=0)
-prop = ('analogOutput',1,'priorityArray')
+prop = ('analogOutput', 1, 'priorityArray')
 priorityArray = device.read_property(prop)
 # print(priorityArray.__dict__.keys())
 print('device points')

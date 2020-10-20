@@ -1,5 +1,5 @@
-from flask_restful import Resource, reqparse, abort, fields, marshal_with
-from src.modbus.models.mod_device import ModbusDeviceModel
+from flask_restful import Resource, reqparse, abort, marshal_with
+
 from src.modbus.interfaces.device.interface_modbus_device import attributes, THIS, \
     interface_mod_device_name, \
     interface_mod_device_enable, interface_mod_device_type, \
@@ -7,27 +7,8 @@ from src.modbus.interfaces.device.interface_modbus_device import attributes, THI
     interface_mod_tcp_device_port, interface_mod_ping_point_type, \
     interface_mod_ping_point_address, interface_mod_device_zero_mode, \
     interface_mod_device_timeout, interface_mod_device_timeout_global, interface_mod_network_uuid
-
-device_fields = {
-    'mod_device_uuid': fields.String,
-    'mod_device_name': fields.String,
-    'mod_device_enable': fields.Boolean,
-    'mod_device_type': fields.String,  # rtu or tcp
-    'mod_device_addr': fields.Integer,  # 1,2,3
-    'mod_tcp_device_ip': fields.String,
-    'mod_tcp_device_port': fields.Integer,
-    'mod_ping_point_type': fields.String,  # for ping a reg to see if the device is online
-    'mod_ping_point_address': fields.Integer,
-    'mod_device_zero_mode': fields.Boolean,
-    # These are 0-based addresses. Therefore, the Modbus protocol address is equal to the Holding Register Offset minus one
-    'mod_device_timeout': fields.Integer,
-    'mod_device_timeout_global': fields.Boolean,  # true
-    'mod_device_fault': fields.Boolean,  # true
-    'mod_device_last_poll_timestamp': fields.String,
-    'mod_device_fault_timestamp': fields.String,
-    'mod_network_uuid': fields.String
-
-}
+from src.modbus.models.mod_device import ModbusDeviceModel
+from src.modbus.resources.mod_fields import device_fields
 
 
 class ModDevice(Resource):

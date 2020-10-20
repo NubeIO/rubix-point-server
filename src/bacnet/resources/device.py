@@ -1,17 +1,8 @@
-from flask_restful import Resource, reqparse, abort, fields, marshal_with
-from src.bacnet.models.device import DeviceModel
-from src.bacnet.resources.network import network_fields
-from src.bacnet.services.device import Device as DeviceService
+from flask_restful import Resource, reqparse, abort, marshal_with
 
-device_fields = {
-    'bac_device_uuid': fields.String,
-    'bac_device_mac': fields.Integer,
-    'bac_device_id': fields.Integer,
-    'bac_device_ip': fields.String,
-    'bac_device_mask': fields.Integer,
-    'bac_device_port': fields.Integer,
-    'network_uuid': fields.String,
-}
+from src.bacnet.models.device import DeviceModel
+from src.bacnet.resources.fields import device_fields
+from src.bacnet.services.device import Device as DeviceService
 
 
 class Device(Resource):
@@ -99,12 +90,6 @@ class DeviceList(Resource):
     @marshal_with(device_fields, envelope="devices")
     def get(self):
         return DeviceModel.query.all()
-
-
-device_point_fields = network_fields
-updated_device_fields = device_fields.copy()
-updated_device_fields.update({'hello': fields.String})
-device_point_fields['devices'] = fields.List(fields.Nested(updated_device_fields))
 
 
 class DevicePoints(Resource):

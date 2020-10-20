@@ -7,24 +7,7 @@ from src.modbus.interfaces.network.interface_modbus_network import \
     interface_mod_rtu_network_port, interface_mod_rtu_network_speed, \
     interface_mod_rtu_network_stopbits, interface_mod_rtu_network_parity, \
     interface_mod_rtu_network_bytesize
-
-network_fields = {
-    'mod_network_uuid': fields.String,
-    'mod_network_name': fields.String,
-    'mod_network_type': fields.String,  # rtu or tcp
-    'mod_network_enable': fields.Boolean,
-    'mod_network_timeout': fields.Integer,  # network time out
-    'mod_network_device_timeout_global': fields.Integer,  # device time out global setting
-    'mod_network_point_timeout_global': fields.Integer,  # point time out global setting
-    'mod_rtu_network_port': fields.String,  # /dev/ttyyUSB0
-    'mod_rtu_network_speed': fields.Integer,  # 9600
-    'mod_rtu_network_stopbits': fields.Integer,  # 1
-    'mod_rtu_network_parity': fields.String,  # O E N Odd, Even, None
-    'mod_rtu_network_bytesize': fields.Integer,  # 5, 6, 7, or 8. This defaults to 8.
-    'mod_network_fault': fields.Boolean,  # true
-    'mod_network_last_poll_timestamp': fields.String,
-    'mod_network_fault_timestamp': fields.String,
-}
+from src.modbus.resources.mod_fields import network_fields
 
 
 class ModNetwork(Resource):

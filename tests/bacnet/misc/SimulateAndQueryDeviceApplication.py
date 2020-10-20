@@ -7,6 +7,7 @@ from src.local_device_applications import LocalDeviceApplication, ReadAllObjectP
 Class for simulating a BACnet device and then querying it of it's objects.
 '''
 
+
 def run_application(**kwargs) -> str:
     '''
     Simulates the device given the specified arguments and returns the query of it's objects.
@@ -14,11 +15,11 @@ def run_application(**kwargs) -> str:
     :return: Result of querying the device for its objects.
     '''
 
-    #Thread for simulating device
+    # Thread for simulating device
     thread = threading.Thread(target=LocalDeviceApplication.run_application, kwargs=kwargs)
     thread.start()
 
-    #Give object identifier of the device object that will be queried.
+    # Give object identifier of the device object that will be queried.
     ReadAllObjectPropertiesApp.run_application(kwargs["objectIdentifier"])
 
     asyncio.get_event_loop().run_until_complete(asyncio.wait_for(ReadAllObjectPropertiesApp.query_output, timeout=30))

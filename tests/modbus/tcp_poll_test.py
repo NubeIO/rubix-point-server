@@ -5,15 +5,12 @@
 import time
 import sys
 import logging
+from pymodbus.client.sync import ModbusTcpClient
 
 FORMAT = '%(asctime)-15s [%(levelname)s] %(message)s'
 logging.basicConfig(format=FORMAT)
 log = logging.getLogger("SDM630_READER")
 log.setLevel(logging.INFO)
-
-from pymodbus.client.sync import ModbusTcpClient as ModbusClient, ModbusTcpClient
-from pymodbus.payload import BinaryPayloadBuilder
-from pymodbus.constants import Endian
 
 HOST = '127.0.0.1'
 PORT = 5020
@@ -79,8 +76,7 @@ try:
                     print('val', val.registers[0:], 'poll_count', cnt, 'slave', slave, 'reg', reg)
                     # print(read)
                 except:
-                    log.error(
-                        "Error handling register %s for slave=%s!", key, slave)
+                    log.error("Error handling register %s for slave=%s!", key, slave)
                     # traceback.print_exc()
 
 except KeyboardInterrupt:

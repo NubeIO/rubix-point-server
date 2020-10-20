@@ -1,5 +1,5 @@
-from logging import getLogger, root, StreamHandler,FileHandler, Formatter
-from logging.handlers import DatagramHandler, SocketHandler
+from logging import getLogger, root, StreamHandler, FileHandler, Formatter
+from logging.handlers import SocketHandler
 
 
 def init_log(logfile="log.log", level="INFO", server_addr=None):
@@ -55,6 +55,7 @@ class test():
         self.warn("warning")
         self.info("test")
         self.debug("debug")
+
 
 @addlog
 def func():
