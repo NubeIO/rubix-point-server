@@ -15,7 +15,3 @@ class DataHelpers:
             return _val
         else:
             return _val
-
-    def bool_to_int(self, _val: bool) -> int:
-        out = int(_val == True)
-        return out
