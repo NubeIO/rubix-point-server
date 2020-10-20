@@ -1,11 +1,12 @@
 import time
-
+from src.modbus.interfaces.point.points import ModbusFC
 from src import db
 from src.modbus.models.mod_device import ModbusDeviceModel
 from src.modbus.models.mod_network import ModbusNetworkModel
 from src.modbus.models.mod_point import ModbusPointModel
 from src.modbus.models.mod_point_store import ModbusPointStoreModel
 from src.modbus.services.tcp_registry import TcpRegistry
+from src.utils.data_funcs import DataHelpers
 
 
 class TcpPolling:
@@ -47,16 +48,24 @@ class TcpPolling:
     def poll_point(self, device, point):
         host = device.mod_tcp_device_ip
         port = device.mod_tcp_device_port
+        mod_device_addr = device.mod_device_addr
+        mod_point_reg_length = point.mod_point_reg_length
+        mod_point_type = point.mod_point_type
         tcp_connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
         if not tcp_connection:
             TcpRegistry.get_instance().add_device(device)
         # TODO: confirm whether this column is correct or not
         reg = point.mod_point_reg
         # TODO: Manually put 1 for now
-        unit = 1
+        # unit = 1
         try:
-            val = tcp_connection.read_holding_registers(reg, 1, unit=unit)
-            val = val.registers[0]
+            if mod_point_type == ModbusFC.readCoils.value:
+                val = tcp_connection.read_coils(reg, mod_point_reg_length, unit=mod_device_addr)
+                val = val.registers[0]
+                val = DataHelpers.bool_to_int(val)
+            if mod_point_type == ModbusFC.readHoldingRegisters.value:
+                val = tcp_connection.read_holding_registers(reg, mod_point_reg_length, unit=mod_device_addr)
+                val = val.registers[0]
             print('val:', val, 'reg:', reg)
             ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
         except Exception as e:
