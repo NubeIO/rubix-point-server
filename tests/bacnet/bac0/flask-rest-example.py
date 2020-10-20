@@ -1,4 +1,3 @@
-
 """
 A web server based on flask that reads properties from objects and returns an
 HTML page of the results.
@@ -35,7 +34,7 @@ flask_app = Flask(__name__)
 point_list = [
     ('some_point', '10.0.1.14', 'analogValue:1', 'presentValue'),
     ('another_point', '10.0.1.14', 'analogValue:2', 'presentValue'),
-    ]
+]
 
 result_template = Template("""
 <!DOCTYPE html>
@@ -76,7 +75,7 @@ def hello():
             request = ReadPropertyRequest(
                 objectIdentifier=obj_id,
                 propertyIdentifier=prop_id,
-                )
+            )
             request.pduDestination = Address(device_address)
             if _debug: hello._debug("    - request: %r", request)
 
@@ -171,6 +170,7 @@ def main():
     bacpypes_thread.join()
 
     _log.debug("fini")
+
 
 if __name__ == "__main__":
     main()

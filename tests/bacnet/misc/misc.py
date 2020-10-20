@@ -1,7 +1,6 @@
-from os import remove
-from os.path import exists
-from commons import addlog, init_log
 from time import sleep
+
+from tests.bacnet.misc.commons import addlog, init_log
 
 _debug = True
 

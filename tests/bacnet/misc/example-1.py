@@ -1,20 +1,11 @@
 #!/usr/bin/env python
 
-import os
-import random
-import time
-
-from bacpypes.debugging import bacpypes_debugging, ModuleLogger
-from bacpypes.consolelogging import ConfigArgumentParser
-
-from bacpypes.core import run
-
-from bacpypes.primitivedata import Real, Boolean
-from bacpypes.object import AnalogValueObject, AveragingObject, Property, register_object_type
-from bacpypes.errors import ExecutionError
-
 from bacpypes.app import BIPSimpleApplication
+from bacpypes.consolelogging import ConfigArgumentParser
+from bacpypes.core import run
 from bacpypes.local.device import LocalDeviceObject
+from bacpypes.object import AnalogValueObject, AveragingObject, Property, register_object_type
+from bacpypes.primitivedata import Real, Boolean
 
 
 class RealProperty(Property):

@@ -1,15 +1,15 @@
 import random
 
-from bacpypes.debugging import bacpypes_debugging, ModuleLogger
+from bacpypes.app import BIPSimpleApplication
+from bacpypes.basetypes import BinaryPV
 from bacpypes.consolelogging import ConfigArgumentParser
 from bacpypes.core import run
-from bacpypes.basetypes import BinaryPV
-from bacpypes.object import BinaryInputObject, BinaryOutputObject, Property, register_object_type
+from bacpypes.debugging import bacpypes_debugging, ModuleLogger
 from bacpypes.errors import ExecutionError
-from bacpypes.app import BIPSimpleApplication
 from bacpypes.local.device import LocalDeviceObject
+from bacpypes.object import BinaryInputObject, BinaryOutputObject, Property, register_object_type
 
-from misc import VBIdev, VBOdev
+from tests.bacnet.misc.misc import VBIdev, VBOdev
 
 DI_devs = [i for i in range(1, 10)]
 DO_devs = [i for i in range(11, 20)]
@@ -151,6 +151,7 @@ class DOBinaryOutput(BinaryOutputObject):
         BinaryOutputObject.__init__(self, **kwargs)
 
         self._dev = dev
+
 
 #
 #   __main__

@@ -7,25 +7,22 @@ to support the ReadPropertyMultiple service.
 
 import random
 
-from bacpypes.debugging import bacpypes_debugging, ModuleLogger
-from bacpypes.consolelogging import ConfigArgumentParser
-
-from bacpypes.core import run
-
-from bacpypes.primitivedata import Real, CharacterString
-from bacpypes.constructeddata import ArrayOf
-from bacpypes.object import AnalogValueObject, Property, register_object_type
-from bacpypes.errors import ExecutionError
-
 from bacpypes.app import BIPSimpleApplication
+from bacpypes.consolelogging import ConfigArgumentParser
+from bacpypes.constructeddata import ArrayOf
+from bacpypes.core import run
+from bacpypes.debugging import bacpypes_debugging, ModuleLogger
+from bacpypes.errors import ExecutionError
+from bacpypes.local.device import LocalDeviceObject
+from bacpypes.object import AnalogValueObject, Property, register_object_type
+from bacpypes.primitivedata import Real, CharacterString
 from bacpypes.service.device import DeviceCommunicationControlServices
 from bacpypes.service.object import ReadWritePropertyMultipleServices
-from bacpypes.local.device import LocalDeviceObject
-
 
 # some debugging
 _debug = 0
 _log = ModuleLogger(globals())
+
 
 #
 #   ReadPropertyMultipleApplication
@@ -33,11 +30,12 @@ _log = ModuleLogger(globals())
 
 @bacpypes_debugging
 class ReadPropertyMultipleApplication(
-        BIPSimpleApplication,
-        ReadWritePropertyMultipleServices,
-        DeviceCommunicationControlServices,
-        ):
+    BIPSimpleApplication,
+    ReadWritePropertyMultipleServices,
+    DeviceCommunicationControlServices,
+):
     pass
+
 
 #
 #   RandomValueProperty
@@ -64,8 +62,10 @@ class RandomValueProperty(Property):
         return value
 
     def WriteProperty(self, obj, value, arrayIndex=None, priority=None, direct=False):
-        if _debug: RandomValueProperty._debug("WriteProperty %r %r arrayIndex=%r priority=%r direct=%r", obj, value, arrayIndex, priority, direct)
+        if _debug: RandomValueProperty._debug("WriteProperty %r %r arrayIndex=%r priority=%r direct=%r", obj, value,
+                                              arrayIndex, priority, direct)
         raise ExecutionError(errorClass='property', errorCode='writeAccessDenied')
+
 
 #
 #   Random Value Object Type
@@ -73,17 +73,18 @@ class RandomValueProperty(Property):
 
 @bacpypes_debugging
 class RandomAnalogValueObject(AnalogValueObject):
-
     properties = [
         RandomValueProperty('presentValue'),
         Property('eventMessageTexts', ArrayOf(CharacterString), mutable=True),
-        ]
+    ]
 
     def __init__(self, **kwargs):
         if _debug: RandomAnalogValueObject._debug("__init__ %r", kwargs)
         AnalogValueObject.__init__(self, **kwargs)
 
+
 register_object_type(RandomAnalogValueObject)
+
 
 #
 #   __main__
@@ -107,12 +108,12 @@ def main():
     ravo1 = RandomAnalogValueObject(
         objectIdentifier=('analogValue', 1), objectName='Random1',
         eventMessageTexts=["infinity", "and", "beyond"],
-        )
+    )
     _log.debug("    - ravo1: %r", ravo1)
 
     ravo2 = RandomAnalogValueObject(
         objectIdentifier=('analogValue', 2), objectName='Random2'
-        )
+    )
     _log.debug("    - ravo2: %r", ravo2)
 
     # add it to the device

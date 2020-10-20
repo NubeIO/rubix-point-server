@@ -1,4 +1,3 @@
-
 """
 This simple TCP server application listens for one or more client connections
 and parses the incoming lines for the parameters to a Write Property request
@@ -7,26 +6,20 @@ and sends the result back to the client.
 
 import os
 
-from bacpypes.debugging import bacpypes_debugging, ModuleLogger
-from bacpypes.consolelogging import ConfigArgumentParser
-
-from bacpypes.core import run
-from bacpypes.comm import PDU, Client, bind, ApplicationServiceElement
-from bacpypes.tcp import TCPServerDirector
-from bacpypes.iocb import IOCB
-
-from bacpypes.pdu import Address
-from bacpypes.object import get_datatype
-
 from bacpypes.apdu import WritePropertyRequest, SimpleAckPDU
-from bacpypes.primitivedata import Null, Atomic, Integer, Unsigned, Real, ObjectIdentifier
-from bacpypes.constructeddata import Array, Any
-
 from bacpypes.app import BIPSimpleApplication
+from bacpypes.comm import PDU, Client, bind, ApplicationServiceElement
+from bacpypes.consolelogging import ConfigArgumentParser
+from bacpypes.constructeddata import Array, Any
+from bacpypes.core import run
+from bacpypes.debugging import bacpypes_debugging, ModuleLogger
+from bacpypes.iocb import IOCB
 # from bacpypes.service.device import LocalDeviceObject
 from bacpypes.local.device import LocalDeviceObject
-
-
+from bacpypes.object import get_datatype
+from bacpypes.pdu import Address
+from bacpypes.primitivedata import Null, Atomic, Integer, Unsigned, Real, ObjectIdentifier
+from bacpypes.tcp import TCPServerDirector
 
 # some debugging
 _debug = 0
@@ -40,6 +33,7 @@ IDLE_TIMEOUT = int(os.getenv('IDLE_TIMEOUT', 0)) or None
 # globals
 args = None
 this_application = None
+
 
 #
 #   WritePropertyClient
@@ -102,7 +96,7 @@ class WritePropertyClient(Client):
             request = WritePropertyRequest(
                 objectIdentifier=obj_id,
                 propertyIdentifier=prop_id
-                )
+            )
             request.pduDestination = Address(addr)
 
             # save the value
@@ -163,6 +157,7 @@ class WritePropertyClient(Client):
         # send it back to the client
         self.request(PDU(response_str.encode('utf-8'), destination=pdu.pduSource))
 
+
 #
 #   WritePropertyASE
 #
@@ -175,6 +170,7 @@ class WritePropertyASE(ApplicationServiceElement):
     from a client, actors that are going away when the connections are closed,
     and socket errors.
     """
+
     def indication(self, add_actor=None, del_actor=None, actor_error=None, error=None):
         global args
 
@@ -190,6 +186,7 @@ class WritePropertyASE(ApplicationServiceElement):
 
         if actor_error:
             if _debug: WritePropertyASE._debug("indication actor_error=%r error=%r", actor_error, error)
+
 
 #
 #   __main__
@@ -211,22 +208,22 @@ def main():
         "host", nargs='?',
         help="listening address of server or 'any' (default %r)" % (SERVER_HOST,),
         default=SERVER_HOST,
-        )
+    )
     parser.add_argument(
         "port", nargs='?', type=int,
         help="server port (default %r)" % (SERVER_PORT,),
         default=SERVER_PORT,
-        )
+    )
     parser.add_argument(
         "--idle-timeout", nargs='?', type=int,
         help="idle connection timeout",
         default=IDLE_TIMEOUT,
-        )
+    )
     parser.add_argument(
         "--hello", action="store_true",
         default=False,
         help="send a hello message to a client when it connects",
-        )
+    )
     args = parser.parse_args()
 
     if _debug: _log.debug("initialization")

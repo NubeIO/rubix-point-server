@@ -1,12 +1,8 @@
 import BAC0
-from BAC0.core.io.Write import WriteProperty
 
-from device_test_settings import  test_device_url, net_url, test_device
-
-
+from tests.bacnet.bac0.device_test_settings import test_device_url, net_url, test_device
 
 bacnet = BAC0.connect(ip=net_url)
-
 
 print(test_device_url)
 test_device = test_device["network_device_id"]
@@ -20,7 +16,7 @@ value = 99
 priority = 8
 
 # bacnet.write('address object object_instance property value - priority')
-write  = f"{test_device_url} {obj} {obj_instance} {prop} {value} - {priority}"
+write = f"{test_device_url} {obj} {obj_instance} {prop} {value} - {priority}"
 print(write)
 bacnet.write(write)
 # write = bacnet.write('192.168.0.202/24:47808 analogOutput 1 presentValue 67 - 10')
@@ -28,18 +24,12 @@ bacnet.write(write)
 
 prop = "presentValue"
 
-
 # device = BAC0.device(test_device_url, test_device,bacnet,poll=0, history_size=1)
-readObj  = f"{test_device_url} {obj} {obj_instance}  {prop}"
+readObj = f"{test_device_url} {obj} {obj_instance}  {prop}"
 read = bacnet.read(readObj)
 print(read)
 
 prop = "priorityArray"
-readObj  = f"{test_device_url} {obj} {obj_instance}  {prop}"
+readObj = f"{test_device_url} {obj} {obj_instance}  {prop}"
 read = bacnet.read(readObj)
 print(read.__dict__)
-
-
-
-# print(write)
-
