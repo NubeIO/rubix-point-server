@@ -1,3 +1,16 @@
+import enum
+
+
+class ModbusFC(enum.Enum):
+    readCoils = 'readCoils'
+    readDiscreteInputs = 'readDiscreteInputs',
+    readHoldingRegisters = 'readHoldingRegisters',
+    readInputRegisters = 'readInputRegisters',
+    writeCoil = 'writeCoil',
+    writeRegister = 'writeRegister',
+    writeCoils = 'writeCoils',
+    writeRegisters = 'writeRegisters'
+
 class ModbusPointUtils:
     common_point_type = {
         "readCoils": "readCoils",
