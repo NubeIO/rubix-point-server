@@ -2,7 +2,7 @@ import time
 from src.modbus.interfaces.point.points import ModbusFC
 from src import db
 from src.modbus.models.mod_device import ModbusDeviceModel
-from src.modbus.models.mod_network import ModbusNetworkModel
+from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
 from src.modbus.models.mod_point import ModbusPointModel
 from src.modbus.models.mod_point_store import ModbusPointStoreModel
 from src.modbus.services.tcp_registry import TcpRegistry
@@ -33,7 +33,9 @@ class TcpPolling:
             count += 1
             print(f'Looping {count}...')
             results = db.session.query(ModbusNetworkModel, ModbusDeviceModel, ModbusPointModel). \
-                select_from(ModbusNetworkModel).join(ModbusDeviceModel).join(ModbusPointModel).all()
+                select_from(ModbusNetworkModel).filter_by(mod_network_type=ModbusType.TCP).join(
+                ModbusDeviceModel).filter_by(mod_device_type=ModbusType.TCP).join(
+                ModbusPointModel).all()
             for network, device, point in results:
                 self.poll_point(device, point)
 
