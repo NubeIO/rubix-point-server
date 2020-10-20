@@ -45,17 +45,22 @@ class TcpPolling:
             #                 self.poll_point(device, point)
 
     def poll_point(self, device, point):
+        # print(device)
         host = device.mod_tcp_device_ip
         port = device.mod_tcp_device_port
+        mod_device_addr = device.mod_device_addr
+        mod_point_reg_length = point.mod_point_reg_length
+        # print({'mod_device_addr': mod_device_addr})
+        # print({'mod_point_reg_length': mod_point_reg_length})
         tcp_connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
         if not tcp_connection:
             TcpRegistry.get_instance().add_device(device)
         # TODO: confirm whether this column is correct or not
         reg = point.mod_point_reg
         # TODO: Manually put 1 for now
-        unit = 1
+        # unit = 1
         try:
-            val = tcp_connection.read_holding_registers(reg, 1, unit=unit)
+            val = tcp_connection.read_holding_registers(reg, mod_point_reg_length, unit=mod_device_addr)
             val = val.registers[0]
             print('val:', val, 'reg:', reg)
             ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
