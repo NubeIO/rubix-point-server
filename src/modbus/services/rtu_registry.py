@@ -1,4 +1,9 @@
 from pymodbus.client.sync import ModbusSerialClient as SerialClient
+import logging
+
+logging.basicConfig()
+log = logging.getLogger()
+log.setLevel(logging.DEBUG)
 
 from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
 
@@ -45,7 +50,7 @@ class RtuRegistry:
         method = 'rtu'
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)
         self.rtu_connections[key] = SerialClient(method=method, port=port, baudrate=baudrate, stopbits=stopbits,
-                                                 parity=parity, bytesize=bytesize, timeout=timeout)
+                                                 parity=parity.value, bytesize=bytesize, timeout=timeout)
 
     def remove_connection_if_exist(self, port, baudrate, stopbits, parity, bytesize, timeout):
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)

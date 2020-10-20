@@ -53,8 +53,8 @@ class RtuPolling:
         try:
             val = None
             if mod_point_type == ModbusFC.readCoils:
-                val = rtu_connection.read_coils(reg, mod_point_reg_length, unit=mod_device_addr)
-                val = val.registers[0]
+                val = rtu_connection.read_coils(reg, 20, unit=mod_device_addr)
+                val = val.bits[0]
                 val = DataHelpers.bool_to_int(val)
             if mod_point_type == ModbusFC.readHoldingRegisters:
                 val = rtu_connection.read_holding_registers(reg, mod_point_reg_length, unit=mod_device_addr)
