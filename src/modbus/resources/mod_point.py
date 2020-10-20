@@ -1,34 +1,11 @@
-from flask_restful import Resource, reqparse, abort, fields, marshal_with
+from flask_restful import Resource, reqparse, abort, marshal_with
 from src.modbus.models.mod_point import ModbusPointModel
 from src.modbus.interfaces.point.interface_modbus_point import points_attributes, THIS, interface_name, interface_reg, \
     interface_reg_length, interface_point_type, interface_point_enable, interface_point_write_value, \
     interface_point_data_type, interface_point_data_endian, interface_point_data_round, interface_point_data_offset, \
     interface_point_timeout, interface_point_timeout_global, interface_point_prevent_duplicates, \
     interface_point_prevent_duplicates_global, interface_interface_help_device_uuid
-
-fields = {
-    'mod_point_uuid': fields.String,
-    'mod_point_name': fields.String,
-    'mod_point_reg': fields.Integer,
-    'mod_point_reg_length': fields.Integer,
-    'mod_point_type': fields.String,
-    'mod_point_enable': fields.Boolean,
-    'mod_point_write_value': fields.Integer,
-    'mod_point_data_type': fields.String,
-    'mod_point_data_endian': fields.String,
-    'mod_point_data_round': fields.Integer,
-    'mod_point_data_offset': fields.Integer,
-    'mod_point_timeout': fields.Integer,
-    'mod_point_timeout_global': fields.Boolean,
-    'mod_point_prevent_duplicates': fields.Boolean,
-    'mod_point_prevent_duplicates_global': fields.Boolean,
-    'mod_point_write_ok': fields.Boolean,
-    'mod_point_fault': fields.Boolean,
-    'mod_point_last_poll_timestamp': fields.String,
-    'mod_point_value': fields.Float,
-    'mod_point_value_array': fields.String,
-    'mod_device_uuid': fields.String,
-}
+from src.modbus.resources.mod_fields import point_fields
 
 
 class ModPoint(Resource):
@@ -109,14 +86,14 @@ class ModPoint(Resource):
                         help=interface_interface_help_device_uuid['help'],
                         )
 
-    @marshal_with(fields)
+    @marshal_with(point_fields)
     def get(self, uuid):
         device = ModbusPointModel.find_by_uuid(uuid)
         if not device:
             abort(404, message=f'{THIS} not found')
         return device
 
-    @marshal_with(fields)
+    @marshal_with(point_fields)
     def post(self, uuid):
         if ModbusPointModel.find_by_uuid(uuid):
             return {'message': "An device with mod_device_uuid '{}' already exists.".format(uuid)}, 400
@@ -130,7 +107,7 @@ class ModPoint(Resource):
         except Exception as e:
             abort(500, message=str(e))
 
-    @marshal_with(fields)
+    @marshal_with(point_fields)
     def put(self, uuid):
         data = ModPoint.parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)
@@ -185,6 +162,6 @@ class ModPoint(Resource):
 
 
 class ModPointList(Resource):
-    @marshal_with(fields, envelope="mod_points")
+    @marshal_with(point_fields, envelope="mod_points")
     def get(self):
         return ModbusPointModel.query.all()

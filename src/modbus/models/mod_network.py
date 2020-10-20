@@ -3,24 +3,6 @@ from sqlalchemy.orm import validates
 
 from src import db
 
-attributes = {
-    'mod_network_uuid': 'mod_network_uuid',
-    'mod_network_name': 'mod_network_name',
-    'mod_network_type': 'mod_network_type',  # rtu or tcp
-    'mod_network_enable': 'mod_network_enable',
-    'mod_network_timeout': 'mod_network_timeout',  # network time out
-    'mod_network_device_timeout_global': 'mod_network_device_timeout_global',  # device time out global setting
-    'mod_network_point_timeout_global': 'mod_network_point_timeout_global',  # point time out global setting
-    'mod_rtu_network_port': 'mod_rtu_network_port',  # /dev/ttyyUSB0
-    'mod_rtu_network_speed': 'mod_rtu_network_speed',  # 9600
-    'mod_rtu_network_stopbits': 'mod_rtu_network_stopbits',  # 1
-    'mod_rtu_network_parity': 'mod_rtu_network_parity',  # O E N Odd, Even, None
-    'mod_rtu_network_bytesize': 'mod_rtu_network_bytesize',  # 5, 6, 7, or 8. This defaults to 8.
-    'mod_network_fault': 'mod_network_fault',  # true
-    'mod_network_last_poll_timestamp': 'mod_network_last_poll_timestamp',
-    'mod_network_fault_timestamp': 'mod_network_fault_timestamp',
-}
-
 
 class ModbusType(enum.Enum):
     RTU = 0
