@@ -1,5 +1,5 @@
 import time
-from src.modbus.interfaces.point.points import ModbusFC
+from src.modbus.interfaces.point.points import ModbusPointType
 from src import db
 from src.modbus.models.mod_device import ModbusDeviceModel
 from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
@@ -52,11 +52,11 @@ class TcpPolling:
         mod_point_type = point.mod_point_type
         try:
             val = None
-            if mod_point_type == ModbusFC.readCoils:
+            if mod_point_type == ModbusPointType.readCoils:
                 val = tcp_connection.read_coils(reg, mod_point_reg_length, unit=mod_device_addr)
                 val = val.registers[0]
                 val = DataHelpers.bool_to_int(val)
-            if mod_point_type == ModbusFC.readHoldingRegisters:
+            if mod_point_type == ModbusPointType.readHoldingRegisters:
                 val = tcp_connection.read_holding_registers(reg, mod_point_reg_length, unit=mod_device_addr)
                 val = val.registers[0]
             if val:
