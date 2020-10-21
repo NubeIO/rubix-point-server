@@ -20,7 +20,7 @@ class ModbusDeviceSingular(ModbusDeviceBase):
         if device is None:
             return self.add_device(uuid, data)
         else:
-            self.abort_if_network_does_not_exist(data.network_uuid)
+            self.abort_if_network_does_not_exist_and_type_mismatch(data.network_uuid, data.type)
             try:
                 ModbusDeviceModel.filter_by_uuid(uuid).update(data)
                 ModbusDeviceModel.commit()

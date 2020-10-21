@@ -27,7 +27,7 @@ class ModbusDeviceBase(Resource):
         return ModbusDeviceModel(uuid=uuid, **data)
 
     def add_device(self, uuid, data):
-        self.abort_if_network_does_not_exist(data.network_uuid)
+        self.abort_if_network_does_not_exist_and_type_mismatch(data.network_uuid, data.type)
         try:
             device = ModbusDeviceBase.create_device_model_obj(uuid, data)
             device.save_to_db()
@@ -35,6 +35,9 @@ class ModbusDeviceBase(Resource):
         except Exception as e:
             abort(500, message=str(e))
 
-    def abort_if_network_does_not_exist(self, network_uuid):
-        if not ModbusNetworkModel.find_by_uuid(network_uuid):
+    def abort_if_network_does_not_exist_and_type_mismatch(self, network_uuid, type):
+        network = ModbusNetworkModel.find_by_uuid(network_uuid)
+        if not network:
             abort(400, message='Network does not exist of that network_uuid')
+        if network.type.name != type:
+            abort(400, message=f'Type Mismatch: network.type is `{network.type}` and device.type needs to be same')
