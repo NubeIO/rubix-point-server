@@ -1,6 +1,6 @@
 from pymodbus.client.sync import ModbusTcpClient
 
-from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
+from src.modbus.models.network import ModbusNetworkModel, ModbusType
 
 
 class TcpRegistry:
@@ -26,7 +26,7 @@ class TcpRegistry:
     def register(self):
         print("Called TCP Poll registration")
         network_service = TcpRegistry.get_instance()
-        for network in ModbusNetworkModel.query.filter_by(mod_network_type=ModbusType.TCP):
+        for network in ModbusNetworkModel.query.filter_by(type=ModbusType.TCP):
             network_service.initialize_network_connections(network)
         print("Finished registration")
 

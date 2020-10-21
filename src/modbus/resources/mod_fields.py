@@ -46,20 +46,22 @@ device_fields = {
 }
 
 network_fields = {
-    'mod_network_uuid': fields.String,
-    'mod_network_name': fields.String,
-    'mod_network_type': fields.String,  # rtu or tcp
-    'mod_network_enable': fields.Boolean,
-    'mod_network_timeout': fields.Integer,  # network time out
-    'mod_network_device_timeout_global': fields.Integer,  # device time out global setting
-    'mod_network_point_timeout_global': fields.Integer,  # point time out global setting
-    'mod_rtu_network_port': fields.String,  # /dev/ttyyUSB0
-    'mod_rtu_network_speed': fields.Integer,  # 9600
-    'mod_rtu_network_stopbits': fields.Integer,  # 1
-    'mod_rtu_network_parity': fields.String,  # O E N Odd, Even, None
-    'mod_rtu_network_bytesize': fields.Integer,  # 5, 6, 7, or 8. This defaults to 8.
-    'mod_network_fault': fields.Boolean,  # true
-    'mod_network_last_poll_timestamp': fields.String,
-    'mod_network_fault_timestamp': fields.String,
-    'mod_devices': fields.List(fields.Nested(device_fields)),
+    'uuid': fields.String,
+    'name': fields.String,
+    'type': fields.String,  # rtu or tcp
+    'enable': fields.Boolean,
+    'timeout': fields.Integer,  # network time out
+    'device_timeout_global': fields.Integer,  # device time out global setting
+    'point_timeout_global': fields.Integer,  # point time out global setting
+    'rtu_port': fields.String,  # /dev/ttyyUSB0
+    'rtu_speed': fields.Integer,  # 9600
+    'rtu_stopbits': fields.Integer,  # 1
+    'rtu_parity': fields.String,  # O E N Odd, Even, None
+    'rtu_bytesize': fields.Integer,  # 5, 6, 7, or 8. This defaults to 8.
+    'fault': fields.Boolean,  # true
+    'last_poll_timestamp': fields.String,
+    'fault_timestamp': fields.String,
+    'created_on': fields.String,
+    'updated_on': fields.String,
+    'devices': fields.List(fields.Nested(device_fields)),
 }

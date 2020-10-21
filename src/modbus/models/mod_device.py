@@ -1,5 +1,5 @@
 from src import db
-from src.modbus.models.mod_network import ModbusType
+from src.modbus.models.network import ModbusType
 
 
 class ModbusDeviceModel(db.Model):
@@ -19,7 +19,7 @@ class ModbusDeviceModel(db.Model):
     mod_device_fault = db.Column(db.Boolean(), nullable=True)
     mod_device_last_poll_timestamp = db.Column(db.String(80), nullable=True)
     mod_device_fault_timestamp = db.Column(db.String(80), nullable=True)
-    mod_network_uuid = db.Column(db.String, db.ForeignKey('mod_networks.mod_network_uuid'))
+    mod_network_uuid = db.Column(db.String, db.ForeignKey('mod_networks.uuid'))
     mod_points = db.relationship('ModbusPointModel', cascade="all,delete", backref='mod_device', lazy=True)
 
     def __repr__(self):
