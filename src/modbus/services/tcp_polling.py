@@ -5,6 +5,7 @@ from src.modbus.models.mod_device import ModbusDeviceModel
 from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
 from src.modbus.models.mod_point import ModbusPointModel
 from src.modbus.models.mod_point_store import ModbusPointStoreModel
+from src.modbus.services.modbus_functions.poll import poll_point
 from src.modbus.services.tcp_registry import TcpRegistry
 from src.utils.data_funcs import DataHelpers
 
@@ -38,30 +39,4 @@ class TcpPolling:
                 ModbusDeviceModel).filter_by(mod_device_type=ModbusType.TCP).join(
                 ModbusPointModel).all()
             for network, device, point in results:
-                self.poll_point(device, point)
-
-    def poll_point(self, device, point):
-        host = device.mod_tcp_device_ip
-        port = device.mod_tcp_device_port
-        tcp_connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
-        if not tcp_connection:
-            TcpRegistry.get_instance().add_device(device)
-        reg = point.mod_point_reg
-        mod_device_addr = device.mod_device_addr
-        mod_point_reg_length = point.mod_point_reg_length
-        mod_point_type = point.mod_point_type
-
-        try:
-            val = None
-            if mod_point_type == ModbusPointType.readCoils:
-                val = tcp_connection.read_coils(reg, mod_point_reg_length, unit=mod_device_addr)
-                val = val.registers[0]
-                val = DataHelpers.bool_to_int(val)
-            if mod_point_type == ModbusPointType.readHoldingRegisters:
-                val = tcp_connection.read_holding_registers(reg, mod_point_reg_length, unit=mod_device_addr)
-                val = val.registers[0]
-            if val:
-                print('val:', val, 'reg:', reg)
-                ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
-        except Exception as e:
-            print(str(e))
+                poll_point(network, device, point, 'tcp')

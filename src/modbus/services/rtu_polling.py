@@ -1,13 +1,9 @@
 import time
-from src.modbus.interfaces.point.points import ModbusPointType
 from src import db
 from src.modbus.models.mod_device import ModbusDeviceModel
 from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
 from src.modbus.models.mod_point import ModbusPointModel
-from src.modbus.models.mod_point_store import ModbusPointStoreModel
-from src.modbus.services.rtu_registry import RtuRegistry
-from src.utils.data_funcs import DataHelpers
-from src.modbus.services.modbus_functions.modbus_functions import read_holding
+from src.modbus.services.modbus_functions.poll import poll_point
 
 
 class RtuPolling:
@@ -39,44 +35,4 @@ class RtuPolling:
                 ModbusDeviceModel).filter_by(mod_device_type=ModbusType.RTU).join(
                 ModbusPointModel).all()
             for network, device, point in results:
-                self.poll_point(network, device, point)
-
-    def poll_point(self, network, device, point):
-        rtu_connection = RtuRegistry.get_rtu_connections().get(RtuRegistry.create_connection_key_by_network(network))
-        if not rtu_connection:
-            RtuRegistry.get_instance().add_network(network)
-
-        # TODO: whether it's functional or not, don't know how data we read
-        reg = point.mod_point_reg
-        mod_device_addr = device.mod_device_addr
-        mod_point_reg_length = point.mod_point_reg_length
-        mod_point_type = point.mod_point_type.name
-        mod_point_data_type = point.mod_point_data_type.name
-        mod_point_data_endian = point.mod_point_data_endian.name
-
-        print(111)
-        print(mod_point_data_type, mod_point_data_endian)
-
-        try:
-            val = None
-            print({'mod_device_addr':mod_device_addr, 'reg': reg, 'mod_point_reg_length': mod_point_reg_length, 'mod_point_type': mod_point_type})
-            if mod_point_type == ModbusPointType.readCoils:
-                val = rtu_connection.read_coils(reg, mod_point_reg_length, unit=mod_device_addr)
-                val = val.bits[0]
-                # array = val.bits
-                val = DataHelpers.bool_to_int(val)
-                print("read_coils", val)
-            if mod_point_type == ModbusPointType.readHoldingRegisters.name:
-                print(rtu_connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type, mod_point_data_endian)
-                read = read_holding(rtu_connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type, mod_point_data_endian)
-                val = read['val']
-                array = read['array']
-                print("val", val, 'array', array)
-
-            if val:
-                print('done')
-                # print("read_holding", val, 'array')
-                # print("mod_point_type", mod_point_type, 'reg', reg, 'val', val,'array', array)
-                # ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
-        except Exception as e:
-            print(f'Error: {str(e)}')
+                poll_point(network, device, point, 'rtu')
