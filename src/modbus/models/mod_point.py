@@ -1,5 +1,5 @@
 from src import db
-from src.modbus.interfaces.point.points import ModbusFC
+from src.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
 
 
 class ModbusPointModel(db.Model):
@@ -8,11 +8,11 @@ class ModbusPointModel(db.Model):
     mod_point_name = db.Column(db.String(80), nullable=False)
     mod_point_reg = db.Column(db.Integer(), nullable=False)
     mod_point_reg_length = db.Column(db.Integer(), nullable=False)
-    mod_point_type = db.Column(db.Enum(ModbusFC), nullable=False)
+    mod_point_type = db.Column(db.Enum(ModbusPointType), nullable=False)
     mod_point_enable = db.Column(db.Boolean(), nullable=False)
     mod_point_write_value = db.Column(db.Integer(), nullable=False)
-    mod_point_data_type = db.Column(db.String(80), nullable=False)
-    mod_point_data_endian = db.Column(db.String(80), nullable=False)
+    mod_point_data_type = db.Column(db.Enum(ModbusDataType), nullable=False)
+    mod_point_data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False)
     mod_point_data_round = db.Column(db.Integer(), nullable=False)
     mod_point_data_offset = db.Column(db.String(80), nullable=False)
     mod_point_timeout = db.Column(db.Integer(), nullable=False)

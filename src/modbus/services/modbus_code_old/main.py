@@ -1,4 +1,4 @@
-from src.modbus.services.client import Client, Registers
+from src.modbus.services.modbus_code_old.client import Client, Registers
 import time
 import logging
 
