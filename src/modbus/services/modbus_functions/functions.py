@@ -47,17 +47,17 @@ def _set_data_length(data_type, reg_length):
         _float = _type['float']
         _double = _type['double']
         if _val == _int16 or _val == _uint16:
-            if reg_length<1:
+            if reg_length < 1:
                 return 1
             else:
                 return length
         if _val == _int32 or _val == _uint32 or _val == _float:
-            if reg_length<2:
+            if reg_length < 2:
                 return 2
             else:
                 return length
         elif _val == _double:
-            if reg_length<4:
+            if reg_length < 4:
                 return 4
             else:
                 return length
@@ -108,7 +108,6 @@ def _select_data_type(data, data_type, byteorder, wordorder):
     :param data: Log List Downloaded
     :return: data in the selected data type
     """
-    print(22222222)
     decoder = BinaryPayloadDecoder.fromRegisters(data.registers, byteorder=byteorder,
                                                  wordorder=wordorder)
     if data_type == 'int16':

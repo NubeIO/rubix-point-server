@@ -1,9 +1,13 @@
 from pymodbus.client.sync import ModbusSerialClient as SerialClient
 import logging
 
-logging.basicConfig()
-log = logging.getLogger()
-log.setLevel(logging.DEBUG)
+from src.modbus.services.modbus_functions.debug import modbus_pymodbus_logs, modbus_start_up
+
+if modbus_pymodbus_logs:
+    logging.basicConfig()
+    log = logging.getLogger()
+    log.setLevel(logging.DEBUG)
+
 
 from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
 
@@ -23,17 +27,17 @@ class RtuRegistry:
 
     def __init__(self):
         if RtuRegistry._instance:
-            raise Exception("RtuRegistry class is a singleton class!")
+            raise Exception(" MODBUS: RtuRegistry class is a singleton class!")
         else:
             RtuRegistry._instance = self
             self.rtu_connections = {}
 
     def register(self):
-        print("Called RTU Poll registration")
+        if modbus_start_up: print("MODBUS: Called RTU Poll registration")
         network_service = RtuRegistry.get_instance()
         for network in ModbusNetworkModel.query.filter_by(mod_network_type=ModbusType.RTU):
             network_service.add_network(network)
-        print("Finished registration")
+        if modbus_start_up:  print("MODBUS: Finished registration")
 
     def add_network(self, network):
         port = network.mod_rtu_network_port
