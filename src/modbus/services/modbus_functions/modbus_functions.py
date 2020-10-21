@@ -85,6 +85,7 @@ def _select_data_type(data, data_type, byteorder, wordorder):
     :param data: Log List Downloaded
     :return: data in the selected data type
     """
+    print(22222222)
     decoder = BinaryPayloadDecoder.fromRegisters(data.registers, byteorder=byteorder,
                                                  wordorder=wordorder)
     if data_type == 'int16':
@@ -99,5 +100,4 @@ def _select_data_type(data, data_type, byteorder, wordorder):
         data = decoder.decode_32bit_float()
     elif data_type == 'double':
         data = decoder.decode_32bit_float()
-
     return data

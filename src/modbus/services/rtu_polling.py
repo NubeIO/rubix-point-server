@@ -54,6 +54,9 @@ class RtuPolling:
         mod_point_data_type = point.mod_point_data_type.name
         mod_point_data_endian = point.mod_point_data_endian.name
 
+        print(111)
+        print(mod_point_data_type, mod_point_data_endian)
+
         try:
             val = None
             print({'mod_device_addr':mod_device_addr, 'reg': reg, 'mod_point_reg_length': mod_point_reg_length, 'mod_point_type': mod_point_type})
@@ -65,10 +68,11 @@ class RtuPolling:
                 print("read_coils", val)
             if mod_point_type == ModbusPointType.readHoldingRegisters.name:
                 print(rtu_connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type, mod_point_data_endian)
-                val = read_holding(rtu_connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type, mod_point_data_endian)
-                val = val['val']
-                array = val['array']
-                print(val, array)
+                read = read_holding(rtu_connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type, mod_point_data_endian)
+                val = read['val']
+                array = read['array']
+                print("val", val, 'array', array)
+
             if val:
                 print('done')
                 # print("read_holding", val, 'array')
