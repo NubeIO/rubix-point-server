@@ -51,11 +51,12 @@ class RtuRegistry:
         self.remove_connection_if_exist(port, baudrate, stopbits, parity, bytesize, timeout)
         self.add_connection(port, baudrate, stopbits, parity, bytesize, timeout)
 
+    # TODO retries=0, retry_on_empty=False fix these up
     def add_connection(self, port, baudrate, stopbits, parity, bytesize, timeout):
         method = 'rtu'
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)
         self.rtu_connections[key] = SerialClient(method=method, port=port, baudrate=baudrate, stopbits=stopbits,
-                                                 parity=parity.value, bytesize=bytesize, timeout=timeout)
+                                                 parity=parity.value, bytesize=bytesize, timeout=timeout, retries=0, retry_on_empty=False)
 
     def remove_connection_if_exist(self, port, baudrate, stopbits, parity, bytesize, timeout):
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)

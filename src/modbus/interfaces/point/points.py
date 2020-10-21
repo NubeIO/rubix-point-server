@@ -13,6 +13,7 @@ class ModbusPointType(enum.Enum):
 
 
 class ModbusDataType(enum.Enum):
+
     RAW = 0
     INT16 = 1
     UINT16 = 2
@@ -20,6 +21,16 @@ class ModbusDataType(enum.Enum):
     UINT32 = 4
     FLOAT = 5
     DOUBLE = 6
+
+#     raw = 'raw'
+#     int16 = 'int16',
+#     uint16 = 'uint16',
+#     int32 = 'int32',
+#     uint32 = 'uint32',
+#     float = 'float',
+#     double = 'double',
+#     digital = 'digital',
+
 
 
 class ModbusDataEndian(enum.Enum):
@@ -48,6 +59,7 @@ class ModbusPointUtils:
         "uint32": "uint32",  # length of 2
         "float": "float",  # length of 2
         "double": "double",  # length of 4
+        "digital": "digital",  # digital value true/false
     }
     mod_point_data_endian = {
         "LEB_BEW": "LEB_BEW",

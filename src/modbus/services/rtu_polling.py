@@ -32,6 +32,7 @@ class RtuPolling:
             count += 1
             if modbus_polling_count:
                 print(f'MODBUS: Looping RTU {count}...')
+
             # TODO: Implement caching
             results = db.session.query(ModbusNetworkModel, ModbusDeviceModel, ModbusPointModel). \
                 select_from(ModbusNetworkModel).filter_by(type=ModbusType.RTU) \
