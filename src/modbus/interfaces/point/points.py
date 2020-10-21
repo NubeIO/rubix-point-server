@@ -48,6 +48,7 @@ class ModbusPointUtils:
         "uint32": "uint32",  # length of 2
         "float": "float",  # length of 2
         "double": "double",  # length of 4
+        "digital": "digital",  # digital value true/false
     }
     mod_point_data_endian = {
         "LEB_BEW": "LEB_BEW",
