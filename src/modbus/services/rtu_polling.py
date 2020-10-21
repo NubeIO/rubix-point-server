@@ -24,12 +24,13 @@ class RtuPolling:
             RtuPolling._instance = self
 
     def polling(self):
-        if modbus_polling_count: print("RTU Polling started")
+        if modbus_polling_count:
+            print("RTU Polling started")
         count = 0
         while True:
             time.sleep(RtuPolling._polling_period)
             count += 1
-            if modbus_polling_count: print(f'MODBUS: Looping RTU {count}...')
+            if modbus_polling_count: print(f'MODBUS LOOPING: Looping RTU {count}...')
             # TODO: Implement caching
             results = db.session.query(ModbusNetworkModel, ModbusDeviceModel, ModbusPointModel). \
                 select_from(ModbusNetworkModel).filter_by(mod_network_type=ModbusType.RTU).join(
