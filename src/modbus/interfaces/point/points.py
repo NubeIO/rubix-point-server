@@ -68,7 +68,7 @@ class ModbusPointUtilsFuncs:
 
     @classmethod
     def common_data_type(cls, _val: str) -> str:
-
+        print(ModbusPointUtils.mod_point_data_type.items())
         for key, value in ModbusPointUtils.mod_point_data_type.items():
             if _val == value:
                 return _val
