@@ -1,5 +1,6 @@
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
+
 from src.modbus.interfaces.point.points import ModbusPointUtilsFuncs, ModbusPointUtils
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 
@@ -10,16 +11,18 @@ def read_holding(client, reg_start, reg_length, _unit, data_type, endian):
     :return:holding reg
     """
     # debug
-    if modbus_debug_funcs: print("MODBUS read_holding, check reg_length")
+    if modbus_debug_funcs:
+        print("MODBUS read_holding, check reg_length")
     reg_type = 'holding'
-    reg_length = _set_data_length(data_type,
-                                  reg_length)  # check that user if for example wants data type of float that the reg_length is > = 2
+    # check that user if for example wants data type of float that the reg_length is > = 2
+    reg_length = _set_data_length(data_type, reg_length)
     # debug
-    if modbus_debug_funcs: print("MODBUS read_holding, check reg_length result then do modbus read", "reg_length",
-                                 reg_length)
+    if modbus_debug_funcs:
+        print("MODBUS read_holding, check reg_length result then do modbus read", "reg_length", reg_length)
     read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
     # debug
-    if modbus_debug_funcs: print("MODBUS read_holding, do modbus read", read)
+    if modbus_debug_funcs:
+        print("MODBUS read_holding, do modbus read", read)
     if not _assertion(read, client, reg_type):  # checking for errors
         bo_wo = _mod_point_data_endian(endian)
         byteorder = bo_wo['bo']

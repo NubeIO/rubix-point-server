@@ -2,7 +2,7 @@ import time
 from src import db
 from src.modbus.models.device import ModbusDeviceModel
 from src.modbus.models.network import ModbusNetworkModel, ModbusType
-from src.modbus.models.mod_point import ModbusPointModel
+from src.modbus.models.point import ModbusPointModel
 from src.modbus.services.modbus_functions.debug import modbus_polling_count
 from src.modbus.services.modbus_functions.poll import poll_point
 

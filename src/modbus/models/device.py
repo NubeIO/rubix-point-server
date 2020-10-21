@@ -11,8 +11,8 @@ class ModbusDeviceModel(db.Model):
     enable = db.Column(db.String(80), nullable=False)
     type = db.Column(db.Enum(ModbusType), nullable=False)
     addr = db.Column(db.Integer(), nullable=False)
-    tcp_device_ip = db.Column(db.String(80))
-    tcp_device_port = db.Column(db.Integer())
+    tcp_ip = db.Column(db.String(80))
+    tcp_port = db.Column(db.Integer())
     ping_point_type = db.Column(db.String(80), nullable=False)
     ping_point_address = db.Column(db.Integer(), nullable=False)
     zero_mode = db.Column(db.Boolean(), nullable=False)
@@ -27,18 +27,18 @@ class ModbusDeviceModel(db.Model):
     points = db.relationship('ModbusPointModel', cascade="all,delete", backref='mod_device', lazy=True)
 
     def __repr__(self):
-        return f"ModbusDeviceModel({self.mod_device_uuid})"
+        return f"ModbusDeviceModel({self.uuid})"
 
-    @validates('tcp_device_ip')
-    def validate_tcp_device_ip(self, _, value):
+    @validates('tcp_ip')
+    def validate_tcp_ip(self, _, value):
         if not value and self.type == ModbusType.TCP.name:
-            raise ValueError("tcp_device_ip should be be there on type TCP")
+            raise ValueError("tcp_ip should be be there on type TCP")
         return value
 
-    @validates('tcp_device_port')
-    def validate_tcp_device_port(self, _, value):
+    @validates('tcp_port')
+    def validate_tcp_port(self, _, value):
         if not value and self.type == ModbusType.TCP.name:
-            raise ValueError("tcp_device_port should be be there on type TCP")
+            raise ValueError("tcp_port should be be there on type TCP")
         return value
 
     @classmethod

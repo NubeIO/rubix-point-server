@@ -15,48 +15,48 @@ def poll_point(network, device, point, transport):
         if not connection:
             RtuRegistry.get_instance().add_network(network)
     if transport == "tcp":
-        host = device.tcp_device_ip
-        port = device.tcp_device_port
+        host = device.tcp_ip
+        port = device.tcp_port
         connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
         if not connection:
             TcpRegistry.get_instance().add_device(device)
     # TODO: whether it's functional or not, don't know how data we read
-    reg = point.mod_point_reg
-    mod_device_addr = device.addr
-    mod_point_reg_length = point.mod_point_reg_length
-    mod_point_type = point.mod_point_type.name
-    mod_point_data_type = point.mod_point_data_type.name
-    mod_point_data_endian = point.mod_point_data_endian.name
+    reg = point.reg
+    device_addr = device.addr
+    point_reg_length = point.reg_length
+    point_type = point.type
+    point_data_type = point.data_type
+    point_data_endian = point.data_endian
     # debug
     if modbus_debug_poll:
         print("MODBUS:", {'network': network,
                           'device': device,
                           'transport': transport,
-                          'mod_device_addr': mod_device_addr,
+                          'device_addr': device_addr,
                           'reg': reg,
-                          'mod_point_reg_length': mod_point_reg_length,
-                          'mod_point_type': mod_point_type,
-                          'mod_point_data_type': mod_point_data_type,
-                          'mod_point_data_endian': mod_point_data_endian})
+                          'point_reg_length': point_reg_length,
+                          'point_type': point_type,
+                          'point_data_type': point_data_type,
+                          'point_data_endian': point_data_endian})
 
     try:
         val = None
-        if mod_point_type == ModbusPointType.readCoils:
-            val = connection.read_coils(reg, mod_point_reg_length, unit=mod_device_addr)
+        if point_type == ModbusPointType.READ_COILS:
+            val = connection.read_coils(reg, point_reg_length, unit=device_addr)
             val = val.bits[0]
             val = DataHelpers.bool_to_int(val)
-        if mod_point_type == ModbusPointType.readHoldingRegisters.name:
-            read = read_holding(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
-                                mod_point_data_endian)
+        if point_type == ModbusPointType.READ_HOLDING_REGISTERS:
+            read = read_holding(connection, reg, point_reg_length, device_addr, point_data_type, point_data_endian)
             val = read['val']
             array = read['array']
             # debug
             if modbus_debug_poll:
-                print("MODBUS:", {'type': ModbusPointType.readHoldingRegisters.name, "val": val, 'array': array})
+                print("MODBUS:", {'type': ModbusPointType.READ_HOLDING_REGISTERS.name, "val": val, 'array': array})
 
         if val:
             # debug
-            if modbus_debug_poll: print("MODBUS: READ/WRITE WAS DONE")
-            ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
+            if modbus_debug_poll:
+                print("MODBUS: READ/WRITE WAS DONE")
+            ModbusPointStoreModel(value=val, point_uuid=point.uuid).save_to_db()
     except Exception as e:
         print(f'Error: {str(e)}')

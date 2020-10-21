@@ -26,7 +26,7 @@ class ModbusNetworkModel(db.Model):
     devices = db.relationship('ModbusDeviceModel', cascade="all,delete", backref='mod_network', lazy=True)
 
     def __repr__(self):
-        return f"ModbusNetworkModel({self.mod_network_uuid})"
+        return f"ModbusNetworkModel({self.uuid})"
 
     @validates('rtu_port')
     def validate_rtu_port(self, _, value):
@@ -54,10 +54,11 @@ class ModbusNetworkModel(db.Model):
 
     @validates('rtu_bytesize')
     def validate_rtu_bytesize(self, _, value):
-        if value not in range(5, 9):
-            raise ValueError("rtu_bytesize should be on range (0-9)")
-        elif not value and self.type == ModbusType.RTU.name:
-            raise ValueError("rtu_bytesize should be be there on type MTU")
+        if self.type == ModbusType.RTU.name:
+            if value not in range(5, 9):
+                raise ValueError("rtu_bytesize should be on range (0-9)")
+            elif not value:
+                raise ValueError("rtu_bytesize should be be there on type MTU")
         return value
 
     @classmethod

@@ -2,8 +2,8 @@ import os
 from threading import Thread
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 CORS(app)
@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 from src import routes
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
-    from src.modbus.models.mod_point_store import ModbusPointStoreModel
+    from src.modbus.models.point_store import ModbusPointStoreModel
 
     db.create_all()
     from src.bacnet.services.network import Network

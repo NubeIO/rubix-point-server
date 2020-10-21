@@ -35,8 +35,7 @@ class ModusNetworkSingular(ModusNetworkBase):
                 abort(500, message=str(e))
 
     def delete(self, uuid):
-        mod_network_uuid = uuid
-        network = ModbusNetworkModel.find_by_uuid(mod_network_uuid)
+        network = ModbusNetworkModel.find_by_uuid(uuid)
         if network:
             network.delete_from_db()
         return '', 204

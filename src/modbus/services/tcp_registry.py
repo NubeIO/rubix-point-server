@@ -36,8 +36,8 @@ class TcpRegistry:
                 self.add_device(device)
 
     def add_device(self, device):
-        host = device.tcp_device_ip
-        port = device.tcp_device_port
+        host = device.tcp_ip
+        port = device.tcp_port
         self.remove_connection_if_exist(host, port)
         self.add_connection(host, port)
 
