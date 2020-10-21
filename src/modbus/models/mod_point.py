@@ -24,7 +24,7 @@ class ModbusPointModel(db.Model):
     mod_point_last_poll_timestamp = db.Column(db.String(80), nullable=True)
     mod_point_value = db.Column(db.Integer(), nullable=True)
     mod_point_value_array = db.Column(db.String(), nullable=True)
-    mod_device_uuid = db.Column(db.String, db.ForeignKey('mod_devices.mod_device_uuid'))
+    mod_device_uuid = db.Column(db.String, db.ForeignKey('mod_devices.uuid'))
 
     def __repr__(self):
         return f"ModbusPointModel(mod_point_uuid = {self.mod_point_uuid})"

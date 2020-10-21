@@ -25,24 +25,26 @@ point_fields = {
 }
 
 device_fields = {
-    'mod_device_uuid': fields.String,
-    'mod_device_name': fields.String,
-    'mod_device_enable': fields.Boolean,
-    'mod_device_type': fields.String,  # rtu or tcp
-    'mod_device_addr': fields.Integer,  # 1,2,3
-    'mod_tcp_device_ip': fields.String,
-    'mod_tcp_device_port': fields.Integer,
-    'mod_ping_point_type': fields.String,  # for ping a reg to see if the device is online
-    'mod_ping_point_address': fields.Integer,
-    'mod_device_zero_mode': fields.Boolean,
+    'uuid': fields.String,
+    'name': fields.String,
+    'enable': fields.Boolean,
+    'type': fields.String,  # rtu or tcp
+    'addr': fields.Integer,  # 1,2,3
+    'tcp_device_ip': fields.String,
+    'tcp_device_port': fields.Integer,
+    'ping_point_type': fields.String,  # for ping a reg to see if the device is online
+    'ping_point_address': fields.Integer,
+    'zero_mode': fields.Boolean,
     # These are 0-based addresses. so, the Modbus protocol address is equal to the Holding Register Offset minus one
-    'mod_device_timeout': fields.Integer,
-    'mod_device_timeout_global': fields.Boolean,  # true
-    'mod_device_fault': fields.Boolean,  # true
-    'mod_device_last_poll_timestamp': fields.String,
-    'mod_device_fault_timestamp': fields.String,
-    'mod_network_uuid': fields.String,
-    'mod_points': fields.List(fields.Nested(point_fields)),
+    'timeout': fields.Integer,
+    'timeout_global': fields.Boolean,  # true
+    'fault': fields.Boolean,  # true
+    'last_poll_timestamp': fields.String,
+    'fault_timestamp': fields.String,
+    'network_uuid': fields.String,
+    'created_on': fields.String,
+    'updated_on': fields.String,
+    'points': fields.List(fields.Nested(point_fields)),
 }
 
 network_fields = {

@@ -28,7 +28,7 @@ class ModusNetworkSingular(ModusNetworkBase):
                     data.type = ModbusType.__members__.get(data.type)
                 if data.rtu_parity:
                     data.rtu_parity = ModbusRtuParity.__members__.get(data.rtu_parity)
-                ModbusNetworkModel.filter_uuid(uuid).update(data)
+                ModbusNetworkModel.filter_by_uuid(uuid).update(data)
                 ModbusNetworkModel.commit()
                 return ModbusNetworkModel.find_by_uuid(uuid)
             except Exception as e:

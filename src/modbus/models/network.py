@@ -65,7 +65,7 @@ class ModbusNetworkModel(db.Model):
         return cls.query.filter_by(uuid=uuid).first()
 
     @classmethod
-    def filter_uuid(cls, uuid):
+    def filter_by_uuid(cls, uuid):
         return cls.query.filter_by(uuid=uuid)
 
     def save_to_db(self):

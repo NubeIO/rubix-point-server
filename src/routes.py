@@ -2,8 +2,9 @@ from flask_restful import Api
 from src import app
 from src.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
 from src.bacnet.resources.network import Network, NetworkList, NetworksIds
+from src.modbus.resources.device.device_plural import ModbusDevicePlural
+from src.modbus.resources.device.device_singular import ModbusDeviceSingular
 
-from src.modbus.resources.mod_device import ModDevice, ModDeviceList
 from src.modbus.resources.mod_point import ModPoint, ModPointList
 from src.modbus.resources.network.network_plural import ModusNetworkPlural
 from src.modbus.resources.network.network_singular import ModusNetworkSingular
@@ -27,8 +28,8 @@ api.add_resource(NetworksIds, f'/{api_prefix}/bacnet/networks/ids')  # get all n
 api.add_resource(ModusNetworkPlural, f'/{api_prefix}/modbus/networks')
 api.add_resource(ModusNetworkSingular, f'/{api_prefix}/modbus/networks/<string:uuid>')
 
-api.add_resource(ModDevice, f'/{api_prefix}/modbus/device/<string:uuid>')
-api.add_resource(ModDeviceList, f'/{api_prefix}/modbus/devices')
+api.add_resource(ModbusDevicePlural, f'/{api_prefix}/modbus/devices')
+api.add_resource(ModbusDeviceSingular, f'/{api_prefix}/modbus/devices/<string:uuid>')
 
 api.add_resource(ModPoint, f'/{api_prefix}/modbus/point/<string:uuid>')
 api.add_resource(ModPointList, f'/{api_prefix}/modbus/points')

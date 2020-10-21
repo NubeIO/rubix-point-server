@@ -31,13 +31,13 @@ class TcpRegistry:
         print("Finished registration")
 
     def initialize_network_connections(self, network):
-        for device in network.mod_devices:
-            if device.mod_device_type is ModbusType.TCP:
+        for device in network.devices:
+            if device.type is ModbusType.TCP:
                 self.add_device(device)
 
     def add_device(self, device):
-        host = device.mod_tcp_device_ip
-        port = device.mod_tcp_device_port
+        host = device.tcp_device_ip
+        port = device.tcp_device_port
         self.remove_connection_if_exist(host, port)
         self.add_connection(host, port)
 

@@ -1,6 +1,6 @@
 import time
 from src import db
-from src.modbus.models.mod_device import ModbusDeviceModel
+from src.modbus.models.device import ModbusDeviceModel
 from src.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.modbus.models.mod_point import ModbusPointModel
 from src.modbus.services.modbus_functions.debug import modbus_debug_poll
@@ -24,7 +24,8 @@ class TcpPolling:
             TcpPolling._instance = self
 
     def polling(self):
-        if modbus_debug_poll: print("MODBUS TCP Polling started")
+        if modbus_debug_poll:
+            print("MODBUS TCP Polling started")
         count = 0
         while True:
             time.sleep(TcpPolling._polling_period)
@@ -32,8 +33,8 @@ class TcpPolling:
             print(f'Looping TCP {count}...')
             # TODO: Implement caching
             results = db.session.query(ModbusNetworkModel, ModbusDeviceModel, ModbusPointModel). \
-                select_from(ModbusNetworkModel).filter_by(type=ModbusType.TCP).join(
-                ModbusDeviceModel).filter_by(mod_device_type=ModbusType.TCP).join(
-                ModbusPointModel).all()
+                select_from(ModbusNetworkModel).filter_by(type=ModbusType.TCP) \
+                .join(ModbusDeviceModel).filter_by(type=ModbusType.TCP) \
+                .join(ModbusPointModel).all()
             for network, device, point in results:
                 poll_point(network, device, point, 'tcp')
