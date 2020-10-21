@@ -11,3 +11,4 @@ bacpypes
 pymodbus
 pendulum
 flask_cors
+uuid==1.30

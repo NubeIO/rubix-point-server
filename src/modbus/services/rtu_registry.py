@@ -8,8 +8,7 @@ if modbus_pymodbus_logs:
     log = logging.getLogger()
     log.setLevel(logging.DEBUG)
 
-
-from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
+from src.modbus.models.network import ModbusNetworkModel, ModbusType
 
 
 class RtuRegistry:
@@ -33,19 +32,21 @@ class RtuRegistry:
             self.rtu_connections = {}
 
     def register(self):
-        if modbus_start_up: print("MODBUS: Called RTU Poll registration")
+        if modbus_start_up:
+            print("MODBUS: Called RTU Poll registration")
         network_service = RtuRegistry.get_instance()
-        for network in ModbusNetworkModel.query.filter_by(mod_network_type=ModbusType.RTU):
+        for network in ModbusNetworkModel.query.filter_by(type=ModbusType.RTU):
             network_service.add_network(network)
-        if modbus_start_up:  print("MODBUS: Finished registration")
+        if modbus_start_up:
+            print("MODBUS: Finished registration")
 
     def add_network(self, network):
-        port = network.mod_rtu_network_port
-        baudrate = network.mod_rtu_network_speed
-        stopbits = network.mod_rtu_network_stopbits
-        parity = network.mod_rtu_network_parity
-        bytesize = network.mod_rtu_network_bytesize
-        timeout = network.mod_network_timeout
+        port = network.rtu_port
+        baudrate = network.rtu_speed
+        stopbits = network.rtu_stopbits
+        parity = network.rtu_parity
+        bytesize = network.rtu_bytesize
+        timeout = network.timeout
 
         self.remove_connection_if_exist(port, baudrate, stopbits, parity, bytesize, timeout)
         self.add_connection(port, baudrate, stopbits, parity, bytesize, timeout)
@@ -69,10 +70,10 @@ class RtuRegistry:
 
     @staticmethod
     def create_connection_key_by_network(network):
-        port = network.mod_rtu_network_port
-        baudrate = network.mod_rtu_network_speed
-        stopbits = network.mod_rtu_network_stopbits
-        parity = network.mod_rtu_network_parity
-        bytesize = network.mod_rtu_network_bytesize
-        timeout = network.mod_network_timeout
+        port = network.rtu_port
+        baudrate = network.rtu_speed
+        stopbits = network.rtu_stopbits
+        parity = network.rtu_parity
+        bytesize = network.rtu_bytesize
+        timeout = network.timeout
         return RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)
