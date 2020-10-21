@@ -79,6 +79,20 @@ def poll_point(network, device, point, transport) -> None:
         """
         read_holding_registers
         """
+        if mod_point_type == read_input_registers:
+            func = read_input_registers
+            read = read_analogue(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
+                                 mod_point_data_endian, func)
+            val = read['val']
+            array = read['array']
+            """
+            DEBUG
+            """
+            if modbus_debug_poll:
+                print("MODBUS DEBUG:", {'type': read_holding_registers, "val": val, 'array': array})
+        """
+        Save modbus data in database
+        """
         if mod_point_type == read_holding_registers:
             func = read_holding_registers
             read = read_analogue(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
@@ -100,6 +114,6 @@ def poll_point(network, device, point, transport) -> None:
             """
             if modbus_debug_poll:
                 print("MODBUS DEBUG:  READ/WRITE WAS DONE", 'TRANSPORT TYPE= ', transport)
-            ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
+            # ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
     except Exception as e:
         print(f'MODBUS ERROR: in poll main function {str(e)}')

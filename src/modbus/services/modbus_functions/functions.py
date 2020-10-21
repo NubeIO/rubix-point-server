@@ -78,13 +78,17 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
     :param func: modbus function type
     :return: dict
     """
-    read_input_registers = ModbusPointType.readInputRegisters.name
+    read_coils = ModbusPointType.readCoils.name
     read_discrete_input = ModbusPointType.readDiscreteInputs.name
     """
     DEBUG
     """
     if modbus_debug_funcs:
-        print("MODBUS read_digital, check reg_length")
+        print("MODBUS read_digital, check reg_length",
+              {'reg_start': reg_start,
+               'reg_length': reg_length,
+               '_unit': _unit,
+               'func': func})
 
     """
     check that user if for example wants data type of float that the reg_length is > = 2
@@ -103,7 +107,7 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
     """
     Select which type of modbus read to do
     """
-    if func == read_input_registers:
+    if func == read_coils:
         read = client.read_coils(reg_start, reg_length, unit=_unit)
         reg_type = 'coil'
     if func == read_discrete_input:
@@ -115,6 +119,16 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
     if modbus_debug_funcs:
         print("MODBUS read_digital, do modbus read", "read", read, "reg_type", reg_type)
     if not _assertion(read, client, reg_type):  # checking for errors
+        """
+        DEBUG
+        """
+        if modbus_debug_funcs:
+            print("MODBUS DEBUG, func _assertion, check data is valid (if in here modbus read was good)",
+                  {'reg_start': reg_start,
+                   'reg_length': reg_length,
+                   '_unit': _unit,
+                   'func': func})
+
         val = read.bits[0]
         array = read.bits
         return {'val': val, 'array': array}

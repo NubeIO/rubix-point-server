@@ -19,7 +19,8 @@ class ModbusDataType(enum.Enum):
     int32 = 'int32',
     uint32 = 'uint32',
     float = 'float',
-    double = 'double'
+    double = 'double',
+    digital = 'digital',
 
 
 class ModbusDataEndian(enum.Enum):

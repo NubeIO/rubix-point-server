@@ -1,3 +1,5 @@
+import time
+
 from pymodbus.client.sync import ModbusSerialClient
 import logging
 
@@ -18,29 +20,61 @@ client = ModbusSerialClient(
     bytesize=8
 )
 
-bo = Endian.Big
-wo = Endian.Big
+res = False
+while True:
+    time.sleep(2)
+    try:
+        time.sleep(2)
+        bo = Endian.Big
+        wo = Endian.Big
 
-if client.connect():  # Trying for connect to Modbus Server/Slave
-    '''Reading from a holding register with the below content.'''
-    res = client.read_holding_registers(6, 10, unit=1)
-    print(res.registers, "res")
-    decoder = BinaryPayloadDecoder.fromRegisters(res.registers,
-                                                 byteorder=bo,
-                                                 wordorder=wo).decode_32bit_float()
-    print(decoder, "decoder")
+        if client.connect():  # Trying for connect to Modbus Server/Slave
+            '''Reading from a holding register with the below content.'''
+            res = client.read_holding_registers(0, 10, unit=1)
+            print(res.registers, "res")
+            decoder = BinaryPayloadDecoder.fromRegisters(res.registers,
+                                                         byteorder=bo,
+                                                         wordorder=wo).decode_32bit_float()
+            print(decoder, "decoder")
 
+            '''Reading from a discrete register with the below content.'''
+            # res = client.read_discrete_inputs(address=1, count=1, unit=1)
 
+            if not res.isError():
+                # print(res.registers)
+                print(res)
+            else:
+                # print(res)
+                print(res)
 
-    '''Reading from a discrete register with the below content.'''
-    # res = client.read_discrete_inputs(address=1, count=1, unit=1)
+        else:
+            print('Cannot connect to the Modbus Server/Slave')
+    except:
+        continue
 
-    if not res.isError():
-        # print(res.registers)
-        print(res)
-    else:
-        # print(res)
-        print(res)
-
-else:
-    print('Cannot connect to the Modbus Server/Slave')
+# while True:
+#     time.sleep(2)
+#     bo = Endian.Big
+#     wo = Endian.Big
+#
+#     if client.connect():  # Trying for connect to Modbus Server/Slave
+#         '''Reading from a holding register with the below content.'''
+#         res = client.read_holding_registers(0, 10, unit=1)
+#         print(res.registers, "res")
+#         decoder = BinaryPayloadDecoder.fromRegisters(res.registers,
+#                                                      byteorder=bo,
+#                                                      wordorder=wo).decode_32bit_float()
+#         print(decoder, "decoder")
+#
+#         '''Reading from a discrete register with the below content.'''
+#         # res = client.read_discrete_inputs(address=1, count=1, unit=1)
+#
+#         if not res.isError():
+#             # print(res.registers)
+#             print(res)
+#         else:
+#             # print(res)
+#             print(res)
+#
+#     else:
+#         print('Cannot connect to the Modbus Server/Slave')
