@@ -1,13 +1,10 @@
 import time
-from src.modbus.interfaces.point.points import ModbusPointType
 from src import db
 from src.modbus.models.mod_device import ModbusDeviceModel
 from src.modbus.models.mod_network import ModbusNetworkModel, ModbusType
 from src.modbus.models.mod_point import ModbusPointModel
-from src.modbus.models.mod_point_store import ModbusPointStoreModel
+from src.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.modbus.services.modbus_functions.poll import poll_point
-from src.modbus.services.tcp_registry import TcpRegistry
-from src.utils.data_funcs import DataHelpers
 
 
 class TcpPolling:
@@ -27,7 +24,7 @@ class TcpPolling:
             TcpPolling._instance = self
 
     def polling(self):
-        print("TCP Polling started")
+        if modbus_debug_poll: print("MODBUS TCP Polling started")
         count = 0
         while True:
             time.sleep(TcpPolling._polling_period)

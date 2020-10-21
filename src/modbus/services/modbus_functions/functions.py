@@ -1,6 +1,7 @@
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
 from src.modbus.interfaces.point.points import ModbusPointUtilsFuncs, ModbusPointUtils
+from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 
 
 def read_holding(client, reg_start, reg_length, _unit, data_type, endian):
@@ -8,9 +9,18 @@ def read_holding(client, reg_start, reg_length, _unit, data_type, endian):
     read holding register
     :return:holding reg
     """
+    # debug
+    if modbus_debug_funcs: print("MODBUS read_holding, check reg_length")
     reg_type = 'holding'
+    reg_length = _set_data_length(data_type,
+                                  reg_length)  # check that user if for example wants data type of float that the reg_length is > = 2
+    # debug
+    if modbus_debug_funcs: print("MODBUS read_holding, check reg_length result then do modbus read", "reg_length",
+                                 reg_length)
     read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
-    if _assertion(read, client, reg_type) == False:  # checking for errors
+    # debug
+    if modbus_debug_funcs: print("MODBUS read_holding, do modbus read", read)
+    if not _assertion(read, client, reg_type):  # checking for errors
         bo_wo = _mod_point_data_endian(endian)
         byteorder = bo_wo['bo']
         wordorder = bo_wo['wo']
@@ -19,25 +29,38 @@ def read_holding(client, reg_start, reg_length, _unit, data_type, endian):
         return {'val': val, 'array': read.registers}
 
 
-def _set_data_length(_val: str):
+def _set_data_length(data_type, reg_length):
     """
     Sets the data length for the selected data type
     :return:holding reg
     """
-    if ModbusPointUtilsFuncs.func_common_data_endian(_val):
+    if modbus_debug_funcs: print("MODBUS: in function  _set_data_length, check reg_length", data_type, reg_length)
+    _val = data_type
+    length = reg_length
+
+    if True:  # TODO add a check for data type
         _type = ModbusPointUtils.mod_point_data_type
-        int16 = _type['int16']
-        uint16 = _type['uint16']
-        int32 = _type['int16']
-        uint32 = _type['uint32']
+        _int16 = _type['int16']
+        _uint16 = _type['uint16']
+        _int32 = _type['int16']
+        _uint32 = _type['uint32']
         _float = _type['float']
         _double = _type['double']
-        if _val == int16 or _val == uint16:
-            return 1
-        if _val == int32 or _val == uint32 or _val == _float:
-            return 2
+        if _val == _int16 or _val == _uint16:
+            if reg_length < 1:
+                return 1
+            else:
+                return length
+        if _val == _int32 or _val == _uint32 or _val == _float:
+            if reg_length < 2:
+                return 2
+            else:
+                return length
         elif _val == _double:
-            return 4
+            if reg_length < 4:
+                return 4
+            else:
+                return length
 
 
 def _mod_point_data_endian(_val: str):
@@ -85,7 +108,6 @@ def _select_data_type(data, data_type, byteorder, wordorder):
     :param data: Log List Downloaded
     :return: data in the selected data type
     """
-    print(22222222)
     decoder = BinaryPayloadDecoder.fromRegisters(data.registers, byteorder=byteorder,
                                                  wordorder=wordorder)
     if data_type == 'int16':
