@@ -33,6 +33,10 @@ class ModbusPointModel(db.Model):
     def find_by_uuid(cls, mod_point_uuid):
         return cls.query.filter_by(mod_point_uuid=mod_point_uuid).first()
 
+    @classmethod
+    def filter_by_uuid(cls, mod_point_uuid):
+        return cls.query.filter_by(mod_point_uuid=mod_point_uuid)
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

@@ -1,10 +1,12 @@
 from flask_restful import Resource, reqparse, abort, marshal_with
-from src.modbus.models.mod_point import ModbusPointModel
-from src.modbus.interfaces.point.interface_modbus_point import points_attributes, THIS, interface_name, interface_reg, \
+
+from src.modbus.interfaces.point.interface_modbus_point import THIS, interface_name, interface_reg, \
     interface_reg_length, interface_point_type, interface_point_enable, interface_point_write_value, \
     interface_point_data_type, interface_point_data_endian, interface_point_data_round, interface_point_data_offset, \
     interface_point_timeout, interface_point_timeout_global, interface_point_prevent_duplicates, \
     interface_point_prevent_duplicates_global, interface_interface_help_device_uuid
+from src.modbus.interfaces.point.points import ModbusDataType, ModbusPointType, ModbusDataEndian
+from src.modbus.models.mod_point import ModbusPointModel
 from src.modbus.resources.mod_fields import point_fields
 
 
@@ -98,48 +100,40 @@ class ModPoint(Resource):
         if ModbusPointModel.find_by_uuid(uuid):
             return {'message': "An device with mod_device_uuid '{}' already exists.".format(uuid)}, 400
         data = ModPoint.parser.parse_args()
-        try:
-            point = ModPoint.create_point_model_obj(uuid, data)
-            if point.find_by_uuid(uuid) is not None:
-                abort(409, message=f'{THIS} already exists')
-            point.save_to_db()
-            return point, 201
-        except Exception as e:
-            abort(500, message=str(e))
+        return self.add_point(data, uuid)
 
     @marshal_with(point_fields)
     def put(self, uuid):
         data = ModPoint.parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)
         if point is None:
+            return self.add_point(data, uuid)
+        else:
             try:
-                point = ModPoint.create_point_model_obj(uuid, data)
+                if data.mod_point_type:
+                    data.mod_point_type = ModbusPointType.__members__.get(data.mod_point_type)
+                if data.mod_point_data_type:
+                    data.mod_point_data_type = ModbusDataType.__members__.get(data.mod_point_data_type)
+                if data.mod_point_data_endian:
+                    data.mod_point_data_endian = ModbusDataEndian.__members__.get(data.mod_point_data_endian)
+                ModbusPointModel.filter_by_uuid(uuid).update(data)
+                return data
             except Exception as e:
                 abort(500, message=str(e))
-        else:
-            point.mod_point_name = data[points_attributes['mod_point_name']]
-            point.mod_point_reg = data[points_attributes['mod_point_reg']]
-            point.mod_point_reg_length = data[points_attributes['mod_point_reg_length']]
-            point.mod_point_type = data[points_attributes['mod_point_type']]
-            point.mod_point_enable = data[points_attributes['mod_point_enable']]
-            point.mod_point_write_value = data[points_attributes['mod_point_write_value']]
-            point.mod_point_data_type = data[points_attributes['mod_point_data_type']]
-            point.mod_point_data_endian = data[points_attributes['mod_point_data_endian']]
-            point.mod_point_data_round = data[points_attributes['mod_point_data_round']]
-            point.mod_point_data_offset = data[points_attributes['mod_point_data_offset']]
-            point.mod_point_timeout = data[points_attributes['mod_point_timeout']]
-            point.mod_point_timeout_global = data[points_attributes['mod_point_timeout_global']]
-            point.mod_point_prevent_duplicates = data[points_attributes['mod_point_prevent_duplicates']]
-            point.mod_point_prevent_duplicates_global = data[points_attributes['mod_point_prevent_duplicates_global']]
-            point.mod_device_uuid = data[points_attributes['mod_device_uuid']]
-        point.save_to_db()
-        return point
 
     def delete(self, uuid):
         point = ModbusPointModel.find_by_uuid(uuid)
         if point:
             point.delete_from_db()
         return '', 204
+
+    def add_point(self, data, uuid):
+        try:
+            point = ModPoint.create_point_model_obj(uuid, data)
+            point.save_to_db()
+            return point
+        except Exception as e:
+            abort(500, message=str(e))
 
     @staticmethod
     def create_point_model_obj(mod_point_uuid, data):
