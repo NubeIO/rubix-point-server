@@ -64,18 +64,11 @@ class RtuPolling:
                 val = DataHelpers.bool_to_int(val)
                 print("read_coils", val)
             if mod_point_type == ModbusPointType.readHoldingRegisters.name:
-                print(11111)
-
-                # def read_holding(client, reg_start, reg_length, _unit, data_type, endian):
-                print(3333)
                 print(rtu_connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type, mod_point_data_endian)
                 val = read_holding(rtu_connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type, mod_point_data_endian)
-                # first = val.registers[0]
-                # array = val.registers[0:]
-                # print("first", first, 'array', array)
-                print('val 1111111')
-                print(val)
-
+                val = val['val']
+                array = val['array']
+                print(val, array)
             if val:
                 print('done')
                 # print("read_holding", val, 'array')

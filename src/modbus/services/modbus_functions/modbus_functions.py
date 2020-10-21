@@ -15,8 +15,8 @@ def read_holding(client, reg_start, reg_length, _unit, data_type, endian):
         byteorder = bo_wo['bo']
         wordorder = bo_wo['wo']
         data_type = _select_data_type(read, data_type, byteorder, wordorder)
-        data = data_type
-        return data
+        val = data_type
+        return {'val': val, 'array': read.registers}
 
 
 def _set_data_length(_val: str):
