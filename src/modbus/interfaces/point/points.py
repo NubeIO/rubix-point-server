@@ -12,6 +12,23 @@ class ModbusPointType(enum.Enum):
     writeRegisters = 'writeRegisters'
 
 
+class ModbusDataType(enum.Enum):
+    raw = 'raw'
+    int16 = 'int16',
+    uint16 = 'uint16',
+    int32 = 'int32',
+    uint32 = 'uint32',
+    float = 'float',
+    double = 'double'
+
+
+class ModbusDataEndian(enum.Enum):
+    LEB_BEW = 'LEB_BEW'
+    LEB_LEW = 'LEB_LEW',
+    BEB_LEW = 'BEB_LEW',
+    BEB_BEW = 'BEB_BEW'
+
+
 class ModbusPointUtils:
     mod_point_type = {
         "readCoils": "readCoils",
@@ -64,13 +81,3 @@ class ModbusPointUtilsFuncs:
             if _val == value:
                 return _val
             raise Exception("endian is not correct")
-
-
-
-
-
-
-
-
-
-

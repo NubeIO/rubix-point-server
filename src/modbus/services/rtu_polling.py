@@ -51,8 +51,8 @@ class RtuPolling:
         mod_device_addr = device.mod_device_addr
         mod_point_reg_length = point.mod_point_reg_length
         mod_point_type = point.mod_point_type.name
-        mod_point_data_type = point.mod_point_data_type
-        mod_point_data_endian = point.mod_point_data_endian
+        mod_point_data_type = point.mod_point_data_type.name
+        mod_point_data_endian = point.mod_point_data_endian.name
 
         try:
             val = None

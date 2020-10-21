@@ -50,6 +50,7 @@ class TcpPolling:
         mod_device_addr = device.mod_device_addr
         mod_point_reg_length = point.mod_point_reg_length
         mod_point_type = point.mod_point_type
+
         try:
             val = None
             if mod_point_type == ModbusPointType.readCoils:
