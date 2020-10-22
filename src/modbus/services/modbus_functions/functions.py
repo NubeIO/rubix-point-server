@@ -1,9 +1,4 @@
 
-from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
-
-from src.modbus.interfaces.point.points import ModbusPointUtilsFuncs, ModbusPointUtils
-
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 from src.modbus.services.modbus_functions.function_utils import _set_data_length, \
@@ -24,8 +19,8 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     :param func: modbus function type
     :return: dict
     """
-    read_holding_registers = ModbusPointType.readHoldingRegisters.name
-    read_input_registers = ModbusPointType.readInputRegisters.name
+    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS.value
+    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS.value
     """
     DEBUG
     """
@@ -35,20 +30,6 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     """
     check that user if for example wants data type of float that the reg_length is > = 2
     """
-    # debug
-    if modbus_debug_funcs:
-        print("MODBUS read_holding, check reg_length")
-    reg_type = 'holding'
-    # check that user if for example wants data type of float that the reg_length is > = 2
-    reg_length = _set_data_length(data_type, reg_length)
-    # debug
-    if modbus_debug_funcs:
-        print("MODBUS read_holding, check reg_length result then do modbus read", "reg_length", reg_length)
-    read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
-    # debug
-    if modbus_debug_funcs:
-        print("MODBUS read_holding, do modbus read", read)
-
     reg_length = _set_data_length(data_type,
                                   reg_length)
     """
@@ -74,6 +55,8 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     if modbus_debug_funcs:
         print("MODBUS read_analogue, do modbus read", "read", read, "reg_type", reg_type)
     if not _assertion(read, client, reg_type):  # checking for errors
+        if modbus_debug_funcs:
+            print("MODBUS _assertion, after modbus read", "read", read, "reg_type", reg_type)
         """
         set up for word and byte order
         """
