@@ -1,9 +1,10 @@
 from src import TcpRegistry
+from src.modbus.interfaces.network.network import ModbusType
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_poll
+from src.modbus.services.modbus_functions.functions import read_analogue, read_digital, write_digital
 from src.modbus.services.rtu_registry import RtuRegistry
 from src.utils.data_funcs import DataHelpers
-from src.modbus.services.modbus_functions.functions import read_analogue, read_digital, write_digital
 
 
 def poll_point(network, device, point, transport) -> None:
@@ -22,11 +23,11 @@ def poll_point(network, device, point, transport) -> None:
     if modbus_debug_poll:
         print('MODBUS DEBUG: main looping function poll_point')
     connection = None
-    if transport == "rtu":
+    if transport == ModbusType.RTU:
         connection = RtuRegistry.get_rtu_connections().get(RtuRegistry.create_connection_key_by_network(network))
         if not connection:
             RtuRegistry.get_instance().add_network(network)
-    if transport == "tcp":
+    if transport == ModbusType.TCP:
         host = device.tcp_ip
         port = device.tcp_port
         connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
@@ -37,14 +38,15 @@ def poll_point(network, device, point, transport) -> None:
     mod_device_addr = device.addr
     reg = point.reg
     mod_point_reg_length = point.reg_length
-    mod_point_type = point.type.value
+    mod_point_type = point.type
     mod_point_data_type = point.data_type
     mod_point_data_endian = point.data_endian
+
     write_value = point.write_value
-    read_coils = ModbusPointType.READ_COILS.value
-    write_coil = ModbusPointType.WRITE_COIL.value
-    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS.value
-    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS.value
+    write_coil = ModbusPointType.WRITE_COIL
+    read_coils = ModbusPointType.READ_COILS
+    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
+    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS
     # read_discrete_input = ModbusPointType.readDiscreteInputs.name
     # write_coil = ModbusPointType.writeCoil.name
     # write_register = ModbusPointType.writeRegister.name

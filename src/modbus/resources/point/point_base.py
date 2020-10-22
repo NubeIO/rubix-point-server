@@ -43,4 +43,4 @@ class ModbusPointBase(Resource):
 
     def abort_if_device_does_not_exist(self, device_uuid):
         if not ModbusDeviceModel.find_by_uuid(device_uuid):
-            abort(400, message='Network does not exist of that device_uuid')
+            abort(400, message='Device does not exist of that device_uuid')
