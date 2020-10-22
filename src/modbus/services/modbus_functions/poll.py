@@ -33,12 +33,22 @@ def poll_point(network, device, point, transport) -> None:
         if not connection:
             TcpRegistry.get_instance().add_device(device)
     # TODO: whether it's functional or not, don't know how data we read
-    reg = point.mod_point_reg
-    mod_device_addr = device.mod_device_addr
-    mod_point_reg_length = point.mod_point_reg_length
-    mod_point_type = point.mod_point_type.name
-    mod_point_data_type = point.mod_point_data_type.name
-    mod_point_data_endian = point.mod_point_data_endian.name
+
+    mod_device_addr = device.addr
+    reg = point.reg
+    mod_point_reg_length = point.reg_length
+    mod_point_type = point.type.value
+    mod_point_data_type = point.data_type
+    mod_point_data_endian = point.data_endian
+
+    read_coils = ModbusPointType.READ_COILS.value
+    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS.value
+    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS.value
+    # read_discrete_input = ModbusPointType.readDiscreteInputs.name
+    # write_coil = ModbusPointType.writeCoil.name
+    # write_register = ModbusPointType.writeRegister.name
+    # write_coils = ModbusPointType.writeCoils.name
+    # write_registers = ModbusPointType.writeRegisters.name
     """
     DEBUG
     """
@@ -51,18 +61,15 @@ def poll_point(network, device, point, transport) -> None:
                                 'mod_point_reg_length': mod_point_reg_length,
                                 'mod_point_type': mod_point_type,
                                 'mod_point_data_type': mod_point_data_type,
-                                'mod_point_data_endian': mod_point_data_endian})
+                                'mod_point_data_endian': mod_point_data_endian,
+                                'read_coils': read_coils,
+                                'read_holding_registers': read_holding_registers,
+                                'read_input_registers': read_input_registers,
+                                })
 
     try:
         val = None
-        read_coils = ModbusPointType.READ_COILS
-        read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
-        read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS
-        # read_discrete_input = ModbusPointType.readDiscreteInputs.name
-        # write_coil = ModbusPointType.writeCoil.name
-        # write_register = ModbusPointType.writeRegister.name
-        # write_coils = ModbusPointType.writeCoils.name
-        # write_registers = ModbusPointType.writeRegisters.name
+
         """
         read_coils
         """
@@ -90,12 +97,14 @@ def poll_point(network, device, point, transport) -> None:
             DEBUG
             """
             if modbus_debug_poll:
-                print("MODBUS DEBUG:", {'type': read_holding_registers, "val": val, 'array': array})
+                print("MODBUS DEBUG:", {'type': read_input_registers, "val": val, 'array': array})
         """
         Save modbus data in database
         """
         if mod_point_type == read_holding_registers:
             func = read_holding_registers
+            if modbus_debug_poll:
+                print("MODBUS DEBUG: try and read a register", {'type': read_holding_registers})
             read = read_analogue(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
                                  mod_point_data_endian, func)
             val = read['val']

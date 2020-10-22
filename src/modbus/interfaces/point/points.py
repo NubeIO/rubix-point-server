@@ -80,15 +80,13 @@ class ModbusPointUtilsFuncs:
 
     @classmethod
     def common_data_type(cls, _val: str) -> str:
-        print(ModbusPointUtils.mod_point_data_type.items())
         for key, value in ModbusPointUtils.mod_point_data_type.items():
             if _val == value:
                 return _val
             raise Exception("data type is not correct")
 
     @classmethod
-    def func_common_data_endian(cls, _val: str) -> str:
-
+    def func_common_data_endian(cls, _val):
         for key, value in ModbusPointUtils.mod_point_data_endian.items():
             if _val == value:
                 return _val

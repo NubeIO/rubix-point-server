@@ -1,6 +1,5 @@
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
-
 from src.modbus.interfaces.point.points import ModbusPointUtils, ModbusPointUtilsFuncs
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 
@@ -10,7 +9,8 @@ def _set_data_length(data_type, reg_length):
     Sets the data length for the selected data type
     :return:holding reg
     """
-    if modbus_debug_funcs: print("MODBUS: in function  _set_data_length, check reg_length", data_type, reg_length)
+    if modbus_debug_funcs:
+        print("MODBUS: in function  _set_data_length, check reg_length", data_type, reg_length)
     _val = data_type
     length = reg_length
 
@@ -45,11 +45,16 @@ def _set_data_length(data_type, reg_length):
                 return length
 
 
-def _mod_point_data_endian(_val: str):
+def _mod_point_data_endian(_val):
     """
     Sets byte order and endian order
+    LEB_BEW = 1
+    LEB_LEW = 2
+    BEB_LEW = 3
+    BEB_BEW = 4
     :return: array {'bo': bo, 'wo': wo}
     """
+    _val = _val.name
     if ModbusPointUtilsFuncs.func_common_data_endian(_val):
         if _val == ModbusPointUtils.mod_point_data_endian['LEB_BEW']:
             bo = Endian.Little
