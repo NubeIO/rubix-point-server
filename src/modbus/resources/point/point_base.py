@@ -20,12 +20,6 @@ class ModbusPointBase(Resource):
     parser.add_argument('timeout_global', type=bool, required=True)
     parser.add_argument('prevent_duplicates', type=bool, required=True)
     parser.add_argument('prevent_duplicates_global', type=bool, required=True)
-    parser.add_argument('write_ok', type=bool, required=False)
-    parser.add_argument('fault', type=bool, required=False)
-    parser.add_argument('last_poll_timestamp', type=str, required=False)
-    parser.add_argument('fault_timestamp', type=str, required=False)
-    parser.add_argument('value', type=int, required=False)
-    parser.add_argument('value_array', type=str, required=False)
     parser.add_argument('device_uuid', type=str, required=True)
 
     @staticmethod
