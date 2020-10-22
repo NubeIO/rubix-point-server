@@ -43,8 +43,8 @@ def poll_point(network, device, point, transport) -> None:
     mod_point_data_endian = point.data_endian
 
     write_value = point.write_value
-    write_coil = ModbusPointType.WRITE_COIL
     read_coils = ModbusPointType.READ_COILS
+    write_coil = ModbusPointType.WRITE_COIL
     read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
     read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS
     # read_discrete_input = ModbusPointType.readDiscreteInputs.name
@@ -72,7 +72,6 @@ def poll_point(network, device, point, transport) -> None:
 
     try:
         val = None
-
         """
         read_coils
         """

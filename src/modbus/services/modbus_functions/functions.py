@@ -35,16 +35,26 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     DEBUG
     """
     if modbus_debug_funcs:
-        print("MODBUS read_analogue, check reg_length result then do modbus read", "reg_length",
-              reg_length)
+        print("MODBUS read_analogue, check reg_length result then do modbus read",
+              {"unit": _unit,
+               "reg_start": reg_start,
+               "reg_length": reg_length,
+               "func": func,
+               "read_holding_registers": read_holding_registers,
+               "read_input_registers": read_input_registers})
     read = None
     reg_type = None
     """
     Select which type of modbus read to do
     """
     if func == read_holding_registers:
-        read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
+        read = client.read_holding_registers(reg_start, reg_length, unit=1)
         reg_type = 'holding'
+        """
+        DEBUG
+        """
+        if modbus_debug_funcs:
+            print("MODBUS DO READ HOLDING", {'read': read})
     if func == read_input_registers:
         read = client.read_input_registers(reg_start, reg_length, unit=_unit)
         reg_type = 'input'
