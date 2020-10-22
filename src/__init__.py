@@ -2,8 +2,8 @@ import os
 from threading import Thread
 
 from flask import Flask
-from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
@@ -15,21 +15,13 @@ db = SQLAlchemy(app)
 from src import routes
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
-    from src.modbus.models.point_store import ModbusPointStoreModel
-
     db.create_all()
-    from src.bacnet.services.network import Network
-    from src.modbus.services.tcp_registry import TcpRegistry
-    from src.modbus.services.tcp_polling import TcpPolling
-    from src.modbus.services.rtu_polling import RtuPolling
-    from src.modbus.services.rtu_registry import RtuRegistry
+    # from src.sourceDrivers.bacnet.services.network import Network
+    from src.sourceDrivers.modbusCopy.services.tcp_registry import TcpRegistry
+    from src.sourceDrivers.modbusCopy.services.tcp_polling import TcpPolling
 
-    Network.get_instance().start()
+    # Network.get_instance().start()
 
-    TcpRegistry.get_instance().register()
-    tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
-    tcp_polling_thread.start()
-
-    RtuRegistry.get_instance().register()
-    rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
-    rtu_polling_thread.start()
+    # TcpRegistry.get_instance().register()
+    # tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
+    # tcp_polling_thread.start()

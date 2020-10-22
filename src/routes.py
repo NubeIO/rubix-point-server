@@ -1,36 +1,33 @@
 from flask_restful import Api
-
 from src import app
-from src.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
-from src.bacnet.resources.network import Network, NetworkList, NetworksIds
-from src.modbus.resources.device.device_plural import ModbusDevicePlural
-from src.modbus.resources.device.device_singular import ModbusDeviceSingular
-from src.modbus.resources.network.network_plural import ModusNetworkPlural
-from src.modbus.resources.network.network_singular import ModusNetworkSingular
-from src.modbus.resources.point.point_plural import ModbusPointPlural
-from src.modbus.resources.point.point_singular import ModbusPointSingular
+# from src.sourceDrivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
+# from src.sourceDrivers.bacnet.resources.network import Network, NetworkList, NetworksIds
 
-api_prefix = 'api'
+from src.sourceDrivers.modbusCopy.resources.mod_network import ModNetwork, ModNetworkList
+from src.sourceDrivers.modbusCopy.resources.mod_device import ModDevice, ModDeviceList
+from src.sourceDrivers.modbusCopy.resources.mod_point import ModPoint, ModPointList
+
+api_ver = 'api'
 api = Api(app)
 
 # bacnet endpoints
-api.add_resource(Device, f'/{api_prefix}/bacnet/dev/<string:uuid>')
-api.add_resource(Network, f'/{api_prefix}/bacnet/network/<string:uuid>')
-api.add_resource(DeviceList, f'/{api_prefix}/bacnet/devices')  # get all devices
-api.add_resource(DevicePoints,
-                 f'/{api_prefix}/bacnet/points/objects/<string:dev_uuid>')  # get all networks DevicePoints
-# get a point /dev_uuid/analogInput/1
-api.add_resource(DevicePoint,
-                 f'/{api_prefix}/bacnet/point/read/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:prop>')
-api.add_resource(NetworkList, f'/{api_prefix}/bacnet/networks')  # get all networks
-api.add_resource(NetworksIds, f'/{api_prefix}/bacnet/networks/ids')  # get all networks DevicePoints
+# api.add_resource(Device, f'/{api_ver}/bacnet/dev/<string:uuid>')
+# api.add_resource(Network, f'/{api_ver}/bacnet/network/<string:uuid>')
+# api.add_resource(DeviceList, f'/{api_ver}/bacnet/devices')  # get all devices
+# api.add_resource(DevicePoints, f'/{api_ver}/bacnet/points/objects/<string:dev_uuid>')  # get all networks DevicePoints
+# api.add_resource(DevicePoint,
+#                  f'/{api_ver}/bacnet/point/read/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:prop>')  # get a point /dev_uuid/analogInput/1
+# api.add_resource(NetworkList, f'/{api_ver}/bacnet/networks')  # get all networks
+# api.add_resource(NetworksIds, f'/{api_ver}/bacnet/networks/ids')  # get all networks DevicePoints
 
-# Modbus endpoints --------------------------------------
-api.add_resource(ModusNetworkPlural, f'/{api_prefix}/modbus/networks')
-api.add_resource(ModusNetworkSingular, f'/{api_prefix}/modbus/networks/<string:uuid>')
+# modbus endpoints
 
-api.add_resource(ModbusDevicePlural, f'/{api_prefix}/modbus/devices')
-api.add_resource(ModbusDeviceSingular, f'/{api_prefix}/modbus/devices/<string:uuid>')
-
-api.add_resource(ModbusPointPlural, f'/{api_prefix}/modbus/points')
-api.add_resource(ModbusPointSingular, f'/{api_prefix}/modbus/points/<string:uuid>')
+# networks
+api.add_resource(ModNetwork, f'/{api_ver}/modbus/network/<string:uuid>')  # CRUD a modbus network
+api.add_resource(ModNetworkList, f'/{api_ver}/modbus/networks')  # get all modbus networks
+# devices
+api.add_resource(ModDevice, f'/{api_ver}/modbus/device/<string:uuid>')  # CRUD a modbus device
+api.add_resource(ModDeviceList, f'/{api_ver}/modbus/devices')  # get all modbus devices
+# points
+api.add_resource(ModPoint, f'/{api_ver}/modbus/point/<string:uuid>')  # CRUD a modbus device
+api.add_resource(ModPointList, f'/{api_ver}/modbus/points')  # get all modbus devices
