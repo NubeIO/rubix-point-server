@@ -10,7 +10,8 @@ def _set_data_length(data_type, reg_length):
     :return:holding reg
     """
     if modbus_debug_funcs:
-        print("MODBUS: in function  _set_data_length, check reg_length", data_type, reg_length)
+        print("MODBUS: in function  _set_data_length, check reg_length",
+              {"data_type": data_type, "reg_length": reg_length})
     _val = data_type
     length = reg_length
 
