@@ -37,14 +37,14 @@ def poll_point(network, device, point, transport) -> None:
     mod_device_addr = device.addr
     reg = point.reg
     mod_point_reg_length = point.reg_length
-    mod_point_type = point.type.value
+    mod_point_type = point.type
     mod_point_data_type = point.data_type
     mod_point_data_endian = point.data_endian
     write_value = point.write_value
-    read_coils = ModbusPointType.READ_COILS.value
-    write_coil = ModbusPointType.WRITE_COIL.value
-    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS.value
-    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS.value
+    read_coils = ModbusPointType.READ_COILS
+    write_coil = ModbusPointType.WRITE_COIL
+    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
+    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS
     # read_discrete_input = ModbusPointType.readDiscreteInputs.name
     # write_coil = ModbusPointType.writeCoil.name
     # write_register = ModbusPointType.writeRegister.name
@@ -70,7 +70,6 @@ def poll_point(network, device, point, transport) -> None:
 
     try:
         val = None
-
         """
         read_coils
         """
