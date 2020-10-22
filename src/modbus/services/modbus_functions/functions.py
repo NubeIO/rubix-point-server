@@ -1,4 +1,3 @@
-
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 from src.modbus.services.modbus_functions.function_utils import _set_data_length, \
@@ -81,8 +80,8 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
     :param func: modbus function type
     :return: dict
     """
-    read_coils = ModbusPointType.readCoils.name
-    read_discrete_input = ModbusPointType.readDiscreteInputs.name
+    read_coils = ModbusPointType.READ_COILS.value
+    read_discrete_input = ModbusPointType.READ_DISCRETE_INPUTS.value
     """
     DEBUG
     """
@@ -135,3 +134,68 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
         val = read.bits[0]
         array = read.bits
         return {'val': val, 'array': array}
+
+
+def write_digital(client, reg_start: int, reg_length: int, _unit: int, func, write_value: int) -> dict:
+    """
+    Write coil
+    :param client: modbus client
+    :param reg_start: modbus client
+    :param reg_length: modbus client
+    :param _unit: modbus address as an int
+    :param func: modbus function type
+    :return: dict
+    """
+    write_coil = ModbusPointType.WRITE_COIL.value
+    """
+    DEBUG
+    """
+    if modbus_debug_funcs:
+        print("MODBUS read_digital, check reg_length",
+              {'reg_start': reg_start,
+               'reg_length': reg_length,
+               '_unit': _unit,
+               'func': func})
+
+    """
+    check that user if for example wants data type of float that the reg_length is > = 2
+    """
+    data_type = 'digital'
+    reg_length = _set_data_length(data_type,
+                                  reg_length)
+    """
+    DEBUG
+    """
+    if modbus_debug_funcs:
+        print("MODBUS read_digital, check reg_length result then do modbus read", "reg_length",
+              reg_length)
+    read = None
+    reg_type = None
+    """
+    Select which type of modbus read to do
+    """
+    if func == write_coil:
+        print(1231234234, 'write_value', write_value)
+        read = client.write_coil(reg_start, write_value, unit=_unit)
+        print(1231234234)
+        print(read)
+        reg_type = 'coil'
+    """
+    DEBUG
+    """
+    if modbus_debug_funcs:
+        print("MODBUS read_digital, do modbus read", "read", read, "reg_type", reg_type)
+    if not _assertion(read, client, reg_type):  # checking for errors
+        """
+        DEBUG
+        """
+        if modbus_debug_funcs:
+            print("MODBUS DEBUG, func _assertion, check data is valid (if in here modbus read was good)",
+                  {'reg_start': reg_start,
+                   'reg_length': reg_length,
+                   '_unit': _unit,
+                   'func': func})
+
+        # val = read.bits[0]
+        # array = read.bits
+        return {'val': read, 'array': read}

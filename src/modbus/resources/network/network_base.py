@@ -12,8 +12,8 @@ class ModusNetworkBase(Resource):
     parser.add_argument('device_timeout_global', type=int)
     parser.add_argument('point_timeout_global', type=int)
 
-    parser.add_argument('rtu_port', type=int, required=False)
-    parser.add_argument('rtu_speed', type=int, required=False)
+    parser.add_argument('rtu_port', type=str, required=False) # dev/ttyUSB0
+    parser.add_argument('rtu_speed', type=int, required=False) # 9600
     parser.add_argument('rtu_stopbits', type=int, required=False)
     parser.add_argument('rtu_parity', type=str, required=False)
     parser.add_argument('rtu_bytesize', type=int, required=False)
