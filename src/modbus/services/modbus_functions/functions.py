@@ -18,8 +18,8 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     :param func: modbus function type
     :return: dict
     """
-    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS.value
-    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS.value
+    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
+    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS
     """
     DEBUG
     """
@@ -80,8 +80,8 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
     :param func: modbus function type
     :return: dict
     """
-    read_coils = ModbusPointType.READ_COILS.value
-    read_discrete_input = ModbusPointType.READ_DISCRETE_INPUTS.value
+    read_coils = ModbusPointType.READ_COILS
+    read_discrete_input = ModbusPointType.READ_DISCRETE_INPUTS
     """
     DEBUG
     """
@@ -96,14 +96,12 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
     check that user if for example wants data type of float that the reg_length is > = 2
     """
     data_type = 'digital'
-    reg_length = _set_data_length(data_type,
-                                  reg_length)
+    reg_length = _set_data_length(data_type, reg_length)
     """
     DEBUG
     """
     if modbus_debug_funcs:
-        print("MODBUS read_digital, check reg_length result then do modbus read", "reg_length",
-              reg_length)
+        print("MODBUS read_digital, check reg_length result then do modbus read", "reg_length", reg_length)
     read = None
     reg_type = None
     """
@@ -146,7 +144,7 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, func, wri
     :param func: modbus function type
     :return: dict
     """
-    write_coil = ModbusPointType.WRITE_COIL.value
+    write_coil = ModbusPointType.WRITE_COIL
     """
     DEBUG
     """
