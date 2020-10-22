@@ -1,4 +1,5 @@
 import time
+
 from src import db
 from src.modbus.models.device import ModbusDeviceModel
 from src.modbus.models.network import ModbusNetworkModel, ModbusType
@@ -38,6 +39,6 @@ class RtuPolling:
                 select_from(ModbusNetworkModel).filter_by(type=ModbusType.RTU) \
                 .join(ModbusDeviceModel).filter_by(type=ModbusType.RTU) \
                 .join(ModbusPointModel).all()
-            db.session.close()  # TODO @binod to fix/check (close db to refresh the values after a HTTP PUT)
+            db.session.close()
             for network, device, point in results:
-                poll_point(network, device, point, 'rtu')
+                poll_point(network, device, point, ModbusType.RTU)

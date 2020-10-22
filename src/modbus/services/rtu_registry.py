@@ -1,6 +1,5 @@
 from pymodbus.client.sync import ModbusSerialClient
 import logging
-
 from src.modbus.services.modbus_functions.debug import modbus_pymodbus_logs, modbus_start_up
 
 if modbus_pymodbus_logs:
@@ -44,7 +43,7 @@ class RtuRegistry:
         port = network.rtu_port
         baudrate = network.rtu_speed
         stopbits = network.rtu_stopbits
-        parity = network.rtu_parity
+        parity = network.rtu_parity.name
         bytesize = network.rtu_bytesize
         timeout = network.timeout
 
@@ -58,6 +57,7 @@ class RtuRegistry:
         self.rtu_connections[key] = ModbusSerialClient(method=method, port=port, baudrate=baudrate, stopbits=stopbits,
                                                        parity=parity.value, bytesize=bytesize, timeout=timeout,
                                                        retries=0, retry_on_empty=False)
+
 
     def remove_connection_if_exist(self, port, baudrate, stopbits, parity, bytesize, timeout):
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)
@@ -74,7 +74,7 @@ class RtuRegistry:
         port = network.rtu_port
         baudrate = network.rtu_speed
         stopbits = network.rtu_stopbits
-        parity = network.rtu_parity
+        parity = network.rtu_parity.name
         bytesize = network.rtu_bytesize
         timeout = network.timeout
         return RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)

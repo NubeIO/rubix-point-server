@@ -36,6 +36,6 @@ class TcpPolling:
                 select_from(ModbusNetworkModel).filter_by(type=ModbusType.TCP) \
                 .join(ModbusDeviceModel).filter_by(type=ModbusType.TCP) \
                 .join(ModbusPointModel).all()
-            db.session.close()  # TODO @binod to fix/check (close db to refresh the values after a HTTP PUT)
+            db.session.close()
             for network, device, point in results:
-                poll_point(network, device, point, 'tcp')
+                poll_point(network, device, point, ModbusType.TCP)

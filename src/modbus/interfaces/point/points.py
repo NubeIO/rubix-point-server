@@ -13,7 +13,6 @@ class ModbusPointType(enum.Enum):
 
 
 class ModbusDataType(enum.Enum):
-
     RAW = 0
     INT16 = 1
     UINT16 = 2
@@ -21,6 +20,7 @@ class ModbusDataType(enum.Enum):
     UINT32 = 4
     FLOAT = 5
     DOUBLE = 6
+
 
 #     raw = 'raw'
 #     int16 = 'int16',
@@ -30,7 +30,6 @@ class ModbusDataType(enum.Enum):
 #     float = 'float',
 #     double = 'double',
 #     digital = 'digital',
-
 
 
 class ModbusDataEndian(enum.Enum):
