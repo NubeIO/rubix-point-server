@@ -1,4 +1,4 @@
-from src import ModbusPointStoreModel, TcpRegistry
+from src import TcpRegistry
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.modbus.services.rtu_registry import RtuRegistry
@@ -15,10 +15,10 @@ def poll_point(network, device, point, transport) -> None:
     :param transport: modbus transport as in TCP or RTU
     :return: None
     """
+
     """
     DEBUG
     """
-
     if modbus_debug_poll:
         print('MODBUS DEBUG: main looping function poll_point')
     connection = None
@@ -40,7 +40,7 @@ def poll_point(network, device, point, transport) -> None:
     mod_point_type = point.type.value
     mod_point_data_type = point.data_type
     mod_point_data_endian = point.data_endian
-
+    write_value = point.write_value
     read_coils = ModbusPointType.READ_COILS.value
     read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS.value
     read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS.value

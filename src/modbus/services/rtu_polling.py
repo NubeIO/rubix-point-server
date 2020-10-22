@@ -38,5 +38,6 @@ class RtuPolling:
                 select_from(ModbusNetworkModel).filter_by(type=ModbusType.RTU) \
                 .join(ModbusDeviceModel).filter_by(type=ModbusType.RTU) \
                 .join(ModbusPointModel).all()
+            db.session.close()
             for network, device, point in results:
                 poll_point(network, device, point, 'rtu')
