@@ -7,7 +7,7 @@ point_fields = {
     'reg_length': fields.Integer,
     'type': fields.String,
     'enable': fields.Boolean,
-    'write_value': fields.Integer,
+    'write_value': fields.Float,
     'data_type': fields.String,
     'data_endian': fields.String,
     'data_round': fields.Integer,
