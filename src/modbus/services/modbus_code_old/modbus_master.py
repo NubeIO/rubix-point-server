@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from pymodbus.client.sync import ModbusSerialClient as SerialClient
@@ -159,7 +160,7 @@ class Master:
         Get time.
         :return: list(timestamp,string)
         """
-        _now = pendulum.now()
+        _now = datetime.now()
         self.timestamp = _now.timestamp()
         self.time_string = _now.to_datetime_string()
         return self.timestamp, self.time_string

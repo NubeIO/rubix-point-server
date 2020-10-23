@@ -1,13 +1,13 @@
 import numbers
-
 from src import TcpRegistry, ModbusPointStoreModel
 from src.modbus.interfaces.network.network import ModbusType
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_poll
-from src.modbus.services.modbus_functions.functions import read_analogue, read_digital, write_digital
-from src.modbus.services.modbus_functions.poll_funcs import read_coils_func, write_coil_func, read_input_registers_func
+from src.modbus.services.modbus_functions.polling.poll_funcs import read_input_registers_handle, \
+    read_holding_registers_handle, \
+    write_coil_handle, \
+    read_coils_handle, write_registers_handle
 from src.modbus.services.rtu_registry import RtuRegistry
-from src.utils.data_funcs import DataHelpers
 
 
 def poll_point(network, device, point, transport) -> None:
@@ -50,11 +50,7 @@ def poll_point(network, device, point, transport) -> None:
     write_coil = ModbusPointType.WRITE_COIL
     read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
     read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS
-    # read_discrete_input = ModbusPointType.readDiscreteInputs.name
-    # write_coil = ModbusPointType.writeCoil.name
-    # write_register = ModbusPointType.writeRegister.name
-    # write_coils = ModbusPointType.writeCoils.name
-    # write_registers = ModbusPointType.writeRegisters.name
+    write_registers = ModbusPointType.WRITE_REGISTERS
     """
     DEBUG
     """
@@ -83,54 +79,66 @@ def poll_point(network, device, point, transport) -> None:
         read_coils
         """
         if mod_point_type == read_coils:
-            val = read_coils_func(connection,
-                                  reg,
-                                  mod_point_reg_length,
-                                  mod_device_addr,
-                                  mod_point_type)
+            val = read_coils_handle(connection,
+                                    reg,
+                                    mod_point_reg_length,
+                                    mod_device_addr,
+                                    mod_point_type)
         """
         write_coils
         """
         if mod_point_type == write_coil:
-            val = write_coil_func(connection, reg,
-                                  mod_point_reg_length,
-                                  mod_device_addr,
-                                  write_value,
-                                  mod_point_type)
+            val = write_coil_handle(connection, reg,
+                                    mod_point_reg_length,
+                                    mod_device_addr,
+                                    write_value,
+                                    mod_point_type)
+        """
+        read_input_registers
+        """
+        if mod_point_type == read_input_registers:
+            val = read_input_registers_handle(connection,
+                                              reg,
+                                              mod_point_reg_length,
+                                              mod_device_addr,
+                                              mod_point_data_type,
+                                              mod_point_data_endian,
+                                              mod_point_type)
         """
         read_holding_registers
         """
-        if mod_point_type == read_input_registers:
-            read = read_input_registers_func(connection,
-                                             reg,
-                                             mod_point_reg_length,
-                                             mod_device_addr,
-                                             mod_point_data_type,
-                                             mod_point_data_endian,
-                                             mod_point_type)
-            val = read['val']
-            array = read['array']
-            """
-            DEBUG
-            """
-            if modbus_debug_poll:
-                print("MODBUS DEBUG:", {'type': read_input_registers, "val": val, 'array': array})
+        if mod_point_type == read_holding_registers:
+            val = read_holding_registers_handle(connection,
+                                                reg,
+                                                mod_point_reg_length,
+                                                mod_device_addr,
+                                                mod_point_data_type,
+                                                mod_point_data_endian,
+                                                mod_point_type)
         """
-        Save modbus data in database
+        read_holding_registers 
         """
         if mod_point_type == read_holding_registers:
-            func = read_holding_registers
-            if modbus_debug_poll:
-                print("MODBUS DEBUG: try and read a register", {'type': read_holding_registers})
-            read = read_analogue(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
-                                 mod_point_data_endian, func)
-            val = read['val']
-            array = read['array']
-            """
-            DEBUG
-            """
-            if modbus_debug_poll:
-                print("MODBUS DEBUG:", {'type': read_holding_registers, "val": val, 'array': array})
+            val = read_holding_registers_handle(connection,
+                                                reg,
+                                                mod_point_reg_length,
+                                                mod_device_addr,
+                                                mod_point_data_type,
+                                                mod_point_data_endian,
+                                                mod_point_type)
+        """
+        write_registers write_registers
+        """
+        if mod_point_type == write_registers:
+            val = write_registers_handle(connection,
+                                         reg,
+                                         mod_point_reg_length,
+                                         mod_device_addr,
+                                         mod_point_data_type,
+                                         mod_point_data_endian,
+                                         write_value,
+                                         mod_point_type)
+
         """
         Save modbus data in database
         """

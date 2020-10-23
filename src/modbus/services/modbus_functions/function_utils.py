@@ -1,5 +1,5 @@
 from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
+from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
 from src.modbus.interfaces.point.points import ModbusPointUtils, ModbusPointUtilsFuncs
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 
@@ -111,3 +111,27 @@ def _select_data_type(data, data_type, byteorder, word_order):
     elif data_type == 'double':
         data = decoder.decode_32bit_float()
     return data
+
+
+def _builder_data_type(payload, data_type, byteorder, word_order):
+    """
+    Converts the data type int, int32, float and so on
+    :return: data in the selected data type
+    """
+    builder = BinaryPayloadBuilder(byteorder=byteorder, wordorder=word_order)
+    data = None
+    if data_type == 'int16':
+        data = builder.add_16bit_int(payload)
+    if data_type == 'uint16':
+        data = builder.add_16bit_uint(payload)
+    if data_type == 'int32':
+        data = builder.add_32bit_int(payload)
+    if data_type == 'uint32':
+        data = builder.add_32bit_uint(payload)
+    if data_type == 'float':
+        data = builder.add_32bit_float(payload)
+    elif data_type == 'double':
+        data = builder.add_64bit_float(payload)
+
+    return data.to_registers()
+
