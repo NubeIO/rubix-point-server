@@ -2,7 +2,7 @@
 
 INTERFACE_NAME = 'network'
 
-network_attributes = {
+network_all_attributes = {
     'network_uuid': {
         'type': str,
         'required': False,
@@ -19,3 +19,5 @@ network_attributes = {
         'help': '',
     },
 }
+
+network_return_attributes = {}

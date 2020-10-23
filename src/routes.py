@@ -1,5 +1,11 @@
 from flask_restful import Api
 from src import app
+
+
+from src.resources.resource_network import NetworkResource, NetworkResourceList
+from src.resources.resource_device import DeviceResource, DeviceResourceList
+from src.resources.resource_point import PointResource, PointResourceList
+
 # from src.sourceDrivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
 # from src.sourceDrivers.bacnet.resources.network import Network, NetworkList, NetworksIds
 
@@ -9,6 +15,17 @@ from src.sourceDrivers.modbusCopy.resources.mod_point import ModPoint, ModPointL
 
 api_ver = 'api'
 api = Api(app)
+
+# networks
+api.add_resource(NetworkResource, f'/{api_ver}/network/<string:uuid>')  # get network
+api.add_resource(NetworkResourceList, f'/{api_ver}/networks')  # get all networks
+# devices
+api.add_resource(DeviceResource, f'/{api_ver}/device/<string:uuid>')  # get device
+api.add_resource(DeviceResourceList, f'/{api_ver}/devices')  # get all devices
+# points
+api.add_resource(PointResource, f'/{api_ver}/point/<string:uuid>')  # get point
+api.add_resource(PointResourceList, f'/{api_ver}/points')  # get all points
+
 
 # bacnet endpoints
 # api.add_resource(Device, f'/{api_ver}/bacnet/dev/<string:uuid>')
@@ -29,5 +46,5 @@ api.add_resource(ModNetworkList, f'/{api_ver}/modbus/networks')  # get all modbu
 api.add_resource(ModDevice, f'/{api_ver}/modbus/device/<string:uuid>')  # CRUD a modbus device
 api.add_resource(ModDeviceList, f'/{api_ver}/modbus/devices')  # get all modbus devices
 # points
-api.add_resource(ModPoint, f'/{api_ver}/modbus/point/<string:uuid>')  # CRUD a modbus device
-api.add_resource(ModPointList, f'/{api_ver}/modbus/points')  # get all modbus devices
+api.add_resource(ModPoint, f'/{api_ver}/modbus/point/<string:uuid>')  # CRUD a modbus point
+api.add_resource(ModPointList, f'/{api_ver}/modbus/points')  # get all modbus points

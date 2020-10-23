@@ -1,7 +1,7 @@
 
 INTERFACE_NAME = 'device'
 
-device_attributes = {
+device_all_attributes = {
     'device_uuid': {
         'type': str,
         'required': False,
@@ -33,3 +33,5 @@ device_attributes = {
         'help': '',
     },
 }
+
+device_return_attributes = {}

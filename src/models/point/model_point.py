@@ -1,5 +1,5 @@
 from src import db
-from src.models.model_point_store import PointStoreModel
+from src.models.point.model_point_store import PointStoreModel
 
 
 class PointModel(db.Model):

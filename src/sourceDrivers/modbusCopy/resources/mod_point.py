@@ -1,44 +1,32 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
 from src.sourceDrivers.modbusCopy.models.mod_point import ModbusPointModel
-# from src.sourceDrivers.modbusCopy.models. import ModbusPointModel
-from src.sourceDrivers.modbusCopy.rest_schema.schema_modbus_point import point_attributes, INTERFACE_NAME
+from src.resources.utils import mapRestSchema
+from src.sourceDrivers.modbusCopy.rest_schema.schema_modbus_point import modbus_point_all_attributes, \
+    point_return_attributes, INTERFACE_NAME
 
 
-def getType(attr_type):
-    if attr_type == int:
-        return fields.Integer
-    elif attr_type == str:
-        return fields.String
-    elif attr_type == bool:
-        return fields.Boolean
-    elif attr_type == float:
-        return fields.Float
-
-
-point_fields = {
-    'point_value': fields.Float(attribute='value.point_value'),
-}
-for attr in point_attributes:
-    point_fields[attr] = getType(point_attributes[attr]['type'])
+modbus_point_all_fields = {}
+mapRestSchema(modbus_point_all_attributes, modbus_point_all_fields)
+mapRestSchema(point_return_attributes, modbus_point_all_fields)
 
 
 class ModPoint(Resource):
     parser = reqparse.RequestParser()
-    for attr in point_attributes:
+    for attr in modbus_point_all_attributes:
         parser.add_argument(attr,
-                            type=point_attributes[attr]['type'],
-                            required=point_attributes[attr]['required'],
-                            help=point_attributes[attr]['help'],
+                            type=modbus_point_all_attributes[attr]['type'],
+                            required=modbus_point_all_attributes[attr]['required'],
+                            help=modbus_point_all_attributes[attr]['help'],
                             )
 
-    @marshal_with(point_fields)
+    @marshal_with(modbus_point_all_fields)
     def get(self, uuid):
         point = ModbusPointModel.find_by_uuid(uuid)
         if not point:
             abort(404, message=f'{INTERFACE_NAME} not found')
         return point
 
-    @marshal_with(point_fields)
+    @marshal_with(modbus_point_all_fields)
     def post(self, uuid):
         if ModbusPointModel.find_by_uuid(uuid):
             return {'message': "An device with mod_device_uuid '{}' already exists.".format(uuid)}, 400
@@ -49,7 +37,7 @@ class ModPoint(Resource):
         device.save_to_db()
         return device, 201
 
-    @marshal_with(point_fields)
+    @marshal_with(modbus_point_all_fields)
     def put(self, uuid):
         data = ModPoint.parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)
@@ -61,7 +49,6 @@ class ModPoint(Resource):
             point.mod_point_reg = data['mod_point_reg']
             point.mod_point_reg_length = data['mod_point_reg_length']
             point.mod_point_type = data['mod_point_type']
-            point.mod_point_write_value = data['mod_point_write_value']
             point.mod_point_data_type = data['mod_point_data_type']
             point.mod_point_data_endian = data['mod_point_data_endian']
             point.mod_point_data_round = data['mod_point_data_round']
@@ -88,7 +75,6 @@ class ModPoint(Resource):
                                  mod_point_reg_length=data['mod_point_reg_length'],
                                  mod_point_type=data['mod_point_type'],
                                  point_enable=data['point_enable'],
-                                 mod_point_write_value=data['mod_point_write_value'],
                                  mod_point_data_type=data['mod_point_data_type'],
                                  mod_point_data_endian=data['mod_point_data_endian'],
                                  mod_point_data_round=data['mod_point_data_round'],
@@ -103,7 +89,8 @@ class ModPoint(Resource):
 
 
 class ModPointList(Resource):
-    @marshal_with(point_fields, envelope="mod_points")
+    @marshal_with(modbus_point_all_fields, envelope="modbus_points")
     def get(self):
         result = ModbusPointModel.query.all()
         return result
+

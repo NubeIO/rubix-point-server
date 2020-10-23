@@ -1,7 +1,7 @@
 import enum
 from sqlalchemy.orm import validates
 from src import db
-from src.models.model_driver_network import DriverNetworkModel
+from src.models.network.model_driver_network import DriverNetworkModel
 
 
 class ModbusType(enum.Enum):
@@ -20,10 +20,6 @@ class Parity(enum.Enum):
 class ModbusNetworkModel(DriverNetworkModel):
     DRIVER_NAME = 'Modbus'
     __tablename__ = 'modbus_networks'
-    network_uuid = db.Column(db.String(80), db.ForeignKey('networks.network_uuid'), primary_key=True, nullable=False)
-    __mapper_args__ = {
-        'polymorphic_identity': DRIVER_NAME
-    }
 
     mod_network_type = db.Column(db.Enum(ModbusType), nullable=False)
     mod_network_timeout = db.Column(db.Integer(), nullable=False)

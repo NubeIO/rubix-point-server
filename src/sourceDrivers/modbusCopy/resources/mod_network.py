@@ -1,41 +1,32 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
+from src.resources.utils import mapRestSchema
 from src.sourceDrivers.modbusCopy.models.mod_network import ModbusNetworkModel
-from src.sourceDrivers.modbusCopy.rest_schema.schema_modbus_network import network_attributes
+from src.sourceDrivers.modbusCopy.rest_schema.schema_modbus_network import modbus_network_all_attributes, \
+    network_return_attributes
 
 
-def getType(attr_type):
-    if attr_type == int:
-        return fields.Integer
-    elif attr_type == str:
-        return fields.String
-    elif attr_type == bool:
-        return fields.Boolean
-    elif attr_type == float:
-        return fields.Float
-
-
-network_fields = {}
-for attr in network_attributes:
-    network_fields[attr] = getType(network_attributes[attr]['type'])
+modbus_network_all_fields = {}
+mapRestSchema(modbus_network_all_attributes, modbus_network_all_fields)
+mapRestSchema(network_return_attributes, modbus_network_all_fields)
 
 
 class ModNetwork(Resource):
     parser = reqparse.RequestParser()
-    for attr in network_attributes:
+    for attr in modbus_network_all_attributes:
         parser.add_argument(attr,
-                            type=network_attributes[attr]['type'],
-                            required=network_attributes[attr]['required'],
-                            help=network_attributes[attr]['help'],
+                            type=modbus_network_all_attributes[attr]['type'],
+                            required=modbus_network_all_attributes[attr]['required'],
+                            help=modbus_network_all_attributes[attr]['help'],
                             )
 
-    @marshal_with(network_fields)
+    @marshal_with(modbus_network_all_fields)
     def get(self, uuid):
         network = ModbusNetworkModel.find_by_network_uuid(uuid)
         if not network:
             abort(404, message='Modbus Network not found')
         return network
 
-    @marshal_with(network_fields)
+    @marshal_with(modbus_network_all_fields)
     def post(self, uuid):
         print('POST NETWORK')
         print('finding existing...')
@@ -52,7 +43,7 @@ class ModNetwork(Resource):
         except Exception as e:
             return abort(500, message=str(e))
 
-    # @marshal_with(network_fields)
+    # @marshal_with(modbus_network_all_fields)
     # def put(self, uuid):
     #     data = ModNetwork.parser.parse_args()
     #     network = ModbusNetworkModel.find_by_network_uuid(uuid)
@@ -100,12 +91,12 @@ class ModNetwork(Resource):
 
 
 class ModNetworkList(Resource):
-    @marshal_with(network_fields, envelope="mod_networks")
+    @marshal_with(modbus_network_all_fields, envelope="modbus_networks")
     def get(self):
         return ModbusNetworkModel.query.all()
 
 
 class ModNetworksIds(Resource):
-    @marshal_with(network_fields, envelope="mod_networks")
+    @marshal_with(modbus_network_all_fields, envelope="modbus_network_uuids")
     def get(self):
         return ModbusNetworkModel.query.all()

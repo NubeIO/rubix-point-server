@@ -2,7 +2,7 @@
 
 INTERFACE_NAME = 'point'
 
-point_attributes = {
+point_all_attributes = {
     'point_uuid': {
         'type': str,
         'required': False,
@@ -28,19 +28,26 @@ point_attributes = {
         'required': False,
         'help': '',
     },
+
+}
+
+point_return_attributes = {
+    'point_value': {
+        'type': float,
+        'nested': True,
+        'dict': 'value.point_value',
+        'help': ''
+    },
     'point_write_ok': {
         'type': str,
-        'required': False,
         'help': '',
     },
     'point_fault': {
         'type': str,
-        'required': False,
         'help': '',
     },
     'point_last_poll_timestamp': {
         'type': str,
-        'required': False,
         'help': '',
     },
 }

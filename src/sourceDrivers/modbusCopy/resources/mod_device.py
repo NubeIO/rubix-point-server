@@ -1,34 +1,25 @@
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
+from src.resources.utils import mapRestSchema
 from src.sourceDrivers.modbusCopy.models.mod_device import ModbusDeviceModel
-from src.sourceDrivers.modbusCopy.rest_schema.schema_modbus_device import device_attributes, INTERFACE_NAME
+from src.sourceDrivers.modbusCopy.rest_schema.schema_modbus_device import modbus_device_all_attributes, \
+    device_return_attributes, INTERFACE_NAME
 
 
-def getType(attr_type):
-    if attr_type == int:
-        return fields.Integer
-    elif attr_type == str:
-        return fields.String
-    elif attr_type == bool:
-        return fields.Boolean
-    elif attr_type == float:
-        return fields.Float
-
-
-device_fields = {}
-for attr in device_attributes:
-    device_fields[attr] = getType(device_attributes[attr]['type'])
+modbus_device_all_fields = {}
+mapRestSchema(modbus_device_all_attributes, modbus_device_all_fields)
+mapRestSchema(device_return_attributes, modbus_device_all_fields)
 
 
 class ModDevice(Resource):
     parser = reqparse.RequestParser()
-    for attr in device_attributes:
+    for attr in modbus_device_all_attributes:
         parser.add_argument(attr,
-                            type=device_attributes[attr]['type'],
-                            required=device_attributes[attr]['required'],
-                            help=device_attributes[attr]['help'],
+                            type=modbus_device_all_attributes[attr]['type'],
+                            required=modbus_device_all_attributes[attr]['required'],
+                            help=modbus_device_all_attributes[attr]['help'],
                             )
 
-    @marshal_with(device_fields)
+    @marshal_with(modbus_device_all_fields)
     def get(self, uuid):
         device = ModbusDeviceModel.find_by_device_uuid(uuid)
         if not device:
@@ -36,7 +27,7 @@ class ModDevice(Resource):
 
         return device
 
-    @marshal_with(device_fields)
+    @marshal_with(modbus_device_all_fields)
     def post(self, uuid):
         if ModbusDeviceModel.find_by_device_uuid(uuid):
             return {'message': "An device with device_uuid '{}' already exists.".format(uuid)}, 400
@@ -50,7 +41,7 @@ class ModDevice(Resource):
         except Exception as e:
             return abort(500, message=str(e))
 
-    @marshal_with(device_fields)
+    @marshal_with(modbus_device_all_fields)
     def put(self, uuid):
         data = ModDevice.parser.parse_args()
         device = ModbusDeviceModel.find_by_device_uuid(uuid)
@@ -98,11 +89,6 @@ class ModDevice(Resource):
 
 
 class ModDeviceList(Resource):
-    @marshal_with(device_fields, envelope="mod_devices")
+    @marshal_with(modbus_device_all_fields, envelope="modbus_devices")
     def get(self):
         return ModbusDeviceModel.query.all()
-
-# mod_device_point_fields = network_fields
-# mod_updated_device_fields = device_fields.copy()
-# mod_updated_device_fields.update({'hello': fields.String})
-# mod_device_point_fields['devices'] = fields.List(fields.Nested(mod_updated_device_fields))

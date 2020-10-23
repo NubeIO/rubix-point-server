@@ -1,15 +1,11 @@
 from src import db
 from src.sourceDrivers.modbusCopy.models.mod_network import ModbusType
-from src.models.model_driver_device import DriverDeviceModel
+from src.models.device.model_driver_device import DriverDeviceModel
 
 
 class ModbusDeviceModel(DriverDeviceModel):
     DRIVER_NAME = 'Modbus'
     __tablename__ = 'modbus_devices'
-    device_uuid = db.Column(db.String(80), db.ForeignKey('devices.device_uuid'), primary_key=True, nullable=False)
-    __mapper_args__ = {
-        'polymorphic_identity': DRIVER_NAME
-    }
 
     mod_device_type = db.Column(db.Enum(ModbusType), nullable=False)
     mod_device_addr = db.Column(db.Integer(), nullable=False)

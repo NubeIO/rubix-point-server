@@ -1,52 +1,53 @@
+from copy import deepcopy
 from src.rest_schema.schema_device import *
 
-
-device_attributes['mod_device_type'] = {
+modbus_device_all_attributes = deepcopy(device_all_attributes)
+modbus_device_all_attributes['mod_device_type'] = {
     'type': str,
     'required': True,
     'help': '',
 }
-device_attributes['mod_device_addr'] = {
+modbus_device_all_attributes['mod_device_addr'] = {
     'type': int,
     'required': True,
     'help': '',
 }
-device_attributes['mod_tcp_device_ip'] = {
+modbus_device_all_attributes['mod_tcp_device_ip'] = {
     'type': str,
     'required': True,
     'help': '',
 }
-device_attributes['mod_tcp_device_port'] = {
+modbus_device_all_attributes['mod_tcp_device_port'] = {
     'type': int,
     'required': True,
     'help': '',
 }
-device_attributes['mod_ping_point_type'] = {
+modbus_device_all_attributes['mod_ping_point_type'] = {
     'type': str,
     'required': True,
     'help': '',
 }
-device_attributes['mod_ping_point_address'] = {
+modbus_device_all_attributes['mod_ping_point_address'] = {
     'type': int,
     'required': True,
     'help': '',
 }
-device_attributes['mod_device_zero_mode'] = {
+modbus_device_all_attributes['mod_device_zero_mode'] = {
     'type': bool,
     'required': True,
     'help': '',
 }
-device_attributes['mod_device_timeout'] = {
+modbus_device_all_attributes['mod_device_timeout'] = {
     'type': int,
     'required': True,
     'help': '',
 }
-device_attributes['mod_device_timeout_global'] = {
+modbus_device_all_attributes['mod_device_timeout_global'] = {
     'type': bool,
     'required': True,
     'help': '',
 }
-device_attributes['mod_device_last_poll_timestamp'] = {
+modbus_device_all_attributes['mod_device_last_poll_timestamp'] = {
     'type': int,
     'required': False,
     'help': '',
