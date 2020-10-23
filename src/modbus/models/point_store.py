@@ -14,6 +14,10 @@ class ModbusPointStoreModel(db.Model):
     def __repr__(self):
         return f"ModbusPointStore({self.id})"
 
+    @classmethod
+    def find_last_valid_row(cls, point_uuid):
+        return cls.query.filter_by(point_uuid=point_uuid, fault=False).order_by(cls.ts.desc()).first()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
