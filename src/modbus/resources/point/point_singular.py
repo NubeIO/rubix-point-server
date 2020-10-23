@@ -23,7 +23,7 @@ class ModbusPointSingular(ModbusPointBase):
             .join(ModbusPointStoreModel, isouter=True) \
             .order_by(ModbusPointStoreModel.id.desc()) \
             .first()
-        db.session.close()
+        db.session.commit()
         if not point:
             abort(404, message=f'Modbus Point not found')
 
