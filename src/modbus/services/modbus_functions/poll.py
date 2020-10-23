@@ -5,6 +5,7 @@ from src.modbus.interfaces.network.network import ModbusType
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.modbus.services.modbus_functions.functions import read_analogue, read_digital, write_digital
+from src.modbus.services.modbus_functions.poll_funcs import read_coils_func, write_coil_func
 from src.modbus.services.rtu_registry import RtuRegistry
 from src.utils.data_funcs import DataHelpers
 
@@ -82,30 +83,12 @@ def poll_point(network, device, point, transport) -> None:
         read_coils
         """
         if mod_point_type == read_coils:
-            func = read_coils
-            read = read_digital(connection, reg, mod_point_reg_length, mod_device_addr, func)
-            single = read['val']
-            array = read['array']
-            val = DataHelpers.bool_to_int(single)
-            """
-            DEBUG
-            """
-            if modbus_debug_poll:
-                print("MODBUS DEBUG:", {'type': read_coils, "val": val, 'array': array})
+            val = read_coils_func(mod_point_type, connection, reg, mod_point_reg_length, mod_device_addr)
         """
         write_coils
         """
         if mod_point_type == write_coil:
-            func = write_coil
-            read = write_digital(connection, reg, mod_point_reg_length, mod_device_addr, func, write_value)
-            single = read['val']
-            array = read['array']
-            val = DataHelpers.bool_to_int(single)
-            """
-            DEBUG
-            """
-            if modbus_debug_poll:
-                print("MODBUS DEBUG:", {'type': func, "val": val, 'array': array})
+            val = write_coil_func(mod_point_type, connection, reg, mod_point_reg_length, mod_device_addr, write_value)
         """
         read_holding_registers
         """
