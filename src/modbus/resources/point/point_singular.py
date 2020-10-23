@@ -1,18 +1,33 @@
 from flask_restful import abort, marshal_with
 
+from src import db
 from src.modbus.interfaces.point.points import ModbusDataType, ModbusPointType, ModbusDataEndian
 from src.modbus.models.point import ModbusPointModel
+from src.modbus.models.point_store import ModbusPointStoreModel
 from src.modbus.resources.mod_fields import point_fields
 from src.modbus.resources.point.point_base import ModbusPointBase
+from src.utils.model_utils import ModelUtils
 
 
 class ModbusPointSingular(ModbusPointBase):
-    @marshal_with(point_fields)
+    """
+    It returns point with point_store object value, which has the current values of point_store for that particular
+    point with last not null value and value_array
+    """
+
     def get(self, uuid):
-        point = ModbusPointModel.find_by_uuid(uuid)
+        point = db.session \
+            .query(ModbusPointModel, ModbusPointStoreModel) \
+            .select_from(ModbusPointModel) \
+            .filter_by(uuid=uuid) \
+            .join(ModbusPointStoreModel, isouter=True) \
+            .order_by(ModbusPointStoreModel.id.desc()) \
+            .first()
+        db.session.close()
         if not point:
             abort(404, message=f'Modbus Point not found')
-        return point
+
+        return {**ModelUtils.row2dict(point[0]), "point_store": self.create_point_store(point[1])}, 200
 
     @marshal_with(point_fields)
     def put(self, uuid):
