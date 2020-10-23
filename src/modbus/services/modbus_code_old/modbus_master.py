@@ -1,4 +1,3 @@
-import pendulum
 import time
 
 from pymodbus.client.sync import ModbusSerialClient as SerialClient
