@@ -22,7 +22,7 @@ class ModbusPointPlural(ModbusPointBase):
             .select_from(ModbusPointModel) \
             .join(filtered_partition_table, ModbusPointModel.uuid == filtered_partition_table.c.point_uuid,
                   isouter=True).all()
-        db.session.close()
+        db.session.commit()
         serialized_output = []
         for row in joined_table:
             serialized_output.append({**ModelUtils.row2dict(row[0]), "point_store": self.create_point_store(row)})

@@ -11,3 +11,4 @@ bacpypes
 pymodbus
 flask_cors
 uuid==1.30
+schedule==0.6.0

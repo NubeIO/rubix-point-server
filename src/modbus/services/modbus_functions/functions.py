@@ -48,7 +48,7 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     Select which type of modbus read to do
     """
     if func == read_holding_registers:
-        read = client.read_holding_registers(reg_start, reg_length, unit=1)
+        read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
         reg_type = 'holding'
         """
         DEBUG
