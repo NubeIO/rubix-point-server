@@ -5,6 +5,8 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
+from src.modbus.services.point_store_cleaner import PointStoreCleaner
+
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
@@ -33,3 +35,6 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     RtuRegistry.get_instance().register()
     rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
     rtu_polling_thread.start()
+
+    point_cleaner_thread = Thread(target=PointStoreCleaner.register)
+    point_cleaner_thread.start()
