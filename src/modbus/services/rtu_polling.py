@@ -5,7 +5,7 @@ from src.modbus.models.device import ModbusDeviceModel
 from src.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.modbus.models.point import ModbusPointModel
 from src.modbus.services.modbus_functions.debug import modbus_polling_count
-from src.modbus.services.modbus_functions.poll import poll_point
+from src.modbus.services.modbus_functions.polling.poll import poll_point
 
 
 class RtuPolling:

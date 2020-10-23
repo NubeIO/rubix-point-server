@@ -1,9 +1,11 @@
+from pymodbus.payload import BinaryPayloadBuilder
+
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 from src.modbus.services.modbus_functions.function_utils import _set_data_length, \
     _assertion, \
     _mod_point_data_endian, \
-    _select_data_type
+    _select_data_type, _builder_data_type
 
 
 def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type, endian, func) -> dict:
@@ -144,7 +146,7 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
         return {'val': val, 'array': array}
 
 
-def write_digital(client, reg_start: int, reg_length: int, _unit: int, func, write_value: int) -> dict:
+def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_value: int, func) -> dict:
     """
     Write coil
     :param client: modbus client
@@ -159,7 +161,7 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, func, wri
     DEBUG
     """
     if modbus_debug_funcs:
-        print("MODBUS read_digital, check reg_length",
+        print("MODBUS write_digital, check reg_length",
               {'reg_start': reg_start,
                'reg_length': reg_length,
                '_unit': _unit,
@@ -175,7 +177,7 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, func, wri
     DEBUG
     """
     if modbus_debug_funcs:
-        print("MODBUS read_digital, check reg_length result then do modbus read", "reg_length",
+        print("MODBUS write_digital, check reg_length result then do modbus write", "reg_length",
               reg_length)
     read = None
     reg_type = None
@@ -193,6 +195,79 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, func, wri
     """
     if modbus_debug_funcs:
         print("MODBUS read_digital, do modbus read", "read", read, "reg_type", reg_type)
+    if not _assertion(read, client, reg_type):  # checking for errors
+        """
+        DEBUG
+        """
+        if modbus_debug_funcs:
+            print("MODBUS DEBUG, func _assertion, check data is valid (if in here modbus read was good)",
+                  {'reg_start': reg_start,
+                   'reg_length': reg_length,
+                   '_unit': _unit,
+                   'func': func})
+
+        # val = read.bits[0]
+        # array = read.bits
+        return {'val': read, 'array': read}
+
+
+def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type, endian, write_value: int,
+                   func) -> dict:
+    """
+    Write holding reg
+    :param client: modbus client
+    :param reg_start: modbus client
+    :param reg_length: modbus client
+    :param _unit: modbus address as an int
+    :param func: modbus function type
+    :return: dict
+    """
+    write_registers = ModbusPointType.WRITE_REGISTERS
+
+    """
+    check that user if for example wants data type of float that the reg_length is > = 2
+    """
+    reg_length = _set_data_length(data_type,
+                                  reg_length)
+    """
+    DEBUG
+    """
+    if modbus_debug_funcs:
+        print("MODBUS write_analogue, check reg_length",
+              {'reg_start': reg_start,
+               'reg_length': reg_length,
+               '_unit': _unit,
+               'func': func})
+
+    """
+    set up for word and byte order
+    """
+    bo_wo = _mod_point_data_endian(endian)
+    byteorder = bo_wo['bo']
+    word_order = bo_wo['wo']
+    """
+    Converts the data type int, int32, float and so on
+    """
+    payload = _builder_data_type(write_value, data_type, byteorder, word_order)
+
+    if modbus_debug_funcs:
+        print("MODBUS write_analogue, check reg_length result then do modbus write", "reg_length",
+              reg_length)
+    read = None
+    reg_type = None
+    """
+    Select which type of modbus read to do
+    """
+    if func == write_registers:
+        read = client.write_coil(reg_start, payload, unit=_unit)
+        print(1231234234)
+        print(read)
+        reg_type = 'holding'
+    """
+    DEBUG
+    """
+    if modbus_debug_funcs:
+        print("MODBUS write_analogue, do modbus write", "write", read, "reg_type", reg_type)
     if not _assertion(read, client, reg_type):  # checking for errors
         """
         DEBUG
