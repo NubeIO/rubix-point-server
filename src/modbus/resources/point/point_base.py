@@ -20,12 +20,6 @@ class ModbusPointBase(Resource):
     parser.add_argument('timeout_global', type=bool, required=True)
     parser.add_argument('prevent_duplicates', type=bool, required=True)
     parser.add_argument('prevent_duplicates_global', type=bool, required=True)
-    parser.add_argument('write_ok', type=bool, required=False)
-    parser.add_argument('fault', type=bool, required=False)
-    parser.add_argument('last_poll_timestamp', type=str, required=False)
-    parser.add_argument('fault_timestamp', type=str, required=False)
-    parser.add_argument('value', type=int, required=False)
-    parser.add_argument('value_array', type=str, required=False)
     parser.add_argument('device_uuid', type=str, required=True)
 
     @staticmethod
@@ -44,3 +38,21 @@ class ModbusPointBase(Resource):
     def abort_if_device_does_not_exist(self, device_uuid):
         if not ModbusDeviceModel.find_by_uuid(device_uuid):
             abort(400, message='Device does not exist of that device_uuid')
+
+    def create_point_store(self, row):
+        if row:
+            return {
+                'value': row.value,
+                'value_array': row.value_array,
+                'fault': row.fault,
+                'fault_message': row.fault_message,
+                'ts': str(row.ts) if row.ts else None,
+            }
+        else:
+            return {
+                'value': None,
+                'value_array': None,
+                'fault': None,
+                'fault_message': None,
+                'ts': None,
+            }

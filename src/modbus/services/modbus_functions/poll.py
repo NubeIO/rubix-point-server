@@ -1,4 +1,6 @@
-from src import TcpRegistry
+import numbers
+
+from src import TcpRegistry, ModbusPointStoreModel
 from src.modbus.interfaces.network.network import ModbusType
 from src.modbus.interfaces.point.points import ModbusPointType
 from src.modbus.services.modbus_functions.debug import modbus_debug_poll
@@ -70,8 +72,12 @@ def poll_point(network, device, point, transport) -> None:
                                 'read_input_registers': read_input_registers,
                                 })
 
+    fault = False
+    fault_message = ""
+    point_store = None
     try:
         val = None
+        array = ""
         """
         read_coils
         """
@@ -133,13 +139,25 @@ def poll_point(network, device, point, transport) -> None:
         """
         Save modbus data in database
         """
-        if val:
-            # TODO add in last poll timestamp, point write/fault status and modbus array to db
-            """
-            DEBUG
-            """
-            if modbus_debug_poll:
-                print("MODBUS DEBUG:  READ/WRITE WAS DONE", 'TRANSPORT TYPE= ', transport)
-            # ModbusPointStoreModel(mod_point_value=val, mod_point_uuid=point.mod_point_uuid).save_to_db()
+        if modbus_debug_poll:
+            print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE =', transport)
+        if isinstance(val, numbers.Number):
+            point_store = ModbusPointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
+        else:
+            fault = True
+            fault_message = "Got not numeric value"
     except Exception as e:
         print(f'MODBUS ERROR: in poll main function {str(e)}')
+        fault = True
+        fault_message = str(e)
+
+    if not point_store:
+        last_valid_row = ModbusPointStoreModel.find_last_valid_row(point.uuid)
+        if last_valid_row:
+            point_store = ModbusPointStoreModel(value=last_valid_row.value, value_array=last_valid_row.value_array,
+                                                fault=fault, fault_message=fault_message, point_uuid=point.uuid)
+        else:
+            point_store = ModbusPointStoreModel(value=0, fault=fault, fault_message=fault_message,
+                                                point_uuid=point.uuid)
+
+    point_store.save_to_db()
