@@ -4,7 +4,8 @@ from src import app
 
 from src.resources.resource_network import NetworkResource, NetworkResourceList
 from src.resources.resource_device import DeviceResource, DeviceResourceList
-from src.resources.resource_point import PointResource, PointResourceList
+from src.resources.resource_point import PointResource, PointResourceList, PointReadOnlyResourceList,\
+    PointWriteableResourceList
 
 # from src.sourceDrivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
 # from src.sourceDrivers.bacnet.resources.network import Network, NetworkList, NetworksIds
@@ -25,6 +26,8 @@ api.add_resource(DeviceResourceList, f'/{api_ver}/devices')  # get all devices
 # points
 api.add_resource(PointResource, f'/{api_ver}/point/<string:uuid>')  # get point
 api.add_resource(PointResourceList, f'/{api_ver}/points')  # get all points
+api.add_resource(PointReadOnlyResourceList, f'/{api_ver}/points/readonly')  # get all readOnly points
+api.add_resource(PointWriteableResourceList, f'/{api_ver}/points/writable')  # get all writable points
 
 
 # bacnet endpoints
