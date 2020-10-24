@@ -54,7 +54,7 @@ def read_holding_registers_handle(connection, reg, mod_point_reg_length,
                                   mod_device_addr, mod_point_data_type,
                                   mod_point_data_endian, mod_point_type):
     if modbus_debug_poll:
-        print("MODBUS DEBUG: try and read a register", {'type': mod_point_type})
+        print("MODBUS DEBUG: inside read_holding_registers_handle try and read", {'type': mod_point_type})
     read = read_analogue(connection, reg, mod_point_reg_length,
                          mod_device_addr, mod_point_data_type,
                          mod_point_data_endian, mod_point_type)
@@ -64,7 +64,8 @@ def read_holding_registers_handle(connection, reg, mod_point_reg_length,
     DEBUG
     """
     if modbus_debug_poll:
-        print("MODBUS DEBUG:", {'type': mod_point_type, "val": val, 'array': array})
+        print(9999999)
+        print("MODBUS DEBUG: inside read_holding_registers_handle AFTER read", {'type': mod_point_type, "val": val, 'array': array})
     return val
 
 
