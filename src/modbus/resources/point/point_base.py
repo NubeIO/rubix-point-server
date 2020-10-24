@@ -16,7 +16,7 @@ class ModbusPointBase(Resource):
     parser.add_argument('data_endian', type=str, required=True)
     parser.add_argument('data_round', type=int, required=True)
     parser.add_argument('data_offset', type=str, required=True)
-    parser.add_argument('timeout', type=int, required=True)
+    parser.add_argument('timeout', type=float, required=True)
     parser.add_argument('timeout_global', type=bool, required=True)
     parser.add_argument('prevent_duplicates', type=bool, required=True)
     parser.add_argument('prevent_duplicates_global', type=bool, required=True)

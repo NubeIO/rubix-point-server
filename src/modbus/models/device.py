@@ -16,7 +16,7 @@ class ModbusDeviceModel(db.Model):
     ping_point_type = db.Column(db.String(80), nullable=False)
     ping_point_address = db.Column(db.Integer(), nullable=False)
     zero_mode = db.Column(db.Boolean(), nullable=False)
-    timeout = db.Column(db.Integer(), nullable=False)
+    timeout = db.Column(db.Float(), nullable=False)
     timeout_global = db.Column(db.Boolean(), nullable=False)
     fault = db.Column(db.Boolean())
     last_poll_timestamp = db.Column(db.DateTime)

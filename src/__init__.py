@@ -28,9 +28,9 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
 
     Network.get_instance().start()
 
-    TcpRegistry.get_instance().register()
-    tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
-    tcp_polling_thread.start()
+    # TcpRegistry.get_instance().register()
+    # tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
+    # tcp_polling_thread.start()
 
     RtuRegistry.get_instance().register()
     rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)

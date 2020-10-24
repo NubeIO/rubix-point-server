@@ -15,7 +15,7 @@ class ModbusPointModel(db.Model):
     data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False)
     data_round = db.Column(db.Integer(), nullable=False)
     data_offset = db.Column(db.String(80), nullable=False)
-    timeout = db.Column(db.Integer(), nullable=False)
+    timeout = db.Column(db.Float(), nullable=False)
     timeout_global = db.Column(db.Boolean(), nullable=False)
     prevent_duplicates = db.Column(db.Boolean(), nullable=False)
     prevent_duplicates_global = db.Column(db.Boolean(), nullable=False)

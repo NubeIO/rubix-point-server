@@ -31,7 +31,7 @@ network_obj = {
     "name": "mod_network_name hey",
     "type": "RTU",
     "enable": True,
-    "timeout": 5,
+    "timeout": 0.1,
     "device_timeout_global": 1000,
     "point_timeout_global": 2000,
     "rtu_port": "/dev/ttyUSB2",
