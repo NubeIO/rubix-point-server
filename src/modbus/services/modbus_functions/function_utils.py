@@ -16,6 +16,7 @@ def _set_data_length(data_type, reg_length):
     length = reg_length
 
     if True:  # TODO add a check for data type
+        _raw = ModbusDataType.RAW
         _digital = ModbusDataType.DIGITAL
         _int16 = ModbusDataType.INT16
         _uint16 = ModbusDataType.UINT16
@@ -23,6 +24,9 @@ def _set_data_length(data_type, reg_length):
         _uint32 = ModbusDataType.UINT32
         _float = ModbusDataType.FLOAT
         _double = ModbusDataType.DOUBLE
+        if _raw:
+            print(232323)
+            return length
         if _digital:
             if reg_length < 1:
                 return 1

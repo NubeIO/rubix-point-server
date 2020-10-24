@@ -1,6 +1,6 @@
 from pymodbus.payload import BinaryPayloadBuilder
 
-from src.modbus.interfaces.point.points import ModbusPointType
+from src.modbus.interfaces.point.points import ModbusPointType, ModbusDataType
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 from src.modbus.services.modbus_functions.function_utils import _set_data_length, \
     _assertion, \
@@ -71,14 +71,18 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
         """
         set up for word and byte order
         """
-        bo_wo = _mod_point_data_endian(endian)
-        byteorder = bo_wo['bo']
-        word_order = bo_wo['wo']
-        """
-        Converts the data type int, int32, float and so on
-        """
-        data_type = _select_data_type(read, data_type, byteorder, word_order)
-        val = data_type
+        if not ModbusDataType.RAW:
+            print(55555)
+            """
+            Converts the data type int, int32, float and so on
+            """
+            bo_wo = _mod_point_data_endian(endian)
+            byteorder = bo_wo['bo']
+            word_order = bo_wo['wo']
+            data_type = _select_data_type(read, data_type, byteorder, word_order)
+            val = data_type
+        else:
+            val = read.registers[0]  # first register
         return {'val': val, 'array': read.registers}
 
 

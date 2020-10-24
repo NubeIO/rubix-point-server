@@ -55,6 +55,7 @@ def poll_point(network, device, point, transport) -> None:
     DEBUG
     """
     if modbus_debug_poll:
+        print("@@@ START MODBUS POLL !!")
         print("MODBUS DEBUG:", {'network': network,
                                 'device': device,
                                 'transport': transport,
@@ -155,6 +156,7 @@ def poll_point(network, device, point, transport) -> None:
         fault = True
         fault_message = str(e)
     if not point_store:
+        print("!!! END MODBUS POLL @@")
         last_valid_row = ModbusPointStoreModel.find_last_valid_row(point.uuid)
         if last_valid_row:
             point_store = ModbusPointStoreModel(value=last_valid_row.value, value_array=last_valid_row.value_array,
