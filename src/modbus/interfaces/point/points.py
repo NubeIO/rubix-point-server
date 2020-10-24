@@ -84,9 +84,9 @@ class ModbusPointUtilsFuncs:
                 return _val
             raise Exception("data type is not correct")
 
-    @classmethod
-    def func_common_data_endian(cls, _val):
-        for key, value in ModbusPointUtils.mod_point_data_endian.items():
-            if _val == value:
-                return _val
-            raise Exception("endian is not correct")
+    # @classmethod
+    # def func_common_data_endian(cls, _val):
+    #     for key, value in ModbusPointUtils.mod_point_data_endian.items():
+    #         if _val == value:
+    #             return _val
+    #         raise Exception("endian is not correct")

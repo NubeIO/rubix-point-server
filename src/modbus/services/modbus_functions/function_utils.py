@@ -1,6 +1,6 @@
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
-from src.modbus.interfaces.point.points import ModbusPointUtils, ModbusPointUtilsFuncs
+from src.modbus.interfaces.point.points import ModbusPointUtils, ModbusPointUtilsFuncs, ModbusDataEndian, ModbusDataType
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 
 
@@ -55,24 +55,22 @@ def _mod_point_data_endian(_val):
     BEB_BEW = 4
     :return: array {'bo': bo, 'wo': wo}
     """
-    _val = _val.name
-    if ModbusPointUtilsFuncs.func_common_data_endian(_val):
-        if _val == ModbusPointUtils.mod_point_data_endian['LEB_BEW']:
-            bo = Endian.Little
-            wo = Endian.Big
-            return {'bo': bo, 'wo': wo}
-        if _val == ModbusPointUtils.mod_point_data_endian['LEB_LEW']:
-            bo = Endian.Little
-            wo = Endian.Little
-            return {'bo': bo, 'wo': wo}
-        if _val == ModbusPointUtils.mod_point_data_endian['BEB_LEW']:
-            bo = Endian.Big
-            wo = Endian.Little
-            return {'bo': bo, 'wo': wo}
-        if _val == ModbusPointUtils.mod_point_data_endian['BEB_BEW']:
-            bo = Endian.Big
-            wo = Endian.Big
-            return {'bo': bo, 'wo': wo}
+    if _val == ModbusDataEndian.LEB_BEW:
+        bo = Endian.Little
+        wo = Endian.Big
+        return {'bo': bo, 'wo': wo}
+    if _val == ModbusDataEndian.LEB_LEW:
+        bo = Endian.Little
+        wo = Endian.Little
+        return {'bo': bo, 'wo': wo}
+    if _val == ModbusDataEndian.BEB_LEW:
+        bo = Endian.Big
+        wo = Endian.Little
+        return {'bo': bo, 'wo': wo}
+    if _val == ModbusDataEndian.BEB_BEW:
+        bo = Endian.Big
+        wo = Endian.Big
+        return {'bo': bo, 'wo': wo}
 
 
 def _assertion(operation, client, reg_type):
@@ -118,20 +116,19 @@ def _builder_data_type(payload, data_type, byteorder, word_order):
     Converts the data type int, int32, float and so on
     :return: data in the selected data type
     """
+    print(99999, payload, data_type, byteorder, word_order)
     builder = BinaryPayloadBuilder(byteorder=byteorder, wordorder=word_order)
-    data = None
-    if data_type == 'int16':
-        data = builder.add_16bit_int(payload)
-    if data_type == 'uint16':
-        data = builder.add_16bit_uint(payload)
-    if data_type == 'int32':
-        data = builder.add_32bit_int(payload)
-    if data_type == 'uint32':
-        data = builder.add_32bit_uint(payload)
-    if data_type == 'float':
-        data = builder.add_32bit_float(payload)
-    elif data_type == 'double':
-        data = builder.add_64bit_float(payload)
-
-    return data.to_registers()
+    if data_type == ModbusDataType.INT16:
+        builder.add_16bit_int(payload)
+    if data_type == ModbusDataType.UINT16:
+        builder.add_16bit_uint(payload)
+    if data_type == ModbusDataType.INT32:
+        builder.add_32bit_int(payload)
+    if data_type == ModbusDataType.UINT32:
+        builder.add_32bit_uint(payload)
+    if data_type == ModbusDataType.FLOAT:
+        builder.add_32bit_float(payload)
+    elif data_type == ModbusDataType.DOUBLE:
+        builder.add_64bit_float(payload)
+    return builder.to_registers()
 
