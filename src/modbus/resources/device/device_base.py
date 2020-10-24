@@ -15,7 +15,7 @@ class ModbusDeviceBase(Resource):
     parser.add_argument('ping_point_type', type=str, required=True)
     parser.add_argument('ping_point_address', type=int, required=True)
     parser.add_argument('zero_mode', type=bool, required=True)
-    parser.add_argument('timeout', type=int, required=True)
+    parser.add_argument('timeout', type=float, required=True)
     parser.add_argument('timeout_global', type=bool, required=True)
     parser.add_argument('fault', type=bool, required=False)
     parser.add_argument('last_poll_timestamp', type=str, required=False)
