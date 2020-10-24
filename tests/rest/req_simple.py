@@ -11,6 +11,9 @@ reg_type = "READ_HOLDING_REGISTERS"
 data_type = "RAW"
 points_url = f'{url}/modbus/points'
 reg_address = [6, 7, 8, 10, 39]
+
+reg_names = ['mode', 'fan_status', 'setpoint', 'temp', 'value_position']
+
 # test device
 # 7 - Mode
 # 8 - Fan Status
@@ -45,8 +48,9 @@ n_uuid = r_json['uuid']
 network_uuid = n_uuid
 
 for d in devices:
+
     devices_obj = {
-        "name": "my name",
+        "name": f'device {d}',
         "enable": True,
         "type": "RTU",
         "addr": d,
@@ -62,11 +66,10 @@ for d in devices:
     r_json = r_d.json()
     print(r_json)
     d_uuid = r_json['uuid']
-    print(d_uuid)
-
-    for r in reg_address:
+    for i, r in enumerate(reg_address):
+        name = reg_names[i]
         point_obj = {
-            "name": "mod_point_name tc 2",
+            "name": f'{name}/{d}/{r}',
             "reg": r,
             "reg_length": 2,
             "type": reg_type,
@@ -85,5 +88,3 @@ for d in devices:
         r_p = requests.post(f'{points_url}', data=point_obj)
         r_json = r_p.json()
         print(r_json)
-
-    # requests.post(f'{devices_url}', data=devices_obj)
