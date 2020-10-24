@@ -141,9 +141,12 @@ def poll_point(network, device, point, transport) -> None:
         Save modbus data in database
         """
         if modbus_debug_poll:
-            print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE =', transport)
+            print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE & VAL', {"transport": transport, "val": val})
         if isinstance(val, numbers.Number):
-            point_store = ModbusPointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
+        # if isinstance(val, numbers.Number):
+            point_store = ModbusPointStoreModel(value=val,
+                                                value_array=str(array),
+                                                point_uuid=point.uuid)
         else:
             fault = True
             fault_message = "Got not numeric value"
