@@ -128,7 +128,6 @@ def poll_point(network, device, point, transport) -> None:
         write_registers write_registers
         """
         if mod_point_type == write_registers:
-            print(111)
             val = write_registers_handle(connection,
                                          reg,
                                          mod_point_reg_length,
@@ -152,7 +151,6 @@ def poll_point(network, device, point, transport) -> None:
         print(f'MODBUS ERROR: in poll main function {str(e)}')
         fault = True
         fault_message = str(e)
-
     if not point_store:
         last_valid_row = ModbusPointStoreModel.find_last_valid_row(point.uuid)
         if last_valid_row:

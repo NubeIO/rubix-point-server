@@ -222,7 +222,6 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     :param func: modbus function type
     :return: dict
     """
-    print(33333)
     write_registers = ModbusPointType.WRITE_REGISTERS
 
     """
@@ -246,12 +245,10 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     bo_wo = _mod_point_data_endian(endian)
     byteorder = bo_wo['bo']
     word_order = bo_wo['wo']
-    print(44444)
     """
     Converts the data type int, int32, float and so on
     """
     payload = _builder_data_type(write_value, data_type, byteorder, word_order)
-    print(5555)
     """
     DEBUG
     """

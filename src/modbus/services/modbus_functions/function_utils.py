@@ -1,6 +1,6 @@
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
-from src.modbus.interfaces.point.points import ModbusPointUtils, ModbusPointUtilsFuncs, ModbusDataEndian, ModbusDataType
+from src.modbus.interfaces.point.points import ModbusDataEndian, ModbusDataType
 from src.modbus.services.modbus_functions.debug import modbus_debug_funcs
 
 
@@ -16,14 +16,13 @@ def _set_data_length(data_type, reg_length):
     length = reg_length
 
     if True:  # TODO add a check for data type
-        _type = ModbusPointUtils.mod_point_data_type
-        _digital = _type['digital']
-        _int16 = _type['int16']
-        _uint16 = _type['uint16']
-        _int32 = _type['int16']
-        _uint32 = _type['uint32']
-        _float = _type['float']
-        _double = _type['double']
+        _digital = ModbusDataType.DIGITAL
+        _int16 = ModbusDataType.INT16
+        _uint16 = ModbusDataType.UINT16
+        _int32 = ModbusDataType.INT32
+        _uint32 = ModbusDataType.UINT32
+        _float = ModbusDataType.FLOAT
+        _double = ModbusDataType.DOUBLE
         if _digital:
             if reg_length < 1:
                 return 1
@@ -96,18 +95,18 @@ def _select_data_type(data, data_type, byteorder, word_order):
     """
     decoder = BinaryPayloadDecoder.fromRegisters(data.registers, byteorder=byteorder,
                                                  wordorder=word_order)
-    if data_type == 'int16':
+    if data_type == ModbusDataType.INT16:
         data = decoder.decode_16bit_int()
-    if data_type == 'uint16':
+    if data_type == ModbusDataType.UINT16:
         data = decoder.decode_16bit_uint()
-    if data_type == 'int32':
+    if data_type == ModbusDataType.INT32:
         data = decoder.decode_32bit_int()
-    if data_type == 'uint32':
+    if data_type == ModbusDataType.UINT32:
         data = decoder.decode_32bit_uint()
-    if data_type == 'float':
+    if data_type == ModbusDataType.FLOAT:
         data = decoder.decode_32bit_float()
-    elif data_type == 'double':
-        data = decoder.decode_32bit_float()
+    elif data_type == ModbusDataType.DOUBLE:
+        data = decoder.decode_16bit_float()
     return data
 
 
@@ -116,7 +115,6 @@ def _builder_data_type(payload, data_type, byteorder, word_order):
     Converts the data type int, int32, float and so on
     :return: data in the selected data type
     """
-    print(99999, payload, data_type, byteorder, word_order)
     builder = BinaryPayloadBuilder(byteorder=byteorder, wordorder=word_order)
     if data_type == ModbusDataType.INT16:
         builder.add_16bit_int(payload)
@@ -131,4 +129,3 @@ def _builder_data_type(payload, data_type, byteorder, word_order):
     elif data_type == ModbusDataType.DOUBLE:
         builder.add_64bit_float(payload)
     return builder.to_registers()
-
