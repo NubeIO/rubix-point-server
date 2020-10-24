@@ -222,6 +222,7 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     :param func: modbus function type
     :return: dict
     """
+    print(33333)
     write_registers = ModbusPointType.WRITE_REGISTERS
 
     """
@@ -245,30 +246,41 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     bo_wo = _mod_point_data_endian(endian)
     byteorder = bo_wo['bo']
     word_order = bo_wo['wo']
+    print(44444)
     """
     Converts the data type int, int32, float and so on
     """
     payload = _builder_data_type(write_value, data_type, byteorder, word_order)
-
+    print(5555)
+    """
+    DEBUG
+    """
     if modbus_debug_funcs:
         print("MODBUS write_analogue, check reg_length result then do modbus write", "reg_length",
               reg_length)
-    read = None
+    write = None
     reg_type = None
     """
     Select which type of modbus read to do
     """
     if func == write_registers:
-        read = client.write_coil(reg_start, payload, unit=_unit)
-        print(1231234234)
-        print(read)
+        write = client.write_registers(reg_start, payload, unit=_unit)
+        """
+        DEBUG
+        """
+        if modbus_debug_funcs:
+            print("MODBUS DEBUG, DO MODBUS WRITE HOLDING REG func write_registers",
+                  {'reg_start': reg_start,
+                   'payload': payload,
+                   '_unit': _unit,
+                   'func': func})
         reg_type = 'holding'
     """
     DEBUG
     """
     if modbus_debug_funcs:
-        print("MODBUS write_analogue, do modbus write", "write", read, "reg_type", reg_type)
-    if not _assertion(read, client, reg_type):  # checking for errors
+        print("MODBUS write_analogue, do modbus write", "write", write, "reg_type", reg_type)
+    if not _assertion(write, client, reg_type):  # checking for errors
         """
         DEBUG
         """
@@ -281,4 +293,4 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
 
         # val = read.bits[0]
         # array = read.bits
-        return {'val': read, 'array': read}
+        return {'val': write, 'array': write}

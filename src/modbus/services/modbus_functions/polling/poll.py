@@ -64,9 +64,7 @@ def poll_point(network, device, point, transport) -> None:
                                 'mod_point_type': mod_point_type,
                                 'mod_point_data_type': mod_point_data_type,
                                 'mod_point_data_endian': mod_point_data_endian,
-                                'read_coils': read_coils,
-                                'read_holding_registers': read_holding_registers,
-                                'read_input_registers': read_input_registers,
+                                'write_value': write_value
                                 })
 
     fault = False
@@ -130,6 +128,7 @@ def poll_point(network, device, point, transport) -> None:
         write_registers write_registers
         """
         if mod_point_type == write_registers:
+            print(111)
             val = write_registers_handle(connection,
                                          reg,
                                          mod_point_reg_length,

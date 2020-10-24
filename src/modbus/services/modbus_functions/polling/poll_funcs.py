@@ -71,6 +71,7 @@ def read_holding_registers_handle(connection, reg, mod_point_reg_length,
 def write_registers_handle(connection, reg, mod_point_reg_length,
                            mod_device_addr, mod_point_data_type,
                            mod_point_data_endian, write_value, mod_point_type):
+    print(22222)
     if modbus_debug_poll:
         print("MODBUS DEBUG: try and read a register", {'type': mod_point_type})
     read = write_analogue(connection, reg, mod_point_reg_length,
