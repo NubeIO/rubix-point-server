@@ -35,9 +35,8 @@ class ModbusPointPlural(ModbusPointBase):
         return self.add_point(data, _uuid)
 
 
-from flask_restful import fields
+# could be a more efficient way to query this but should be good
 class ModbusPointPluralPointStore(ModbusPointBase):
-    @marshal_with({'name': fields.String(), 'value': fields.Float()})
     def get(self, device_uuid):
         from src import db, ModbusPointStoreModel
 
@@ -52,22 +51,14 @@ class ModbusPointPluralPointStore(ModbusPointBase):
             .subquery()
         filtered_partition_table = db.session.query(partition_table).filter(partition_table.c.rank == 1).subquery()
 
-        final = db.session.query(device_points.c.name, filtered_partition_table.c.value) \
+        final = db.session.query(device_points.c.uuid, device_points.c.name, device_points.c.reg,
+                                 filtered_partition_table.c.value, filtered_partition_table.c.fault) \
             .select_from(device_points) \
             .join(filtered_partition_table, filtered_partition_table.c.point_uuid == device_points.c.uuid) \
             .all()
 
-        res = []
+        serialized_output = []
         for row in final:
-            res.append({'name': row.name, 'value': row.value})
-        return res
-
-
-# point_store_get_fields = {
-#     'uuid': fields.String,
-#     'name': fields.String,
-#     'reg': fields.Integer,
-#     'value': fields.Float,
-#     'fault': fields.Boolean
-# }
-# api.add_resource(ModbusPointPluralPointStore, f'/{api_prefix}/modbus/<string:device_uuid>/points_store')
+            serialized_output.append({'uuid': row.uuid, 'name': row.name, 'reg': row.reg, 'fault': row.fault,
+                                      'value': row.value})
+        return serialized_output
