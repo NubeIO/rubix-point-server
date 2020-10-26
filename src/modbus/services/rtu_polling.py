@@ -10,7 +10,7 @@ from src.modbus.services.modbus_functions.polling.poll import poll_point
 
 class RtuPolling:
     _instance = None
-    _polling_period = 0.1
+    _polling_period = 0.2
 
     @staticmethod
     def get_instance():
