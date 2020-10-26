@@ -1,16 +1,21 @@
 import os
 from threading import Thread
-
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-
 from src.modbus.services.point_store_cleaner import PointStoreCleaner
 
 app = Flask(__name__)
 CORS(app)
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
+
+
+db_pg = True
+if db_pg:
+    app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
+elif db_pg:
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
@@ -33,13 +38,19 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
 
     Network.get_instance().start()
 
-    # TcpRegistry.get_instance().register()
-    # tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
-    # tcp_polling_thread.start()
+    enable_tcp = False
+    if enable_tcp:
+        TcpRegistry.get_instance().register()
+        tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
+        tcp_polling_thread.start()
 
-    RtuRegistry.get_instance().register()
-    rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
-    rtu_polling_thread.start()
+    enable_rtu = False
+    if enable_rtu:
+        RtuRegistry.get_instance().register()
+        rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
+        rtu_polling_thread.start()
 
-    point_cleaner_thread = Thread(target=PointStoreCleaner.register)
-    point_cleaner_thread.start()
+    enable_cleaner = False
+    if enable_cleaner:
+        point_cleaner_thread = Thread(target=PointStoreCleaner.register)
+        point_cleaner_thread.start()
