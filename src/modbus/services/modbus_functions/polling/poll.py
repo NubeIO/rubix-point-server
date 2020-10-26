@@ -144,25 +144,26 @@ def poll_point(network, device, point, transport) -> None:
         if modbus_debug_poll:
             print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE & VAL', {"transport": transport, "val": val})
         if isinstance(val, numbers.Number):
-        # if isinstance(val, numbers.Number):
             point_store = ModbusPointStoreModel(value=val,
                                                 value_array=str(array),
                                                 point_uuid=point.uuid)
         else:
             fault = True
-            fault_message = "Got not numeric value"
+            fault_message = "Got non numeric value"
     except Exception as e:
-        print(f'MODBUS ERROR: in poll main function {str(e)}')
+        if modbus_debug_poll:
+            print(f'MODBUS ERROR: in poll main function {str(e)}')
         fault = True
         fault_message = str(e)
     if not point_store:
-        print("!!! END MODBUS POLL @@")
-        last_valid_row = ModbusPointStoreModel.find_last_valid_row(point.uuid)
-        if last_valid_row:
-            point_store = ModbusPointStoreModel(value=last_valid_row.value, value_array=last_valid_row.value_array,
-                                                fault=fault, fault_message=fault_message, point_uuid=point.uuid)
-        else:
-            point_store = ModbusPointStoreModel(value=0, fault=fault, fault_message=fault_message,
-                                                point_uuid=point.uuid)
+        if modbus_debug_poll:
+            print("!!! END MODBUS POLL @@")
+        # last_valid_row = ModbusPointStoreModel.find_last_valid_row(point.uuid)
+        # if last_valid_row:
+        #     point_store = ModbusPointStoreModel(value=last_valid_row.value, value_array=last_valid_row.value_array,
+        #                                         fault=fault, fault_message=fault_message, point_uuid=point.uuid)
+        # else:
+        point_store = ModbusPointStoreModel(fault=fault, fault_message=fault_message,
+                                            point_uuid=point.uuid)
 
-    point_store.save_to_db()
+    point_store.update_to_db_cov_only()

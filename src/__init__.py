@@ -3,7 +3,7 @@ from threading import Thread
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from src.modbus.services.point_store_cleaner import PointStoreCleaner
+# from src.modbus.services.point_store_cleaner import PointStoreCleaner
 
 app = Flask(__name__)
 CORS(app)
@@ -12,16 +12,16 @@ CORS(app)
 db_pg = False
 if db_pg:
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
-elif db_pg:
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
-
-if db_pg:
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_size': 10,
         'max_overflow': 20
     }
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 
 db = SQLAlchemy(app)
 from src import routes
@@ -38,7 +38,7 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
 
     Network.get_instance().start()
 
-    enable_tcp = True
+    enable_tcp = False
     if enable_tcp:
         TcpRegistry.get_instance().register()
         tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
@@ -50,7 +50,7 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
         rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
         rtu_polling_thread.start()
 
-    enable_cleaner = True
-    if enable_cleaner:
-        point_cleaner_thread = Thread(target=PointStoreCleaner.register)
-        point_cleaner_thread.start()
+    # enable_cleaner = False
+    # if enable_cleaner:
+    #     point_cleaner_thread = Thread(target=PointStoreCleaner.register)
+    #     point_cleaner_thread.start()

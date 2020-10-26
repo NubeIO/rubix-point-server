@@ -1,6 +1,6 @@
 from src import db
 from src.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
-
+from src.modbus.models.point_store import ModbusPointStoreModel
 
 class ModbusPointModel(db.Model):
     __tablename__ = 'mod_points'
@@ -22,6 +22,7 @@ class ModbusPointModel(db.Model):
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
     device_uuid = db.Column(db.String, db.ForeignKey('mod_devices.uuid'), nullable=False)
+    value = db.relationship('ModbusPointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
 
     def __repr__(self):
         return f"ModbusPointModel({self.uuid})"
@@ -35,6 +36,7 @@ class ModbusPointModel(db.Model):
         return cls.query.filter_by(uuid=uuid)
 
     def save_to_db(self):
+        self.value = ModbusPointStoreModel(point_uuid=self.uuid, value=0, value_array='')
         db.session.add(self)
         db.session.commit()
 

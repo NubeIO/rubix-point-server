@@ -72,7 +72,6 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
         set up for word and byte order
         """
         if not ModbusDataType.RAW:
-            print(55555)
             """
             Converts the data type int, int32, float and so on
             """
@@ -189,10 +188,10 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_val
     Select which type of modbus read to do
     """
     if func == write_coil:
-        print(1231234234, 'write_value', write_value)
         read = client.write_coil(reg_start, write_value, unit=_unit)
-        print(1231234234)
-        print(read)
+        if modbus_debug_funcs:
+            print('write_value', write_value)
+            print('write-read', read)
         reg_type = 'coil'
     """
     DEBUG

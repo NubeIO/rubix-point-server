@@ -16,18 +16,18 @@ class ModbusPointSingular(ModbusPointBase):
     """
 
     def get(self, uuid):
-        point = db.session \
-            .query(ModbusPointModel, ModbusPointStoreModel) \
-            .select_from(ModbusPointModel) \
-            .filter_by(uuid=uuid) \
-            .join(ModbusPointStoreModel, isouter=True) \
-            .order_by(ModbusPointStoreModel.id.desc()) \
-            .first()
-        db.session.commit()
+        # point = db.session \
+        #     .query(ModbusPointModel, ModbusPointStoreModel) \
+        #     .select_from(ModbusPointModel) \
+        #     .filter_by(uuid=uuid) \
+        #     .join(ModbusPointStoreModel, isouter=True) \
+        #     .order_by(ModbusPointStoreModel.id.desc()) \
+        #     .first()
+        point = ModbusPointModel.find_by_uuid(uuid)
         if not point:
             abort(404, message=f'Modbus Point not found')
 
-        return {**ModelUtils.row2dict(point[0]), "point_store": self.create_point_store(point[1])}, 200
+        return {**ModelUtils.row2dict(point), "point_store": self.create_point_store(point.value)}, 200
 
     @marshal_with(point_fields)
     def put(self, uuid):

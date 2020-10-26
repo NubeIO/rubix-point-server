@@ -25,7 +25,6 @@ def _set_data_length(data_type, reg_length):
         _float = ModbusDataType.FLOAT
         _double = ModbusDataType.DOUBLE
         if _raw:
-            print(232323)
             return length
         if _digital:
             if reg_length < 1:
@@ -84,7 +83,7 @@ def _assertion(operation, client, reg_type):
     # test that we are not an error
     if not operation.isError():
         pass
-    else:
+    elif modbus_debug_funcs:
         print("connects to port: {}; Type Register: {}; Exception: {}".format(client.port,
                                                                               reg_type,
                                                                               operation, ))
