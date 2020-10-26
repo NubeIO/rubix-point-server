@@ -9,6 +9,7 @@ from src.modbus.resources.network.network_plural import ModusNetworkPlural
 from src.modbus.resources.network.network_singular import ModusNetworkSingular
 from src.modbus.resources.point.point_plural import ModbusPointPlural, ModbusPointPluralPointStore
 from src.modbus.resources.point.point_singular import ModbusPointSingular
+from src.system.resources.memory import GetSystemMem
 
 api_prefix = 'api'
 api = Api(app)
@@ -35,3 +36,6 @@ api.add_resource(ModbusDeviceSingular, f'/{api_prefix}/modbus/devices/<string:uu
 api.add_resource(ModbusPointPlural, f'/{api_prefix}/modbus/points')
 api.add_resource(ModbusPointPluralPointStore, f'/{api_prefix}/modbus/<string:device_uuid>/points_store')
 api.add_resource(ModbusPointSingular, f'/{api_prefix}/modbus/points/<string:uuid>')
+
+
+api.add_resource(GetSystemMem, f'/{api_prefix}/system/memory')
