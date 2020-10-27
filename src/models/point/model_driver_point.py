@@ -9,12 +9,12 @@ class DriverPointModel(PointModel):
     __tablename__ = 'DEFAULT_DRIVER_points'
 
     @declared_attr
-    def point_uuid(cls):
-        return db.Column(db.String(80), db.ForeignKey('points.point_uuid'), primary_key=True, nullable=False)
+    def uuid(cls):
+        return db.Column(db.String(80), db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': DRIVER_NAME
     }
 
     def __repr__(self):
-        return f"{self.DRIVER_NAME} Point(point_uuid = {self.point_uuid})"
+        return f"{self.DRIVER_NAME} Point(uuid = {self.uuid})"

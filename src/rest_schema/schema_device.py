@@ -2,32 +2,32 @@
 INTERFACE_NAME = 'device'
 
 device_all_attributes = {
-    'device_uuid': {
-        'type': str,
-        'required': False,
-        'help': '',
-    },
-    'device_name': {
-        'type': str,
-        'required': True,
-        'help': '',
-    },
-    'device_network_uuid': {
+    # 'uuid': {
+    #     'type': str,
+    #     'required': False,
+    #     'help': '',
+    # },
+    'name': {
         'type': str,
         'required': True,
         'help': '',
     },
-    'device_enable': {
+    'network_uuid': {
+        'type': str,
+        'required': True,
+        'help': '',
+    },
+    'enable': {
         'type': bool,
         'required': False,
         'help': '',
     },
-    'device_fault': {
+    'fault': {
         'type': bool,
         'required': False,
         'help': '',
     },
-    'device_fault_timestamp': {
+    'fault_timestamp': {
         'type': int,
         'required': False,
         'help': '',

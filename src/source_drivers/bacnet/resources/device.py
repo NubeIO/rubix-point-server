@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, abort, marshal_with
 
-from src.source_drivers.bacnet.models.device import DeviceModel
+from src.source_drivers.bacnet.models.device import BacnetDeviceModel
 from src.source_drivers.bacnet.resources.fields import device_fields
 from src.source_drivers.bacnet.services.device import Device as DeviceService
 
@@ -40,14 +40,14 @@ class Device(Resource):
 
     @marshal_with(device_fields)
     def get(self, uuid):
-        device = DeviceModel.find_by_bac_device_uuid(uuid)
+        device = BacnetDeviceModel.find_by_bac_device_uuid(uuid)
         if not device:
             abort(404, message='Device not found.')
         return device
 
     @marshal_with(device_fields)
     def post(self, uuid):
-        if DeviceModel.find_by_bac_device_uuid(uuid):
+        if BacnetDeviceModel.find_by_bac_device_uuid(uuid):
             return {'message': "An device with bac_device_uuid '{}' already exists.".format(uuid)}, 400
         data = Device.parser.parse_args()
         device = Device.create_device_model_obj(uuid, data)
@@ -59,7 +59,7 @@ class Device(Resource):
     @marshal_with(device_fields)
     def put(self, uuid):
         data = Device.parser.parse_args()
-        device = DeviceModel.find_by_bac_device_uuid(uuid)
+        device = BacnetDeviceModel.find_by_bac_device_uuid(uuid)
         if device is None:
             device = Device.create_device_model_obj(uuid, data)
         else:
@@ -73,29 +73,29 @@ class Device(Resource):
         return device
 
     def delete(self, uuid):
-        device = DeviceModel.find_by_bac_device_uuid(uuid)
+        device = BacnetDeviceModel.find_by_bac_device_uuid(uuid)
         if device:
             device.delete_from_db()
         return '', 204
 
     @staticmethod
     def create_device_model_obj(bac_device_uuid, data):
-        return DeviceModel(bac_device_uuid=bac_device_uuid, bac_device_mac=data['bac_device_mac'],
-                           bac_device_id=data['bac_device_id'], bac_device_ip=data['bac_device_ip'],
-                           bac_device_mask=data['bac_device_mask'], bac_device_port=data['bac_device_port'],
-                           network_uuid=data['network_uuid'])
+        return BacnetDeviceModel(bac_device_uuid=bac_device_uuid, bac_device_mac=data['bac_device_mac'],
+                                 bac_device_id=data['bac_device_id'], bac_device_ip=data['bac_device_ip'],
+                                 bac_device_mask=data['bac_device_mask'], bac_device_port=data['bac_device_port'],
+                                 network_uuid=data['network_uuid'])
 
 
 class DeviceList(Resource):
     @marshal_with(device_fields, envelope="devices")
     def get(self):
-        return DeviceModel.query.all()
+        return BacnetDeviceModel.query.all()
 
 
 class DevicePoints(Resource):
     def get(self, dev_uuid):
         response = {}
-        device = DeviceModel.find_by_bac_device_uuid(dev_uuid)
+        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
         if not device:
             abort(404, message='Device Not found')
         response['network_uuid'] = device.network.network_uuid
@@ -111,7 +111,7 @@ class DevicePoints(Resource):
 class DevicePoint(Resource):
     def get(self, dev_uuid, obj, obj_instance, prop):
         response = {}
-        device = DeviceModel.find_by_bac_device_uuid(dev_uuid)
+        device = BacnetDeviceModel.find_by_bac_device_uuid(dev_uuid)
         if not device:
             abort(404, message='Device Not found')
         response['network_uuid'] = device.network.network_uuid

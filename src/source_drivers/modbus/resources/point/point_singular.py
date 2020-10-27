@@ -13,28 +13,22 @@ class ModbusPointSingular(ModbusPointBase):
     point with last not null value and value_array
     """
 
-    def get(self, uuid):
-        # point = db.session \
-        #     .query(ModbusPointModel, ModbusPointStoreModel) \
-        #     .select_from(ModbusPointModel) \
-        #     .filter_by(uuid=uuid) \
-        #     .join(ModbusPointStoreModel, isouter=True) \
-        #     .order_by(ModbusPointStoreModel.id.desc()) \
-        #     .first()
+    @classmethod
+    def get(cls, uuid):
         point = ModbusPointModel.find_by_uuid(uuid)
         if not point:
             abort(404, message=f'Modbus Point not found')
+        return {**ModelUtils.row2dict(point), "point_store": ModelUtils.row2dict(point.value)}
 
-        return {**ModelUtils.row2dict(point), "point_store": self.create_point_store(point.value)}, 200
-
+    @classmethod
     @marshal_with(point_fields)
-    def put(self, uuid):
+    def put(cls, uuid):
         data = ModbusPointSingular.parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)
         if point is None:
-            return self.add_point(data, uuid)
+            return cls.add_point(data, uuid)
         else:
-            self.abort_if_device_does_not_exist(data.device_uuid)
+            cls.abort_if_device_does_not_exist(data.device_uuid)
             try:
                 if data.type:
                     data.type = ModbusPointType.__members__.get(data.type)
@@ -42,14 +36,15 @@ class ModbusPointSingular(ModbusPointBase):
                     data.data_type = ModbusDataType.__members__.get(data.data_type)
                 if data.data_endian:
                     data.data_endian = ModbusDataEndian.__members__.get(data.data_endian)
-                ModbusPointModel.filter_by_uuid(uuid).update(data)
-                ModbusPointModel.commit()
+                point.update(data)
+                point.commit()
                 return ModbusPointModel.find_by_uuid(uuid)
             except Exception as e:
                 abort(500, message=str(e))
 
-    def delete(self, uuid):
+    @classmethod
+    def delete(cls, uuid):
         point = ModbusPointModel.find_by_uuid(uuid)
         if point:
             point.delete_from_db()
-        return '', 204
+        return ''

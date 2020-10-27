@@ -3,17 +3,17 @@
 INTERFACE_NAME = 'network'
 
 network_all_attributes = {
-    'network_uuid': {
-        'type': str,
-        'required': False,
-        'help': '',
-    },
-    'network_name': {
+    # 'uuid': {
+    #     'type': str,
+    #     'required': False,
+    #     'help': '',
+    # },
+    'name': {
         'type': str,
         'required': True,
         'help': '',
     },
-    'network_enable': {
+    'enable': {
         'type': bool,
         'required': True,
         'help': '',

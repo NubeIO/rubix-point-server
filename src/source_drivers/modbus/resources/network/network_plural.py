@@ -7,12 +7,14 @@ from src.source_drivers.modbus.resources.network.network_base import ModbusNetwo
 
 
 class ModbusNetworkPlural(ModbusNetworkBase):
+    @classmethod
     @marshal_with(network_fields, envelope="networks")
-    def get(self):
+    def get(cls):
         return ModbusNetworkModel.query.all()
 
+    @classmethod
     @marshal_with(network_fields)
-    def post(self):
+    def post(cls):
         _uuid = str(uuid.uuid4())
         data = ModbusNetworkPlural.parser.parse_args()
-        return self.add_network(_uuid, data)
+        return cls.add_network(_uuid, data)

@@ -1,5 +1,7 @@
 from flask_restful import fields
 
+# TODO: move all to rest schemas
+
 point_fields = {
     'uuid': fields.String,
     'name': fields.String,
@@ -7,7 +9,7 @@ point_fields = {
     'reg_length': fields.Integer,
     'type': fields.String,
     'enable': fields.Boolean,
-    'write_value': fields.Float,
+    # 'write_value': fields.Float,
     'data_type': fields.String,
     'data_endian': fields.String,
     'data_round': fields.Integer,
@@ -26,7 +28,7 @@ device_fields = {
     'name': fields.String,
     'enable': fields.Boolean,
     'type': fields.String,  # rtu or tcp
-    'addr': fields.Integer,  # 1,2,3
+    'address': fields.Integer,  # 1,2,3
     'tcp_ip': fields.String,
     'tcp_port': fields.Integer,
     'ping_point_type': fields.String,  # for ping a reg to see if the device is online
@@ -54,9 +56,9 @@ network_fields = {
     'point_timeout_global': fields.Integer,  # point time out global setting
     'rtu_port': fields.String,  # /dev/ttyyUSB0
     'rtu_speed': fields.Integer,  # 9600
-    'rtu_stopbits': fields.Integer,  # 1
+    'rtu_stop_bits': fields.Integer,  # 1
     'rtu_parity': fields.String,  # O E N Odd, Even, None
-    'rtu_bytesize': fields.Integer,  # 5, 6, 7, or 8. This defaults to 8.
+    'rtu_byte_size': fields.Integer,  # 5, 6, 7, or 8. This defaults to 8.
     'fault': fields.Boolean,  # true
     'last_poll_timestamp': fields.String,
     'fault_timestamp': fields.String,

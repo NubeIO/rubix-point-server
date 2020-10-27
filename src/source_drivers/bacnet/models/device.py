@@ -1,15 +1,15 @@
 from src import db
 
 
-class DeviceModel(db.Model):
-    __tablename__ = 'devices'
+class BacnetDeviceModel(db.Model):
+    __tablename__ = 'bacnet_devices'
     bac_device_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     bac_device_mac = db.Column(db.Integer(), unique=False, nullable=False)
     bac_device_id = db.Column(db.Integer(), unique=False, nullable=False)
     bac_device_ip = db.Column(db.String(20), unique=False, nullable=False)
     bac_device_mask = db.Column(db.Integer(), nullable=False)
     bac_device_port = db.Column(db.Integer(), nullable=False)
-    network_uuid = db.Column(db.String, db.ForeignKey('networks.network_uuid'))
+    network_uuid = db.Column(db.String, db.ForeignKey('bacnet_networks.network_uuid'))
 
     def __repr__(self):
         return f"Device(bac_device_uuid = {self.network_uuid})"

@@ -3,27 +3,27 @@
 INTERFACE_NAME = 'point'
 
 point_all_attributes = {
-    'point_uuid': {
-        'type': str,
-        'required': False,
-        'help': '',
-    },
-    'point_name': {
+    # 'uuid': {
+    #     'type': str,
+    #     'required': False,
+    #     'help': '',
+    # },
+    'name': {
         'type': str,
         'required': True,
         'help': '',
     },
-    'point_device_uuid': {
+    'device_uuid': {
         'type': str,
         'required': False,
         'help': '',
     },
-    'point_enable': {
+    'enable': {
         'type': bool,
         'required': True,
         'help': '',
     },
-    'point_prevent_duplicates': {
+    'prevent_duplicates': {
         'type': bool,
         'required': False,
         'help': '',
@@ -32,21 +32,23 @@ point_all_attributes = {
 }
 
 point_return_attributes = {
-    'point_value': {
+    'value': {
         'type': float,
         'nested': True,
         'dict': 'value.point_value',
         'help': ''
     },
-    'point_write_ok': {
-        'type': str,
+    # 'write_ok': {
+    #     'type': str,
+    #     'help': '',
+    # },
+    'fault': {
+        'type': bool,
+        'nested': True,
+        'dict': 'value.fault',
         'help': '',
     },
-    'point_fault': {
-        'type': str,
-        'help': '',
-    },
-    'point_last_poll_timestamp': {
+    'last_poll_timestamp': {
         'type': str,
         'help': '',
     },

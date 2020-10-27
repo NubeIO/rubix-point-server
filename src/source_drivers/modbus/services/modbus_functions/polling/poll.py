@@ -1,7 +1,8 @@
 import numbers
-from src import TcpRegistry, ModbusPointStoreModel
+from src import TcpRegistry
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
+from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_input_registers_handle, \
     read_holding_registers_handle, \
@@ -144,9 +145,9 @@ def poll_point(network, device, point, transport) -> None:
         if modbus_debug_poll:
             print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE & VAL', {"transport": transport, "val": val})
         if isinstance(val, numbers.Number):
-            point_store = ModbusPointStoreModel(value=val,
-                                                value_array=str(array),
-                                                point_uuid=point.uuid)
+            point_store = PointStoreModel(value=val,
+                                          # value_array=str(array),
+                                          point_uuid=point.uuid)
             point_store.update_to_db_cov_only()
         else:
             fault = True
@@ -162,8 +163,8 @@ def poll_point(network, device, point, transport) -> None:
         #     point_store = ModbusPointStoreModel(value=last_valid_row.value, value_array=last_valid_row.value_array,
         #                                         fault=fault, fault_message=fault_message, point_uuid=point.uuid)
         # else:
-        point_store = ModbusPointStoreModel(fault=fault, fault_message=fault_message,
-                                            point_uuid=point.uuid)
+        point_store = PointStoreModel(fault=fault, fault_message=fault_message,
+                                      point_uuid=point.uuid)
         point_store.update_with_fault()
 
     if modbus_debug_poll:

@@ -1,35 +1,33 @@
 from flask_restful import Resource, abort, reqparse
-
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
+from src.resources.utils import mapRestSchema
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_network import modbus_network_all_attributes, \
+    network_return_attributes
+
+
+modbus_network_all_fields = {}
+mapRestSchema(modbus_network_all_attributes, modbus_network_all_fields)
+mapRestSchema(network_return_attributes, modbus_network_all_fields)
 
 
 class ModbusNetworkBase(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('name', type=str, required=True)
-    parser.add_argument('type', type=str, required=True)
-    parser.add_argument('enable', type=bool, required=True)
-    parser.add_argument('timeout', type=float, required=True)
-    parser.add_argument('device_timeout_global', type=float)
-    parser.add_argument('point_timeout_global', type=float)
-
-    parser.add_argument('rtu_port', type=str, required=False)  # dev/ttyUSB0
-    parser.add_argument('rtu_speed', type=int, required=False)  # 9600
-    parser.add_argument('rtu_stopbits', type=int, required=False)
-    parser.add_argument('rtu_parity', type=str, required=False)
-    parser.add_argument('rtu_bytesize', type=int, required=False)
-
-    parser.add_argument('fault', type=bool, required=False)
-    parser.add_argument('last_poll_timestamp', type=str, required=False)
-    parser.add_argument('fault_timestamp', type=str, required=False)
+    for attr in modbus_network_all_attributes:
+        parser.add_argument(attr,
+                            type=modbus_network_all_attributes[attr]['type'],
+                            required=modbus_network_all_attributes[attr]['required'],
+                            help=modbus_network_all_attributes[attr]['help'],
+                            )
 
     @staticmethod
     def create_network_model_obj(uuid, data):
         return ModbusNetworkModel(uuid=uuid, **data)
 
-    def add_network(self, uuid, data):
+    @staticmethod
+    def add_network(uuid, data):
         try:
             network = ModbusNetworkBase.create_network_model_obj(uuid, data)
             network.save_to_db()
-            return network, 201
+            return network
         except Exception as e:
             abort(500, message=str(e))

@@ -12,7 +12,7 @@ CORS(app)
 # TMP CONFIGS
 db_pg = False
 enable_tcp = False
-enable_rtu = True
+enable_rtu = False
 
 if db_pg:
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
@@ -31,16 +31,15 @@ db = SQLAlchemy(app)
 from src import routes
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
-    from src.source_drivers.modbus.models.point_store import ModbusPointStoreModel
 
     db.create_all()
-    from src.source_drivers.bacnet.services.network import Network
+    # from src.source_drivers.bacnet.services.network import Network
     from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
     from src.source_drivers.modbus.services.tcp_polling import TcpPolling
     from src.source_drivers.modbus.services.rtu_polling import RtuPolling
     from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 
-    Network.get_instance().start()
+    # Network.get_instance().start()
 
     if enable_tcp:
         TcpRegistry.get_instance().register()

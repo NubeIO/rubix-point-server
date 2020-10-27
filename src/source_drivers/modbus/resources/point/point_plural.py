@@ -7,7 +7,8 @@ from src.utils.model_utils import ModelUtils
 
 
 class ModbusPointPlural(ModbusPointBase):
-    def get(self):
+    @classmethod
+    def get(cls):
         # partition_table = db.session.query(ModbusPointStoreModel, func.rank()
         #                                    .over(order_by=ModbusPointStoreModel.ts.desc(),
         #                                          partition_by=ModbusPointStoreModel.point_uuid)
@@ -22,11 +23,12 @@ class ModbusPointPlural(ModbusPointBase):
         points = ModbusPointModel.query.all()
         serialized_output = []
         for row in points:
-            serialized_output.append({**ModelUtils.row2dict(row), "point_store": self.create_point_store(row.value)})
-        return serialized_output, 200
+            serialized_output.append({**ModelUtils.row2dict(row), "point_store": ModelUtils.row2dict(row.value)})
+        return serialized_output
 
+    @classmethod
     @marshal_with(point_fields)
-    def post(self):
+    def post(cls):
         _uuid = str(uuid.uuid4())
         data = ModbusPointPlural.parser.parse_args()
-        return self.add_point(data, _uuid)
+        return cls.add_point(data, _uuid)

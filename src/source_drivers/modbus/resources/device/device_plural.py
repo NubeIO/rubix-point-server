@@ -7,12 +7,14 @@ from src.source_drivers.modbus.resources.mod_fields import device_fields
 
 
 class ModbusDevicePlural(ModbusDeviceBase):
+    @classmethod
     @marshal_with(device_fields, envelope="devices")
-    def get(self):
+    def get(cls):
         return ModbusDeviceModel.query.all()
 
+    @classmethod
     @marshal_with(device_fields)
-    def post(self):
+    def post(cls):
         _uuid = str(uuid.uuid4())
         data = ModbusDevicePlural.parser.parse_args()
-        return self.add_device(_uuid, data)
+        return cls.add_device(_uuid, data)

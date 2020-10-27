@@ -19,9 +19,9 @@ from src.source_drivers.modbus.resources.point.point_plural import ModbusPointPl
 from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingular
 from src.source_drivers.modbus.resources.point.point_stores import *
 from src.system.resources.memory import GetSystemMem
-# from src.sourceDrivers.modbusCopy.resources.mod_network import ModNetwork, ModNetworkList
-# from src.sourceDrivers.modbusCopy.resources.mod_device import ModDevice, ModDeviceList
-# from src.sourceDrivers.modbusCopy.resources.mod_point import ModPoint, ModPointList
+# from src.sourceDrivers.modbus_copy.resources.mod_network import ModNetwork, ModNetworkList
+# from src.sourceDrivers.modbus_copy.resources.mod_device import ModDevice, ModDeviceList
+# from src.sourceDrivers.modbus_copy.resources.mod_point import ModPoint, ModPointList
 
 api_prefix = 'api'
 api = Api(app)

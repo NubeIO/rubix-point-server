@@ -1,8 +1,8 @@
 from src import db
 
 
-class NetworkModel(db.Model):
-    __tablename__ = 'networks'
+class BacnetNetworkModel(db.Model):
+    __tablename__ = 'bacnet_networks'
     network_uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     network_ip = db.Column(db.String(20), unique=False, nullable=False)
     network_mask = db.Column(db.Integer(), nullable=False)
@@ -10,7 +10,7 @@ class NetworkModel(db.Model):
     network_device_id = db.Column(db.Integer(), nullable=False)
     network_device_name = db.Column(db.String(80), nullable=False)
     network_number = db.Column(db.Integer())
-    devices = db.relationship('DeviceModel', cascade="all,delete", backref='network', lazy=True)
+    devices = db.relationship('BacnetDeviceModel', cascade="all,delete", backref='network', lazy=True)
 
     def __repr__(self):
         return f"Network(network_uuid = {self.network_uuid})"

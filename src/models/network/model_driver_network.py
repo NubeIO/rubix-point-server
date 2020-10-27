@@ -9,12 +9,12 @@ class DriverNetworkModel(NetworkModel):
     __tablename__ = 'DEFAULT_DRIVER_networks'
 
     @declared_attr
-    def network_uuid(cls):
-        return db.Column(db.String(80), db.ForeignKey('networks.network_uuid'),  primary_key=True, nullable=False)
+    def uuid(cls):
+        return db.Column(db.String(80), db.ForeignKey('networks.uuid'),  primary_key=True, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': DRIVER_NAME
     }
 
     def __repr__(self):
-        return f"{self.DRIVER_NAME} Network(network_uuid = {self.network_uuid})"
+        return f"{self.DRIVER_NAME} Network(uuid = {self.uuid})"
