@@ -37,6 +37,11 @@ modbus_point_all_attributes['data_round'] = {
     'required': True,
     'help': '',
 }
+modbus_point_all_attributes['write_value'] = {
+    'type': float,
+    'required': False,
+    'help': '',
+}
 modbus_point_all_attributes['timeout'] = {
     'type': float,
     'required': True,

@@ -11,7 +11,7 @@ class ModbusPointModel(DriverPointModel):
     reg = db.Column(db.Integer(), nullable=False)
     reg_length = db.Column(db.Integer(), nullable=False)
     type = db.Column(db.Enum(ModbusPointType), nullable=False)
-    # write_value = db.Column(db.Float(), nullable=False)
+    write_value = db.Column(db.Float(), nullable=False, default=0)
     data_type = db.Column(db.Enum(ModbusDataType), nullable=False)
     data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False)
     data_round = db.Column(db.Integer(), nullable=False)

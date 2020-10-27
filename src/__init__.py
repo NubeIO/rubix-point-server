@@ -12,7 +12,7 @@ CORS(app)
 # TMP CONFIGS
 db_pg = False
 enable_tcp = False
-enable_rtu = False
+enable_rtu = True
 
 if db_pg:
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
