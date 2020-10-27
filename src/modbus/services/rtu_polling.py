@@ -6,7 +6,7 @@ from src.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.modbus.models.point import ModbusPointModel
 from src.modbus.services.modbus_functions.debug import modbus_polling_count
 from src.modbus.services.modbus_functions.polling.poll import poll_point
-
+import time
 
 class RtuPolling:
     _instance = None
@@ -39,6 +39,7 @@ class RtuPolling:
                 select_from(ModbusNetworkModel).filter_by(type=ModbusType.RTU) \
                 .join(ModbusDeviceModel).filter_by(type=ModbusType.RTU) \
                 .join(ModbusPointModel).all()
-            db.session.commit()
+
             for network, device, point in results:
                 poll_point(network, device, point, ModbusType.RTU)
+            db.session.commit()

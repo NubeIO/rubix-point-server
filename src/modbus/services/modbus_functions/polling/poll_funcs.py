@@ -64,7 +64,6 @@ def read_holding_registers_handle(connection, reg, mod_point_reg_length,
     DEBUG
     """
     if modbus_debug_poll:
-        print(9999999)
         print("MODBUS DEBUG: inside read_holding_registers_handle AFTER read", {'type': mod_point_type, "val": val, 'array': array})
     return val
 
