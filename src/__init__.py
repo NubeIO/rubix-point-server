@@ -30,14 +30,14 @@ db = SQLAlchemy(app)
 from src import routes
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
-    from src.sourceDrivers.modbus.models.point_store import ModbusPointStoreModel
+    from src.source_drivers.modbus.models.point_store import ModbusPointStoreModel
 
     db.create_all()
-    from src.sourceDrivers.bacnet.services.network import Network
-    from src.sourceDrivers.modbus.services.tcp_registry import TcpRegistry
-    from src.sourceDrivers.modbus.services.tcp_polling import TcpPolling
-    from src.sourceDrivers.modbus.services.rtu_polling import RtuPolling
-    from src.sourceDrivers.modbus.services.rtu_registry import RtuRegistry
+    from src.source_drivers.bacnet.services.network import Network
+    from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
+    from src.source_drivers.modbus.services.tcp_polling import TcpPolling
+    from src.source_drivers.modbus.services.rtu_polling import RtuPolling
+    from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 
     Network.get_instance().start()
 

@@ -1,15 +1,15 @@
 from flask_restful import Api
 
 from src import app
-from src.sourceDrivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
-from src.sourceDrivers.bacnet.resources.network import Network, NetworkList, NetworksIds
-from src.sourceDrivers.modbus.resources.device.device_plural import ModbusDevicePlural
-from src.sourceDrivers.modbus.resources.device.device_singular import ModbusDeviceSingular
-from src.sourceDrivers.modbus.resources.network.network_plural import ModbusNetworkPlural
-from src.sourceDrivers.modbus.resources.network.network_singular import ModbusNetworkSingular
-from src.sourceDrivers.modbus.resources.point.point_plural import ModbusPointPlural
-from src.sourceDrivers.modbus.resources.point.point_singular import ModbusPointSingular
-from src.sourceDrivers.modbus.resources.point.point_stores import *
+from src.source_drivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
+from src.source_drivers.bacnet.resources.network import Network, NetworkList, NetworksIds
+from src.source_drivers.modbus.resources.device.device_plural import ModbusDevicePlural
+from src.source_drivers.modbus.resources.device.device_singular import ModbusDeviceSingular
+from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
+from src.source_drivers.modbus.resources.network.network_singular import ModbusNetworkSingular
+from src.source_drivers.modbus.resources.point.point_plural import ModbusPointPlural
+from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingular
+from src.source_drivers.modbus.resources.point.point_stores import *
 from src.system.resources.memory import GetSystemMem
 
 api_prefix = 'api'
