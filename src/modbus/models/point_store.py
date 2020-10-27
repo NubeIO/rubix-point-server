@@ -12,7 +12,7 @@ class ModbusPointStoreModel(db.Model):
     ts = db.Column(db.DateTime, server_default=db.func.now())
 
     def __repr__(self):
-        return f"ModbusPointStore({self.id})"
+        return f"ModbusPointStore({self.point_uuid})"
 
     @classmethod
     def find_last_valid_row(cls, point_uuid):
@@ -26,11 +26,24 @@ class ModbusPointStoreModel(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def update_to_db(self):
-        db.session.commit()
-
     def update_to_db_cov_only(self):
-        curr_point_store = db.session.query(ModbusPointStoreModel) \
-            .filter(ModbusPointStoreModel.point_uuid == self.point_uuid).first()
-        if self.value != curr_point_store.value:
-            db.session.commit()
+        if self.value is None:
+            return
+        db.session.query(ModbusPointStoreModel).filter(ModbusPointStoreModel.point_uuid == self.point_uuid and
+                                                       (ModbusPointStoreModel.value != self.value or
+                                                       ModbusPointStoreModel.fault == True)) \
+            .update({
+                ModbusPointStoreModel.value: self.value,
+                ModbusPointStoreModel.value_array: self.value_array,
+                ModbusPointStoreModel.fault: False,
+                ModbusPointStoreModel.fault_message: None,
+            })
+
+    def update_with_fault(self):
+        db.session.query(ModbusPointStoreModel).filter(ModbusPointStoreModel.point_uuid == self.point_uuid and
+                                                       (ModbusPointStoreModel.fault == False or
+                                                        ModbusPointStoreModel.fault_message != self.fault_message)) \
+            .update({
+                ModbusPointStoreModel.fault: self.fault,
+                ModbusPointStoreModel.fault_message: self.fault_message,
+            })

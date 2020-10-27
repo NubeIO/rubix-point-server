@@ -147,6 +147,7 @@ def poll_point(network, device, point, transport) -> None:
             point_store = ModbusPointStoreModel(value=val,
                                                 value_array=str(array),
                                                 point_uuid=point.uuid)
+            point_store.update_to_db_cov_only()
         else:
             fault = True
             fault_message = "Got non numeric value"
@@ -156,8 +157,6 @@ def poll_point(network, device, point, transport) -> None:
         fault = True
         fault_message = str(e)
     if not point_store:
-        if modbus_debug_poll:
-            print("!!! END MODBUS POLL @@")
         # last_valid_row = ModbusPointStoreModel.find_last_valid_row(point.uuid)
         # if last_valid_row:
         #     point_store = ModbusPointStoreModel(value=last_valid_row.value, value_array=last_valid_row.value_array,
@@ -165,5 +164,7 @@ def poll_point(network, device, point, transport) -> None:
         # else:
         point_store = ModbusPointStoreModel(fault=fault, fault_message=fault_message,
                                             point_uuid=point.uuid)
+        point_store.update_with_fault()
 
-    point_store.update_to_db_cov_only()
+    if modbus_debug_poll:
+        print("!!! END MODBUS POLL @@")
