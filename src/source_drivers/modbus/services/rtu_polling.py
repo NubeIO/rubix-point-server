@@ -4,6 +4,7 @@ from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusT
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_polling_count
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
+from src.models.point.model_point_store import PointStoreModel
 import time
 
 
@@ -41,6 +42,11 @@ class RtuPolling:
                 .join(ModbusPointModel).all()
 
             # TODO: separate thread for each network
+            point_stores = []
             for network, device, point in results:
-                poll_point(network, device, point, ModbusType.RTU)
+                point_stores.append(poll_point(network, device, point, ModbusType.RTU))
+
+            for point_store in point_stores:
+                point_store.update()
+
             db.session.commit()

@@ -15,24 +15,17 @@ class PointStoreModel(db.Model):
     def __repr__(self):
         return f"PointStore(point_uuid = {self.point_uuid})"
 
-    def update_to_db_cov_only(self):
-        if self.value is None:
-            return
-        db.session.query(PointStoreModel).filter(PointStoreModel.point_uuid == self.point_uuid and
-                                                 (PointStoreModel.value != self.value or
-                                                  PointStoreModel.fault == True)) \
-            .update({
-                PointStoreModel.value: self.value,
-                PointStoreModel.value_array: self.value_array,
-                PointStoreModel.fault: False,
-                PointStoreModel.fault_message: None,
-            })
-
-    def update_with_fault(self):
-        db.session.query(PointStoreModel).filter(PointStoreModel.point_uuid == self.point_uuid and
-                                                 (PointStoreModel.fault == False or
-                                                  PointStoreModel.fault_message != self.fault_message)) \
-            .update({
-                PointStoreModel.fault: self.fault,
-                PointStoreModel.fault_message: self.fault_message,
-            })
+    def update(self):
+        if self.fault is None or not self.fault:
+            db.session.execute(PointStoreModel.__table__
+                               .update()
+                               .values(value=self.value, fault=False, fault_message=None)
+                               .where(PointStoreModel.__table__.c.point_uuid == self.point_uuid and
+                                      PointStoreModel.__table__.c.value != self.value))
+        else:
+            db.session.execute(PointStoreModel.__table__
+                               .update()
+                               .values(fault=self.fault, fault_message=self.fault_message)
+                               .where(PointStoreModel.__table__.c.point_uuid == self.point_uuid and
+                                      PointStoreModel.__table__.c.fault != self.fault and
+                                      PointStoreModel.__table__.c.fault_message != self.fault_message))
