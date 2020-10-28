@@ -79,65 +79,65 @@ def poll_point(network, device, point, transport) -> None:
         read_coils
         """
         if mod_point_type == read_coils:
-            val = read_coils_handle(connection,
-                                    reg,
-                                    mod_point_reg_length,
-                                    mod_device_address,
-                                    mod_point_type)
+            val, array = read_coils_handle(connection,
+                                           reg,
+                                           mod_point_reg_length,
+                                           mod_device_address,
+                                           mod_point_type)
         """
         write_coils
         """
         if mod_point_type == write_coil:
-            val = write_coil_handle(connection, reg,
-                                    mod_point_reg_length,
-                                    mod_device_address,
-                                    write_value,
-                                    mod_point_type)
+            val, array = write_coil_handle(connection, reg,
+                                           mod_point_reg_length,
+                                           mod_device_address,
+                                           write_value,
+                                           mod_point_type)
         """
         read_input_registers
         """
         if mod_point_type == read_input_registers:
-            val = read_input_registers_handle(connection,
-                                              reg,
-                                              mod_point_reg_length,
-                                              mod_device_address,
-                                              mod_point_data_type,
-                                              mod_point_data_endian,
-                                              mod_point_type)
+            val, array = read_input_registers_handle(connection,
+                                                     reg,
+                                                     mod_point_reg_length,
+                                                     mod_device_address,
+                                                     mod_point_data_type,
+                                                     mod_point_data_endian,
+                                                     mod_point_type)
         """
         read_holding_registers
         """
         if mod_point_type == read_holding_registers:
-            val = read_holding_registers_handle(connection,
-                                                reg,
-                                                mod_point_reg_length,
-                                                mod_device_address,
-                                                mod_point_data_type,
-                                                mod_point_data_endian,
-                                                mod_point_type)
+            val, array = read_holding_registers_handle(connection,
+                                                       reg,
+                                                       mod_point_reg_length,
+                                                       mod_device_address,
+                                                       mod_point_data_type,
+                                                       mod_point_data_endian,
+                                                       mod_point_type)
         """
         read_holding_registers 
         """
         if mod_point_type == read_holding_registers:
-            val = read_holding_registers_handle(connection,
+            val, array = read_holding_registers_handle(connection,
+                                                       reg,
+                                                       mod_point_reg_length,
+                                                       mod_device_address,
+                                                       mod_point_data_type,
+                                                       mod_point_data_endian,
+                                                       mod_point_type)
+        """
+        write_registers write_registers
+        """
+        if mod_point_type == write_registers:
+            val, array = write_registers_handle(connection,
                                                 reg,
                                                 mod_point_reg_length,
                                                 mod_device_address,
                                                 mod_point_data_type,
                                                 mod_point_data_endian,
+                                                write_value,
                                                 mod_point_type)
-        """
-        write_registers write_registers
-        """
-        if mod_point_type == write_registers:
-            val = write_registers_handle(connection,
-                                         reg,
-                                         mod_point_reg_length,
-                                         mod_device_address,
-                                         mod_point_data_type,
-                                         mod_point_data_endian,
-                                         write_value,
-                                         mod_point_type)
 
         """
         Save modbus data in database
@@ -146,7 +146,7 @@ def poll_point(network, device, point, transport) -> None:
             print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE & VAL', {"transport": transport, "val": val})
         if isinstance(val, numbers.Number):
             point_store = PointStoreModel(value=val,
-                                          # value_array=str(array),
+                                          value_array=str(array),
                                           point_uuid=point.uuid)
             point_store.update_to_db_cov_only()
         else:

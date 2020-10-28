@@ -5,11 +5,12 @@ class PointStoreModel(db.Model):
     __tablename__ = 'point_stores'
     point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
     value = db.Column(db.Float(), nullable=True)
+    value_array = db.Column(db.String(), nullable=True)
     fault = db.Column(db.Boolean(), default=False, nullable=False)
     fault_message = db.Column(db.String())
     ts = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
-    # TODO: add value array somehow
+    # TODO: Change value array to match different drivers
 
     def __repr__(self):
         return f"PointStore(point_uuid = {self.point_uuid})"

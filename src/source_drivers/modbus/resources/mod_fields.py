@@ -5,6 +5,7 @@ from flask_restful import fields
 point_store_fields = {
     'point_uuid': fields.String,
     'value': fields.Float,
+    'value_array': fields.String,
     'fault': fields.Boolean,
     'fault_message': fields.String,
     'ts': fields.String

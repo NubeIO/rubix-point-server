@@ -17,7 +17,7 @@ def read_coils_handle(connection, reg, mod_point_reg_length,
     """
     if modbus_debug_poll:
         print("MODBUS DEBUG:", {'type': mod_point_type, "val": val, 'array': array})
-    return val
+    return val, array
 
 
 def write_coil_handle(connection, reg, mod_point_reg_length,
@@ -32,7 +32,7 @@ def write_coil_handle(connection, reg, mod_point_reg_length,
     """
     if modbus_debug_poll:
         print("MODBUS DEBUG:", {'type': mod_point_type, "val": val, 'array': array})
-    return val
+    return val, array
 
 
 def read_input_registers_handle(connection, reg, mod_point_reg_length,
@@ -48,7 +48,7 @@ def read_input_registers_handle(connection, reg, mod_point_reg_length,
     """
     if modbus_debug_poll:
         print("MODBUS DEBUG:", {'type': mod_point_type, "val": val, 'array': array})
-    return val
+    return val, array
 
 
 def read_holding_registers_handle(connection, reg, mod_point_reg_length,
@@ -67,7 +67,7 @@ def read_holding_registers_handle(connection, reg, mod_point_reg_length,
     if modbus_debug_poll:
         print("MODBUS DEBUG: inside read_holding_registers_handle AFTER read",
               {'type': mod_point_type, "val": val, 'array': array})
-    return val
+    return val, array
 
 
 def write_registers_handle(connection, reg, mod_point_reg_length,
@@ -85,4 +85,4 @@ def write_registers_handle(connection, reg, mod_point_reg_length,
     """
     if modbus_debug_poll:
         print("MODBUS DEBUG:", {'type': mod_point_type, "val": val, 'array': array})
-    return val
+    return val, array

@@ -37,6 +37,12 @@ point_return_attributes = {
         'dict': 'point_store.value',
         'help': ''
     },
+    'value_array': {
+        'type': str,
+        'nested': True,
+        'dict': 'point_store.value_array',
+        'help': ''
+    },
     'fault': {
         'type': bool,
         'nested': True,
