@@ -9,7 +9,8 @@ import time
 
 class RtuPolling:
     _instance = None
-    _polling_period = 2
+    
+    _polling_period = 1
 
     @staticmethod
     def get_instance():
