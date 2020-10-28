@@ -2,6 +2,14 @@ from flask_restful import fields
 
 # TODO: move all to rest schemas
 
+point_store_fields = {
+    'point_uuid': fields.String,
+    'value': fields.Float,
+    'fault': fields.Boolean,
+    'fault_message': fields.String,
+    'ts': fields.String
+}
+
 point_fields = {
     'uuid': fields.String,
     'name': fields.String,
@@ -17,10 +25,10 @@ point_fields = {
     'timeout': fields.Integer,
     'timeout_global': fields.Boolean,
     'prevent_duplicates': fields.Boolean,
-    'prevent_duplicates_global': fields.Boolean,
     'created_on': fields.String,
     'updated_on': fields.String,
     'device_uuid': fields.String,
+    'point_store': fields.Nested(point_store_fields),
 }
 
 device_fields = {

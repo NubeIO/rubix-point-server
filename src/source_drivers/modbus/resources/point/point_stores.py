@@ -4,6 +4,7 @@ from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
 from src.utils.model_utils import ModelUtils
 
 # TODO: move all to base point_store resource
+# TODO: use @marshal_with
 
 
 class ModbusPointStore(ModbusPointBase):
@@ -25,7 +26,7 @@ class ModbusPointPluralPointStore(ModbusPointBase):
             if row.device_uuid not in serialized_output:
                 serialized_output[row.device_uuid] = []
             serialized_output[row.device_uuid].append({'uuid': row.uuid, 'name': row.name, 'reg': row.reg,
-                                                       'fault': row.value.fault, 'value': row.value.value})
+                                                       'fault': row.point_store.fault, 'value': row.point_store.value})
         return serialized_output
 
 
@@ -35,6 +36,6 @@ class ModbusDevicePointPluralPointStore(ModbusPointBase):
         points = ModbusPointModel.query.filter(ModbusPointModel.device_uuid == device_uuid)
         serialized_output = []
         for row in points:
-            serialized_output.append({'uuid': row.uuid, 'name': row.name, 'reg': row.reg, 'fault': row.value.fault,
-                                      'value': row.value.value})
+            serialized_output.append({'uuid': row.uuid, 'name': row.name, 'reg': row.reg,
+                                      'fault': row.point_store.fault, 'value': row.point_store.value})
         return serialized_output

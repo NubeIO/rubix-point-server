@@ -11,7 +11,7 @@ class PointModel(db.Model):
     fault = db.Column(db.Boolean(), nullable=True)
     prevent_duplicates = db.Column(db.Boolean(), nullable=False)
     driver = db.Column(db.String(80))
-    value = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
+    point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
@@ -28,8 +28,8 @@ class PointModel(db.Model):
         return cls.query.filter_by(uuid=point_uuid).first()
 
     def save_to_db(self):
-        # self.value = PointStoreModel(point_uuid=self.uuid, value=0, value_array='')
-        self.value = PointStoreModel(point_uuid=self.uuid, value=0)
+        # self.point_store = PointStoreModel(point_uuid=self.uuid, value=0, value_array='')
+        self.point_store = PointStoreModel(point_uuid=self.uuid, value=0)
         db.session.add(self)
         db.session.commit()
 
