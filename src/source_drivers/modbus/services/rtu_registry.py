@@ -44,9 +44,9 @@ class RtuRegistry:
     def add_network(self, network):
         port = network.rtu_port
         baudrate = network.rtu_speed
-        stopbits = network.rtu_stopbits
+        stopbits = network.rtu_stop_bits
         parity = network.rtu_parity.name
-        bytesize = network.rtu_bytesize
+        bytesize = network.rtu_byte_size
         timeout = network.timeout
 
         self.remove_connection_if_exist(port, baudrate, stopbits, parity, bytesize, timeout)
@@ -75,8 +75,8 @@ class RtuRegistry:
     def create_connection_key_by_network(network):
         port = network.rtu_port
         baudrate = network.rtu_speed
-        stopbits = network.rtu_stopbits
+        stopbits = network.rtu_stop_bits
         parity = network.rtu_parity.name
-        bytesize = network.rtu_bytesize
+        bytesize = network.rtu_byte_size
         timeout = network.timeout
         return RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)

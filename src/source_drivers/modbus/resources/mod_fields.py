@@ -1,5 +1,16 @@
 from flask_restful import fields
 
+# TODO: move all to rest schemas
+
+point_store_fields = {
+    'point_uuid': fields.String,
+    'value': fields.Float,
+    'value_array': fields.String,
+    'fault': fields.Boolean,
+    'fault_message': fields.String,
+    'ts': fields.String
+}
+
 point_fields = {
     'uuid': fields.String,
     'name': fields.String,
@@ -15,10 +26,10 @@ point_fields = {
     'timeout': fields.Integer,
     'timeout_global': fields.Boolean,
     'prevent_duplicates': fields.Boolean,
-    'prevent_duplicates_global': fields.Boolean,
     'created_on': fields.String,
     'updated_on': fields.String,
     'device_uuid': fields.String,
+    'point_store': fields.Nested(point_store_fields),
 }
 
 device_fields = {
@@ -26,7 +37,7 @@ device_fields = {
     'name': fields.String,
     'enable': fields.Boolean,
     'type': fields.String,  # rtu or tcp
-    'addr': fields.Integer,  # 1,2,3
+    'address': fields.Integer,  # 1,2,3
     'tcp_ip': fields.String,
     'tcp_port': fields.Integer,
     'ping_point_type': fields.String,  # for ping a reg to see if the device is online
@@ -54,9 +65,9 @@ network_fields = {
     'point_timeout_global': fields.Integer,  # point time out global setting
     'rtu_port': fields.String,  # /dev/ttyyUSB0
     'rtu_speed': fields.Integer,  # 9600
-    'rtu_stopbits': fields.Integer,  # 1
+    'rtu_stop_bits': fields.Integer,  # 1
     'rtu_parity': fields.String,  # O E N Odd, Even, None
-    'rtu_bytesize': fields.Integer,  # 5, 6, 7, or 8. This defaults to 8.
+    'rtu_byte_size': fields.Integer,  # 5, 6, 7, or 8. This defaults to 8.
     'fault': fields.Boolean,  # true
     'last_poll_timestamp': fields.String,
     'fault_timestamp': fields.String,

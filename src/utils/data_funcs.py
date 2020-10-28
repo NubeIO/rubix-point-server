@@ -22,4 +22,3 @@ class DataHelpers:
     def bool_to_int(_val: bool) -> int:
         out = int(_val)
         return out
-

@@ -1,5 +1,5 @@
 import BAC0
-from src.source_drivers.bacnet.models.network import NetworkModel
+from src.source_drivers.bacnet.models.network import BacnetNetworkModel
 
 
 class Network:
@@ -21,7 +21,7 @@ class Network:
     def start(self):
         print("Network Start...")
         network_service = Network.get_instance()
-        for network in NetworkModel.query.all():
+        for network in BacnetNetworkModel.query.all():
             network_service.add_network(network)
 
     def add_network(self, network):

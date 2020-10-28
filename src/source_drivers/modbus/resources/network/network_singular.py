@@ -3,25 +3,26 @@ from flask_restful import marshal_with, abort
 from src.source_drivers.modbus.interfaces.network.network import ModbusType, ModbusRtuParity
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.resources.mod_fields import network_fields
-from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
 from src.source_drivers.modbus.resources.network.network_base import ModbusNetworkBase
 
 
 class ModbusNetworkSingular(ModbusNetworkBase):
 
+    @classmethod
     @marshal_with(network_fields)
-    def get(self, uuid):
+    def get(cls, uuid):
         network = ModbusNetworkModel.find_by_uuid(uuid)
         if not network:
             abort(404, message='Modbus Network not found')
         return network
 
+    @classmethod
     @marshal_with(network_fields)
-    def put(self, uuid):
-        data = ModbusNetworkPlural.parser.parse_args()
+    def put(cls, uuid):
+        data = ModbusNetworkBase.parser.parse_args()
         network = ModbusNetworkModel.find_by_uuid(uuid)
         if network is None:
-            return self.add_network(uuid, data)
+            return cls.add_network(uuid, data)
         else:
             try:
                 if data.type:
@@ -34,8 +35,9 @@ class ModbusNetworkSingular(ModbusNetworkBase):
             except Exception as e:
                 abort(500, message=str(e))
 
-    def delete(self, uuid):
+    @classmethod
+    def delete(cls, uuid):
         network = ModbusNetworkModel.find_by_uuid(uuid)
         if network:
             network.delete_from_db()
-        return '', 204
+        return ''

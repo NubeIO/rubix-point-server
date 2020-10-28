@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse, fields, marshal_with, abort
 
-from src.source_drivers.bacnet.models.network import NetworkModel
+from src.source_drivers.bacnet.models.network import BacnetNetworkModel
 from src.source_drivers.bacnet.resources.fields import network_fields
 from src.source_drivers.bacnet.services.network import Network as NetworkService
 
@@ -40,14 +40,14 @@ class Network(Resource):
 
     @marshal_with(network_fields)
     def get(self, uuid):
-        network = NetworkModel.find_by_network_uuid(uuid)
+        network = BacnetNetworkModel.find_by_network_uuid(uuid)
         if not network:
             abort(404, message='Network not found')
         return network
 
     @marshal_with(network_fields)
     def post(self, uuid):
-        if NetworkModel.find_by_network_uuid(uuid):
+        if BacnetNetworkModel.find_by_network_uuid(uuid):
             return abort(409, message=f"An Network with network_uuid '{uuid}' already exists.")
         data = Network.parser.parse_args()
         network = Network.create_network_model_obj(uuid, data)
@@ -58,7 +58,7 @@ class Network(Resource):
     @marshal_with(network_fields)
     def put(self, uuid):
         data = Network.parser.parse_args()
-        network = NetworkModel.find_by_network_uuid(uuid)
+        network = BacnetNetworkModel.find_by_network_uuid(uuid)
         if network is None:
             network = Network.create_network_model_obj(uuid, data)
         else:
@@ -74,7 +74,7 @@ class Network(Resource):
 
     def delete(self, uuid):
         network_uuid = uuid
-        network = NetworkModel.find_by_network_uuid(network_uuid)
+        network = BacnetNetworkModel.find_by_network_uuid(network_uuid)
         if network:
             network.delete_from_db()
             NetworkService.get_instance().delete_network(network)
@@ -82,18 +82,18 @@ class Network(Resource):
 
     @staticmethod
     def create_network_model_obj(network_uuid, data):
-        return NetworkModel(network_uuid=network_uuid, network_ip=data['network_ip'], network_mask=data['network_mask'],
-                            network_port=data['network_port'], network_device_id=data['network_device_id'],
-                            network_device_name=data['network_device_name'], network_number=data['network_number'])
+        return BacnetNetworkModel(network_uuid=network_uuid, network_ip=data['network_ip'], network_mask=data['network_mask'],
+                                  network_port=data['network_port'], network_device_id=data['network_device_id'],
+                                  network_device_name=data['network_device_name'], network_number=data['network_number'])
 
 
 class NetworkList(Resource):
     @marshal_with(network_fields, envelope="networks")
     def get(self):
-        return NetworkModel.query.all()
+        return BacnetNetworkModel.query.all()
 
 
 class NetworksIds(Resource):
     @marshal_with({'network_uuid': fields.String}, envelope="networks")
     def get(self):
-        return NetworkModel.query.all()
+        return BacnetNetworkModel.query.all()

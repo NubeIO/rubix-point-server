@@ -36,12 +36,13 @@ network_obj = {
     "point_timeout_global": 2000,
     "rtu_port": "/dev/ttyUSB2",
     "rtu_speed": 9600,
-    "rtu_stopbits": 1,
+    "rtu_stop_bits": 1,
     "rtu_parity": "N",
-    "rtu_bytesize": 8
+    "rtu_byte_size": 8
 }
 
 r_n = requests.post(f'{network_url}', data=network_obj)
+print(r_n)
 r_json = r_n.json()
 print(r_json)
 n_uuid = r_json['uuid']
@@ -53,7 +54,7 @@ for d in devices:
         "name": f'device {d}',
         "enable": True,
         "type": "RTU",
-        "addr": d,
+        "address": d,
         "ping_point_type": "mod_ping_point_type",
         "ping_point_address": 1,
         "zero_mode": False,
@@ -74,7 +75,7 @@ for d in devices:
             "reg_length": 2,
             "type": reg_type,
             "enable": True,
-            "write_value": 0,
+            # "write_value": 0,
             "data_type": data_type,
             "data_endian": "BEB_BEW",
             "data_round": 22,
@@ -82,7 +83,6 @@ for d in devices:
             "timeout": 34,
             "timeout_global": True,
             "prevent_duplicates": True,
-            "prevent_duplicates_global": True,
             "device_uuid": d_uuid
         }
         r_p = requests.post(f'{points_url}', data=point_obj)
