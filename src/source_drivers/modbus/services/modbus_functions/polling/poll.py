@@ -39,7 +39,7 @@ def poll_point(network, device, point, transport) -> None:
             TcpRegistry.get_instance().add_device(device)
     # TODO: whether it's functional or not, don't know how data we read
 
-    mod_device_addr = device.addr
+    mod_device_address = device.address
     reg = point.reg
     mod_point_reg_length = point.reg_length
     mod_point_type = point.type
@@ -60,7 +60,7 @@ def poll_point(network, device, point, transport) -> None:
         print("MODBUS DEBUG:", {'network': network,
                                 'device': device,
                                 'transport': transport,
-                                'mod_device_addr': mod_device_addr,
+                                'mod_device_address': mod_device_address,
                                 'reg': reg,
                                 'mod_point_reg_length': mod_point_reg_length,
                                 'mod_point_type': mod_point_type,
@@ -82,7 +82,7 @@ def poll_point(network, device, point, transport) -> None:
             val = read_coils_handle(connection,
                                     reg,
                                     mod_point_reg_length,
-                                    mod_device_addr,
+                                    mod_device_address,
                                     mod_point_type)
         """
         write_coils
@@ -90,7 +90,7 @@ def poll_point(network, device, point, transport) -> None:
         if mod_point_type == write_coil:
             val = write_coil_handle(connection, reg,
                                     mod_point_reg_length,
-                                    mod_device_addr,
+                                    mod_device_address,
                                     write_value,
                                     mod_point_type)
         """
@@ -100,7 +100,7 @@ def poll_point(network, device, point, transport) -> None:
             val = read_input_registers_handle(connection,
                                               reg,
                                               mod_point_reg_length,
-                                              mod_device_addr,
+                                              mod_device_address,
                                               mod_point_data_type,
                                               mod_point_data_endian,
                                               mod_point_type)
@@ -111,7 +111,7 @@ def poll_point(network, device, point, transport) -> None:
             val = read_holding_registers_handle(connection,
                                                 reg,
                                                 mod_point_reg_length,
-                                                mod_device_addr,
+                                                mod_device_address,
                                                 mod_point_data_type,
                                                 mod_point_data_endian,
                                                 mod_point_type)
@@ -122,7 +122,7 @@ def poll_point(network, device, point, transport) -> None:
             val = read_holding_registers_handle(connection,
                                                 reg,
                                                 mod_point_reg_length,
-                                                mod_device_addr,
+                                                mod_device_address,
                                                 mod_point_data_type,
                                                 mod_point_data_endian,
                                                 mod_point_type)
@@ -133,7 +133,7 @@ def poll_point(network, device, point, transport) -> None:
             val = write_registers_handle(connection,
                                          reg,
                                          mod_point_reg_length,
-                                         mod_device_addr,
+                                         mod_device_address,
                                          mod_point_data_type,
                                          mod_point_data_endian,
                                          write_value,
