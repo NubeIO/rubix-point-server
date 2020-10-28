@@ -8,7 +8,6 @@ from src.models.network.model_driver_network import DriverNetworkModel
 class ModbusNetworkModel(DriverNetworkModel):
     DRIVER_NAME = 'Modbus'
     __tablename__ = 'modbus_networks'
-
     type = db.Column(db.Enum(ModbusType), nullable=False)
     timeout = db.Column(db.Float(), nullable=False)
     device_timeout_global = db.Column(db.Float(), nullable=False)
@@ -35,8 +34,10 @@ class ModbusNetworkModel(DriverNetworkModel):
 
     @validates('rtu_stop_bits')
     def validate_rtu_stop_bits(self, _, value):
+        msg = "rtu_stop_bits The number of bits sent after each character in a message to indicate the end of the " \
+              "byte. This defaults to 1 "
         if not value and self.type == ModbusType.RTU.name:
-            raise ValueError("rtu_stop_bits should be be there on type MTU")
+            raise ValueError(msg)
         return value
 
     @validates('rtu_parity')
@@ -47,9 +48,11 @@ class ModbusNetworkModel(DriverNetworkModel):
 
     @validates('rtu_byte_size')
     def validate_rtu_byte_size(self, _, value):
+        msg = "rtu_byte_size The number of bits in a byte of serial data. This can be one of 5, 6, 7, or 8. This " \
+              "defaults to 8"
         if self.type == ModbusType.RTU.name:
             if value not in range(5, 9):
-                raise ValueError("rtu_byte_size should be on range (0-9)")
+                raise ValueError(msg)
             elif not value:
-                raise ValueError("rtu_byte_size should be be there on type MTU")
+                raise ValueError(msg)
         return value
