@@ -1,4 +1,4 @@
-from src.rest_schema.schema_point import *
+from src.resources.rest_schema.schema_point import *
 from copy import deepcopy
 
 modbus_point_all_attributes = deepcopy(point_all_attributes)

@@ -21,10 +21,6 @@ class ModbusNetworkModel(DriverNetworkModel):
     last_poll_timestamp = db.Column(db.DateTime, nullable=True)
     fault_timestamp = db.Column(db.DateTime, nullable=True)
 
-    # TODO: move to parent
-    # created_on = db.Column(db.DateTime, server_default=db.func.now())
-    # updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
-
     @validates('rtu_port')
     def validate_rtu_port(self, _, value):
         if not value and self.type == ModbusType.RTU.name:

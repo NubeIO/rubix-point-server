@@ -21,10 +21,6 @@ class ModbusDeviceModel(DriverDeviceModel):
     last_poll_timestamp = db.Column(db.DateTime)
     fault_timestamp = db.Column(db.DateTime)
 
-    # TODO: move to parent
-    # created_on = db.Column(db.DateTime, server_default=db.func.now())
-    # updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
-
     @validates('tcp_ip')
     def validate_tcp_ip(self, _, value):
         if not value and self.type == ModbusType.TCP.name:

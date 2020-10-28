@@ -1,13 +1,13 @@
 from flask_restful import Resource, reqparse, abort, marshal_with
 from src.resources.utils import mapRestSchema
 from src.models.device.model_device import DeviceModel
-from src.rest_schema.schema_device import device_all_attributes, \
+from src.resources.rest_schema.schema_device import device_all_attributes, \
     device_return_attributes, INTERFACE_NAME
 
 
 device_all_fields = {}
-mapRestSchema(device_all_attributes, device_all_fields)
 mapRestSchema(device_return_attributes, device_all_fields)
+mapRestSchema(device_all_attributes, device_all_fields)
 
 
 class DeviceResource(Resource):
@@ -19,9 +19,10 @@ class DeviceResource(Resource):
                             help=device_all_attributes[attr]['help'],
                             )
 
+    @classmethod
     @marshal_with(device_all_fields)
-    def get(self, uuid):
-        device = DeviceModel.find_by_device_uuid(uuid)
+    def get(cls, uuid):
+        device = DeviceModel.find_by_uuid(uuid)
         if not device:
             abort(404, message=f'{INTERFACE_NAME} not found')
 
@@ -29,6 +30,7 @@ class DeviceResource(Resource):
 
 
 class DeviceResourceList(Resource):
+    @classmethod
     @marshal_with(device_all_fields, envelope="devices")
-    def get(self):
+    def get(cls):
         return DeviceModel.query.all()

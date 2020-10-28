@@ -1,4 +1,4 @@
-from src.rest_schema.schema_network import *
+from src.resources.rest_schema.schema_network import *
 from copy import deepcopy
 
 modbus_network_all_attributes = deepcopy(network_all_attributes)

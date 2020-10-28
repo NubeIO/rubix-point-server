@@ -1,13 +1,7 @@
-# TODO: need to make a class and private
 
 INTERFACE_NAME = 'point'
 
 point_all_attributes = {
-    # 'uuid': {
-    #     'type': str,
-    #     'required': False,
-    #     'help': '',
-    # },
     'name': {
         'type': str,
         'required': True,
@@ -32,24 +26,33 @@ point_all_attributes = {
 }
 
 point_return_attributes = {
+    'uuid': {
+        'type': str,
+        'required': False,
+        'help': '',
+    },
     'value': {
         'type': float,
         'nested': True,
-        'dict': 'value.point_value',
+        'dict': 'point_store.value',
         'help': ''
     },
-    # 'write_ok': {
-    #     'type': str,
-    #     'help': '',
-    # },
     'fault': {
         'type': bool,
         'nested': True,
-        'dict': 'value.fault',
+        'dict': 'point_store.fault',
         'help': '',
     },
     'last_poll_timestamp': {
         'type': str,
         'help': '',
     },
+    'created_on': {
+        'type': str,
+        'help': '',
+    },
+    'updated_on': {
+        'type': str,
+        'help': '',
+    }
 }

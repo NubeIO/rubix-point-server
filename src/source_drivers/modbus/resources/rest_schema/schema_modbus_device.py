@@ -1,5 +1,5 @@
 from copy import deepcopy
-from src.rest_schema.schema_device import *
+from src.resources.rest_schema.schema_device import *
 
 modbus_device_all_attributes = deepcopy(device_all_attributes)
 modbus_device_all_attributes['type'] = {

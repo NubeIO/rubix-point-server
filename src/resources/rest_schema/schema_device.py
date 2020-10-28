@@ -2,11 +2,6 @@
 INTERFACE_NAME = 'device'
 
 device_all_attributes = {
-    # 'uuid': {
-    #     'type': str,
-    #     'required': False,
-    #     'help': '',
-    # },
     'name': {
         'type': str,
         'required': True,
@@ -34,4 +29,17 @@ device_all_attributes = {
     },
 }
 
-device_return_attributes = {}
+device_return_attributes = {
+    'uuid': {
+        'type': str,
+        'help': '',
+    },
+    'created_on': {
+        'type': str,
+        'help': '',
+    },
+    'updated_on': {
+        'type': str,
+        'help': '',
+    }
+}
