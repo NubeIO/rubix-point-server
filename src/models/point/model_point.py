@@ -1,5 +1,4 @@
 from sqlalchemy.orm import validates
-
 from src import db
 from src.interfaces.point import HistoryType
 from src.models.model_base import ModelBase
