@@ -9,11 +9,12 @@ class PointModel(db.Model):
     device_uuid = db.Column(db.String, db.ForeignKey('devices.uuid'), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
     fault = db.Column(db.Boolean(), nullable=True)
+    driver = db.Column(db.String(80))  # TODO: use this
     prevent_duplicates = db.Column(db.Boolean(), nullable=False)
-    driver = db.Column(db.String(80))
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+    influx_enable = db.Column(db.Boolean(), nullable=False, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',
@@ -28,7 +29,6 @@ class PointModel(db.Model):
         return cls.query.filter_by(uuid=point_uuid).first()
 
     def save_to_db(self):
-        # self.point_store = PointStoreModel(point_uuid=self.uuid, value=0, value_array='')
         self.point_store = PointStoreModel(point_uuid=self.uuid, value=0)
         db.session.add(self)
         db.session.commit()

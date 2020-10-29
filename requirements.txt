@@ -14,4 +14,4 @@ uuid==1.30
 schedule==0.6.0
 psycopg2-binary
 gunicorn
-
+influxdb
