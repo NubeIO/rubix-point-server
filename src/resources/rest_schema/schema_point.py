@@ -17,6 +17,11 @@ point_all_attributes = {
         'required': True,
         'help': '',
     },
+    'influx_enable': {
+        'type': bool,
+        'required': False,
+        'help': '',
+    },
     'prevent_duplicates': {
         'type': bool,
         'required': False,
