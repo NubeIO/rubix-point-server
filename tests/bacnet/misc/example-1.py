@@ -4,7 +4,7 @@ from bacpypes.app import BIPSimpleApplication
 from bacpypes.consolelogging import ConfigArgumentParser
 from bacpypes.core import run
 from bacpypes.local.device import LocalDeviceObject
-from bacpypes.object import AnalogValueObject, AveragingObject, Property, register_object_type
+from bacpypes.object import BinaryOutputObject, AnalogValueObject, AveragingObject, Property, register_object_type
 from bacpypes.primitivedata import Real, Boolean
 
 
@@ -45,6 +45,14 @@ class MyAveragingObject(AveragingObject):
         register_object_type(MyAveragingObject)
 
 
+class MyBoolObj(BinaryOutputObject):
+    properties = [RealProperty('minimumValue'), RealProperty('averageValue'), RealProperty('maximumValue')]
+
+    def __init__(self, **kwargs):
+        BinaryOutputObject.__init__(self, **kwargs)
+        register_object_type(MyAveragingObject)
+
+
 def main():
     global args
     parser = ConfigArgumentParser(description=__doc__)
@@ -58,7 +66,7 @@ def main():
     global realValue
     global booleanValue
     booleanValue = False
-    realValue = int(input("Inserire un numero "))
+    realValue = int(input("type a num "))
 
     analog = MyAnalogValueObject(objectIdentifier=('analogValue', 123), objectName='hea')
     averaging = MyAveragingObject(objectIdentifier=('averaging', 70), objectName='averagingTest')

@@ -1,7 +1,8 @@
 import asyncio
 import threading
 
-from src.local_device_applications import LocalDeviceApplication, ReadAllObjectPropertiesApp
+# from src.local_device_applications import LocalDeviceApplication, ReadAllObjectPropertiesApp
+from tests.bacnet.bac_server_test import ReadAllObjectPropertiesApp, LocalDeviceApplication
 
 '''
 Class for simulating a BACnet device and then querying it of it's objects.
@@ -19,12 +20,12 @@ def run_application(**kwargs) -> str:
     thread = threading.Thread(target=LocalDeviceApplication.run_application, kwargs=kwargs)
     thread.start()
 
-    # Give object identifier of the device object that will be queried.
-    ReadAllObjectPropertiesApp.run_application(kwargs["objectIdentifier"])
+    # # Give object identifier of the device object that will be queried.
+    # ReadAllObjectPropertiesApp.run_application(kwargs["objectIdentifier"])
+    #
+    # asyncio.get_event_loop().run_until_complete(asyncio.wait_for(ReadAllObjectPropertiesApp.query_output, timeout=30))
 
-    asyncio.get_event_loop().run_until_complete(asyncio.wait_for(ReadAllObjectPropertiesApp.query_output, timeout=30))
-
-    LocalDeviceApplication.stop_application()
+    # LocalDeviceApplication.stop_application()
 
     thread.join()
 
