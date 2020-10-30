@@ -21,16 +21,26 @@ class WiresPlatModel(db.Model):
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
-        return f"Wires(uuid = {self.uuid})"
+        return f"Wires({self.uuid})"
 
     @classmethod
     def find_by_uuid(cls, wires_uuid):
         return cls.query.filter_by(uuid=wires_uuid).first()
 
+    @classmethod
+    def filter_by_uuid(cls, wires_uuid):
+        return cls.query.filter_by(uuid=wires_uuid)
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
 
-    def delete_from_db(self):
-        db.session.delete(self)
+    @classmethod
+    def delete_from_db(cls):
+        db.session.query(WiresPlatModel).delete()
+        db.session.commit()
+
+    @classmethod
+    def update_to_db(cls, _uuid, data):
+        cls.filter_by_uuid(_uuid).update({**data, "uuid": _uuid})
         db.session.commit()

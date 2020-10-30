@@ -21,32 +21,32 @@ class WiresPlatResource(Resource):
                             help=wires_plat_all_attributes[attr]['help'],
                             )
 
-        @staticmethod
-        def create_wires_model_obj(uuid, data):
-            return WiresPlatModel(uuid=uuid, **data)
-
-        @staticmethod
-        def add_wires(uuid, data):
-            try:
-                wires = WiresPlatResource.create_wires_model_obj(uuid, data)
-                wires.save_to_db()
-                return wires
-            except Exception as e:
-                abort(500, message=str(e))
-
     @classmethod
     @marshal_with(wires_plat_all_fields)
     def get(cls):
         wires = WiresPlatModel.query.all()
-        latest = wires[-1]
-        if not wires:
+        if len(wires) == 0:
             abort(404, message='Wires details not found')
-        return latest
+        return wires[-1]
 
     @classmethod
     @marshal_with(wires_plat_all_fields)
-    def post(cls):
-        _uuid = str(uuid.uuid4())
+    def put(cls):
         data = WiresPlatResource.parser.parse_args()
-        return cls.add_wires(_uuid, data)
+        wires = WiresPlatModel.query.all()
+        try:
+            if len(wires) == 0:
+                _uuid = str(uuid.uuid4())
+                wires = WiresPlatModel(uuid=_uuid, **data)
+                wires.save_to_db()
+                return wires
+            else:
+                _uuid = wires[-1].uuid
+                WiresPlatModel.update_to_db(_uuid, data)
+                return WiresPlatModel.find_by_uuid(_uuid)
+        except Exception as e:
+            abort(500, message=str(e))
 
+    def delete(self):
+        WiresPlatModel.delete_from_db()
+        return '', 204

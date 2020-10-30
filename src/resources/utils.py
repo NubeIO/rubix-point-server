@@ -13,6 +13,9 @@ def getFieldType(attr_type):
 
 
 def mapRestSchema(schema, resource_fields):
+    """
+    Adds schema dict marshaled data to resource_fields dict
+    """
     for attr in schema:
         resource_fields[attr] = getFieldType(schema[attr]['type'])
         if schema[attr].get('nested', False):
