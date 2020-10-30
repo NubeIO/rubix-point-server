@@ -5,6 +5,7 @@ from src.interfaces.point import HistoryType
 from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
+from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_input_registers_handle, \
     read_holding_registers_handle, \
@@ -117,6 +118,17 @@ def poll_point(network, device, point, transport) -> None:
                                                        mod_point_data_endian,
                                                        mod_point_type)
         """
+        read_holding_registers 
+        """
+        if mod_point_type == read_holding_registers:
+            val, array = read_holding_registers_handle(connection,
+                                                       reg,
+                                                       mod_point_reg_length,
+                                                       mod_device_address,
+                                                       mod_point_data_type,
+                                                       mod_point_data_endian,
+                                                       mod_point_type)
+        """
         write_registers write_registers
         """
         if mod_point_type == write_registers:
@@ -145,7 +157,7 @@ def poll_point(network, device, point, transport) -> None:
         fault = True
         fault_message = str(e)
     if not point_store_new:
-        point_store_new = PointStoreModel(value=0, fault=fault, fault_message=fault_message, point_uuid=point.uuid)
+        point_store_new = PointStoreModel(fault=fault, fault_message=fault_message, point_uuid=point.uuid)
     if modbus_debug_poll:
         print("!!! END MODBUS POLL @@@")
 
