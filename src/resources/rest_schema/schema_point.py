@@ -1,4 +1,3 @@
-
 INTERFACE_NAME = 'point'
 
 point_all_attributes = {
@@ -17,17 +16,21 @@ point_all_attributes = {
         'required': True,
         'help': '',
     },
-    'influx_enable': {
+    'history_enable': {
         'type': bool,
         'required': False,
         'help': '',
     },
-    'prevent_duplicates': {
-        'type': bool,
+    'history_type': {
+        'type': str,
         'required': False,
         'help': '',
     },
-
+    'history_interval': {
+        'type': int,
+        'required': False,
+        'help': '',
+    },
 }
 
 point_return_attributes = {
