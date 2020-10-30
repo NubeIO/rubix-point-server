@@ -7,6 +7,7 @@ from src.resources.resource_device import DeviceResource, DeviceResourceList
 from src.resources.resource_point import PointResource, PointResourceList
 # from src.source_drivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
 # from src.source_drivers.bacnet.resources.network import Network, NetworkList, NetworksIds
+from src.resources.resource_wires_plat import WiresPlatResource
 from src.source_drivers.modbus.resources.device.device_plural import ModbusDevicePlural
 from src.source_drivers.modbus.resources.device.device_singular import ModbusDeviceSingular
 from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
@@ -62,3 +63,6 @@ api.add_resource(ModbusDevicePointPluralPointStore, f'/{api_prefix}/modbus/<stri
 
 # system endpoints
 api.add_resource(GetSystemMem, f'/{api_prefix}/system/memory')
+
+# wires-plat
+api.add_resource(WiresPlatResource, f'/{api_prefix}/wires/plat')

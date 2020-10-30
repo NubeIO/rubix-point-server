@@ -1,13 +1,13 @@
 from flask_restful import Resource, reqparse, marshal_with, abort
-from src.resources.utils import mapRestSchema
+
 from src.models.network.model_network import NetworkModel
 from src.resources.rest_schema.schema_network import network_all_attributes, \
     network_return_attributes
-
+from src.resources.utils import map_rest_schema
 
 network_all_fields = {}
-mapRestSchema(network_return_attributes, network_all_fields)
-mapRestSchema(network_all_attributes, network_all_fields)
+map_rest_schema(network_return_attributes, network_all_fields)
+map_rest_schema(network_all_attributes, network_all_fields)
 
 
 class NetworkResource(Resource):

@@ -1,18 +1,17 @@
 from flask_restful import Resource, reqparse, abort, marshal_with
+
 from src.models.point.model_point import PointModel
 # from src.models.point.writable.model_point_writeable import PointModelWritable
 # from src.models.point.readOnly.model_point_readonly import PointModelReadOnly
 from src.resources.rest_schema.schema_point import point_all_attributes, point_return_attributes, INTERFACE_NAME
 from src.resources.utils import *
 
-
 point_all_fields = {}
-mapRestSchema(point_return_attributes, point_all_fields)
-mapRestSchema(point_all_attributes, point_all_fields)
+map_rest_schema(point_return_attributes, point_all_fields)
+map_rest_schema(point_all_attributes, point_all_fields)
 
 
 class PointResource(Resource):
-
     parser = reqparse.RequestParser()
     for attr in point_all_attributes:
         parser.add_argument(attr,
@@ -43,7 +42,6 @@ class PointResourceList(Resource):
     def get(cls):
         result = PointModel.query.all()
         return result
-
 
 # class PointWriteableResourceList(Resource):
 #     @classmethod
