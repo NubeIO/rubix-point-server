@@ -1,13 +1,13 @@
 from flask_restful import Resource, abort, reqparse
+
+from src.resources.utils import map_rest_schema
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
-from src.resources.utils import mapRestSchema
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_network import modbus_network_all_attributes, \
     network_return_attributes
 
-
 modbus_network_all_fields = {}
-mapRestSchema(modbus_network_all_attributes, modbus_network_all_fields)
-mapRestSchema(network_return_attributes, modbus_network_all_fields)
+map_rest_schema(modbus_network_all_attributes, modbus_network_all_fields)
+map_rest_schema(network_return_attributes, modbus_network_all_fields)
 
 
 class ModbusNetworkBase(Resource):

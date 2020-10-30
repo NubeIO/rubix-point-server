@@ -2,14 +2,14 @@ import uuid
 from flask_restful import Resource, reqparse, marshal_with, abort
 
 from src.models.wires.model_wires_plat import WiresPlatModel
-from src.resources.utils import mapRestSchema
+from src.resources.utils import map_rest_schema
 
 from src.resources.rest_schema.schema_wires_plat import wires_plat_all_attributes, \
     wires_plat_return_attributes
 
 wires_plat_all_fields = {}
-mapRestSchema(wires_plat_return_attributes, wires_plat_all_fields)
-mapRestSchema(wires_plat_all_attributes, wires_plat_all_fields)
+map_rest_schema(wires_plat_return_attributes, wires_plat_all_fields)
+map_rest_schema(wires_plat_all_attributes, wires_plat_all_fields)
 
 
 class WiresPlatResource(Resource):
