@@ -1,7 +1,6 @@
 from src import db
-from src.source_drivers.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
-from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_driver_point import DriverPointModel
+from src.source_drivers.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
 
 
 class ModbusPointModel(DriverPointModel):

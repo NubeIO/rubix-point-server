@@ -92,7 +92,6 @@ for d in devices:
             "data_offset": 2,
             "timeout": 34,
             "timeout_global": True,
-            "prevent_duplicates": True,
             "device_uuid": d_uuid
         }
         r_p = requests.post(f'{points_url}', data=point_obj)

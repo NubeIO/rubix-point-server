@@ -25,7 +25,6 @@ point_fields = {
     'data_offset': fields.Integer,
     'timeout': fields.Integer,
     'timeout_global': fields.Boolean,
-    'prevent_duplicates': fields.Boolean,
     'created_on': fields.String,
     'updated_on': fields.String,
     'device_uuid': fields.String,
