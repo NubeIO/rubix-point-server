@@ -23,7 +23,7 @@ import time
 # params.test_device.disconnect()
 # params.bacnet.disconnect()
 import BAC0
-from BAC0.core.devices.create_objects import create_AV
+from BAC0.core.devices.create_objects import create_AV, create_BO
 from BAC0.tasks.RecurringTask import RecurringTask
 from bacpypes.primitivedata import Real
 
@@ -41,8 +41,7 @@ def changeValueOfMyAI():
     value = value + 1 if value < 100 else 0
     obj.presentValue = Real(value)
 
-
-ip = '192.168.0.100/24:47808'
+ip = '192.168.0.101/24:47808'
 deviceId = 100
 localObjName = "BAC0_Fireplace"
 
@@ -58,9 +57,10 @@ bacnet = BAC0.lite(ip=ip, deviceId=deviceId, localObjName=localObjName)
 # bacnet = BAC0.lite()
 # bacnet = BAC0.lite(ip='192.168.0.100/24:47808')
 bacnet.this_application.add_object(create_AV(oid=0, name='MyAI', pv=Real(0), pv_writable=True))
-bacnet.this_application.add_object(create_AV(oid=2, name='MyAI2', pv=Real(0), pv_writable=True))
-# bacnet.this_application.add_object(create_AI(oid=0, name='MyAI', pv=Real(0)))
-
+# bacnet.this_application.add_object(create_AV(oid=2, name='MyAI2', pv=Real(0), pv_writable=True))
+# bacnet.this_application.add_object(create_BO(oid=0, name='MyAI', pv=Real(0)))
+# def create_BO(
+#     oid=1, pv=0, name="BO", activeText="On", inactiveText="Off", pv_writable=False
 task = RecurringTask(changeValueOfMyAI, delay=5)
 task.start()
 
