@@ -14,9 +14,9 @@ class ModbusNetworkBase(Resource):
     parser = reqparse.RequestParser()
     for attr in modbus_network_all_attributes:
         parser.add_argument(attr,
-                            type=modbus_network_all_attributes[attr]['type'],
-                            required=modbus_network_all_attributes[attr]['required'],
-                            help=modbus_network_all_attributes[attr]['help'],
+                            type=modbus_network_all_attributes[attr].get('type'),
+                            required=modbus_network_all_attributes[attr].get('required', False),
+                            help=modbus_network_all_attributes[attr].get('help', None),
                             )
 
     @staticmethod

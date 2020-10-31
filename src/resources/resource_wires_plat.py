@@ -2,14 +2,7 @@ import uuid
 from flask_restful import Resource, reqparse, marshal_with, abort
 
 from src.models.wires.model_wires_plat import WiresPlatModel
-from src.resources.utils import map_rest_schema
-
-from src.resources.rest_schema.schema_wires_plat import wires_plat_all_attributes, \
-    wires_plat_return_attributes
-
-wires_plat_all_fields = {}
-map_rest_schema(wires_plat_return_attributes, wires_plat_all_fields)
-map_rest_schema(wires_plat_all_attributes, wires_plat_all_fields)
+from src.resources.rest_schema.schema_wires_plat import wires_plat_all_attributes, wires_plat_all_fields
 
 
 class WiresPlatResource(Resource):
@@ -17,8 +10,8 @@ class WiresPlatResource(Resource):
     for attr in wires_plat_all_attributes:
         parser.add_argument(attr,
                             type=wires_plat_all_attributes[attr]['type'],
-                            required=wires_plat_all_attributes[attr]['required'],
-                            help=wires_plat_all_attributes[attr]['help'],
+                            required=wires_plat_all_attributes[attr].get('required', False),
+                            help=wires_plat_all_attributes[attr].get('help', None),
                             )
 
     @classmethod

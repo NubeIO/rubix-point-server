@@ -17,8 +17,6 @@ class ModbusDeviceModel(DeviceMixinModel):
     zero_mode = db.Column(db.Boolean(), nullable=False)
     timeout = db.Column(db.Float(), nullable=False)
     timeout_global = db.Column(db.Boolean(), nullable=False)
-    last_poll_timestamp = db.Column(db.DateTime)
-    fault_timestamp = db.Column(db.DateTime)
 
     @classmethod
     def get_polymorphic_identity(cls):
