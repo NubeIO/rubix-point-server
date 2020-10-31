@@ -1,12 +1,11 @@
 from sqlalchemy.orm import validates
 
 from src import db
+from src.models.network.model_network_mixin import NetworkMixinModel
 from src.source_drivers.modbus.interfaces.network.network import ModbusType, ModbusRtuParity
-from src.models.network.model_driver_network import DriverNetworkModel
 
 
-class ModbusNetworkModel(DriverNetworkModel):
-    DRIVER_NAME = 'Modbus'
+class ModbusNetworkModel(NetworkMixinModel):
     __tablename__ = 'modbus_networks'
     type = db.Column(db.Enum(ModbusType), nullable=False)
     timeout = db.Column(db.Float(), nullable=False)
@@ -19,6 +18,10 @@ class ModbusNetworkModel(DriverNetworkModel):
     rtu_byte_size = db.Column(db.Integer(), default=8)
     last_poll_timestamp = db.Column(db.DateTime, nullable=True)
     fault_timestamp = db.Column(db.DateTime, nullable=True)
+
+    @classmethod
+    def get_polymorphic_identity(cls):
+        return 'Modbus'
 
     @validates('rtu_port')
     def validate_rtu_port(self, _, value):
