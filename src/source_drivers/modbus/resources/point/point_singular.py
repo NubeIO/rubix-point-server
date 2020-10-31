@@ -2,8 +2,8 @@ from flask_restful import abort, marshal_with
 
 from src.source_drivers.modbus.interfaces.point.points import ModbusDataType, ModbusPointType, ModbusDataEndian
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.source_drivers.modbus.resources.mod_fields import point_fields
 from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields
 from src.utils.model_utils import ModelUtils
 
 
@@ -21,7 +21,7 @@ class ModbusPointSingular(ModbusPointBase):
         return {**ModelUtils.row2dict(point), "point_store": ModelUtils.row2dict(point.point_store)}
 
     @classmethod
-    @marshal_with(point_fields)
+    @marshal_with(modbus_point_all_fields)
     def put(cls, uuid):
         data = ModbusPointSingular.parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)

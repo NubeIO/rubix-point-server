@@ -1,5 +1,9 @@
+from flask_restful import fields
+
 from src.resources.rest_schema.schema_network import *
 from copy import deepcopy
+
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_fields
 
 modbus_network_all_attributes = deepcopy(network_all_attributes)
 modbus_network_all_attributes['type'] = {
@@ -33,3 +37,10 @@ modbus_network_all_attributes['rtu_parity'] = {
 modbus_network_all_attributes['rtu_byte_size'] = {
     'type': int,
 }
+
+modbus_network_return_attributes = deepcopy(network_return_attributes)
+
+modbus_network_all_fields = {}
+map_rest_schema(modbus_network_return_attributes, modbus_network_all_fields)
+map_rest_schema(modbus_network_all_attributes, modbus_network_all_fields)
+modbus_network_all_fields['devices'] = fields.List(fields.Nested(modbus_device_all_fields))
