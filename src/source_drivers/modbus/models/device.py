@@ -22,6 +22,10 @@ class ModbusDeviceModel(DeviceMixinModel):
     def get_polymorphic_identity(cls):
         return 'Modbus'
 
+    @classmethod
+    def get_polymorphic_identity(cls):
+        return 'Modbus'
+
     @validates('tcp_ip')
     def validate_tcp_ip(self, _, value):
         if not value and self.type == ModbusType.TCP.name:
