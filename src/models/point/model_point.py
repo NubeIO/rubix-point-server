@@ -1,3 +1,5 @@
+from sqlalchemy.ext.declarative import declared_attr
+
 from src import db
 from src.interfaces.point import HistoryType
 from src.models.point.model_point_store import PointStoreModel
@@ -9,7 +11,7 @@ class PointModel(db.Model):
     name = db.Column(db.String(80), nullable=False)
     device_uuid = db.Column(db.String, db.ForeignKey('devices.uuid'), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
-    driver = db.Column(db.String(80))  # TODO: use this
+    driver = db.Column(db.String(80))
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.COV)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
@@ -21,6 +23,10 @@ class PointModel(db.Model):
         'polymorphic_identity': 'point',
         'polymorphic_on': driver
     }
+
+    @declared_attr
+    def uuid(cls):
+        return db.Column(db.String(80), db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
 
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
@@ -37,4 +43,3 @@ class PointModel(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-
