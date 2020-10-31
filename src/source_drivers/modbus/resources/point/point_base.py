@@ -16,8 +16,8 @@ class ModbusPointBase(Resource):
     for attr in modbus_point_all_attributes:
         parser.add_argument(attr,
                             type=modbus_point_all_attributes[attr]['type'],
-                            required=modbus_point_all_attributes[attr]['required'],
-                            help=modbus_point_all_attributes[attr]['help'],
+                            required=modbus_point_all_attributes[attr].get('required', False),
+                            help=modbus_point_all_attributes[attr].get('help', None),
                             )
 
     @staticmethod

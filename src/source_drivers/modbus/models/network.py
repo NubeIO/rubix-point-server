@@ -16,8 +16,6 @@ class ModbusNetworkModel(NetworkMixinModel):
     rtu_stop_bits = db.Column(db.Integer())
     rtu_parity = db.Column(db.Enum(ModbusRtuParity))
     rtu_byte_size = db.Column(db.Integer(), default=8)
-    last_poll_timestamp = db.Column(db.DateTime, nullable=True)
-    fault_timestamp = db.Column(db.DateTime, nullable=True)
 
     @classmethod
     def get_polymorphic_identity(cls):

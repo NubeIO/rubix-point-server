@@ -1,4 +1,4 @@
-INTERFACE_NAME = 'wires_plat'
+from src.resources.utils import map_rest_schema
 
 wires_plat_all_attributes = {
     'device_id': {
@@ -83,3 +83,7 @@ wires_plat_return_attributes = {
         'help': '',
     }
 }
+
+wires_plat_all_fields = {}
+map_rest_schema(wires_plat_return_attributes, wires_plat_all_fields)
+map_rest_schema(wires_plat_all_attributes, wires_plat_all_fields)
