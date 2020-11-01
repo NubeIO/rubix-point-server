@@ -24,10 +24,6 @@ class PointModel(db.Model):
         'polymorphic_on': driver
     }
 
-    @declared_attr
-    def uuid(cls):
-        return db.Column(db.String(80), db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
-
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
 

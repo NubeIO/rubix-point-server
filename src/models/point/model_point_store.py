@@ -31,4 +31,3 @@ class PointStoreModel(db.Model):
                                .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                            or_(self.__table__.c.fault != self.fault,
                                                self.__table__.c.fault_message != self.fault_message))))
-        db.session.commit()
