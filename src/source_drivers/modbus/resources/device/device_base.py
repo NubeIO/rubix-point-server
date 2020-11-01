@@ -1,9 +1,8 @@
 from flask_restful import Resource, reqparse, abort
+
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
-from src.resources.utils import mapRestSchema
-from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_attributes, \
-    device_return_attributes, INTERFACE_NAME
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_attributes
 
 
 class ModbusDeviceBase(Resource):
@@ -11,8 +10,8 @@ class ModbusDeviceBase(Resource):
     for attr in modbus_device_all_attributes:
         parser.add_argument(attr,
                             type=modbus_device_all_attributes[attr]['type'],
-                            required=modbus_device_all_attributes[attr]['required'],
-                            help=modbus_device_all_attributes[attr]['help'],
+                            required=modbus_device_all_attributes[attr].get('required', False),
+                            help=modbus_device_all_attributes[attr].get('help', None),
                             )
 
     @staticmethod

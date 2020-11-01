@@ -11,7 +11,7 @@ def run_application() -> str:
     :return: Object query result.
     '''
     from bacpypes.object import AnalogInputObject, AnalogValueObject, BinaryValueObject, BinaryInputObject
-    from tests.bacnet.misc.SimulateAndQueryDeviceApplication import SimulateAndQueryDeviceApplication
+    from tests.bacnet.bac_server_test.SimulateAndQueryDeviceApplication import SimulateAndQueryDeviceApplication
 
     analog_input_objects = \
         [

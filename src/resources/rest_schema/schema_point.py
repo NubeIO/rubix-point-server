@@ -1,69 +1,64 @@
-
-INTERFACE_NAME = 'point'
+from src.resources.utils import map_rest_schema
 
 point_all_attributes = {
+    'device_uuid': {
+        'type': str,
+        'required': True,
+    },
     'name': {
         'type': str,
         'required': True,
-        'help': '',
-    },
-    'device_uuid': {
-        'type': str,
-        'required': False,
-        'help': '',
     },
     'enable': {
         'type': bool,
         'required': True,
-        'help': '',
     },
-    'influx_enable': {
+    'history_enable': {
         'type': bool,
-        'required': False,
-        'help': '',
     },
-    'prevent_duplicates': {
-        'type': bool,
-        'required': False,
-        'help': '',
+    'history_type': {
+        'type': str,
     },
-
+    'history_interval': {
+        'type': int,
+    },
 }
 
 point_return_attributes = {
     'uuid': {
         'type': str,
-        'required': False,
-        'help': '',
+    },
+    'driver': {
+        'type': str,
+    },
+    'created_on': {
+        'type': str,
+    },
+    'updated_on': {
+        'type': str,
     },
     'value': {
         'type': float,
         'nested': True,
         'dict': 'point_store.value',
-        'help': ''
     },
     'value_array': {
         'type': str,
         'nested': True,
         'dict': 'point_store.value_array',
-        'help': ''
     },
     'fault': {
         'type': bool,
         'nested': True,
         'dict': 'point_store.fault',
-        'help': '',
     },
     'last_poll_timestamp': {
         'type': str,
-        'help': '',
+        'nested': True,
+        'dict': 'point_store.ts',
     },
-    'created_on': {
-        'type': str,
-        'help': '',
-    },
-    'updated_on': {
-        'type': str,
-        'help': '',
-    }
 }
+
+point_all_fields = {}
+map_rest_schema(point_return_attributes, point_all_fields)
+map_rest_schema(point_all_attributes, point_all_fields)

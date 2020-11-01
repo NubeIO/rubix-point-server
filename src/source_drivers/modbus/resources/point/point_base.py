@@ -1,24 +1,17 @@
 from flask_restful import Resource, reqparse, abort
+
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.resources.utils import mapRestSchema
-from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_attributes, \
-    point_return_attributes, INTERFACE_NAME
-
-
-modbus_point_all_fields = {}
-mapRestSchema(modbus_point_all_attributes, modbus_point_all_fields)
-mapRestSchema(point_return_attributes, modbus_point_all_fields)
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_attributes
 
 
 class ModbusPointBase(Resource):
     parser = reqparse.RequestParser()
-    parser = reqparse.RequestParser()
     for attr in modbus_point_all_attributes:
         parser.add_argument(attr,
                             type=modbus_point_all_attributes[attr]['type'],
-                            required=modbus_point_all_attributes[attr]['required'],
-                            help=modbus_point_all_attributes[attr]['help'],
+                            required=modbus_point_all_attributes[attr].get('required', False),
+                            help=modbus_point_all_attributes[attr].get('help', None),
                             )
 
     @staticmethod

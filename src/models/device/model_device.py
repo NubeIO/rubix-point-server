@@ -4,10 +4,10 @@ from src import db
 class DeviceModel(db.Model):
     __tablename__ = 'devices'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
+    network_uuid = db.Column(db.String, db.ForeignKey('networks.uuid'), nullable=False)
     name = db.Column(db.String(80), nullable=False)
     enable = db.Column(db.String(80), nullable=False)
     fault = db.Column(db.Boolean(), nullable=True)
-    network_uuid = db.Column(db.String, db.ForeignKey('networks.uuid'), nullable=False)
     points = db.relationship('PointModel', cascade="all,delete", backref='device', lazy=True)
     driver = db.Column(db.String(80))
     created_on = db.Column(db.DateTime, server_default=db.func.now())

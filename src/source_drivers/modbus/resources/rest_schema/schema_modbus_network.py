@@ -1,49 +1,46 @@
+from flask_restful import fields
+
 from src.resources.rest_schema.schema_network import *
 from copy import deepcopy
+
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_fields
 
 modbus_network_all_attributes = deepcopy(network_all_attributes)
 modbus_network_all_attributes['type'] = {
     'type': str,
     'required': True,
-    'help': '',
 }
 modbus_network_all_attributes['timeout'] = {
     'type': float,
     'required': True,
-    'help': '',
 }
 modbus_network_all_attributes['device_timeout_global'] = {
     'type': float,
     'required': True,
-    'help': '',
 }
 modbus_network_all_attributes['point_timeout_global'] = {
     'type': float,
     'required': True,
-    'help': '',
 }
 modbus_network_all_attributes['rtu_port'] = {
     'type': str,
-    'required': False,
-    'help': '',
 }
 modbus_network_all_attributes['rtu_speed'] = {
     'type': int,
-    'required': False,
-    'help': '',
 }
 modbus_network_all_attributes['rtu_stop_bits'] = {
     'type': int,
-    'required': False,
-    'help': '',
 }
 modbus_network_all_attributes['rtu_parity'] = {
     'type': str,
-    'required': False,
-    'help': '',
 }
 modbus_network_all_attributes['rtu_byte_size'] = {
     'type': int,
-    'required': False,
-    'help': '',
 }
+
+modbus_network_return_attributes = deepcopy(network_return_attributes)
+
+modbus_network_all_fields = {}
+map_rest_schema(modbus_network_return_attributes, modbus_network_all_fields)
+map_rest_schema(modbus_network_all_attributes, modbus_network_all_fields)
+modbus_network_all_fields['devices'] = fields.List(fields.Nested(modbus_device_all_fields))

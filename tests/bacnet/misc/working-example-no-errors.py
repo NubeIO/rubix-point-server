@@ -20,8 +20,9 @@ from bacpypes.service.device import DeviceCommunicationControlServices
 from bacpypes.service.object import ReadWritePropertyMultipleServices
 
 # some debugging
-_debug = 0
+_debug = True
 _log = ModuleLogger(globals())
+print(22)
 
 
 #
