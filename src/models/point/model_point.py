@@ -1,5 +1,3 @@
-from sqlalchemy.ext.declarative import declared_attr
-
 from src import db
 from src.interfaces.point import HistoryType
 from src.models.point.model_point_store import PointStoreModel
@@ -23,10 +21,6 @@ class PointModel(db.Model):
         'polymorphic_identity': 'point',
         'polymorphic_on': driver
     }
-
-    @declared_attr
-    def uuid(cls):
-        return db.Column(db.String(80), db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
 
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"

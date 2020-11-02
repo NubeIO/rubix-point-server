@@ -1,3 +1,5 @@
+from sqlalchemy import and_, or_
+
 from src import db
 
 
@@ -16,16 +18,16 @@ class PointStoreModel(db.Model):
         return f"PointStore(point_uuid = {self.point_uuid})"
 
     def update(self):
-        if self.fault is None or not self.fault:
+        if not self.fault:
             db.session.execute(PointStoreModel.__table__
                                .update()
-                               .values(value=self.value, value_array=self.value_array, fault=False, fault_message=None)
-                               .where(PointStoreModel.__table__.c.point_uuid == self.point_uuid and
-                                      PointStoreModel.__table__.c.value != self.value))
+                               .values(value=self.value, fault=False, fault_message=None)
+                               .where(and_(self.__table__.c.point_uuid == self.point_uuid,
+                                           self.__table__.c.value != self.value)))
         else:
             db.session.execute(PointStoreModel.__table__
                                .update()
                                .values(fault=self.fault, fault_message=self.fault_message)
-                               .where(PointStoreModel.__table__.c.point_uuid == self.point_uuid and
-                                      PointStoreModel.__table__.c.fault != self.fault and
-                                      PointStoreModel.__table__.c.fault_message != self.fault_message))
+                               .where(and_(self.__table__.c.point_uuid == self.point_uuid,
+                                           or_(self.__table__.c.fault != self.fault,
+                                               self.__table__.c.fault_message != self.fault_message))))
