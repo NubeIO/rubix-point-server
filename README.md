@@ -29,6 +29,13 @@ python3 run.py
 ```
 
 ```
+sudo journalctl -f -u nubeio-bac-rest.service
+sudo systemctl start nubeio-bac-rest.service
+sudo systemctl stop nubeio-bac-rest.service
+sudo systemctl restart nubeio-bac-rest.service
+```
+
+```
 
 ### Had to update the BBB from 3.5 to 3.7 but didn't work
 
