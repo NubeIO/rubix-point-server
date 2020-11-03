@@ -50,3 +50,23 @@ class ModbusPointSingular(ModbusPointBase):
         if point:
             point.delete_from_db()
         return '', 204
+
+
+# from flask_restful import Resource
+# from src.event_dispatcher import EventDispatcher
+# from src.services.event_service_base import Event, EventCallableBlocking, EventTypes
+# from src.source_drivers.modbus.services.rtu_polling import RtuPolling
+#
+#
+# class TestEndPoint(Resource):
+#
+#     @classmethod
+#     def get(cls, thing):
+#         event = EventCallableBlocking(RtuPolling.temporary_test_func, (thing, thing))
+#         EventDispatcher.dispatch_to_source_only(
+#             event, 'modbus_rtu')
+#         event.condition.wait()
+#         if event.error:
+#             abort(500, message='unknown error')
+#         else:
+#             return event.data, 200
