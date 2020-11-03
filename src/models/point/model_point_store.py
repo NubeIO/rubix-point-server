@@ -17,6 +17,10 @@ class PointStoreModel(db.Model):
     def __repr__(self):
         return f"PointStore(point_uuid = {self.point_uuid})"
 
+    @classmethod
+    def find_by_point_uuid(cls, point_uuid):
+        return cls.query.filter_by(point_uuid=point_uuid).first()
+
     def update(self):
         if not self.fault:
             db.session.execute(PointStoreModel.__table__

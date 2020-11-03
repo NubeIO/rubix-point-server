@@ -1,7 +1,8 @@
 from src import db
+from src.models.model_base import ModelBase
 
 
-class WiresPlatModel(db.Model):
+class WiresPlatModel(ModelBase):
     __tablename__ = 'wires_plat'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     device_id = db.Column(db.String(80), nullable=False)
@@ -30,17 +31,3 @@ class WiresPlatModel(db.Model):
     @classmethod
     def filter_by_uuid(cls, wires_uuid):
         return cls.query.filter_by(uuid=wires_uuid)
-
-    def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    @classmethod
-    def delete_from_db(cls):
-        db.session.query(WiresPlatModel).delete()
-        db.session.commit()
-
-    @classmethod
-    def update_to_db(cls, _uuid, data):
-        cls.filter_by_uuid(_uuid).update({**data, "uuid": _uuid})
-        db.session.commit()

@@ -24,8 +24,7 @@ class ModbusDeviceSingular(ModbusDeviceBase):
         else:
             cls.abort_if_network_does_not_exist_and_type_mismatch(data.network_uuid, data.type)
             try:
-                ModbusDeviceModel.filter_by_uuid(uuid).update(data)
-                ModbusDeviceModel.commit()
+                device.update(**data)
                 return ModbusDeviceModel.find_by_uuid(uuid)
             except Exception as e:
                 abort(500, message=str(e))

@@ -1,7 +1,8 @@
 from src import db
+from src.models.model_base import ModelBase
 
 
-class DeviceModel(db.Model):
+class DeviceModel(ModelBase):
     __tablename__ = 'devices'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     network_uuid = db.Column(db.String, db.ForeignKey('networks.uuid'), nullable=False)
@@ -25,11 +26,3 @@ class DeviceModel(db.Model):
     @classmethod
     def find_by_uuid(cls, device_uuid):
         return cls.query.filter_by(uuid=device_uuid).first()
-
-    def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def delete_from_db(self):
-        db.session.delete(self)
-        db.session.commit()

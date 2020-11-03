@@ -26,17 +26,16 @@ class WiresPlatResource(Resource):
     @marshal_with(wires_plat_all_fields)
     def put(cls):
         data = WiresPlatResource.parser.parse_args()
-        wires = WiresPlatModel.query.all()
+        wire = WiresPlatModel.query.first()
         try:
-            if len(wires) == 0:
+            if wire:
                 _uuid = str(uuid.uuid4())
                 wires = WiresPlatModel(uuid=_uuid, **data)
                 wires.save_to_db()
                 return wires
             else:
-                _uuid = wires[-1].uuid
-                WiresPlatModel.update_to_db(_uuid, data)
-                return WiresPlatModel.find_by_uuid(_uuid)
+                wire.update(**{**data, "uuid": wire.uuid})
+                return WiresPlatModel.find_by_uuid(wire.uuid)
         except Exception as e:
             abort(500, message=str(e))
 

@@ -1,5 +1,6 @@
 from flask_restful import abort, marshal_with
 
+from src.interfaces.point import HistoryType
 from src.source_drivers.modbus.interfaces.point.points import ModbusDataType, ModbusPointType, ModbusDataEndian
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
@@ -36,8 +37,9 @@ class ModbusPointSingular(ModbusPointBase):
                     data.data_type = ModbusDataType.__members__.get(data.data_type)
                 if data.data_endian:
                     data.data_endian = ModbusDataEndian.__members__.get(data.data_endian)
-                point.update(data)
-                point.commit()
+                if data.history_type:
+                    data.history_type = HistoryType.__members__.get(data.history_type)
+                point.update(**data)
                 return ModbusPointModel.find_by_uuid(uuid)
             except Exception as e:
                 abort(500, message=str(e))
