@@ -11,8 +11,8 @@ from src.event_dispatcher import EventDispatcher
 
 class RtuPolling(EventServiceBase):
     _instance = None
-
     _polling_period = 1
+    service_name = 'modbus_rtu'
 
     @staticmethod
     def get_instance():
@@ -26,6 +26,7 @@ class RtuPolling(EventServiceBase):
         else:
             super().__init__()
             self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
+            EventDispatcher.add_source_driver(self)
             RtuPolling._instance = self
 
     def polling(self):
@@ -53,6 +54,8 @@ class RtuPolling(EventServiceBase):
 
                 for p in ps:
                     if p.update():
-                        EventDispatcher.dispatch_from_source(Event(EventTypes.POINT_COV))
+                        EventDispatcher.dispatch_from_source(self, Event(EventTypes.POINT_COV))
                 db.session.commit()
                 self.set_internal_service_timeout(RtuPolling._polling_period)
+            else:
+                raise Exception('MODBUS: unsupported event error', event.event_type)
