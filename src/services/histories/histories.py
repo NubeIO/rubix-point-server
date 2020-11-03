@@ -3,7 +3,8 @@ from src import db
 from src.models.network.model_network import NetworkModel
 from src.models.device.model_device import DeviceModel
 from src.models.point.model_point import PointModel
-from src.services.event_service_base import EventServiceBase, EventTypes
+from src.services.event_service_base import EventServiceBase, EventTypes, Event
+from src.event_dispatcher import EventDispatcher
 from influxdb import InfluxDBClient
 
 # TODO: move these to some sort of config
@@ -11,7 +12,7 @@ influx_enable = True
 
 
 class Histories(EventServiceBase):
-
+    service_name = 'histories'
     _push_period_minutes = 1
 
     _instance = None

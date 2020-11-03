@@ -21,8 +21,11 @@ class Event:
 
 
 class EventServiceBase:
+    service_name = None
 
     def __init__(self):
+        if self.service_name is None:
+            raise Exception('service name was not created')
         self.event_queue = Queue()
         self.supported_events = [False] * len(EventTypes)
         self.internal_timeout_thread = None
