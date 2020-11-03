@@ -16,6 +16,9 @@ device_all_attributes = {
     'fault': {
         'type': bool,
     },
+    'history_enable': {
+        'type': bool,
+    },
 }
 
 device_return_attributes = {

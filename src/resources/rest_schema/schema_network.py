@@ -12,6 +12,9 @@ network_all_attributes = {
     'fault': {
         'type': bool,
     },
+    'history_enable': {
+        'type': bool,
+    },
 }
 
 network_return_attributes = {
