@@ -5,7 +5,7 @@ from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusT
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_polling_count
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
-from src.services.event_service_base import EventServiceBase, EventTypes, Event
+from src.services.event_service_base import EventServiceBase, EventTypes, Event, EventCallableBlocking
 from src.event_dispatcher import EventDispatcher
 
 
@@ -26,6 +26,7 @@ class RtuPolling(EventServiceBase):
         else:
             super().__init__()
             self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
+            self.supported_events[EventTypes.CALLABLE] = True
             EventDispatcher.add_source_driver(self)
             RtuPolling._instance = self
 
@@ -58,4 +59,8 @@ class RtuPolling(EventServiceBase):
                 db.session.commit()
                 self.set_internal_service_timeout(RtuPolling._polling_period)
             else:
-                raise Exception('MODBUS: unsupported event error', event.event_type)
+                self.handle_internal_callable(event)
+
+    # def temporary_test_func(self, thing1, thing2) -> str:
+    #     ret = str(thing1) + ' and ' + str(thing2)
+    #     return ret

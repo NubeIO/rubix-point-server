@@ -31,21 +31,19 @@ app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 
 db = SQLAlchemy(app)
 
+
+# Other Services
+from src.services.histories.histories import Histories
+# Source Drivers
+# from src.source_drivers.bacnet.services.network import Network
+from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
+from src.source_drivers.modbus.services.tcp_polling import TcpPolling
+from src.source_drivers.modbus.services.rtu_polling import RtuPolling
+from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 from src import routes
+db.create_all()
 
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
-
-    db.create_all()
-
-    # Other Services
-    from src.services.histories.histories import Histories
-
-    # Source Drivers
-    # from src.source_drivers.bacnet.services.network import Network
-    from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
-    from src.source_drivers.modbus.services.tcp_polling import TcpPolling
-    from src.source_drivers.modbus.services.rtu_polling import RtuPolling
-    from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 
     if enable_histories:
         histories = Histories.get_instance()

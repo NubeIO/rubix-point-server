@@ -39,16 +39,18 @@ class EventDispatcher:
 
     @classmethod
     def dispatch_from_service(cls, origin_service: EventServiceBase, event: Event, source_driver_name: str = None):
-        if source_driver_name:
-            print('Event dispatcher searching for driver', source_driver_name)
-            for driver in cls.get_instance().source_drivers:
-                if driver.service_name == source_driver_name:
-                    print('Event dispatcher found source driver')
-                    driver.add_event(event)
-                    break
+        cls.dispatch_to_source_only(event, source_driver_name)
         for service in cls.get_instance().services:
             if service is not origin_service:
                 service.add_event(event)
+
+    @classmethod
+    def dispatch_to_source_only(cls, event: Event, source_driver_name: str = None):
+        if source_driver_name:
+            for driver in cls.get_instance().source_drivers:
+                if driver.service_name == source_driver_name:
+                    driver.add_event(event)
+                    break
 
     @classmethod
     def dispatch_from_source(cls, origin_source_driver: EventServiceBase, event: Event):
