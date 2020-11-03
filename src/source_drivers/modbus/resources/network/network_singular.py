@@ -40,4 +40,4 @@ class ModbusNetworkSingular(ModbusNetworkBase):
         network = ModbusNetworkModel.find_by_uuid(uuid)
         if network:
             network.delete_from_db()
-        return ''
+        return '', 204

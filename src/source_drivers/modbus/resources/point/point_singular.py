@@ -4,7 +4,6 @@ from src.source_drivers.modbus.interfaces.point.points import ModbusDataType, Mo
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields
-from src.utils.model_utils import ModelUtils
 
 
 class ModbusPointSingular(ModbusPointBase):
@@ -14,11 +13,12 @@ class ModbusPointSingular(ModbusPointBase):
     """
 
     @classmethod
+    @marshal_with(modbus_point_all_fields)
     def get(cls, uuid):
         point = ModbusPointModel.find_by_uuid(uuid)
         if not point:
             abort(404, message=f'Modbus Point not found')
-        return {**ModelUtils.row2dict(point), "point_store": ModelUtils.row2dict(point.point_store)}
+        return point
 
     @classmethod
     @marshal_with(modbus_point_all_fields)
@@ -47,4 +47,4 @@ class ModbusPointSingular(ModbusPointBase):
         point = ModbusPointModel.find_by_uuid(uuid)
         if point:
             point.delete_from_db()
-        return ''
+        return '', 204

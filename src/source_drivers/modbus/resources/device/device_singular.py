@@ -35,4 +35,4 @@ class ModbusDeviceSingular(ModbusDeviceBase):
         device = ModbusDeviceModel.find_by_uuid(uuid)
         if device:
             device.delete_from_db()
-        return ''
+        return '', 204
