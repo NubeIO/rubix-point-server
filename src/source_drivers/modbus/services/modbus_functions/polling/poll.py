@@ -1,6 +1,7 @@
 import numbers
 
-from src import TcpRegistry
+from src import TcpRegistry, PointStoreHistoryModel
+from src.interfaces.point import HistoryType
 from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
@@ -10,6 +11,7 @@ from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs impo
     write_coil_handle, \
     read_coils_handle, write_registers_handle
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
+from src.utils.model_utils import ModelUtils
 
 
 def poll_point(network, device, point, transport) -> None:
@@ -71,7 +73,7 @@ def poll_point(network, device, point, transport) -> None:
 
     fault = False
     fault_message = ""
-    point_store = None
+    point_store_new = None
     try:
         val = None
         array = ""
@@ -134,7 +136,7 @@ def poll_point(network, device, point, transport) -> None:
         if modbus_debug_poll:
             print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE & VAL', {"transport": transport, "val": val})
         if isinstance(val, numbers.Number):
-            point_store = PointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
+            point_store_new = PointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
         else:
             fault = True
             fault_message = "Got non numeric value"
@@ -143,9 +145,44 @@ def poll_point(network, device, point, transport) -> None:
             print(f'MODBUS ERROR: in poll main function {str(e)}')
         fault = True
         fault_message = str(e)
-    if not point_store:
-        point_store = PointStoreModel(fault=fault, fault_message=fault_message, point_uuid=point.uuid)
+    if not point_store_new:
+        point_store_new = PointStoreModel(value=0, fault=fault, fault_message=fault_message, point_uuid=point.uuid)
     if modbus_debug_poll:
         print("!!! END MODBUS POLL @@@")
 
-    point_store.update()
+    update_point_store(network, device, point, point_store_new)
+
+
+def update_point_store(network, device, point, point_store_new):
+    """
+    It compares :param {PointStoreModel} point_store_new with the existing point_store value for that particular point &
+    If new: update it
+    If old: do nothing
+    """
+    point_store_existing = PointStoreModel.find_by_point_uuid(point.uuid)
+
+    if not point_store_existing:
+        # If some manual point_store table deletion occurred
+        point_store_existing = PointStoreModel.create_new_point_store_model(point.uuid)
+        point_store_existing.save_to_db()
+
+    _point_store_existing = ModelUtils.row2dict_default(point_store_existing)
+    del _point_store_existing['ts']
+
+    _point_store_new = ModelUtils.row2dict_default(point_store_new)
+    del _point_store_new['ts']
+
+    if _point_store_new != _point_store_existing:
+        point_store_existing.update(**_point_store_new)
+        add_point_history_on_cov(network, device, point)
+
+
+def add_point_history_on_cov(network, device, point):
+    """
+    add point.point_store to the point_store_history if they history type is 'COV' and history_enable is `True`
+    """
+    if point.history_type == HistoryType.COV \
+            and network.history_enable and device.history_enable and point.history_enable:
+        data = ModelUtils.row2dict_default(PointStoreModel.find_by_point_uuid(point.uuid))
+        point_store_history = PointStoreHistoryModel(**data)
+        point_store_history.save_to_db()

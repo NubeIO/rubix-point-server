@@ -12,7 +12,7 @@ CORS(app)
 
 # TMP CONFIGS
 db_pg = False
-enable_tcp = False
+enable_tcp = True
 enable_rtu = True
 
 if db_pg:
@@ -39,7 +39,7 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     from src.source_drivers.modbus.services.tcp_polling import TcpPolling
     from src.source_drivers.modbus.services.rtu_polling import RtuPolling
     from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-    from src.services.histories.history import History
+    from src.services.histories.history_interval import HistoryInterval
 
     # Network.get_instance().start()
 
@@ -53,7 +53,7 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
         rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
         rtu_polling_thread.start()
 
-    history_thread = Thread(target=History.get_instance().sync)
+    history_thread = Thread(target=HistoryInterval.get_instance().sync_interval)
     history_thread.start()
 
     # enable_cleaner = False

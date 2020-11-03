@@ -1,3 +1,5 @@
+from sqlalchemy.orm import validates
+
 from src import db
 from src.interfaces.point import HistoryType
 from src.models.model_base import ModelBase
@@ -31,6 +33,13 @@ class PointModel(ModelBase):
         return cls.query.filter_by(uuid=uuid).first()
 
     def save_to_db(self):
-        self.point_store = PointStoreModel(point_uuid=self.uuid, value=0)
+        self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         db.session.add(self)
         db.session.commit()
+
+    @validates('history_interval')
+    def validate_rtu_byte_size(self, _, value):
+        if self.history_type == HistoryType.INTERVAL and value is not None and value < 1:
+            print('tRUE')
+            raise ValueError("This needs to be at least 1, default is 15 (in minutes)")
+        return value
