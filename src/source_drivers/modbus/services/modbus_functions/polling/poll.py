@@ -12,7 +12,7 @@ from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs impo
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 
 
-def poll_point(network, device, point, transport) -> None:
+def poll_point(network, device, point, transport) -> PointStoreModel:
     """
     Main modbus polling loop
     :param network: modbus network class
@@ -159,4 +159,4 @@ def poll_point(network, device, point, transport) -> None:
     if modbus_debug_poll:
         print("!!! END MODBUS POLL @@@")
 
-    point_store.update()
+    return point_store

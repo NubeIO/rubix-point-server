@@ -3,13 +3,14 @@ from src import db
 from src.models.network.model_network import NetworkModel
 from src.models.device.model_device import DeviceModel
 from src.models.point.model_point import PointModel
+from src.services.event_service_base import EventServiceBase, EventTypes
 from influxdb import InfluxDBClient
 
 # TODO: move these to some sort of config
 influx_enable = True
 
 
-class Histories:
+class Histories(EventServiceBase):
 
     _push_period_minutes = 1
 
@@ -20,7 +21,10 @@ class Histories:
         if Histories._instance:
             raise Exception("HISTORIES: Histories class is a singleton class!")
         else:
+            super().__init__()
             Histories._instance = self
+            self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
+            self.supported_events[EventTypes.POINT_COV] = True
         # TODO: create bindings
 
     @staticmethod
@@ -34,11 +38,15 @@ class Histories:
         return
 
     def polling(self):
+        self.set_internal_service_timeout(self._push_period_minutes * 3)
         while True:
-            time.sleep(self._push_period_minutes * 60)
-            self.connect_binding()
-            #
-            results = self.get_points()
+            event = self.event_queue.get()
+            print('HISTORIES: event', event.event_type)
+            if event.event_type is EventTypes.INTERNAL_SERVICE_TIMEOUT:
+                self.set_internal_service_timeout(self._push_period_minutes * 3)
+
+            # self.connect_binding()
+            # results = self.get_points()
             # TODO: get any local histories
             # TODO: format data and post to histories
             # TODO: check post success

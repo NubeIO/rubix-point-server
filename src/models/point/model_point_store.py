@@ -1,5 +1,4 @@
 from sqlalchemy import and_, or_
-
 from src import db
 
 
@@ -17,17 +16,19 @@ class PointStoreModel(db.Model):
     def __repr__(self):
         return f"PointStore(point_uuid = {self.point_uuid})"
 
-    def update(self):
+    def update(self) -> bool:
+        res = None
         if not self.fault:
-            db.session.execute(PointStoreModel.__table__
-                               .update()
-                               .values(value=self.value, fault=False, fault_message=None)
-                               .where(and_(self.__table__.c.point_uuid == self.point_uuid,
-                                           self.__table__.c.value != self.value)))
+            res = db.session.execute(PointStoreModel.__table__
+                                     .update()
+                                     .values(value=self.value, fault=False, fault_message=None)
+                                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
+                                                 self.__table__.c.value != self.value)))
         else:
-            db.session.execute(PointStoreModel.__table__
-                               .update()
-                               .values(fault=self.fault, fault_message=self.fault_message)
-                               .where(and_(self.__table__.c.point_uuid == self.point_uuid,
-                                           or_(self.__table__.c.fault != self.fault,
-                                               self.__table__.c.fault_message != self.fault_message))))
+            res = db.session.execute(PointStoreModel.__table__
+                                     .update()
+                                     .values(fault=self.fault, fault_message=self.fault_message)
+                                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
+                                                 or_(self.__table__.c.fault != self.fault,
+                                                     self.__table__.c.fault_message != self.fault_message))))
+        return bool(res.rowcount)
