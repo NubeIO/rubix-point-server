@@ -5,7 +5,6 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-# from src.modbus.services.point_store_cleaner import PointStoreCleaner
 from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
 
 app = Flask(__name__)
@@ -41,7 +40,7 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     from src.source_drivers.modbus.services.tcp_polling import TcpPolling
     from src.source_drivers.modbus.services.rtu_polling import RtuPolling
     from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-    from src.services.histories.history_interval import HistoryInterval
+    from src.services.histories.history_local import HistoryLocal
 
     # Network.get_instance().start()
 
@@ -55,7 +54,7 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
         rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
         rtu_polling_thread.start()
 
-    history_thread = Thread(target=HistoryInterval.get_instance().sync_interval)
+    history_thread = Thread(target=HistoryLocal.get_instance().sync_interval)
     history_thread.start()
 
     if enable_cleaner:

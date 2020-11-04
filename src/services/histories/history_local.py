@@ -4,11 +4,12 @@ from datetime import datetime
 from src import db
 from src.interfaces.point import HistoryType
 from src.models.network.model_network import NetworkModel
+from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.utils.model_utils import ModelUtils
 
 
-class HistoryInterval:
+class HistoryLocal:
     """
     A simple history saving protocol for those points which has `history_type=INTERVAL`
     """
@@ -18,16 +19,16 @@ class HistoryInterval:
     binding = None
 
     def __init__(self):
-        if HistoryInterval._instance:
+        if HistoryLocal._instance:
             raise Exception("HISTORY SYNC: HistoryInterval class is a singleton class!")
         else:
-            HistoryInterval._instance = self
+            HistoryLocal._instance = self
 
     @staticmethod
     def get_instance():
-        if not HistoryInterval._instance:
-            HistoryInterval()
-        return HistoryInterval._instance
+        if not HistoryLocal._instance:
+            HistoryLocal()
+        return HistoryLocal._instance
 
     def sync_interval(self):
         while True:
@@ -60,3 +61,9 @@ class HistoryInterval:
         _point_store = ModelUtils.row2dict_default(point_store)
         _point_store_history = PointStoreHistoryModel(**_point_store)
         _point_store_history.save_to_db()
+
+    @staticmethod
+    def add_point_history_on_cov(point_uuid):
+        data = ModelUtils.row2dict_default(PointStoreModel.find_by_point_uuid(point_uuid))
+        point_store_history = PointStoreHistoryModel(**data)
+        point_store_history.save_to_db()

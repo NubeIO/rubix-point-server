@@ -1,6 +1,6 @@
 import numbers
 
-from src import TcpRegistry, PointStoreHistoryModel
+from src import TcpRegistry
 from src.interfaces.point import HistoryType
 from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
@@ -11,7 +11,6 @@ from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs impo
     write_coil_handle, \
     read_coils_handle, write_registers_handle
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-from src.utils.model_utils import ModelUtils
 
 
 def poll_point(network, device, point, transport) -> None:
@@ -150,25 +149,8 @@ def poll_point(network, device, point, transport) -> None:
     if modbus_debug_poll:
         print("!!! END MODBUS POLL @@@")
 
-    update_point_store(network, device, point, point_store_new)
-
-
-def update_point_store(network, device, point, point_store_new):
-    """
-    It compares :param {PointStoreModel} point_store_new with the existing point_store value for that particular point &
-    If new: update it and also call add_point_history_on_cov
-    If old: do nothing
-    """
-    if point_store_new.update():
-        add_point_history_on_cov(network, device, point)
-
-
-def add_point_history_on_cov(network, device, point):
-    """
-    add point.point_store to the point_store_history if they history type is 'COV' and history_enable is `True`
-    """
-    if point.history_type == HistoryType.COV \
+    is_updated = point_store_new.update()
+    if is_updated and point.history_type == HistoryType.COV \
             and network.history_enable and device.history_enable and point.history_enable:
-        data = ModelUtils.row2dict_default(PointStoreModel.find_by_point_uuid(point.uuid))
-        point_store_history = PointStoreHistoryModel(**data)
-        point_store_history.save_to_db()
+        from src import HistoryLocal
+        HistoryLocal.add_point_history_on_cov(point.uuid)
