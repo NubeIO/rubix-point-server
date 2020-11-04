@@ -156,24 +156,10 @@ def poll_point(network, device, point, transport) -> None:
 def update_point_store(network, device, point, point_store_new):
     """
     It compares :param {PointStoreModel} point_store_new with the existing point_store value for that particular point &
-    If new: update it
+    If new: update it and also call add_point_history_on_cov
     If old: do nothing
     """
-    point_store_existing = PointStoreModel.find_by_point_uuid(point.uuid)
-
-    if not point_store_existing:
-        # If some manual point_store table deletion occurred
-        point_store_existing = PointStoreModel.create_new_point_store_model(point.uuid)
-        point_store_existing.save_to_db()
-
-    _point_store_existing = ModelUtils.row2dict_default(point_store_existing)
-    del _point_store_existing['ts']
-
-    _point_store_new = ModelUtils.row2dict_default(point_store_new)
-    del _point_store_new['ts']
-
-    if _point_store_new != _point_store_existing:
-        point_store_existing.update(**_point_store_new)
+    if point_store_new.update():
         add_point_history_on_cov(network, device, point)
 
 

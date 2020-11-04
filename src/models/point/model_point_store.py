@@ -1,8 +1,9 @@
+from sqlalchemy import and_, or_
+
 from src import db
-from src.models.model_base import ModelBase
 
 
-class PointStoreModel(ModelBase):
+class PointStoreModel(db.Model):
     __tablename__ = 'point_stores'
     point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
     value = db.Column(db.Float(), nullable=True)
@@ -21,3 +22,19 @@ class PointStoreModel(ModelBase):
     @classmethod
     def create_new_point_store_model(cls, point_uuid):
         return PointStoreModel(point_uuid=point_uuid, value=0)
+
+    def update(self) -> bool:
+        if not self.fault:
+            res = db.session.execute(self.__table__
+                                     .update()
+                                     .values(value=self.value, fault=False, fault_message=None)
+                                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
+                                                 self.__table__.c.value != self.value)))
+        else:
+            res = db.session.execute(self.__table__
+                                     .update()
+                                     .values(fault=self.fault, fault_message=self.fault_message)
+                                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
+                                                 or_(self.__table__.c.fault != self.fault,
+                                                     self.__table__.c.fault_message != self.fault_message))))
+        return bool(res.rowcount)
