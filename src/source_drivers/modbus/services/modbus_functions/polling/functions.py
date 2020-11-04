@@ -80,7 +80,9 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
             val = data_type
         else:
             val = read.registers[0]  # first register
-        return {'val': val, 'array': read.registers}
+        return val, read.registers
+    else:
+        raise read
 
 
 def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> dict:
@@ -144,7 +146,9 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
 
         val = read.bits[0]
         array = read.bits
-        return {'val': val, 'array': array}
+        return val, array
+    else:
+        raise read
 
 
 def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_value: int, func) -> dict:
@@ -209,7 +213,9 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_val
 
         # val = read.bits[0]
         # array = read.bits
-        return {'val': read, 'array': read}
+        return read, read
+    else:
+        raise read
 
 
 def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type, endian, write_value: int,
@@ -291,4 +297,6 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
 
         # val = read.bits[0]
         # array = read.bits
-        return {'val': write, 'array': write}
+        return write, write
+    else:
+        raise write
