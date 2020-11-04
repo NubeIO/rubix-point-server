@@ -18,7 +18,7 @@ class ModbusPointSingular(ModbusPointBase):
         point = ModbusPointModel.find_by_uuid(uuid)
         if not point:
             abort(404, message=f'Modbus Point not found')
-        return {**ModelUtils.row2dict(point), "point_store": ModelUtils.row2dict(point.value)}
+        return {**ModelUtils.row2dict(point), "point_store": ModelUtils.row2dict(point.point_store)}
 
     @classmethod
     @marshal_with(point_fields)
