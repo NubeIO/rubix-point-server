@@ -43,5 +43,6 @@ class RtuPolling:
 
             # TODO: separate thread for each network
             for network, device, point in results:
+                time.sleep(RtuPolling._polling_period)
                 poll_point(network, device, point, ModbusType.RTU)
             db.session.commit()
