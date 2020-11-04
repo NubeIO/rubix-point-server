@@ -12,7 +12,7 @@ CORS(app)
 
 # TMP CONFIGS
 db_pg = False
-enable_tcp = True
+enable_tcp = False
 enable_rtu = True
 enable_cleaner = True
 
