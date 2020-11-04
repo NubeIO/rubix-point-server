@@ -1,12 +1,14 @@
 from src import db
+from src.models.model_base import ModelBase
 
 
-class NetworkModel(db.Model):
+class NetworkModel(ModelBase):
     __tablename__ = 'networks'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
     fault = db.Column(db.Boolean(), nullable=True)
+    history_enable = db.Column(db.Boolean(), nullable=False, default=True)
     devices = db.relationship('DeviceModel', cascade="all,delete", backref='network', lazy=True)
     driver = db.Column(db.String(80))
     created_on = db.Column(db.DateTime, server_default=db.func.now())
@@ -23,11 +25,3 @@ class NetworkModel(db.Model):
     @classmethod
     def find_by_uuid(cls, network_uuid):
         return cls.query.filter_by(uuid=network_uuid).first()
-
-    def save_to_db(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def delete_from_db(self):
-        db.session.delete(self)
-        db.session.commit()

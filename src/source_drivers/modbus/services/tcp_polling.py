@@ -1,16 +1,16 @@
 import time
+
 from src import db
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
-from src.models.point.model_point_store import PointStoreModel
 
 
 class TcpPolling:
     _instance = None
-    _polling_period = 0.1
+    _polling_period = 1
 
     @staticmethod
     def get_instance():
@@ -39,11 +39,6 @@ class TcpPolling:
                 .join(ModbusPointModel).all()
 
             # TODO: separate thread for each network
-            point_stores = []
             for network, device, point in results:
-                point_stores.append(poll_point(network, device, point, ModbusType.TCP))
-
-            for point_store in point_stores:
-                point_store.update()
-
+                poll_point(network, device, point, ModbusType.TCP)
             db.session.commit()

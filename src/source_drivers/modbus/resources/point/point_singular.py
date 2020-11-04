@@ -1,10 +1,10 @@
 from flask_restful import abort, marshal_with
 
+from src.interfaces.point import HistoryType
 from src.source_drivers.modbus.interfaces.point.points import ModbusDataType, ModbusPointType, ModbusDataEndian
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.source_drivers.modbus.resources.mod_fields import point_fields
 from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
-from src.utils.model_utils import ModelUtils
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields
 
 
 class ModbusPointSingular(ModbusPointBase):
@@ -14,14 +14,15 @@ class ModbusPointSingular(ModbusPointBase):
     """
 
     @classmethod
+    @marshal_with(modbus_point_all_fields)
     def get(cls, uuid):
         point = ModbusPointModel.find_by_uuid(uuid)
         if not point:
             abort(404, message=f'Modbus Point not found')
-        return {**ModelUtils.row2dict(point), "point_store": ModelUtils.row2dict(point.point_store)}
+        return point
 
     @classmethod
-    @marshal_with(point_fields)
+    @marshal_with(modbus_point_all_fields)
     def put(cls, uuid):
         data = ModbusPointSingular.parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)
@@ -36,8 +37,9 @@ class ModbusPointSingular(ModbusPointBase):
                     data.data_type = ModbusDataType.__members__.get(data.data_type)
                 if data.data_endian:
                     data.data_endian = ModbusDataEndian.__members__.get(data.data_endian)
-                point.update(data)
-                point.commit()
+                if data.history_type:
+                    data.history_type = HistoryType.__members__.get(data.history_type)
+                point.update(**data)
                 return ModbusPointModel.find_by_uuid(uuid)
             except Exception as e:
                 abort(500, message=str(e))
@@ -47,4 +49,4 @@ class ModbusPointSingular(ModbusPointBase):
         point = ModbusPointModel.find_by_uuid(uuid)
         if point:
             point.delete_from_db()
-        return ''
+        return '', 204

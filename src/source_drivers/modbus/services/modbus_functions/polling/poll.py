@@ -1,8 +1,10 @@
 import numbers
+
 from src import TcpRegistry
+from src.interfaces.point import HistoryType
+from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
-from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_input_registers_handle, \
     read_holding_registers_handle, \
@@ -37,7 +39,6 @@ def poll_point(network, device, point, transport) -> None:
         connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
         if not connection:
             TcpRegistry.get_instance().add_device(device)
-    # TODO: whether it's functional or not, don't know how data we read
 
     mod_device_address = device.address
     reg = point.reg
@@ -56,7 +57,7 @@ def poll_point(network, device, point, transport) -> None:
     DEBUG
     """
     if modbus_debug_poll:
-        print("@@@ START MODBUS POLL !!")
+        print("@@@ START MODBUS POLL !!!")
         print("MODBUS DEBUG:", {'network': network,
                                 'device': device,
                                 'transport': transport,
@@ -71,7 +72,7 @@ def poll_point(network, device, point, transport) -> None:
 
     fault = False
     fault_message = ""
-    point_store = None
+    point_store_new = None
     try:
         val = None
         array = ""
@@ -134,9 +135,7 @@ def poll_point(network, device, point, transport) -> None:
         if modbus_debug_poll:
             print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE & VAL', {"transport": transport, "val": val})
         if isinstance(val, numbers.Number):
-            point_store = PointStoreModel(value=val,
-                                          value_array=str(array),
-                                          point_uuid=point.uuid)
+            point_store_new = PointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
         else:
             fault = True
             fault_message = "Got non numeric value"
@@ -145,10 +144,13 @@ def poll_point(network, device, point, transport) -> None:
             print(f'MODBUS ERROR: in poll main function {str(e)}')
         fault = True
         fault_message = str(e)
-    if not point_store:
-        point_store = PointStoreModel(fault=fault, fault_message=fault_message,
-                                      point_uuid=point.uuid)
+    if not point_store_new:
+        point_store_new = PointStoreModel(value=0, fault=fault, fault_message=fault_message, point_uuid=point.uuid)
     if modbus_debug_poll:
-        print("!!! END MODBUS POLL @@")
+        print("!!! END MODBUS POLL @@@")
 
-    return point_store
+    is_updated = point_store_new.update()
+    if is_updated and point.history_type == HistoryType.COV \
+            and network.history_enable and device.history_enable and point.history_enable:
+        from src import HistoryLocal
+        HistoryLocal.add_point_history_on_cov(point.uuid)

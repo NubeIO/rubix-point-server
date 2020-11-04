@@ -1,22 +1,16 @@
 from flask_restful import Resource, abort, reqparse
 
-from src.resources.utils import map_rest_schema
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
-from src.source_drivers.modbus.resources.rest_schema.schema_modbus_network import modbus_network_all_attributes, \
-    network_return_attributes
-
-modbus_network_all_fields = {}
-map_rest_schema(modbus_network_all_attributes, modbus_network_all_fields)
-map_rest_schema(network_return_attributes, modbus_network_all_fields)
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_network import modbus_network_all_attributes
 
 
 class ModbusNetworkBase(Resource):
     parser = reqparse.RequestParser()
     for attr in modbus_network_all_attributes:
         parser.add_argument(attr,
-                            type=modbus_network_all_attributes[attr]['type'],
-                            required=modbus_network_all_attributes[attr]['required'],
-                            help=modbus_network_all_attributes[attr]['help'],
+                            type=modbus_network_all_attributes[attr].get('type'),
+                            required=modbus_network_all_attributes[attr].get('required', False),
+                            help=modbus_network_all_attributes[attr].get('help', None),
                             )
 
     @staticmethod

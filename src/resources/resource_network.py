@@ -1,22 +1,16 @@
 from flask_restful import Resource, reqparse, marshal_with, abort
 
 from src.models.network.model_network import NetworkModel
-from src.resources.rest_schema.schema_network import network_all_attributes, \
-    network_return_attributes
-from src.resources.utils import map_rest_schema
-
-network_all_fields = {}
-map_rest_schema(network_return_attributes, network_all_fields)
-map_rest_schema(network_all_attributes, network_all_fields)
+from src.resources.rest_schema.schema_network import network_all_attributes, network_all_fields
 
 
 class NetworkResource(Resource):
     parser = reqparse.RequestParser()
     for attr in network_all_attributes:
         parser.add_argument(attr,
-                            type=network_all_attributes[attr]['type'],
-                            required=network_all_attributes[attr]['required'],
-                            help=network_all_attributes[attr]['help'],
+                            type=network_all_attributes[attr].get('type'),
+                            required=network_all_attributes[attr].get('required', False),
+                            help=network_all_attributes[attr].get('help', None),
                             )
 
     @classmethod

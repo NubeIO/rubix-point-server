@@ -2,14 +2,7 @@ import uuid
 from flask_restful import Resource, reqparse, marshal_with, abort
 
 from src.models.wires.model_wires_plat import WiresPlatModel
-from src.resources.utils import map_rest_schema
-
-from src.resources.rest_schema.schema_wires_plat import wires_plat_all_attributes, \
-    wires_plat_return_attributes
-
-wires_plat_all_fields = {}
-map_rest_schema(wires_plat_return_attributes, wires_plat_all_fields)
-map_rest_schema(wires_plat_all_attributes, wires_plat_all_fields)
+from src.resources.rest_schema.schema_wires_plat import wires_plat_all_attributes, wires_plat_all_fields
 
 
 class WiresPlatResource(Resource):
@@ -17,8 +10,8 @@ class WiresPlatResource(Resource):
     for attr in wires_plat_all_attributes:
         parser.add_argument(attr,
                             type=wires_plat_all_attributes[attr]['type'],
-                            required=wires_plat_all_attributes[attr]['required'],
-                            help=wires_plat_all_attributes[attr]['help'],
+                            required=wires_plat_all_attributes[attr].get('required', False),
+                            help=wires_plat_all_attributes[attr].get('help', None),
                             )
 
     @classmethod
@@ -33,17 +26,16 @@ class WiresPlatResource(Resource):
     @marshal_with(wires_plat_all_fields)
     def put(cls):
         data = WiresPlatResource.parser.parse_args()
-        wires = WiresPlatModel.query.all()
+        wire = WiresPlatModel.query.first()
         try:
-            if len(wires) == 0:
+            if wire:
                 _uuid = str(uuid.uuid4())
                 wires = WiresPlatModel(uuid=_uuid, **data)
                 wires.save_to_db()
                 return wires
             else:
-                _uuid = wires[-1].uuid
-                WiresPlatModel.update_to_db(_uuid, data)
-                return WiresPlatModel.find_by_uuid(_uuid)
+                wire.update(**{**data, "uuid": wire.uuid})
+                return WiresPlatModel.find_by_uuid(wire.uuid)
         except Exception as e:
             abort(500, message=str(e))
 

@@ -1,32 +1,37 @@
-
-
-INTERFACE_NAME = 'network'
+from src.resources.utils import map_rest_schema
 
 network_all_attributes = {
     'name': {
         'type': str,
         'required': True,
-        'help': '',
     },
     'enable': {
         'type': bool,
         'required': True,
-        'help': '',
+    },
+    'fault': {
+        'type': bool,
+    },
+    'history_enable': {
+        'type': bool,
     },
 }
 
 network_return_attributes = {
     'uuid': {
         'type': str,
-        'required': False,
-        'help': '',
+    },
+    'driver': {
+        'type': str
     },
     'created_on': {
         'type': str,
-        'help': '',
     },
     'updated_on': {
         'type': str,
-        'help': '',
     }
 }
+
+network_all_fields = {}
+map_rest_schema(network_return_attributes, network_all_fields)
+map_rest_schema(network_all_attributes, network_all_fields)

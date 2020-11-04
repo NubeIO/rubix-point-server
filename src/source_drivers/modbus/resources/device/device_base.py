@@ -10,8 +10,8 @@ class ModbusDeviceBase(Resource):
     for attr in modbus_device_all_attributes:
         parser.add_argument(attr,
                             type=modbus_device_all_attributes[attr]['type'],
-                            required=modbus_device_all_attributes[attr]['required'],
-                            help=modbus_device_all_attributes[attr]['help'],
+                            required=modbus_device_all_attributes[attr].get('required', False),
+                            help=modbus_device_all_attributes[attr].get('help', None),
                             )
 
     @staticmethod
