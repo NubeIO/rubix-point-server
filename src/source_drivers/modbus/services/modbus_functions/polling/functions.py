@@ -6,7 +6,7 @@ from src.source_drivers.modbus.services.modbus_functions.function_utils import _
     _select_data_type, _builder_data_type
 
 
-def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type, endian, func) -> dict:
+def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type, endian, func) -> (any, list):
     """
     Read holding or input register
     :param client: modbus client
@@ -80,10 +80,12 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
             val = data_type
         else:
             val = read.registers[0]  # first register
-        return {'val': val, 'array': read.registers}
+        return val, read.registers
+    else:
+        raise read
 
 
-def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> dict:
+def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> (any, list):
     """
     Read coil or digital input register
     :param client: modbus client
@@ -144,10 +146,12 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func) -> d
 
         val = read.bits[0]
         array = read.bits
-        return {'val': val, 'array': array}
+        return val, array
+    else:
+        raise read
 
 
-def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_value: int, func) -> dict:
+def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_value: int, func) -> (any, list):
     """
     Write coil
     :param client: modbus client
@@ -209,11 +213,13 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_val
 
         # val = read.bits[0]
         # array = read.bits
-        return {'val': read, 'array': read}
+        return read, read
+    else:
+        raise read
 
 
 def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type, endian, write_value: int,
-                   func) -> dict:
+                   func) -> (any, list):
     """
     Write holding reg
     :param client: modbus client
@@ -291,4 +297,6 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
 
         # val = read.bits[0]
         # array = read.bits
-        return {'val': write, 'array': write}
+        return write, write
+    else:
+        raise write

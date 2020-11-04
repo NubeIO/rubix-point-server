@@ -7,11 +7,9 @@ from src.utils.data_funcs import DataHelpers
 
 def read_coils_handle(connection, reg, mod_point_reg_length,
                       mod_device_addr, mod_point_type):
-    read = read_digital(connection, reg, mod_point_reg_length,
-                        mod_device_addr, mod_point_type)
-    single = read['val']
-    array = read['array']
-    val = DataHelpers.bool_to_int(single)
+    val, array = read_digital(connection, reg, mod_point_reg_length,
+                              mod_device_addr, mod_point_type)
+    val = DataHelpers.bool_to_int(val)
     """
     DEBUG
     """
@@ -22,11 +20,9 @@ def read_coils_handle(connection, reg, mod_point_reg_length,
 
 def write_coil_handle(connection, reg, mod_point_reg_length,
                       mod_device_addr, write_value, mod_point_type):
-    read = write_digital(connection, reg, mod_point_reg_length,
-                         mod_device_addr, write_value, mod_point_type)
-    single = read['val']
-    array = read['array']
-    val = DataHelpers.bool_to_int(single)
+    val, array = write_digital(connection, reg, mod_point_reg_length,
+                               mod_device_addr, write_value, mod_point_type)
+    val = DataHelpers.bool_to_int(val)
     """
     DEBUG
     """
@@ -38,11 +34,9 @@ def write_coil_handle(connection, reg, mod_point_reg_length,
 def read_input_registers_handle(connection, reg, mod_point_reg_length,
                                 mod_device_addr, mod_point_data_type,
                                 mod_point_data_endian, mod_point_type):
-    read = read_analogue(connection, reg, mod_point_reg_length,
-                         mod_device_addr, mod_point_data_type,
-                         mod_point_data_endian, mod_point_type)
-    val = read['val']
-    array = read['array']
+    val, array = read_analogue(connection, reg, mod_point_reg_length,
+                               mod_device_addr, mod_point_data_type,
+                               mod_point_data_endian, mod_point_type)
     """
     DEBUG
     """
@@ -56,11 +50,9 @@ def read_holding_registers_handle(connection, reg, mod_point_reg_length,
                                   mod_point_data_endian, mod_point_type):
     if modbus_debug_poll:
         print("MODBUS DEBUG: inside read_holding_registers_handle try and read", {'type': mod_point_type})
-    read = read_analogue(connection, reg, mod_point_reg_length,
-                         mod_device_addr, mod_point_data_type,
-                         mod_point_data_endian, mod_point_type)
-    val = read['val']
-    array = read['array']
+    val, array = read_analogue(connection, reg, mod_point_reg_length,
+                               mod_device_addr, mod_point_data_type,
+                               mod_point_data_endian, mod_point_type)
     """
     DEBUG
     """
@@ -75,11 +67,9 @@ def write_registers_handle(connection, reg, mod_point_reg_length,
                            mod_point_data_endian, write_value, mod_point_type):
     if modbus_debug_poll:
         print("MODBUS DEBUG: try and read a register", {'type': mod_point_type})
-    read = write_analogue(connection, reg, mod_point_reg_length,
-                          mod_device_addr, mod_point_data_type,
-                          mod_point_data_endian, write_value, mod_point_type)
-    val = read['val']
-    array = read['array']
+    val, array = write_analogue(connection, reg, mod_point_reg_length,
+                                mod_device_addr, mod_point_data_type,
+                                mod_point_data_endian, write_value, mod_point_type)
     """
     DEBUG
     """
