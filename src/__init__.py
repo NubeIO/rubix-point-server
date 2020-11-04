@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
 # from src.modbus.services.point_store_cleaner import PointStoreCleaner
+from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
 
 app = Flask(__name__)
 CORS(app)
@@ -14,6 +15,7 @@ CORS(app)
 db_pg = False
 enable_tcp = True
 enable_rtu = True
+enable_cleaner = True
 
 if db_pg:
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
@@ -56,7 +58,6 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     history_thread = Thread(target=HistoryInterval.get_instance().sync_interval)
     history_thread.start()
 
-    # enable_cleaner = False
-    # if enable_cleaner:
-    #     point_cleaner_thread = Thread(target=PointStoreCleaner.register)
-    #     point_cleaner_thread.start()
+    if enable_cleaner:
+        point_cleaner_thread = Thread(target=PointStoreHistoryCleaner.register)
+        point_cleaner_thread.start()
