@@ -1,7 +1,7 @@
 import enum
 import subprocess
 
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, abort
 
 '''
 sudo systemctl start nubeio-rubix-wires.service
@@ -25,50 +25,32 @@ sudo systemctl restart nubeio-wires-plat.service
 
 class ServiceAction(enum.Enum):
     START = 1
-    start = 2
-    STOP = 3
-    stop = 4
-    RESTART = 5
-    restart = 6
+    STOP = 2
+    RESTART = 3
 
 
 class Services(enum.Enum):
-    WIRES = 1
-    wires = 2
-    PLAT = 3
-    plat = 4
-    MOSQUITTO = 5
-    mosquitto = 6
+    WIRES = 'nubeio-rubix-wires.service'
+    PLAT = 'nubeio-wires-plat.service'
+    MOSQUITTO = 'mosquitto.service'
 
 
-def _action(action):
-    if action in ServiceAction.__members__.keys():
-        action = action.lower()
-        if action == 'start':
-            return "start"
-        if action == 'stop':
-            return "stop"
-        if action == 'restart':
-            return "restart"
+def _validate_and_create_action(action) -> str:
+    if action.upper() in ServiceAction.__members__.keys():
+        return action.lower()
     else:
-        return None
+        abort(400, message='action should be `start | stop | restart`')
 
 
-def _service(action, service):
-    if service in Services.__members__.keys():
-        service = service.lower()
-        if service == 'wires':
-            return f'sudo {action} nubeio-rubix-wires.service'
-        if service == 'plat':
-            return f'sudo {action} nubeio-wires-plat.service'
-        if service == 'mosquitto':
-            return f'systemctl {action} mosquitto'
+def _validate_and_create_service(action, service) -> str:
+    if service.upper() in Services.__members__.keys():
+        return f'sudo systemctl {action} {Services[service.upper()].value}'
     else:
-        return None
+        abort(400, message=f'service {service} does not exist in our system`')
 
 
-def _system_call(cmd):
-    """ Start systemd service."""
+def _execute_command(cmd):
+    """Run command line"""
     try:
         subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE)
     except subprocess.CalledProcessError:
@@ -76,50 +58,49 @@ def _system_call(cmd):
     return True
 
 
-def _systemctl_exists(_service):
-    """Return True if systemd service is running
-        example: check = systemctl_exists('mosquitto')
+def _systemctl_status_check(service):
+    """
+    Return True if systemd service is running
+    example: check = systemctl_exists('mosquitto')
     """
     try:
-        cmd = f'systemctl is-active {_service} >/dev/null 2>&1 && echo TRUE || echo FALSE'
+        cmd = f'systemctl is-active {service} >/dev/null 2>&1 && echo TRUE || echo FALSE'
         completed = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE)
-    except subprocess.CalledProcessError as err:
+    except subprocess.CalledProcessError:
         return False
-    else:
-        for line in completed.stdout.decode('utf-8').splitlines():
-            if 'TRUE' in line:
-                return True
-        return False
+
+    for line in completed.stdout.decode('utf-8').splitlines():
+        if 'TRUE' in line:
+            return True
+    return False
 
 
 class SystemctlCommand(Resource):
-    def get(self):
+    def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('action', type=str, help='action is required (start, stop, restart)', required=True)
-        parser.add_argument('service', type=str, help='service type is required example: (wires, mosquitto)', required=True)
+        parser.add_argument('action', type=str, help='action should be `start | stop | restart`', required=True)
+        parser.add_argument('service',
+                            type=str,
+                            help='service type is required example: (wires, mosquitto)',
+                            required=True)
         args = parser.parse_args()
-        act = _action(args['action'])
-        ser = _service(act, args['service'])
-        call = _system_call(ser)
+        action = _validate_and_create_action(args['action'])
+        service = _validate_and_create_service(action, args['service'])
+        call = _execute_command(service)
         if call:
             return {"service": f'{call}, worked!'}
         else:
             return {"service": f'{call}, failed!'}, 404
 
 
-class SystemctlExists(Resource):
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('service', type=str, help='service type is required example: (wires, mosquitto)', required=True)
-        args = parser.parse_args()
-        ser = args['service']
-        ser = ser.lower()
-        if ser in Services.__members__.keys():
-            ser = ser.lower()
-            check = _systemctl_exists(ser)
+class SystemctlStatus(Resource):
+    @classmethod
+    def get(cls, service):
+        if service.upper() in Services.__members__.keys():
+            check = _systemctl_status_check(Services[service.upper()].value)
             if check:
-                return {"check_service": check}
+                return {'status': f'{service} is running'}
             else:
-                return {"check_service": check}
+                return {'status': f'{service} is not running'}
         else:
-            return {"check_service": f'{ser} not exists'}
+            return {'status': f'{service} does not exist in our system'}
