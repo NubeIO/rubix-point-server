@@ -124,17 +124,6 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
                                                        mod_point_data_endian,
                                                        mod_point_type)
         """
-        read_holding_registers 
-        """
-        if mod_point_type == read_holding_registers:
-            val, array = read_holding_registers_handle(connection,
-                                                       reg,
-                                                       mod_point_reg_length,
-                                                       mod_device_address,
-                                                       mod_point_data_type,
-                                                       mod_point_data_endian,
-                                                       mod_point_type)
-        """
         write_registers write_registers
         """
         if mod_point_type == write_registers:
