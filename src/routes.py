@@ -65,7 +65,12 @@ api.add_resource(ModbusDevicePointPluralPointStore, f'/{api_prefix}/modbus/<stri
 # wires-plat
 api.add_resource(WiresPlatResource, f'/{api_prefix}/wires/plat')
 
+
 # system endpoints
 api.add_resource(GetSystemMem, f'/{api_prefix}/system/memory')
 api.add_resource(SystemctlCommand, f'/{api_prefix}/system/service/command')
 api.add_resource(SystemctlExists, f'/{api_prefix}/system/service/check')
+
+# from src.source_drivers.modbus.resources.point.point_singular import TestEndPoint
+# api.add_resource(TestEndPoint, f'/{api_prefix}/test/<string:thing>')
+

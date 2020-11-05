@@ -18,6 +18,9 @@ class PointStoreHistoryModel(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def save_to_db_no_commit(self):
+        db.session.add(self)
+
     @classmethod
     def get_latest(cls, point_uuid):
         return cls.query.filter_by(point_uuid=point_uuid).order_by(cls.__table__.c.ts.desc()).first()
