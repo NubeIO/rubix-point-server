@@ -7,13 +7,18 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.utils.model_utils import ModelUtils
+from src.services.event_service_base import EventServiceBase, EventTypes, Event, EventCallableBlocking
+from src.event_dispatcher import EventDispatcher
+
+SERVICE_NAME_HISTORIES_LOCAL = 'histories_local'
 
 
-class HistoryLocal:
+class HistoryLocal(EventServiceBase):
     """
     A simple history saving protocol for those points which has `history_type=INTERVAL`
     """
     SYNC_PERIOD = 5
+    service_name = SERVICE_NAME_HISTORIES_LOCAL
 
     _instance = None
     binding = None
@@ -22,6 +27,10 @@ class HistoryLocal:
         if HistoryLocal._instance:
             raise Exception("HISTORY SYNC: HistoryInterval class is a singleton class!")
         else:
+            super().__init__()
+            self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
+            # self.supported_events[EventTypes.POINT_COV] = True
+            EventDispatcher.add_service(self)
             HistoryLocal._instance = self
 
     @staticmethod
@@ -32,7 +41,10 @@ class HistoryLocal:
 
     def sync_interval(self):
         while True:
-            time.sleep(self.SYNC_PERIOD)
+            self._set_internal_service_timeout(self.SYNC_PERIOD)
+            event = self._event_queue.get()
+            if event.event_type is not EventTypes.INTERNAL_SERVICE_TIMEOUT:
+                raise Exception('History Local: invalid event received somehow... should be impossible')
             for network in NetworkModel.query.all():
                 for device in network.devices:
                     for point in device.points:
@@ -64,6 +76,11 @@ class HistoryLocal:
 
     @staticmethod
     def add_point_history_on_cov(point_uuid):
+        # WARNING: this method no longer commits to db as it was using too much write time and cause db lock errors.
+        #   Commit later when ready
+
+        # TODO: change to take in PointStoreModel and/or just perform sql to add
+        #   as this saves an extra read request to the db
         data = ModelUtils.row2dict_default(PointStoreModel.find_by_point_uuid(point_uuid))
         point_store_history = PointStoreHistoryModel(**data)
-        point_store_history.save_to_db()
+        point_store_history.save_to_db_no_commit()

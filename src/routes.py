@@ -66,3 +66,6 @@ api.add_resource(GetSystemMem, f'/{api_prefix}/system/memory')
 
 # wires-plat
 api.add_resource(WiresPlatResource, f'/{api_prefix}/wires/plat')
+
+# from src.source_drivers.modbus.resources.point.point_singular import TestEndPoint
+# api.add_resource(TestEndPoint, f'/{api_prefix}/test/<string:thing>')

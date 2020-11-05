@@ -1,5 +1,4 @@
 from sqlalchemy.orm import validates
-
 from src import db
 from src.interfaces.point import HistoryType
 from src.models.model_base import ModelBase
@@ -12,8 +11,8 @@ class PointModel(ModelBase):
     device_uuid = db.Column(db.String, db.ForeignKey('devices.uuid'), nullable=False)
     name = db.Column(db.String(80), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
-    history_enable = db.Column(db.Boolean(), nullable=False, default=True)
-    history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.COV)
+    history_enable = db.Column(db.Boolean(), nullable=False, default=False)
+    history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     driver = db.Column(db.String(80))

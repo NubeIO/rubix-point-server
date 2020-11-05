@@ -2,20 +2,27 @@ import numbers
 
 from src import TcpRegistry
 from src.interfaces.point import HistoryType
-from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
+from src.source_drivers.modbus.models.network import ModbusNetworkModel
+from src.source_drivers.modbus.models.device import ModbusDeviceModel
+from src.source_drivers.modbus.models.point import ModbusPointModel
+from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_input_registers_handle, \
     read_holding_registers_handle, \
     write_coil_handle, \
     read_coils_handle, write_registers_handle
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
+from src.services.event_service_base import EventServiceBase, EventTypes, Event
+from src.event_dispatcher import EventDispatcher
 
 
-def poll_point(network, device, point, transport) -> None:
+def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: ModbusDeviceModel,
+               point: ModbusPointModel, transport: ModbusType) -> None:
     """
     Main modbus polling loop
+    :param service: EventServiceBase object that's calling this (for point COV events)
     :param network: modbus network class
     :param device: modbus device class
     :param point: modbus point class
@@ -145,12 +152,14 @@ def poll_point(network, device, point, transport) -> None:
         fault = True
         fault_message = str(e)
     if not point_store_new:
-        point_store_new = PointStoreModel(value=0, fault=fault, fault_message=fault_message, point_uuid=point.uuid)
+        point_store_new = PointStoreModel(fault=fault, fault_message=fault_message, point_uuid=point.uuid)
     if modbus_debug_poll:
         print("!!! END MODBUS POLL @@@")
 
     is_updated = point_store_new.update()
-    if is_updated and point.history_type == HistoryType.COV \
-            and network.history_enable and device.history_enable and point.history_enable:
-        from src import HistoryLocal
-        HistoryLocal.add_point_history_on_cov(point.uuid)
+    if is_updated:
+        # EventDispatcher.dispatch_from_source(service, Event(EventTypes.POINT_COV))
+        if point.history_type == HistoryType.COV and network.history_enable and \
+                device.history_enable and point.history_enable:
+            from src import HistoryLocal
+            HistoryLocal.add_point_history_on_cov(point.uuid)

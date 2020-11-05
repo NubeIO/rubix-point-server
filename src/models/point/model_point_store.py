@@ -27,7 +27,8 @@ class PointStoreModel(db.Model):
         if not self.fault:
             res = db.session.execute(self.__table__
                                      .update()
-                                     .values(value=self.value, value_array=self.value_array, fault=False, fault_message=None)
+                                     .values(value=self.value, value_array=self.value_array,
+                                             fault=False, fault_message=None)
                                      .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                                  self.__table__.c.value != self.value)))
         else:
