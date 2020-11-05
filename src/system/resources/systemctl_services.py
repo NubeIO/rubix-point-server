@@ -87,7 +87,6 @@ def _systemctl_exists(_service):
         return False
     else:
         for line in completed.stdout.decode('utf-8').splitlines():
-            print(line, 11111)
             if 'TRUE' in line:
                 return True
         return False
@@ -100,16 +99,12 @@ class SystemctlCommand(Resource):
         parser.add_argument('service', type=str, help='service type is required example: (wires, mosquitto)', required=True)
         args = parser.parse_args()
         act = _action(args['action'])
-        if act is None:
-            return {"action_required": False}, 404
-        ser = _service(args['service'], act)
-        if ser is None:
-            return {"service_required": False}, 404
-        check = _system_call(act)
-        if check:
-            return {"system_call": True}
+        ser = _service(act, args['service'])
+        call = _system_call(ser)
+        if call:
+            return {"service": f'{call}, worked!'}
         else:
-            return {"system_call": False}, 404
+            return {"service": f'{call}, failed!'}, 404
 
 
 class SystemctlExists(Resource):
