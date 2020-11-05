@@ -21,10 +21,6 @@ class ModbusNetworkModel(NetworkMixinModel):
     def get_polymorphic_identity(cls):
         return 'Modbus'
 
-    @classmethod
-    def get_polymorphic_identity(cls):
-        return 'Modbus'
-
     @validates('rtu_port')
     def validate_rtu_port(self, _, value):
         if not value and self.type == ModbusType.RTU.name:

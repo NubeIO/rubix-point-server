@@ -41,7 +41,7 @@ class HistoryLocal(EventServiceBase):
 
     def sync_interval(self):
         while True:
-            self._set_internal_service_timeout(self.SYNC_PERIOD * 60)
+            self._set_internal_service_timeout(self.SYNC_PERIOD)
             event = self._event_queue.get()
             if event.event_type is not EventTypes.INTERNAL_SERVICE_TIMEOUT:
                 raise Exception('History Local: invalid event received somehow... should be impossible')

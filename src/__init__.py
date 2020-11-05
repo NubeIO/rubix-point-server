@@ -48,7 +48,6 @@ db.create_all()
 if not not os.environ.get("WERKZEUG_RUN_MAIN"):
 
     if enable_histories:
-        histories = HistoryLocal.get_instance()
         histories_thread = Thread(target=HistoryLocal.get_instance().sync_interval)
         histories_thread.start()
 
