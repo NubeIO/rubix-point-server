@@ -5,14 +5,13 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from src.event_dispatcher import EventDispatcher
-from src.models.point.model_point_store import PointStoreModel
 
 app = Flask(__name__)
 CORS(app)
 
 # TMP CONFIGS
 db_pg = False
-enable_histories = False
+enable_histories = True
 enable_tcp = False
 enable_rtu = True
 enable_cleaner = True
@@ -34,6 +33,7 @@ db = SQLAlchemy(app)
 
 # Other Services
 from src.services.histories.history_local import HistoryLocal
+from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
 # Source Drivers
 # from src.source_drivers.bacnet.services.network import Network
 from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
@@ -49,7 +49,6 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
 
     if enable_histories:
         histories = HistoryLocal.get_instance()
-        EventDispatcher.add_service(histories)
         histories_thread = Thread(target=HistoryLocal.get_instance().sync_interval)
         histories_thread.start()
 
@@ -64,11 +63,6 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
         RtuRegistry.get_instance().register()
         rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
         rtu_polling_thread.start()
-
-    # enable_cleaner = False
-    # if enable_cleaner:
-    #     point_cleaner_thread = Thread(target=PointStoreCleaner.register)
-    #     point_cleaner_thread.start()
 
     if enable_cleaner:
         point_cleaner_thread = Thread(target=PointStoreHistoryCleaner.register)

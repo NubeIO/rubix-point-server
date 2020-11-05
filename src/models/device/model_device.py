@@ -9,7 +9,7 @@ class DeviceModel(ModelBase):
     name = db.Column(db.String(80), nullable=False)
     enable = db.Column(db.String(80), nullable=False)
     fault = db.Column(db.Boolean(), nullable=True)
-    history_enable = db.Column(db.Boolean(), nullable=False, default=True)
+    history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     points = db.relationship('PointModel', cascade="all,delete", backref='device', lazy=True)
     driver = db.Column(db.String(80))
     created_on = db.Column(db.DateTime, server_default=db.func.now())

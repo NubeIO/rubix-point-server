@@ -19,7 +19,8 @@ class PointStoreHistoryCleaner:
 
     @classmethod
     def clean(cls):
-        from src import db, PointStoreHistoryModel
+        from src import db
+        from src.models.point.model_point_store_history import PointStoreHistoryModel
         print("MODBUS: Started PointStoreHistoryCleaner cleaning process...")
         time.sleep(10)
         partition_table = db.session.query(PointStoreHistoryModel, func.rank()

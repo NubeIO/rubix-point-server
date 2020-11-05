@@ -9,10 +9,11 @@ from influxdb import InfluxDBClient
 
 # TODO: move these to some sort of config
 influx_enable = True
+SERVICE_NAME_HISTORIES = 'histories'
 
 
 class Histories(EventServiceBase):
-    service_name = 'histories'
+    service_name = SERVICE_NAME_HISTORIES
     _push_period_minutes = 1
 
     _instance = None
@@ -25,7 +26,7 @@ class Histories(EventServiceBase):
             super().__init__()
             Histories._instance = self
             self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
-            self.supported_events[EventTypes.POINT_COV] = True
+            # self.supported_events[EventTypes.POINT_COV] = True
         # TODO: create bindings
 
     @staticmethod
@@ -39,12 +40,12 @@ class Histories(EventServiceBase):
         return
 
     def polling(self):
-        self.set_internal_service_timeout(self._push_period_minutes * 3)
+        self._set_internal_service_timeout(self._push_period_minutes * 3)
         while True:
-            event = self.event_queue.get()
+            event = self._event_queue.get()
             print('HISTORIES: event', event.event_type)
             if event.event_type is EventTypes.INTERNAL_SERVICE_TIMEOUT:
-                self.set_internal_service_timeout(self._push_period_minutes * 3)
+                self._set_internal_service_timeout(self._push_period_minutes * 3)
 
             # self.connect_binding()
             # results = self.get_points()
@@ -54,11 +55,12 @@ class Histories(EventServiceBase):
             #   if no, store local
 
     def get_points(self):
-        results = db.session.query(NetworkModel, DeviceModel, PointModel) \
-            .select_from(PointModel) \
-            .filter(PointModel.influx_enable == True and PointModel.enable == True) \
-            .join(DeviceModel).filter(DeviceModel.enable == True) \
-            .join(NetworkModel).filter(NetworkModel.enable == True) \
-            .all()
+        pass
+        # results = db.session.query(NetworkModel, DeviceModel, PointModel) \
+        #     .select_from(PointModel) \
+        #     .filter(PointModel.influx_enable == True and PointModel.enable == True) \
+        #     .join(DeviceModel).filter(DeviceModel.enable == True) \
+        #     .join(NetworkModel).filter(NetworkModel.enable == True) \
+        #     .all()
 
-        return results
+        # return results

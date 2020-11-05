@@ -40,23 +40,23 @@ class EventServiceBase:
     def __init__(self):
         if self.service_name is None:
             raise Exception('service name was not created')
-        self.event_queue = Queue()
+        self._event_queue = Queue()
         self.supported_events = [False] * len(EventTypes)
-        self.internal_timeout_thread = None
+        self._internal_timeout_thread = None
 
     def add_event(self, event):
         if isinstance(event, Event) and isinstance(event.event_type, EventTypes):
             if self.supported_events[event.event_type]:
-                self.event_queue.put(event)
+                self._event_queue.put(event)
         else:
             raise Exception('Tried to add invalid event: ', event)
 
-    def set_internal_service_timeout(self, seconds):
-        self.internal_timeout_thread = Timer(seconds, self.add_event,
-                                             [Event(EventTypes.INTERNAL_SERVICE_TIMEOUT, None)])
-        self.internal_timeout_thread.start()
+    def _set_internal_service_timeout(self, seconds):
+        self._internal_timeout_thread = Timer(seconds, self.add_event,
+                                              [Event(EventTypes.INTERNAL_SERVICE_TIMEOUT, None)])
+        self._internal_timeout_thread.start()
 
-    def handle_internal_callable(self, event):
+    def _handle_internal_callable(self, event):
         if event.event_type is EventTypes.CALLABLE and isinstance(event, EventCallableBlocking):
             try:
                 if event.args and event.kwargs:
