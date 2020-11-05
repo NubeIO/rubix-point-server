@@ -76,8 +76,11 @@ class HistoryLocal(EventServiceBase):
 
     @staticmethod
     def add_point_history_on_cov(point_uuid):
+        # WARNING: this method no longer commits to db as it was using too much write time and cause db lock errors.
+        #   Commit later when ready
+
         # TODO: change to take in PointStoreModel and/or just perform sql to add
         #   as this saves an extra read request to the db
         data = ModelUtils.row2dict_default(PointStoreModel.find_by_point_uuid(point_uuid))
         point_store_history = PointStoreHistoryModel(**data)
-        point_store_history.save_to_db()
+        point_store_history.save_to_db_no_commit()
