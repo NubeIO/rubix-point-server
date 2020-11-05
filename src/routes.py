@@ -16,6 +16,7 @@ from src.source_drivers.modbus.resources.point.point_plural import ModbusPointPl
 from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingular
 from src.source_drivers.modbus.resources.point.point_stores import *
 from src.system.resources.memory import GetSystemMem
+from src.system.resources.systemctl_services import SystemctlExists, SystemctlCommand
 
 api_prefix = 'api'
 api = Api(app)
@@ -61,8 +62,10 @@ api.add_resource(ModbusPointPluralPointStore, f'/{api_prefix}/modbus/point_store
 api.add_resource(ModbusPointStore, f'/{api_prefix}/modbus/point_stores/<string:uuid>')
 api.add_resource(ModbusDevicePointPluralPointStore, f'/{api_prefix}/modbus/<string:device_uuid>/point_stores')
 
-# system endpoints
-api.add_resource(GetSystemMem, f'/{api_prefix}/system/memory')
-
 # wires-plat
 api.add_resource(WiresPlatResource, f'/{api_prefix}/wires/plat')
+
+# system endpoints
+api.add_resource(GetSystemMem, f'/{api_prefix}/system/memory')
+api.add_resource(SystemctlCommand, f'/{api_prefix}/system/service/command')
+api.add_resource(SystemctlExists, f'/{api_prefix}/system/service/check')
