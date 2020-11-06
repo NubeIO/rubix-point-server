@@ -30,12 +30,15 @@ class PointStoreModel(db.Model):
                                      .values(value=self.value, value_array=self.value_array,
                                              fault=False, fault_message=None)
                                      .where(and_(self.__table__.c.point_uuid == self.point_uuid,
-                                                 self.__table__.c.value != self.value)))
+                                                 or_(self.__table__.c.value != self.value,
+                                                     self.__table__.c.value_array != self.value_array,
+                                                     self.__table__.c.fault != self.fault))))
         else:
             res = db.session.execute(self.__table__
                                      .update()
                                      .values(fault=self.fault, fault_message=self.fault_message)
                                      .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                                  or_(self.__table__.c.fault != self.fault,
-                                                     self.__table__.c.fault_message != self.fault_message))))
+                                                     self.__table__.c.fault_message != self.fault_message,
+                                                     self.__table__.c.fault != self.fault))))
         return bool(res.rowcount)
