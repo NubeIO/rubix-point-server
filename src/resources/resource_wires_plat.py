@@ -28,7 +28,7 @@ class WiresPlatResource(Resource):
         data = WiresPlatResource.parser.parse_args()
         wire = WiresPlatModel.query.first()
         try:
-            if wire:
+            if not wire:
                 _uuid = str(uuid.uuid4())
                 wires = WiresPlatModel(uuid=_uuid, **data)
                 wires.save_to_db()
