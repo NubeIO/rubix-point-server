@@ -1,3 +1,5 @@
+import time
+
 from src import db
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import EventServiceBase, EventTypes
@@ -53,6 +55,7 @@ class RtuPolling(EventServiceBase):
         # TODO: separate thread for each network
         for network, device, point in results:
             if all(v is not None for v in results):
+                time.sleep(RtuPolling._polling_period)
                 poll_point(self, network, device, point, ModbusType.RTU)
         db.session.commit()
 
