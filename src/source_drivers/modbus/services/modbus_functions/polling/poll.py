@@ -49,6 +49,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
 
     mod_device_address = device.address
     reg = point.reg
+    mod_point_uuid = point.uuid
     mod_point_reg_length = point.reg_length
     mod_point_type = point.type
     mod_point_data_type = point.data_type
@@ -64,9 +65,10 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     DEBUG
     """
     if modbus_debug_poll:
-        print("@@@ START MODBUS POLL !!!")
+        print("@@@ START MODBUS POLL !!!", {"device": mod_device_address, 'reg': reg})
         print("MODBUS DEBUG:", {'network': network,
                                 'device': device,
+                                'point':mod_point_uuid,
                                 'transport': transport,
                                 'mod_device_address': mod_device_address,
                                 'reg': reg,
