@@ -1,12 +1,11 @@
-import time
 from src import db
+from src.event_dispatcher import EventDispatcher
+from src.services.event_service_base import EventServiceBase, EventTypes
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll, modbus_polling_count
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
-from src.services.event_service_base import EventServiceBase, EventTypes, Event, EventCallableBlocking
-from src.event_dispatcher import EventDispatcher
 
 SERVICE_NAME_MODBUS_RTU = 'modbus_rtu'
 
@@ -53,17 +52,13 @@ class RtuPolling(EventServiceBase):
         results = self.__get_all_points()
         # TODO: separate thread for each network
         for network, device, point in results:
-            poll_point(self, network, device, point, ModbusType.RTU)
+            if all(v is not None for v in results):
+                poll_point(self, network, device, point, ModbusType.RTU)
         db.session.commit()
 
     def __get_all_points(self):
-        # TODO: Implement caching
         results = db.session.query(ModbusNetworkModel, ModbusDeviceModel, ModbusPointModel). \
             select_from(ModbusNetworkModel).filter_by(type=ModbusType.RTU, enable=True) \
             .join(ModbusDeviceModel).filter_by(type=ModbusType.RTU, enable=True) \
             .join(ModbusPointModel).filter_by(enable=True).all()
         return results
-
-    # def temporary_test_func(self, thing1, thing2) -> str:
-    #     ret = str(thing1) + ' and ' + str(thing2)
-    #     return ret
