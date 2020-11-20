@@ -14,6 +14,7 @@ SERVICE_NAME_HISTORIES = 'histories'
 
 class Histories(EventServiceBase):
     service_name = SERVICE_NAME_HISTORIES
+    threaded = True
     _push_period_minutes = 1
 
     _instance = None

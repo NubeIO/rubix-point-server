@@ -44,9 +44,14 @@ for n in range(1, networks+1):
     }
 
     response_n = requests.post(f'{network_url}', data=network_obj)
-    r_json = response_n.json()
-    network_uuid = r_json['uuid']
-    print('added network', r_json.get('name'), network_uuid)
+    network_uuid_uuid = None
+    if 200 <= response_n.status_code < 300:
+        r_json = response_n.json()
+        network_uuid = r_json['uuid']
+        print('added network', r_json.get('name'), network_uuid)
+    else:
+        print('failed to add network', network_obj.get('name'), response_n.reason)
+        continue
 
     for d in range(1, devices+1):
 
@@ -64,14 +69,19 @@ for n in range(1, networks+1):
         }
 
         response_d = requests.post(f'{devices_url}', data=devices_obj)
-        r_json = response_d.json()
-        device_uuid = r_json['uuid']
-        print('    added device', r_json.get('name'), device_uuid)
+        device_uuid = None
+        if 200 <= response_d.status_code < 300:
+            r_json = response_d.json()
+            device_uuid = r_json['uuid']
+            print('    added device', r_json.get('name'), device_uuid)
+        else:
+            print('    failed to add device', devices_obj.get('name'), response_d.reason)
+            continue
 
         for r in range(1, points+1):
             name = f'point_{r}'
             point_obj = {
-                "name": f'{name}/{d}/{r}',
+                "name": f'{name}\\{d}\\{r}',
                 "reg": r,
                 "reg_length": 2,
                 "type": reg_type,
@@ -85,5 +95,9 @@ for n in range(1, networks+1):
                 "device_uuid": device_uuid
             }
             response_p = requests.post(f'{points_url}', data=point_obj)
-            r_json = response_p.json()
-            print('        added point', r_json.get('name'), r_json.get('uuid'))
+            if 200 <= response_p.status_code < 300:
+                r_json = response_p.json()
+                print('        added point', r_json.get('name'), r_json.get('uuid'))
+            else:
+                print('        failed to add point', point_obj.get('name'), response_p.reason)
+                continue

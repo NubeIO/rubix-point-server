@@ -19,6 +19,7 @@ class HistoryLocal(EventServiceBase):
     """
     SYNC_PERIOD = 5
     service_name = SERVICE_NAME_HISTORIES_LOCAL
+    threaded = True
 
     _instance = None
     binding = None

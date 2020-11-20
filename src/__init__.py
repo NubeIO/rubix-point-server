@@ -11,6 +11,7 @@ CORS(app)
 
 # TMP CONFIGS
 db_pg = False
+enable_mqtt = True
 enable_histories = True
 enable_tcp = False
 enable_rtu = True
@@ -31,6 +32,7 @@ app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 db = SQLAlchemy(app)
 
 # Other Services
+from src.services.mqtt_client.mqtt_client import MqttClient
 from src.services.histories.history_local import HistoryLocal
 from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
 # Source Drivers
@@ -49,6 +51,12 @@ if not not os.environ.get("WERKZEUG_RUN_MAIN"):
     if enable_histories:
         histories_thread = Thread(target=HistoryLocal.get_instance().sync_interval)
         histories_thread.start()
+
+    # if config.getboolean('settings', 'enable_mqtt'):
+    if enable_mqtt:
+    # mqtt_thread = Thread(target=MqttClient.get_instance().start)
+        mqtt_thread = Thread(target=MqttClient.get_instance().start, args=('localhost', 1883))
+        mqtt_thread.start()
 
     # Network.get_instance().start()
 
