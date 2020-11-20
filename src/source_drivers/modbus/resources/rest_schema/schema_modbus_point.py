@@ -1,7 +1,5 @@
-from flask_restful import fields
-
-from src.resources.rest_schema.schema_point import *
 from copy import deepcopy
+from src.resources.rest_schema.schema_point import *
 
 modbus_point_all_attributes = deepcopy(point_all_attributes)
 modbus_point_all_attributes['reg'] = {
@@ -15,10 +13,6 @@ modbus_point_all_attributes['reg_length'] = {
 modbus_point_all_attributes['type'] = {
     'type': str,
     'required': True,
-}
-modbus_point_all_attributes['write_value'] = {
-    'type': float,
-    'required': False,
 }
 modbus_point_all_attributes['data_type'] = {
     'type': str,
@@ -45,31 +39,8 @@ modbus_point_all_attributes['timeout_global'] = {
     'required': True,
 }
 
-modbus_point_return_attributes = {
-    'uuid': {
-        'type': str,
-    },
-    'driver': {
-        'type': str,
-    },
-    'created_on': {
-        'type': str,
-    },
-    'updated_on': {
-        'type': str,
-    },
-}
-
-point_store_fields = {
-    'point_uuid': fields.String,
-    'value': fields.Float,
-    'value_array': fields.String,
-    'fault': fields.Boolean,
-    'fault_message': fields.String,
-    'ts': fields.String
-}
+modbus_point_return_attributes = deepcopy(point_return_attributes)
 
 modbus_point_all_fields = {}
 map_rest_schema(modbus_point_return_attributes, modbus_point_all_fields)
 map_rest_schema(modbus_point_all_attributes, modbus_point_all_fields)
-modbus_point_all_fields['point_store'] = fields.Nested(point_store_fields)

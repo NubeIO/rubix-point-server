@@ -5,7 +5,7 @@ from src.models.model_base import ModelBase
 class NetworkModel(ModelBase):
     __tablename__ = 'networks'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
-    name = db.Column(db.String(80), nullable=False)
+    name = db.Column(db.String(80), nullable=False, unique=True)
     enable = db.Column(db.Boolean(), nullable=False)
     fault = db.Column(db.Boolean(), nullable=True)
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)

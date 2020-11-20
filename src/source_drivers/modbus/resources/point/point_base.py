@@ -3,6 +3,7 @@ from flask_restful import Resource, reqparse, abort
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_attributes
+from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
 
 
 class ModbusPointBase(Resource):
@@ -27,6 +28,10 @@ class ModbusPointBase(Resource):
     def add_point(cls, data, uuid):
         cls.abort_if_device_does_not_exist(data.device_uuid)
         try:
+            point_type = data.get('type')
+            if point_type is ModbusPointType.WRITE_COIL or point_type is ModbusPointType.WRITE_REGISTER \
+                    or point_type is ModbusPointType.WRITE_COILS or point_type is ModbusPointType.WRITE_REGISTERS:
+                data['writable'] = True
             point = ModbusPointBase.create_point_model_obj(uuid, data)
             point.save_to_db()
             return point

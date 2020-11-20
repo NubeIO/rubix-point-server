@@ -1,4 +1,7 @@
+from flask_restful import fields
+
 from src.resources.utils import map_rest_schema
+from src.resources.rest_schema.schema_device import device_all_fields
 
 network_all_attributes = {
     'name': {
@@ -29,6 +32,9 @@ network_return_attributes = {
     },
     'updated_on': {
         'type': str,
+    },
+    'devices': {
+        'type': fields.List(fields.Nested(device_all_fields))
     }
 }
 

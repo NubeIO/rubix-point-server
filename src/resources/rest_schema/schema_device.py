@@ -1,4 +1,7 @@
+from flask_restful import fields
 from src.resources.utils import map_rest_schema
+
+from src.resources.rest_schema.schema_point import point_all_fields
 
 device_all_attributes = {
     'network_uuid': {
@@ -33,6 +36,9 @@ device_return_attributes = {
     },
     'updated_on': {
         'type': str,
+    },
+    'points': {
+        'type': fields.List(fields.Nested(point_all_fields))
     }
 }
 
