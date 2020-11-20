@@ -14,6 +14,7 @@ class TcpPolling(EventServiceBase):
     _instance = None
     _polling_period = 1
     service_name = SERVICE_NAME_MODBUS_TCP
+    threaded = True
     _count = 0
 
     @staticmethod

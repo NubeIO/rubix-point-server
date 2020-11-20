@@ -1,3 +1,4 @@
+from sqlalchemy.orm import validates
 from src import db
 
 
@@ -20,3 +21,9 @@ class ModelBase(db.Model):
         if hasattr(self, 'updated_on'):
             self.updated_on = db.func.now()
         db.session.commit()
+
+    @validates('name')
+    def validate_name(self, _, name):
+        if '/' in name:
+            raise ValueError('name cannot contain forward slash (/)')
+        return name

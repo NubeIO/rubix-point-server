@@ -39,6 +39,5 @@ class PointModel(ModelBase):
     @validates('history_interval')
     def validate_history_interval(self, _, value):
         if self.history_type == HistoryType.INTERVAL and value is not None and value < 1:
-            print('tRUE')
-            raise ValueError("This needs to be at least 1, default is 15 (in minutes)")
+            raise ValueError("history_interval needs to be at least 1, default is 15 (in minutes)")
         return value

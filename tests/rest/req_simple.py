@@ -70,7 +70,7 @@ for d in devices:
     for i, r in enumerate(reg_address):
         name = reg_names[i]
         point_obj = {
-            "name": f'{name}/{d}/{r}',
+            "name": f'{name}\\{d}\\{r}',
             "reg": r,
             "reg_length": 2,
             "type": reg_type,

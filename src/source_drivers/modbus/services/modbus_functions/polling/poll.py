@@ -160,7 +160,14 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
 
     is_updated = point_store_new.update()
     if is_updated:
-        # EventDispatcher.dispatch_from_source(service, Event(EventTypes.POINT_COV))
+        EventDispatcher.dispatch_from_source(service, Event(EventTypes.POINT_COV, {
+            'point': point,
+            'point_store': point_store_new,
+            'device': device,
+            'network': network,
+            'source_driver': service.service_name
+        }))
+        # TODO: move this to history service local as the dispatch event will handle it
         if point.history_type == HistoryType.COV and network.history_enable and \
                 device.history_enable and point.history_enable:
             from src import HistoryLocal

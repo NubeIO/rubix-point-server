@@ -6,7 +6,7 @@ from typing import Callable
 
 @unique
 class EventTypes(IntEnum):
-    TEST_EVENT = auto()
+    TEST_EVENT = 0
     INTERNAL_SERVICE_TIMEOUT = auto()
     CALLABLE = auto()
     POINT_COV = auto()
@@ -36,20 +36,30 @@ class EventCallableBlocking(Event):
 
 class EventServiceBase:
     service_name = None
+    threaded = None
 
     def __init__(self):
         if self.service_name is None:
             raise Exception('service name was not created')
+        if self.threaded is None:
+            raise Exception('service threaded attribute was not defined')
         self._event_queue = Queue()
         self.supported_events = [False] * len(EventTypes)
         self._internal_timeout_thread = None
 
-    def add_event(self, event):
+    # TODO: look at way to make certain methods runnable instead of adding to thread queue if threaded service
+    def add_event(self, event: Event):
         if isinstance(event, Event) and isinstance(event.event_type, EventTypes):
             if self.supported_events[event.event_type]:
-                self._event_queue.put(event)
+                if self.threaded:
+                    self._event_queue.put(event)
+                else:
+                    self._run_event(event)
         else:
             raise Exception('Tried to add invalid event: ', event)
+
+    def _run_event(self, event: Event):
+        raise Exception('_run_event() not implemented for non threaded service', self.service_name)
 
     def _set_internal_service_timeout(self, seconds):
         self._internal_timeout_thread = Timer(seconds, self.add_event,
