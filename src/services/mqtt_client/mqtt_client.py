@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
+import time
 
 # from src.ini_config import config
 from src.services.event_service_base import EventServiceBase, Event, EventTypes
@@ -9,6 +10,7 @@ from src.models.point.model_point_store import PointStoreModel
 
 SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
+MQTT_CLIENT_NAME = 'rubix_points'
 MQTT_TOPIC = 'rubix/points'
 MQTT_TOPIC_MIN = len(MQTT_TOPIC.split('/')) + 1
 MQTT_TOPIC_ALL = 'all'
@@ -21,6 +23,8 @@ DEFAULT_keepalive = 60
 DEFAULT_qos = 1
 DEFAULT_retain = False
 DEFAULT_publish_value = False
+DEFAULT_attempt_reconnect_on_unavailable = True
+DEFAULT_attempt_reconnect_secs = 5
 DEFAULT_debug = False
 
 
@@ -33,6 +37,8 @@ class MqttClient(EventServiceBase):
     __qos = DEFAULT_qos
     __retain = DEFAULT_retain
     __publish_value = DEFAULT_publish_value
+    __attempt_reconnect_on_unavailable = DEFAULT_attempt_reconnect_on_unavailable
+    __attempt_reconnect_secs = DEFAULT_attempt_reconnect_secs
     __debug = DEFAULT_debug
 
     def __init__(self):
@@ -40,13 +46,17 @@ class MqttClient(EventServiceBase):
             raise Exception("MqttClient class is a singleton class!")
         else:
             super().__init__()
+            # MqttClient.__keepalive = config.getint('mqtt', 'keepalive', fallback=DEFAULT_keepalive)
+            # MqttClient.__qos = config.getint('mqtt', 'qos', fallback=DEFAULT_qos)
+            # MqttClient.__retain = int(config.getboolean('mqtt', 'retain', fallback=DEFAULT_retain))
+            # MqttClient.__publish_value = config.getboolean('mqtt', 'publish_value', fallback=DEFAULT_publish_value)
+            # MqttClient.__attempt_reconnect_on_unavailable = config.getboolean(
+            #     'mqtt', 'attempt_reconnect_on_unavailable', fallback=DEFAULT_attempt_reconnect_on_unavailable)
+            # MqttClient.__attempt_reconnect_secs = config.getint('mqtt', 'attempt_reconnect_secs',
+            #                                             fallback=DEFAULT_attempt_reconnect_secs)
+            # MqttClient.__debug = config.getboolean('mqtt', 'debug', fallback=DEFAULT_debug)
             self.supported_events[EventTypes.POINT_COV] = True
             EventDispatcher.add_service(self)
-            # MqttClient.__keepalive = int(config.get('mqtt', 'keepalive', fallback=DEFAULT_keepalive))
-            # MqttClient.__qos = int(config.get('mqtt', 'qos', fallback=DEFAULT_qos))
-            # MqttClient.__retain = int(config.get('mqtt', 'retain', fallback=DEFAULT_retain))
-            # MqttClient.__publish_value = config.get('mqtt', 'publish_value', fallback=DEFAULT_publish_value)
-            # MqttClient.__debug = config.get('mqtt', 'debug', fallback=DEFAULT_debug)
             MqttClient.__instance = self
 
     @staticmethod
@@ -61,7 +71,7 @@ class MqttClient(EventServiceBase):
         raise Exception('.ini config not implemented')
         # try:
         # host = config.get('mqtt', 'host', fallback=DEFAULT_host)
-        # port = int(config.get('mqtt', 'port', fallback=DEFAULT_port))
+        # port = config.getint('mqtt', 'port', fallback=DEFAULT_port)
         #
         # MqttClient.start(host, MqttClient.__port, MqttClient.__keepalive, MqttClient.__qos, MqttClient.__retain)
         # except Exception as e:
@@ -71,14 +81,29 @@ class MqttClient(EventServiceBase):
     def start(host: str, port: int = DEFAULT_port, keepalive: int = DEFAULT_keepalive,
               qos: int = DEFAULT_qos, retain: bool = DEFAULT_retain):
         MqttClient.get_instance()
-        MqttClient.__client = mqtt.Client()
+        MqttClient.__client = mqtt.Client(MQTT_CLIENT_NAME)
         MqttClient.__qos = qos
         MqttClient.__retain = retain
-        try:
-            MqttClient.__client.connect(host, port, keepalive)
-            MqttClient.__client.loop_forever()
-        except Exception as e:
-            print(f"Error {e}")
+        MqttClient.__client.on_connect = MqttClient.__on_connect
+        MqttClient.__client.on_message = MqttClient.__on_message
+        if MqttClient.__attempt_reconnect_on_unavailable:
+            while True:
+                try:
+                    MqttClient.__client.connect(host, port, keepalive)
+                    break
+                except ConnectionRefusedError:
+                    if MqttClient.__debug:
+                        print('MQTT connection failure: ConnectionRefusedError. Attempting reconnect in',
+                              MqttClient.__attempt_reconnect_secs, 'seconds')
+                    time.sleep(MqttClient.__attempt_reconnect_secs)
+        else:
+            try:
+                MqttClient.__client.connect(host, port, keepalive)
+            except Exception as e:
+                # catching so can set __client to None so publish_cov doesn't stack messages forever
+                MqttClient.__client = None
+                raise e
+        MqttClient.__client.loop_forever()
 
     @staticmethod
     def publish_cov(point: PointModel, point_store: PointStoreModel, device_uuid: str, network_uuid: str,
