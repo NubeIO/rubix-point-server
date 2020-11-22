@@ -13,6 +13,45 @@ pip install -r requirements.txt
 python run.py
 ```
 
+Install the service
+
+```
+git clone --depth 1 https://github.com/NubeDev/bac-rest
+cd bac-rest/
+sudo apt-get install python3-venv -y && python3 -m venv venv && source venv/bin/activate
+pip install --upgrade pip && pip install -r requirements.txt 
+
+nano systemd/nubeio-bac-rest.service
+
+python run.py
+# install the service
+sudo cp systemd/nubeio-bac-rest.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable nubeio-bac-rest.service && sudo journalctl -f -u nubeio-bac-rest.service
+# check its running
+sudo systemctl restart nubeio-bac-rest.service
+sudo journalctl -f -u nubeio-bac-rest.service
+```
+
+```
+[Unit]
+Description=Flask Application for Nube Rest API
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/bac-rest
+ExecStart=/home/pi/bac-rest/venv/bin/gunicorn -b 0.0.0.0:1515 --log-level=DEBUG -w 1 run:app
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bac-rest
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
 ## License
 
 ### Installing (for BBB)
