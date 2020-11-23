@@ -16,12 +16,11 @@ MQTT_TOPIC_MIN = len(MQTT_TOPIC.split('/')) + 1
 MQTT_TOPIC_ALL = 'all'
 MQTT_TOPIC_DRIVER = 'driver'
 
-
 DEFAULT_host = 'localhost'
 DEFAULT_port = 1883
 DEFAULT_keepalive = 60
 DEFAULT_qos = 1
-DEFAULT_retain = False
+DEFAULT_retain = True
 DEFAULT_publish_value = False
 DEFAULT_attempt_reconnect_on_unavailable = True
 DEFAULT_attempt_reconnect_secs = 5
@@ -107,26 +106,28 @@ class MqttClient(EventServiceBase):
 
     @staticmethod
     def publish_cov(point: PointModel, point_store: PointStoreModel, device_uuid: str, network_uuid: str,
-                    source_driver: str):
+                    source_driver: str, network_name: str, device_name: str):
         if MqttClient.__client is None:
             return
-        if point is None or point_store is None or device_uuid is None or network_uuid is None or source_driver is None:
+        if point is None or point_store is None or device_uuid is None or network_uuid is None \
+                or source_driver is None or network_name is None or device_name is None:
             raise Exception('Bad MQTT publish arguments')
-        topic = f'{MQTT_TOPIC}/{source_driver}/{network_uuid}/{device_uuid}/{point.uuid}/{point.name}'
+        topic = f'{MQTT_TOPIC}/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point.uuid}/{point.name}'
 
         payload = {
             'value': point_store.value,
             'value_array': point_store.value_array,
             'fault': point_store.fault,
-            'fault_message': point_store.fault_message
+            'fault_message': point_store.fault_message,
+            'details': {'network_name': network_name, 'device_name': device_name}
         }
         if MqttClient.__debug:
-            print('MQTT PUB:', topic+'/data', payload)
-        MqttClient.__client.publish(topic+'/data', json.dumps(payload), MqttClient.__qos, MqttClient.__retain)
+            print('MQTT PUB:', topic + '/data', payload)
+        MqttClient.__client.publish(topic + '/data', json.dumps(payload), MqttClient.__qos, MqttClient.__retain)
         if MqttClient.__publish_value and not point_store.fault:
             if MqttClient.__debug:
-                print('MQTT PUB', topic+'/value', point_store.value)
-            MqttClient.__client.publish(topic+'/value', point_store.value, MqttClient.__qos, MqttClient.__retain)
+                print('MQTT PUB', topic + '/value', point_store.value)
+            MqttClient.__client.publish(topic + '/value', point_store.value, MqttClient.__qos, MqttClient.__retain)
 
     @staticmethod
     def __on_connect(client, userdata, flags, reason_code, properties=None):
@@ -168,6 +169,8 @@ class MqttClient(EventServiceBase):
         if event.event_type == EventTypes.POINT_COV:
             if event.data is not None:
                 # TODO: maybe data checking or leave up to developer to speed up?
+                print(event.data)
                 MqttClient.publish_cov(event.data.get('point'), event.data.get('point_store'),
                                        event.data.get('device').uuid, event.data.get('network').uuid,
-                                       event.data.get('source_driver'))
+                                       event.data.get('source_driver'), event.data.get('network').name,
+                                       event.data.get('device').name)

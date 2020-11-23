@@ -48,12 +48,46 @@ sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt install python3.7
 ```
 
-Using the API
 
+
+**Initial MQTT client**
+publishes on COV
+  
+topic:
 ```
-1- in rest api /network we need to add your PC ip the ip that will talk to the BACnet device
-2- once a new network is added copy the network_uuid
-3- add a /device and use the network_uuid
-4- once added copy the network_uuid and bacnet_network_uuid
-5- /devices/points/obj and paste in your UUIDs   http://127.0.0.1:5000/api/bacnet/device/points/obj/d0554857-47df-4100-bf6c-43deafb9aa88,5430510a-f0d9-49be-abcc-ddcbf35eb21b
+rubix/points/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point.uuid}/{point.name}/data
+
+[optional] (value only)
+rubix/points/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point.uuid}/{point.name}/value
+rubix/points/3{source_driver}/4{network_uuid}/5{network_name}/6{device_uuid}/7{device_name}/8{point.uuid}/9{point.name}/value
 ```
+
+
+example topics:
+```
+all points:
+rubix/points/+/+/+/+/+/data
+
+all modbus rtu points:
+rubix/points/modbus_rtu/+/+/+/+/data
+
+by point uuid:
+rubix/points/modbus_rtu/+/+/example_point_uuid/+/data
+
+by point name:
+rubix/points/modbus_rtu/+/+/+/example_point_name/data
+
+by device name:
+rubix/points/modbus_rtu/+/+/+/device 2/+/+/data
+
+by device name:
+rubix/points/modbus_rtu/+/+/+/device 2/+/+/data
+
+by network name:
+rubix/points/modbus_rtu/+/mod_network_name hey/+/+/+/+/data
+```
+Other changes:
+- `network`, `device`, `point` names can no longer contain forward slash (`/`)
+- event services now have a `threaded` flag which dictates whether an event of the subscribing service will be run by the publishing service or added to the event queue or the subscribing service. This will probs be changed in future to be method independent
+  
+
