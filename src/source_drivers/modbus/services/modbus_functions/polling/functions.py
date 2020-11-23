@@ -19,7 +19,7 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     :return: dict
     """
     read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
-    read_input_registers = ModbusPointType.READ_DISCRETE_INPUTS
+    read_input_registers = ModbusPointType.READ_INPUT_REGISTERS
     """
     DEBUG
     """
