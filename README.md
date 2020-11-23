@@ -40,7 +40,7 @@ After=network.target
 Type=simple
 User=pi
 WorkingDirectory=/home/pi/bac-rest
-ExecStart=/home/pi/bac-rest/venv/bin/gunicorn -b 0.0.0.0:1515 --log-level=DEBUG -w 1 run:app
+ExecStart=/home/pi/bac-rest/venv/bin/python run.py
 Restart=always
 RestartSec=10
 StandardOutput=syslog
