@@ -60,6 +60,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     write_coil = ModbusPointType.WRITE_COIL
     read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
     read_input_registers = ModbusPointType.READ_INPUT_REGISTERS
+    read_input_discrete = ModbusPointType.READ_DISCRETE_INPUTS
     write_registers = ModbusPointType.WRITE_REGISTERS
     """
     DEBUG
@@ -89,6 +90,16 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         read_coils
         """
         if mod_point_type == read_coils:
+            val, array = read_coils_handle(connection,
+                                           reg,
+                                           mod_point_reg_length,
+                                           mod_device_address,
+                                           mod_point_type)
+
+        """
+        read_input_discrete
+        """
+        if mod_point_type == read_input_discrete:
             val, array = read_coils_handle(connection,
                                            reg,
                                            mod_point_reg_length,
