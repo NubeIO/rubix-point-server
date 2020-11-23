@@ -29,9 +29,9 @@ class ModbusDeviceBase(Resource):
             abort(500, message=str(e))
 
     @staticmethod
-    def abort_if_network_does_not_exist_and_type_mismatch(network_uuid, type):
+    def abort_if_network_does_not_exist_and_type_mismatch(network_uuid, type_):
         network = ModbusNetworkModel.find_by_uuid(network_uuid)
         if not network:
             abort(400, message='Network does not exist of that network_uuid')
-        if network.type.name != type:
+        if network.type.name != type_:
             abort(400, message=f'Type Mismatch: network.type is `{network.type}` and device.type needs to be same')
