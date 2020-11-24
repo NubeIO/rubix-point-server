@@ -20,23 +20,23 @@ modbus_point_all_attributes['data_type'] = {
 }
 modbus_point_all_attributes['data_endian'] = {
     'type': str,
-    'required': True,
+    'required': False,
 }
 modbus_point_all_attributes['data_round'] = {
     'type': int,
-    'required': True,
+    'required': False,
 }
 modbus_point_all_attributes['data_offset'] = {
     'type': int,
-    'required': True,
+    'required': False,
 }
 modbus_point_all_attributes['timeout'] = {
     'type': float,
-    'required': True,
+    'required': False,
 }
 modbus_point_all_attributes['timeout_global'] = {
     'type': bool,
-    'required': True,
+    'required': False,
 }
 
 modbus_point_return_attributes = deepcopy(point_return_attributes)

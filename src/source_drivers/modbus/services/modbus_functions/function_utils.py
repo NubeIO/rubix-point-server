@@ -48,34 +48,33 @@ def _set_data_length(data_type, reg_length):
                 return length
 
 
-def _mod_point_data_endian(_val):
+def _mod_point_data_endian(_val: ModbusDataEndian) -> (Endian, Endian):
     """
     Sets byte order and endian order
     LEB_BEW = 1
     LEB_LEW = 2
     BEB_LEW = 3
     BEB_BEW = 4
-    :return: array {'bo': bo, 'wo': wo}
+    :return: tuple (bo: Endian, wo: Endian)
     """
+    bo = None
+    wo = None
     if _val == ModbusDataEndian.LEB_BEW:
         bo = Endian.Little
         wo = Endian.Big
-        return {'bo': bo, 'wo': wo}
-    if _val == ModbusDataEndian.LEB_LEW:
+    elif _val == ModbusDataEndian.LEB_LEW:
         bo = Endian.Little
         wo = Endian.Little
-        return {'bo': bo, 'wo': wo}
-    if _val == ModbusDataEndian.BEB_LEW:
+    elif _val == ModbusDataEndian.BEB_LEW:
         bo = Endian.Big
         wo = Endian.Little
-        return {'bo': bo, 'wo': wo}
-    if _val == ModbusDataEndian.BEB_BEW:
+    elif _val == ModbusDataEndian.BEB_BEW:
         bo = Endian.Big
         wo = Endian.Big
-        return {'bo': bo, 'wo': wo}
+    return bo, wo
 
 
-def _assertion(operation, client, reg_type):
+def _assertion(operation, client):
     """
     :param operation: Client method. Checks whether data has been downloaded
     :return: Status False to OK or True.
@@ -84,9 +83,7 @@ def _assertion(operation, client, reg_type):
     if not operation.isError():
         pass
     elif modbus_debug_funcs:
-        print("connects to port: {}; Type Register: {}; Exception: {}".format(client.port,
-                                                                              reg_type,
-                                                                              operation, ))
+        print(f"connects to port: {client.port}; Exception: {operation}")
     return operation.isError()
 
 

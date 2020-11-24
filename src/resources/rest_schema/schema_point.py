@@ -32,6 +32,9 @@ point_all_attributes = {
     'history_interval': {
         'type': int,
     },
+    'write_value': {
+        'type': float,
+    }
 }
 
 point_return_attributes = {
@@ -49,9 +52,6 @@ point_return_attributes = {
     },
     'writable': {
         'type': bool,
-    },
-    'write_value': {
-        'type': float,
     },
     'point_store': {
         'type': fields.Nested(point_store_fields),

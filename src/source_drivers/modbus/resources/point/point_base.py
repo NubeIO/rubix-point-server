@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse, abort
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_attributes
-from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
+from src.source_drivers.modbus.interfaces.point.points import ModbusPointType, ModbusDataType
 
 
 class ModbusPointBase(Resource):
@@ -28,10 +28,7 @@ class ModbusPointBase(Resource):
     def add_point(cls, data, uuid):
         cls.abort_if_device_does_not_exist(data.device_uuid)
         try:
-            point_type = data.get('type')
-            if point_type is ModbusPointType.WRITE_COIL or point_type is ModbusPointType.WRITE_REGISTER \
-                    or point_type is ModbusPointType.WRITE_COILS or point_type is ModbusPointType.WRITE_REGISTERS:
-                data['writable'] = True
+            cls.validate_modbus_point_json(data)
             point = ModbusPointBase.create_point_model_obj(uuid, data)
             point.save_to_db()
             return point
@@ -39,20 +36,30 @@ class ModbusPointBase(Resource):
             abort(500, message=str(e))
 
     @staticmethod
-    def create_point_store(row):
-        if row:
-            return {
-                'value': row.value,
-                'value_array': row.value_array,
-                'fault': row.fault,
-                'fault_message': row.fault_message,
-                'ts': str(row.ts) if row.ts else None,
-            }
-        else:
-            return {
-                'value': None,
-                'value_array': None,
-                'fault': None,
-                'fault_message': None,
-                'ts': None,
-            }
+    def validate_modbus_point_json(data: dict):
+        point_type = ModbusPointType[data.get('type')]
+        reg_length = int(data.get('reg_length'))
+        if point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_REGISTER \
+                or point_type == ModbusPointType.WRITE_COILS or point_type == ModbusPointType.WRITE_REGISTERS:
+            data['writable'] = True
+            if data.get('write_value') is None:
+                data['write_value'] = 0.0
+
+            if reg_length > 1 and point_type == ModbusPointType.WRITE_COIL:
+                data['type'] = ModbusPointType.WRITE_COILS
+            elif reg_length == 1 and point_type == ModbusPointType.WRITE_COILS:
+                data['type'] = ModbusPointType.WRITE_COIL
+            elif reg_length > 1 and point_type == ModbusPointType.WRITE_REGISTER:
+                data['type'] = ModbusPointType.WRITE_REGISTERS
+            elif reg_length == 1 and point_type == ModbusPointType.WRITE_REGISTERS:
+                data['type'] = ModbusPointType.WRITE_REGISTER
+
+        data_type = ModbusDataType[data.get('data_type')]
+        if point_type == ModbusPointType.READ_DISCRETE_INPUTS or point_type == ModbusPointType.READ_COILS or \
+                point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_COILS:
+            data_type = ModbusDataType.DIGITAL
+            data['data_type'] = ModbusDataType.DIGITAL
+            data['data_round']
+
+        if data_type == ModbusDataType.FLOAT or data_type == ModbusDataType.INT32 or data_type == ModbusDataType.UINT32:
+            assert reg_length % 2 == 0, f'reg_length invalid for data_type {data_type}'

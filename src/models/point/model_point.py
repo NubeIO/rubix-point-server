@@ -40,6 +40,7 @@ class PointModel(ModelBase):
         db.session.add(self)
         db.session.commit()
 
+    # TODO: use this for writing endpoint and produce COV event
     def write_point(self, uuid: str, value: float) -> bool:
         assert type(value) == float
         res = db.session.execute(self.__table__
