@@ -53,41 +53,38 @@ sudo apt install python3.7
 **Initial MQTT client**
 publishes on COV
   
-topic:
+topic structure:
 ```
 rubix/points/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point.uuid}/{point.name}/data
 
 [optional] (value only)
 rubix/points/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point.uuid}/{point.name}/value
-rubix/points/3{source_driver}/4{network_uuid}/5{network_name}/6{device_uuid}/7{device_name}/8{point.uuid}/9{point.name}/value
 ```
 
 
 example topics:
 ```
 all points:
-rubix/points/+/+/+/+/+/data
+rubix/points/+/+/+/+/+/+/+/data
 
 all modbus rtu points:
-rubix/points/modbus_rtu/+/+/+/+/data
+rubix/points/modbus_rtu/+/+/+/+/+/+/data
 
 by point uuid:
-rubix/points/modbus_rtu/+/+/example_point_uuid/+/data
+rubix/points/+/+/+/+/+/example_point_uuid/+/data
 
 by point name:
-rubix/points/modbus_rtu/+/+/+/example_point_name/data
+rubix/points/+/+/+/+/+/+/example_point_name/data
+
+by device uuid:
+rubix/points/+/+/+/example_device_uuid/+/+/+/data
 
 by device name:
-rubix/points/modbus_rtu/+/+/+/device 2/+/+/data
+rubix/points/+/+/+/+/example_device_name/+/+/data
 
-by device name:
-rubix/points/modbus_rtu/+/+/+/device 2/+/+/data
+by network uuid:
+rubix/points/+/example_network_uuid/+/+/+/+/+/data
 
 by network name:
-rubix/points/modbus_rtu/+/mod_network_name hey/+/+/+/+/data
+rubix/points/+/+/example_network_name/+/+/+/+/data
 ```
-Other changes:
-- `network`, `device`, `point` names can no longer contain forward slash (`/`)
-- event services now have a `threaded` flag which dictates whether an event of the subscribing service will be run by the publishing service or added to the event queue or the subscribing service. This will probs be changed in future to be method independent
-  
-

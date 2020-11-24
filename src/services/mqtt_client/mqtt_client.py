@@ -105,21 +105,21 @@ class MqttClient(EventServiceBase):
         MqttClient.__client.loop_forever()
 
     @staticmethod
-    def publish_cov(point: PointModel, point_store: PointStoreModel, device_uuid: str, network_uuid: str,
-                    source_driver: str, network_name: str, device_name: str):
+    def publish_cov(point: PointModel, point_store: PointStoreModel, device_uuid: str, device_name: str,
+                    network_uuid: str, network_name: str, source_driver: str):
         if MqttClient.__client is None:
             return
         if point is None or point_store is None or device_uuid is None or network_uuid is None \
                 or source_driver is None or network_name is None or device_name is None:
             raise Exception('Bad MQTT publish arguments')
-        topic = f'{MQTT_TOPIC}/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point.uuid}/{point.name}'
+        topic = f'{MQTT_TOPIC}/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}' \
+                f'/{point.uuid}/{point.name}'
 
         payload = {
             'value': point_store.value,
             'value_array': point_store.value_array,
             'fault': point_store.fault,
             'fault_message': point_store.fault_message,
-            'details': {'network_name': network_name, 'device_name': device_name}
         }
         if MqttClient.__debug:
             print('MQTT PUB:', topic + '/data', payload)
@@ -169,8 +169,7 @@ class MqttClient(EventServiceBase):
         if event.event_type == EventTypes.POINT_COV:
             if event.data is not None:
                 # TODO: maybe data checking or leave up to developer to speed up?
-                print(event.data)
                 MqttClient.publish_cov(event.data.get('point'), event.data.get('point_store'),
-                                       event.data.get('device').uuid, event.data.get('network').uuid,
-                                       event.data.get('source_driver'), event.data.get('network').name,
-                                       event.data.get('device').name)
+                                       event.data.get('device').uuid, event.data.get('device').name,
+                                       event.data.get('network').uuid, event.data.get('network').name,
+                                       event.data.get('source_driver'))
