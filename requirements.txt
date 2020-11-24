@@ -16,3 +16,4 @@ psycopg2-binary
 gunicorn
 influxdb
 paho-mqtt
+gevent

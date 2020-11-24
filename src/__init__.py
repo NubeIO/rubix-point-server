@@ -1,21 +1,15 @@
 import os
-from threading import Thread
 
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+
 from src.event_dispatcher import EventDispatcher
 
 app = Flask(__name__)
 CORS(app)
 
-# TMP CONFIGS
 db_pg = False
-enable_mqtt = True
-enable_histories = True
-enable_tcp = False
-enable_rtu = True
-enable_cleaner = True
 
 if db_pg:
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
@@ -30,46 +24,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 
 db = SQLAlchemy(app)
-
-# Other Services
-from src.services.mqtt_client.mqtt_client import MqttClient
-from src.services.histories.history_local import HistoryLocal
-from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
-# Source Drivers
-# from src.source_drivers.bacnet.services.network import Network
-from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
-from src.source_drivers.modbus.services.tcp_polling import TcpPolling
-from src.source_drivers.modbus.services.rtu_polling import RtuPolling
-from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-
-from src import routes
+from src import routes  # importing for creating all the schema on un-existing case
+from src.models.point.model_point_store_history import PointStoreHistoryModel  # this one doesn't exist on routes
 
 db.create_all()
 
-if not not os.environ.get("WERKZEUG_RUN_MAIN"):
+with app.app_context():
+    if not os.environ.get("WERKZEUG_RUN_MAIN"):
+        from src.background import Background
 
-    if enable_histories:
-        histories_thread = Thread(target=HistoryLocal.get_instance().sync_interval)
-        histories_thread.start()
-
-    # if config.getboolean('settings', 'enable_mqtt'):
-    if enable_mqtt:
-    # mqtt_thread = Thread(target=MqttClient.get_instance().start)
-        mqtt_thread = Thread(target=MqttClient.get_instance().start, args=('localhost', 1883))
-        mqtt_thread.start()
-
-    # Network.get_instance().start()
-
-    if enable_tcp:
-        TcpRegistry.get_instance().register()
-        tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling)
-        tcp_polling_thread.start()
-
-    if enable_rtu:
-        RtuRegistry.get_instance().register()
-        rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling)
-        rtu_polling_thread.start()
-
-    if enable_cleaner:
-        point_cleaner_thread = Thread(target=PointStoreHistoryCleaner.register)
-        point_cleaner_thread.start()
+        Background.run()
