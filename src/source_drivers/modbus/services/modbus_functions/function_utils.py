@@ -1,7 +1,12 @@
+import logging
+
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
+
+from src.loggers import modbus_debug
 from src.source_drivers.modbus.interfaces.point.points import ModbusDataEndian, ModbusDataType
-from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_funcs
+
+logger = logging.getLogger(modbus_debug)
 
 
 def _set_data_length(data_type, reg_length):
@@ -9,9 +14,7 @@ def _set_data_length(data_type, reg_length):
     Sets the data length for the selected data type
     :return:holding reg
     """
-    if modbus_debug_funcs:
-        print("MODBUS: in function  _set_data_length, check reg_length",
-              {"data_type": data_type, "reg_length": reg_length})
+    logger.debug(f"in function _set_data_length, check reg_length {{data_type: {data_type}, reg_length: {reg_length}}}")
     _val = data_type
     length = reg_length
 
@@ -74,7 +77,7 @@ def _mod_point_data_endian(_val: ModbusDataEndian) -> (Endian, Endian):
     return bo, wo
 
 
-def _assertion(operation, client):
+def _assertion(operation):
     """
     :param operation: Client method. Checks whether data has been downloaded
     :return: Status False to OK or True.
@@ -82,8 +85,6 @@ def _assertion(operation, client):
     # test that we are not an error
     if not operation.isError():
         pass
-    elif modbus_debug_funcs:
-        print(f"connects to port: {client.port}; Exception: {operation}")
     return operation.isError()
 
 

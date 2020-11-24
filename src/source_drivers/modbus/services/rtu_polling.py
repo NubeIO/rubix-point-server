@@ -1,4 +1,4 @@
-import time
+import logging
 
 from src import db
 from src.event_dispatcher import EventDispatcher
@@ -6,10 +6,11 @@ from src.services.event_service_base import EventServiceBase, EventTypes
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll, modbus_polling_count
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
 
 SERVICE_NAME_MODBUS_RTU = 'modbus_rtu'
+
+logger = logging.getLogger(__name__)
 
 
 class RtuPolling(EventServiceBase):
@@ -37,8 +38,7 @@ class RtuPolling(EventServiceBase):
 
     def polling(self):
         self._set_internal_service_timeout(RtuPolling._polling_period)
-        if modbus_debug_poll:
-            print("RTU Polling started")
+        logger.info("RTU Polling started")
         while True:
             event = self._event_queue.get()
             if event.event_type is EventTypes.INTERNAL_SERVICE_TIMEOUT:
@@ -49,9 +49,7 @@ class RtuPolling(EventServiceBase):
 
     def __poll(self):
         self._count += 1
-        if modbus_polling_count:
-            print(f'MODBUS: Looping RTU {self._count}...')
-
+        logger.debug(f'MODBUS: Looping RTU {self._count}...')
         results = self.__get_all_points()
         # TODO: separate thread for each network
         for network, device, point in results:

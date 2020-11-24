@@ -1,3 +1,4 @@
+import logging.config
 import os
 
 from flask import Flask
@@ -5,6 +6,8 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
 from src.event_dispatcher import EventDispatcher
+
+logging.config.fileConfig('logging/logging.conf')
 
 app = Flask(__name__)
 CORS(app)

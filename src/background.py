@@ -1,3 +1,4 @@
+import logging
 from threading import Thread
 
 from src.ini_config import config
@@ -9,11 +10,12 @@ from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 from src.source_drivers.modbus.services.tcp_polling import TcpPolling
 from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
 
+logger = logging.getLogger(__name__)
 
 class Background:
     @staticmethod
     def run():
-        print("Running Background Task...")
+        logger.info("Running Background Task...")
         if config.getboolean('settings', 'enable_mqtt', fallback=False):
             mqtt_thread = Thread(target=MqttClient.get_instance().start, daemon=True)
             mqtt_thread.start()

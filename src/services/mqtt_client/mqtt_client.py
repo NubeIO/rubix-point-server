@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 
 import paho.mqtt.client as mqtt
@@ -16,6 +17,8 @@ MQTT_TOPIC = 'rubix/points'
 MQTT_TOPIC_MIN = len(MQTT_TOPIC.split('/')) + 1
 MQTT_TOPIC_ALL = 'all'
 MQTT_TOPIC_DRIVER = 'driver'
+
+logger = logging.getLogger(__name__)
 
 
 class MqttClient(EventServiceBase):
@@ -71,11 +74,11 @@ class MqttClient(EventServiceBase):
                 try:
                     MqttClient.__client.connect(MqttClient.__host, MqttClient.__port, MqttClient.__keepalive)
                     break
-                except ConnectionRefusedError as e:
-                    print(e)
+                except ConnectionRefusedError:
                     if MqttClient.__debug:
-                        print('MQTT connection failure: ConnectionRefusedError. Attempting reconnect in',
-                              MqttClient.__attempt_reconnect_secs, 'seconds')
+                        logger.info(
+                            f'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in '
+                            f'{MqttClient.__attempt_reconnect_secs} seconds')
                     time.sleep(MqttClient.__attempt_reconnect_secs)
         else:
             try:
@@ -104,12 +107,12 @@ class MqttClient(EventServiceBase):
             'fault_message': point_store.fault_message,
         }
         if MqttClient.__debug:
-            print('MQTT PUB:', topic + '/data', payload)
-        MqttClient.__client.publish(topic + '/data', json.dumps(payload), MqttClient.__qos, MqttClient.__retain)
+            logger.info(f'MQTT PUB: {topic}/data > {payload}')
+        MqttClient.__client.publish(f'{topic}/data', json.dumps(payload), MqttClient.__qos, MqttClient.__retain)
         if MqttClient.__publish_value and not point_store.fault:
             if MqttClient.__debug:
-                print('MQTT PUB', topic + '/value', point_store.value)
-            MqttClient.__client.publish(topic + '/value', point_store.value, MqttClient.__qos, MqttClient.__retain)
+                logger.info(f'MQTT PUB: {topic}/value > {point_store.value}')
+            MqttClient.__client.publish(f'{topic}/value', point_store.value, MqttClient.__qos, MqttClient.__retain)
 
     @staticmethod
     def __on_connect(client, userdata, flags, reason_code, properties=None):

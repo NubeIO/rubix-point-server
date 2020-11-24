@@ -1,5 +1,10 @@
+import logging
+
 import BAC0
+
 from src.source_drivers.bacnet.models.network import BacnetNetworkModel
+
+logger = logging.getLogger(__name__)
 
 
 class Network:
@@ -19,7 +24,7 @@ class Network:
             self.networks = {}
 
     def start(self):
-        print("Network Start...")
+        logger.info("Network Start...")
         network_service = Network.get_instance()
         for network in BacnetNetworkModel.query.all():
             network_service.add_network(network)
@@ -35,20 +40,19 @@ class Network:
         if not self.networks.get(net_url).get(network_device_id):
             self.networks[net_url][network_device_id] = {}
 
-        print('=====================================================')
-        print('...........Creating BACnet network with..............')
-        print('net_url:', net_url)
-        print('network_device_id:', network_device_id)
-        print('network_device_name:', network_device_name)
-        print('.....................................................')
-        print('=====================================================')
+        logger.info('=====================================================')
+        logger.info('...........Creating BACnet network with..............')
+        logger.info(f'net_url: {net_url}')
+        logger.info(f'network_device_id: {network_device_id}')
+        logger.info(f'network_device_name: {network_device_name}')
+        logger.info('.....................................................')
+        logger.info('=====================================================')
 
         try:
             network = BAC0.lite(ip=net_url, deviceId=network_device_id, localObjName=network_device_name)
             self.networks[net_url][network_device_id][network_device_name] = network
-
         except:
-            print("Initialization error!")
+            logger.error("Initialization error!")
 
     def delete_network(self, network):
         net_url = f"{network.network_ip}/{network.network_mask}:{network.network_port}"
