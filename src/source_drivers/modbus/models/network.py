@@ -11,7 +11,7 @@ class ModbusNetworkModel(NetworkMixinModel):
     timeout = db.Column(db.Float(), nullable=False, default=1)
     device_timeout_global = db.Column(db.Float(), nullable=False, default=1)
     point_timeout_global = db.Column(db.Float(), nullable=False, default=1)
-    rtu_port = db.Column(db.String(80), nullable=False)
+    rtu_port = db.Column(db.String(80), nullable=True)
     rtu_speed = db.Column(db.Integer(), default=9600)
     rtu_stop_bits = db.Column(db.Integer(), default=1)
     rtu_parity = db.Column(db.Enum(ModbusRtuParity), default=ModbusRtuParity.N)

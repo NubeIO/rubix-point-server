@@ -19,7 +19,6 @@ modbus_network_all_attributes['point_timeout_global'] = {
 }
 modbus_network_all_attributes['rtu_port'] = {
     'type': str,
-    'required': True
 }
 modbus_network_all_attributes['rtu_speed'] = {
     'type': int,
