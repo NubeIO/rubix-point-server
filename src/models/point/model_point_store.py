@@ -41,4 +41,5 @@ class PointStoreModel(db.Model):
                                                  or_(self.__table__.c.fault != self.fault,
                                                      self.__table__.c.fault_message != self.fault_message,
                                                      self.__table__.c.fault != self.fault))))
+        db.session.commit()
         return bool(res.rowcount)

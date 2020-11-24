@@ -2,14 +2,14 @@ import enum
 
 
 class ModbusPointType(enum.Enum):
-    READ_COILS = 0
-    READ_DISCRETE_INPUTS = 1
-    READ_HOLDING_REGISTERS = 2
-    READ_INPUT_REGISTERS = 3
-    WRITE_COIL = 4
-    WRITE_REGISTER = 5
-    WRITE_COILS = 6
-    WRITE_REGISTERS = 7
+    READ_COILS = 1
+    READ_DISCRETE_INPUTS = 2
+    READ_HOLDING_REGISTERS = 3
+    READ_INPUT_REGISTERS = 4
+    WRITE_COIL = 5
+    WRITE_REGISTER = 6
+    WRITE_COILS = 15
+    WRITE_REGISTERS = 16
 
 
 class ModbusDataType(enum.Enum):

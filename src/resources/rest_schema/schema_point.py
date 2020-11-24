@@ -1,4 +1,14 @@
+from flask_restful import fields
 from src.resources.utils import map_rest_schema
+
+point_store_fields = {
+    'point_uuid': fields.String,
+    'value': fields.Float,
+    'value_array': fields.String,
+    'fault': fields.Boolean,
+    'fault_message': fields.String,
+    'ts': fields.String
+}
 
 point_all_attributes = {
     'device_uuid': {
@@ -22,6 +32,9 @@ point_all_attributes = {
     'history_interval': {
         'type': int,
     },
+    'write_value': {
+        'type': float,
+    }
 }
 
 point_return_attributes = {
@@ -37,26 +50,12 @@ point_return_attributes = {
     'updated_on': {
         'type': str,
     },
-    'value': {
-        'type': float,
-        'nested': True,
-        'dict': 'point_store.value',
-    },
-    'value_array': {
-        'type': str,
-        'nested': True,
-        'dict': 'point_store.value_array',
-    },
-    'fault': {
+    'writable': {
         'type': bool,
-        'nested': True,
-        'dict': 'point_store.fault',
     },
-    'last_poll_timestamp': {
-        'type': str,
-        'nested': True,
-        'dict': 'point_store.ts',
-    },
+    'point_store': {
+        'type': fields.Nested(point_store_fields),
+    }
 }
 
 point_all_fields = {}

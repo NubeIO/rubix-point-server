@@ -17,6 +17,10 @@ def map_rest_schema(schema, resource_fields):
     Adds schema dict marshaled data to resource_fields dict
     """
     for attr in schema:
-        resource_fields[attr] = get_field_type(schema[attr]['type'])
+        # hack fix... change to make fields primary thing and switch get_field_type to return opposite
+        if not isinstance(schema[attr]['type'], fields.Raw):
+            resource_fields[attr] = get_field_type(schema[attr]['type'])
+        else:
+            resource_fields[attr] = schema[attr]['type']
         if schema[attr].get('nested', False):
             resource_fields[attr].__init__(attribute=schema[attr]['dict'])

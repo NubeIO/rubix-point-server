@@ -1,4 +1,5 @@
 import numbers
+from sqlalchemy.orm.exc import ObjectDeletedError
 
 from src.event_dispatcher import EventDispatcher
 from src.interfaces.point import HistoryType
@@ -10,10 +11,8 @@ from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
-from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_input_registers_handle, \
-    read_holding_registers_handle, \
-    write_coil_handle, \
-    read_coils_handle, write_registers_handle
+from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_digital_handle, \
+    read_analog_handle, write_coil_handle, write_holding_registers_handle
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
 
@@ -30,11 +29,6 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     :return: None
     """
 
-    """
-    DEBUG
-    """
-    if modbus_debug_poll:
-        print('MODBUS DEBUG: main looping function poll_point')
     connection = None
     if transport == ModbusType.RTU:
         connection = RtuRegistry.get_rtu_connections().get(RtuRegistry.create_connection_key_by_network(network))
@@ -47,107 +41,86 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         if not connection:
             TcpRegistry.get_instance().add_device(device)
 
-    mod_device_address = device.address
-    reg = point.reg
-    mod_point_uuid = point.uuid
-    mod_point_reg_length = point.reg_length
-    mod_point_type = point.type
-    mod_point_data_type = point.data_type
-    mod_point_data_endian = point.data_endian
+    try:
+        device_address = device.address
+        zero_based = device.zero_based
+        reg = point.reg
+        point_uuid = point.uuid
+        point_reg_length = point.reg_length
+        point_type = point.type
+        point_data_type = point.data_type
+        point_data_endian = point.data_endian
+        write_value = point.write_value
+    except ObjectDeletedError:
+        return
 
-    write_value = point.write_value
-    read_coils = ModbusPointType.READ_COILS
-    write_coil = ModbusPointType.WRITE_COIL
-    read_holding_registers = ModbusPointType.READ_HOLDING_REGISTERS
-    read_input_registers = ModbusPointType.READ_INPUT_REGISTERS
-    read_input_discrete = ModbusPointType.READ_DISCRETE_INPUTS
-    write_registers = ModbusPointType.WRITE_REGISTERS
-    """
-    DEBUG
-    """
     if modbus_debug_poll:
-        print("@@@ START MODBUS POLL !!!", {"device": mod_device_address, 'reg': reg})
+        print("@@@ START MODBUS POLL !!!", {"device": device_address, 'reg': reg})
         print("MODBUS DEBUG:", {'network': network,
                                 'device': device,
-                                'point': mod_point_uuid,
+                                'point': point_uuid,
                                 'transport': transport,
-                                'mod_device_address': mod_device_address,
+                                'device_address': device_address,
                                 'reg': reg,
-                                'mod_point_reg_length': mod_point_reg_length,
-                                'mod_point_type': mod_point_type,
-                                'mod_point_data_type': mod_point_data_type,
-                                'mod_point_data_endian': mod_point_data_endian,
+                                'point_reg_length': point_reg_length,
+                                'point_type': point_type,
+                                'point_data_type': point_data_type,
+                                'point_data_endian': point_data_endian,
                                 'write_value': write_value
                                 })
+    if not zero_based:
+        reg -= 1
+        if modbus_debug_poll:
+            print(f"MODBUS DEBUG: device zero_based True. reg -= 1: {reg + 1} -> {reg}")
 
     fault = False
     fault_message = ""
     point_store_new = None
+
     try:
         val = None
         array = ""
         """
-        read_coils
+        read_coils read_discrete_inputs
         """
-        if mod_point_type == read_coils:
-            val, array = read_coils_handle(connection,
-                                           reg,
-                                           mod_point_reg_length,
-                                           mod_device_address,
-                                           mod_point_type)
-
+        if point_type == ModbusPointType.READ_COILS or point_type == ModbusPointType.READ_DISCRETE_INPUTS:
+            val, array = read_digital_handle(connection,
+                                             reg,
+                                             point_reg_length,
+                                             device_address,
+                                             point_type)
         """
-        read_input_discrete
+        read_holding_registers read_input_registers
         """
-        if mod_point_type == read_input_discrete:
-            val, array = read_coils_handle(connection,
-                                           reg,
-                                           mod_point_reg_length,
-                                           mod_device_address,
-                                           mod_point_type)
+        if point_type == ModbusPointType.READ_HOLDING_REGISTERS or point_type == ModbusPointType.READ_INPUT_REGISTERS:
+            val, array = read_analog_handle(connection,
+                                            reg,
+                                            point_reg_length,
+                                            device_address,
+                                            point_data_type,
+                                            point_data_endian,
+                                            point_type)
         """
         write_coils
         """
-        if mod_point_type == write_coil:
+        if point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_COILS:
             val, array = write_coil_handle(connection, reg,
-                                           mod_point_reg_length,
-                                           mod_device_address,
+                                           point_reg_length,
+                                           device_address,
                                            write_value,
-                                           mod_point_type)
+                                           point_type)
         """
-        read_input_registers
+        write_registers
         """
-        if mod_point_type == read_input_registers:
-            val, array = read_input_registers_handle(connection,
-                                                     reg,
-                                                     mod_point_reg_length,
-                                                     mod_device_address,
-                                                     mod_point_data_type,
-                                                     mod_point_data_endian,
-                                                     mod_point_type)
-        """
-        read_holding_registers
-        """
-        if mod_point_type == read_holding_registers:
-            val, array = read_holding_registers_handle(connection,
-                                                       reg,
-                                                       mod_point_reg_length,
-                                                       mod_device_address,
-                                                       mod_point_data_type,
-                                                       mod_point_data_endian,
-                                                       mod_point_type)
-        """
-        write_registers write_registers
-        """
-        if mod_point_type == write_registers:
-            val, array = write_registers_handle(connection,
-                                                reg,
-                                                mod_point_reg_length,
-                                                mod_device_address,
-                                                mod_point_data_type,
-                                                mod_point_data_endian,
-                                                write_value,
-                                                mod_point_type)
+        if point_type == ModbusPointType.WRITE_REGISTER or point_type == ModbusPointType.WRITE_REGISTERS:
+            val, array = write_holding_registers_handle(connection,
+                                                        reg,
+                                                        point_reg_length,
+                                                        device_address,
+                                                        point_data_type,
+                                                        point_data_endian,
+                                                        write_value,
+                                                        point_type)
 
         """
         Save modbus data in database
@@ -159,6 +132,8 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         else:
             fault = True
             fault_message = "Got non numeric value"
+    except ObjectDeletedError:
+        return
     except Exception as e:
         if modbus_debug_poll:
             print(f'MODBUS ERROR: in poll main function {str(e)}')
@@ -169,7 +144,12 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     if modbus_debug_poll:
         print("!!! END MODBUS POLL @@@")
 
-    is_updated = point_store_new.update()
+    is_updated = False
+    try:
+        is_updated = point_store_new.update()
+    except Exception:
+        return
+
     if is_updated:
         EventDispatcher.dispatch_from_source(service, Event(EventTypes.POINT_COV, {
             'point': point,

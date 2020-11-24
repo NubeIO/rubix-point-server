@@ -34,6 +34,7 @@ class ModbusPointSingular(ModbusPointBase):
         else:
             cls.abort_if_device_does_not_exist(data.device_uuid)
             try:
+                cls.validate_modbus_point_json(data)
                 point.update(**data)
                 return ModbusPointModel.find_by_uuid(uuid)
             except Exception as e:
@@ -50,6 +51,7 @@ class ModbusPointSingular(ModbusPointBase):
             device_uuid = data.device_uuid if data.device_uuid else point.device_uuid
             cls.abort_if_device_does_not_exist(device_uuid)
             try:
+                cls.validate_modbus_point_json(data)
                 point.update(**data)
                 return ModbusPointModel.find_by_uuid(uuid)
             except Exception as e:

@@ -8,13 +8,13 @@ from src.source_drivers.modbus.interfaces.network.network import ModbusType, Mod
 class ModbusNetworkModel(NetworkMixinModel):
     __tablename__ = 'modbus_networks'
     type = db.Column(db.Enum(ModbusType), nullable=False)
-    timeout = db.Column(db.Float(), nullable=False)
-    device_timeout_global = db.Column(db.Float(), nullable=False)
-    point_timeout_global = db.Column(db.Float(), nullable=False)
-    rtu_port = db.Column(db.String(80))
-    rtu_speed = db.Column(db.Integer())
-    rtu_stop_bits = db.Column(db.Integer())
-    rtu_parity = db.Column(db.Enum(ModbusRtuParity))
+    timeout = db.Column(db.Float(), nullable=False, default=1)
+    device_timeout_global = db.Column(db.Float(), nullable=False, default=1)
+    point_timeout_global = db.Column(db.Float(), nullable=False, default=1)
+    rtu_port = db.Column(db.String(80), nullable=True)
+    rtu_speed = db.Column(db.Integer(), default=9600)
+    rtu_stop_bits = db.Column(db.Integer(), default=1)
+    rtu_parity = db.Column(db.Enum(ModbusRtuParity), default=ModbusRtuParity.N)
     rtu_byte_size = db.Column(db.Integer(), default=8)
 
     @classmethod
