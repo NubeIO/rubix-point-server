@@ -10,18 +10,16 @@ modbus_network_all_attributes['type'] = {
 }
 modbus_network_all_attributes['timeout'] = {
     'type': float,
-    'required': True,
 }
 modbus_network_all_attributes['device_timeout_global'] = {
     'type': float,
-    'required': True,
 }
 modbus_network_all_attributes['point_timeout_global'] = {
     'type': float,
-    'required': True,
 }
 modbus_network_all_attributes['rtu_port'] = {
     'type': str,
+    'required': True
 }
 modbus_network_all_attributes['rtu_speed'] = {
     'type': int,

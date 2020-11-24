@@ -43,6 +43,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
 
     try:
         device_address = device.address
+        zero_based = device.zero_based
         reg = point.reg
         point_uuid = point.uuid
         point_reg_length = point.reg_length
@@ -67,10 +68,15 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
                                 'point_data_endian': point_data_endian,
                                 'write_value': write_value
                                 })
+    if not zero_based:
+        reg -= 1
+        if modbus_debug_poll:
+            print(f"MODBUS DEBUG: device zero_based True. reg -= 1: {reg + 1} -> {reg}")
 
     fault = False
     fault_message = ""
     point_store_new = None
+
     try:
         val = None
         array = ""

@@ -18,25 +18,20 @@ modbus_device_all_attributes['tcp_ip'] = {
 modbus_device_all_attributes['tcp_port'] = {
     'type': int,
 }
-modbus_device_all_attributes['ping_point_type'] = {
-    'type': str,
-    'required': True,
-}
-modbus_device_all_attributes['ping_point_address'] = {
-    'type': int,
-    'required': True,
-}
-modbus_device_all_attributes['zero_mode'] = {
+# modbus_device_all_attributes['ping_point_type'] = {
+#     'type': str,
+# }
+# modbus_device_all_attributes['ping_point_address'] = {
+#     'type': int,
+# }
+modbus_device_all_attributes['zero_based'] = {
     'type': bool,
-    'required': True,
 }
 modbus_device_all_attributes['timeout'] = {
     'type': float,
-    'required': True,
 }
 modbus_device_all_attributes['timeout_global'] = {
     'type': bool,
-    'required': True,
 }
 
 modbus_device_return_attributes = deepcopy(device_return_attributes)
