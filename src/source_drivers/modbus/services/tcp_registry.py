@@ -1,6 +1,10 @@
+import logging
+
 from pymodbus.client.sync import ModbusTcpClient
 
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
+
+logger = logging.getLogger(__name__)
 
 
 class TcpRegistry:
@@ -24,11 +28,11 @@ class TcpRegistry:
             self.tcp_connections = {}
 
     def register(self):
-        print("Called TCP Poll registration")
+        logger.info("Called TCP Poll registration")
         network_service = TcpRegistry.get_instance()
         for network in ModbusNetworkModel.query.filter_by(type=ModbusType.TCP):
             network_service.initialize_network_connections(network)
-        print("Finished registration")
+        logger.info("Finished registration")
 
     def initialize_network_connections(self, network):
         for device in network.devices:
@@ -43,10 +47,12 @@ class TcpRegistry:
 
     def add_connection(self, host, port):
         key = TcpRegistry.create_connection_key(host, port)
+        logger.debug(f'Adding tcp_connection {key}')
         self.tcp_connections[key] = ModbusTcpClient(host, port)
 
     def remove_connection_if_exist(self, host, port):
         key = TcpRegistry.create_connection_key(host, port)
+        logger.debug(f'Removing tcp_connection {key}')
         tcp_connection = self.tcp_connections.get(key)
         if tcp_connection:
             tcp_connection.close()

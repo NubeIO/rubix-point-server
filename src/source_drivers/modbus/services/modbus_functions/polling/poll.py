@@ -1,8 +1,11 @@
+import logging
 import numbers
+
 from sqlalchemy.orm.exc import ObjectDeletedError
 
 from src.event_dispatcher import EventDispatcher
 from src.interfaces.point import HistoryType
+from src.loggers import modbus_debug_poll
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventTypes, Event
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
@@ -10,11 +13,12 @@ from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_digital_handle, \
     read_analog_handle, write_coil_handle, write_holding_registers_handle
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
+
+logger = logging.getLogger(modbus_debug_poll)
 
 
 def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: ModbusDeviceModel,
@@ -54,24 +58,22 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     except ObjectDeletedError:
         return
 
-    if modbus_debug_poll:
-        print("@@@ START MODBUS POLL !!!", {"device": device_address, 'reg': reg})
-        print("MODBUS DEBUG:", {'network': network,
-                                'device': device,
-                                'point': point_uuid,
-                                'transport': transport,
-                                'device_address': device_address,
-                                'reg': reg,
-                                'point_reg_length': point_reg_length,
-                                'point_type': point_type,
-                                'point_data_type': point_data_type,
-                                'point_data_endian': point_data_endian,
-                                'write_value': write_value
-                                })
+    logger.debug('@@@ START MODBUS POLL !!!')
+    logger.debug({'network': network,
+                  'device': device,
+                  'point': point_uuid,
+                  'transport': transport,
+                  'device_address': device_address,
+                  'reg': reg,
+                  'point_reg_length': point_reg_length,
+                  'point_type': point_type,
+                  'point_data_type': point_data_type,
+                  'point_data_endian': point_data_endian,
+                  'write_value': write_value
+                  })
     if not zero_based:
         reg -= 1
-        if modbus_debug_poll:
-            print(f"MODBUS DEBUG: device zero_based True. reg -= 1: {reg + 1} -> {reg}")
+        logger.debug(f"MODBUS DEBUG: device zero_based True. reg -= 1: {reg + 1} -> {reg}")
 
     fault = False
     fault_message = ""
@@ -125,8 +127,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         """
         Save modbus data in database
         """
-        if modbus_debug_poll:
-            print("MODBUS DEBUG: READ/WRITE WAS DONE", 'TRANSPORT TYPE & VAL', {"transport": transport, "val": val})
+        logger.debug(f'MODBUS DEBUG: READ/WRITE WAS DONE: {{"transport": {transport}, "val": {val}}}')
         if isinstance(val, numbers.Number):
             point_store_new = PointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
         else:
@@ -135,21 +136,17 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     except ObjectDeletedError:
         return
     except Exception as e:
-        if modbus_debug_poll:
-            print(f'MODBUS ERROR: in poll main function {str(e)}')
+        logger.debug(f'MODBUS ERROR: in poll main function {str(e)}')
         fault = True
         fault_message = str(e)
     if not point_store_new:
         point_store_new = PointStoreModel(fault=fault, fault_message=fault_message, point_uuid=point.uuid)
-    if modbus_debug_poll:
-        print("!!! END MODBUS POLL @@@")
+    logger.debug("!!! END MODBUS POLL @@@")
 
-    is_updated = False
     try:
         is_updated = point_store_new.update()
     except Exception:
         return
-
     if is_updated:
         EventDispatcher.dispatch_from_source(service, Event(EventTypes.POINT_COV, {
             'point': point,

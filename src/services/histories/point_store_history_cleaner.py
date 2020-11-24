@@ -1,7 +1,10 @@
+import logging
 import time
 
 import schedule
 from sqlalchemy import func, and_, or_
+
+logger = logging.getLogger(__name__)
 
 
 class PointStoreHistoryCleaner:
@@ -9,7 +12,7 @@ class PointStoreHistoryCleaner:
 
     @classmethod
     def register(cls):
-        print("MODBUS: Register PointStoreHistoryCleaner")
+        logger.info("Register PointStoreHistoryCleaner")
         # schedule.every(5).seconds.do(PointStoreCleaner.clean)  # for testing
         schedule.every(5).minutes.do(PointStoreHistoryCleaner.clean)  # schedules job for every hours
 
@@ -21,7 +24,7 @@ class PointStoreHistoryCleaner:
     def clean(cls):
         from src import db
         from src.models.point.model_point_store_history import PointStoreHistoryModel
-        print("MODBUS: Started PointStoreHistoryCleaner cleaning process...")
+        logger.info("Started PointStoreHistoryCleaner cleaning process...")
         time.sleep(10)
         partition_table = db.session.query(PointStoreHistoryModel, func.rank()
                                            .over(order_by=PointStoreHistoryModel.ts.desc(),
@@ -38,4 +41,4 @@ class PointStoreHistoryCleaner:
             db.session.query(PointStoreHistoryModel).filter(or_(*filter_param)).delete()
             db.session.commit()
 
-        print("MODBUS: Finished PointStoreCleaner cleaning process!")
+        logger.info("Finished PointStoreCleaner cleaning process!")

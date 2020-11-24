@@ -1,11 +1,14 @@
-from pymodbus.bit_write_message import WriteSingleCoilResponse, WriteMultipleCoilsResponse
+import logging
+
+from pymodbus.bit_write_message import WriteSingleCoilResponse
 from pymodbus.exceptions import ModbusIOException
+
+from src.loggers import modbus_debug
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
-from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_funcs
-from src.source_drivers.modbus.services.modbus_functions.function_utils import _set_data_length, \
-    _assertion, \
-    _mod_point_data_endian, \
-    _select_data_type, _builder_data_type
+from src.source_drivers.modbus.services.modbus_functions.function_utils import _set_data_length, _assertion, \
+    _mod_point_data_endian, _select_data_type, _builder_data_type
+
+logger = logging.getLogger(modbus_debug)
 
 
 def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
@@ -21,18 +24,8 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     :param func: modbus function type
     :return: tuple (val: any, array: list)
     """
-
-    reg_length = _set_data_length(data_type,
-                                  reg_length)
-    if modbus_debug_funcs:
-        print("MODBUS read_analogue",
-              {"unit": _unit,
-               "reg_start": reg_start,
-               "reg_length": reg_length,
-               "func": func
-               })
-    read = None
-
+    debug_log('read_analogue', _unit, func, reg_length, reg_start)
+    reg_length = _set_data_length(data_type, reg_length)
     if func == ModbusPointType.READ_HOLDING_REGISTERS:
         read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
     elif func == ModbusPointType.READ_INPUT_REGISTERS:
@@ -40,10 +33,8 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(read, client):  # checking for errors
-        if modbus_debug_funcs:
-            print("MODBUS _assertion", "read", read)
-
+    if not _assertion(read):  # checking for errors
+        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
         if data_type is not ModbusDataType.RAW:
             byteorder, word_order = _mod_point_data_endian(endian)
             val = _select_data_type(read, data_type, byteorder, word_order)
@@ -66,18 +57,9 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
     :param func: modbus function type
     :return: tuple (val: any, array: list)
     """
-
-    if modbus_debug_funcs:
-        print("MODBUS read_digital, check reg_length",
-              {'reg_start': reg_start,
-               'reg_length': reg_length,
-               '_unit': _unit,
-               'func': func})
-
+    debug_log('read_digital', _unit, func, reg_length, reg_start)
     data_type = 'digital'
     reg_length = _set_data_length(data_type, reg_length)
-    read = None
-
     if func == ModbusPointType.READ_COILS:
         read = client.read_coils(reg_start, reg_length, unit=_unit)
     elif func == ModbusPointType.READ_DISCRETE_INPUTS:
@@ -85,15 +67,8 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(read, client):  # checking for errors
-
-        if modbus_debug_funcs:
-            print("MODBUS DEBUG, func _assertion OK",
-                  {'reg_start': reg_start,
-                   'reg_length': reg_length,
-                   '_unit': _unit,
-                   'func': func})
-
+    if not _assertion(read):  # checking for errors
+        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
         for ind in range(len(read.bits)):
             read.bits[ind] = int(read.bits[ind])
         val = read.bits[0]
@@ -116,37 +91,22 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_val
     :param func: modbus function type
     :return: tuple (val: any, array: list)
     """
-
-    if modbus_debug_funcs:
-        print("MODBUS write_digital, check reg_length",
-              {'reg_start': reg_start,
-               'reg_length': reg_length,
-               '_unit': _unit,
-               'func': func})
-
+    debug_log('write_digital', _unit, func, reg_length, reg_start)
     data_type = 'digital'
-    reg_length = _set_data_length(data_type,
-                                  reg_length)
-    write = None
+    reg_length = _set_data_length(data_type, reg_length)
     if func == ModbusPointType.WRITE_COIL:
         write = client.write_coil(reg_start, write_value, unit=_unit)
     elif func == ModbusPointType.WRITE_COILS:
-        write = client.write_coils(reg_start, [write_value]*reg_length, unit=_unit)
+        write = client.write_coils(reg_start, [write_value] * reg_length, unit=_unit)
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(write, client):  # checking for errors
-
-        if modbus_debug_funcs:
-            print("MODBUS DEBUG _assertion OK",
-                  {'reg_start': reg_start,
-                   'reg_length': reg_length,
-                   '_unit': _unit,
-                   'func': func})
+    if not _assertion(write):  # checking for errors
+        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
         if isinstance(write, WriteSingleCoilResponse):
             return int(write.value), [int(write.value)]
         else:
-            return int(write_value), [int(write_value)]*reg_length
+            return int(write_value), [int(write_value)] * reg_length
     else:
         if not isinstance(write, ModbusIOException):
             write = ModbusIOException(write)
@@ -167,20 +127,10 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     :param func: modbus function type
     :return: tuple (val: any, array: list)
     """
-
-    reg_length = _set_data_length(data_type,
-                                  reg_length)
-
-    if modbus_debug_funcs:
-        print("MODBUS write_analogue, check reg_length",
-              {'reg_start': reg_start,
-               'reg_length': reg_length,
-               '_unit': _unit,
-               'func': func})
-
+    debug_log('write_analogue', _unit, func, reg_length, reg_start)
+    reg_length = _set_data_length(data_type, reg_length)
     byteorder, word_order = _mod_point_data_endian(endian)
     payload = _builder_data_type(write_value, data_type, byteorder, word_order)
-    write = None
     if func == ModbusPointType.WRITE_REGISTER:
         write = client.write_register(reg_start, payload, unit=_unit)
     elif func == ModbusPointType.WRITE_REGISTERS:
@@ -188,17 +138,20 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(write, client):  # checking for errors
-
-        if modbus_debug_funcs:
-            print("MODBUS DEBUG _assertion OK",
-                  {'reg_start': reg_start,
-                   'reg_length': reg_length,
-                   '_unit': _unit,
-                   'func': func})
-
+    if not _assertion(write):  # checking for errors
+        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
         return write_value, payload
     else:
         if not isinstance(write, ModbusIOException):
             write = ModbusIOException(write)
         raise write
+
+
+def debug_log(name, _unit, func, reg_length, reg_start):
+    logger.debug(
+        f'{name}, check reg_length {{"reg_start": {reg_start}, "reg_length": {reg_length}, "_unit:" {_unit}}}, "func": {func}}}')
+
+
+def assertion_ok_debug_log(_unit, func, reg_length, reg_start):
+    logger.debug(
+        f'_assertion OK {{"reg_start": {reg_start}, "reg_length": {reg_length}, "unit:" {_unit}}}, "func": {func}}}')

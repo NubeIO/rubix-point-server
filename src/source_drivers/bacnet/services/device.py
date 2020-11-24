@@ -26,7 +26,6 @@ class Device:
         dev_url = self.get_dev_url(device)
         bac_device_id = device.bac_device_id
         network = self.get_network(device)
-        print(network)
         if network:
             return network.read(f"{dev_url} device {bac_device_id} objectList")
         raise Exception("Network not found")
