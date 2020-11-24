@@ -1,21 +1,21 @@
 import numbers
 
-from src import TcpRegistry
+from src.event_dispatcher import EventDispatcher
 from src.interfaces.point import HistoryType
+from src.models.point.model_point_store import PointStoreModel
+from src.services.event_service_base import EventServiceBase, EventTypes, Event
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
-from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
+from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.services.modbus_functions.debug import modbus_debug_poll
 from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_input_registers_handle, \
     read_holding_registers_handle, \
     write_coil_handle, \
     read_coils_handle, write_registers_handle
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-from src.services.event_service_base import EventServiceBase, EventTypes, Event
-from src.event_dispatcher import EventDispatcher
+from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
 
 
 def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: ModbusDeviceModel,
@@ -69,7 +69,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         print("@@@ START MODBUS POLL !!!", {"device": mod_device_address, 'reg': reg})
         print("MODBUS DEBUG:", {'network': network,
                                 'device': device,
-                                'point':mod_point_uuid,
+                                'point': mod_point_uuid,
                                 'transport': transport,
                                 'mod_device_address': mod_device_address,
                                 'reg': reg,
