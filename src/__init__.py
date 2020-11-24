@@ -25,6 +25,7 @@ app.config['SQLALCHEMY_ECHO'] = False  # for print the sql query
 
 db = SQLAlchemy(app)
 from src import routes  # importing for creating all the schema on un-existing case
+from src.models.point.model_point_store_history import PointStoreHistoryModel  # this one doesn't exist on routes
 
 db.create_all()
 
