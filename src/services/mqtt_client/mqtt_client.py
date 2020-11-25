@@ -74,9 +74,13 @@ class MqttClient(EventServiceBase):
             MqttClient()
         return MqttClient.__instance
 
-    @staticmethod
-    def start():
-        MqttClient.get_instance()
+    def status(self):
+        if not MqttClient.__client:
+            return False
+        else:
+            return MqttClient.__client.is_connected()
+
+    def start(self):
         MqttClient.__client = mqtt.Client(MQTT_CLIENT_NAME)
         MqttClient.__client.on_connect = MqttClient.__on_connect
         MqttClient.__client.on_message = MqttClient.__on_message

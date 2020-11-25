@@ -1,7 +1,7 @@
 from flask_restful import Resource
 
 
-def getCurrentMemoryUsage():
+def get_current_memory_usage():
     """ Memory usage in kB """
     with open('/proc/self/status') as f:
         mem_usage = f.read().split('VmRSS:')[1].split('\n')[0][:-3]
@@ -10,5 +10,5 @@ def getCurrentMemoryUsage():
 
 class GetSystemMem(Resource):
     def get(self):
-        mem = getCurrentMemoryUsage()
+        mem = get_current_memory_usage()
         return {'networks': mem}
