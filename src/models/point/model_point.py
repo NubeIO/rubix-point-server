@@ -17,6 +17,7 @@ class PointModel(ModelBase):
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
+    cov_threshold = db.Column(db.Float, nullable=False, default=0)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     writable = db.Column(db.Boolean, nullable=False, default=False)
     write_value = db.Column(db.Float, nullable=True, default=None)  # TODO: more data types...

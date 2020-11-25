@@ -32,6 +32,9 @@ point_all_attributes = {
     'history_interval': {
         'type': int,
     },
+    'cov_threshold': {
+        'type': float,
+    },
     'write_value': {
         'type': float,
     }

@@ -55,6 +55,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         point_data_type = point.data_type
         point_data_endian = point.data_endian
         write_value = point.write_value
+        point_cov_threshold = point.cov_threshold
     except ObjectDeletedError:
         return
 
@@ -144,7 +145,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     logger.debug("!!! END MODBUS POLL @@@")
 
     try:
-        is_updated = point_store_new.update()
+        is_updated = point_store_new.update(point_cov_threshold)
     except Exception:
         return
     if is_updated:
