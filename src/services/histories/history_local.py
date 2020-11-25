@@ -1,14 +1,13 @@
-import time
 from datetime import datetime
 
 from src import db
+from src.event_dispatcher import EventDispatcher
 from src.interfaces.point import HistoryType
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
+from src.services.event_service_base import EventServiceBase, EventTypes
 from src.utils.model_utils import ModelUtils
-from src.services.event_service_base import EventServiceBase, EventTypes, Event, EventCallableBlocking
-from src.event_dispatcher import EventDispatcher
 
 SERVICE_NAME_HISTORIES_LOCAL = 'histories_local'
 

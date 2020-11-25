@@ -25,9 +25,18 @@ class WiresPlatModel(ModelBase):
         return f"Wires({self.uuid})"
 
     @classmethod
+    def find_one(cls):
+        return cls.query.first()
+
+    @classmethod
     def find_by_uuid(cls, wires_uuid):
         return cls.query.filter_by(uuid=wires_uuid).first()
 
     @classmethod
     def filter_by_uuid(cls, wires_uuid):
         return cls.query.filter_by(uuid=wires_uuid)
+
+    @classmethod
+    def delete_from_db(cls):
+        cls.query.delete()
+        db.session.commit()
