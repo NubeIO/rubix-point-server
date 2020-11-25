@@ -11,7 +11,7 @@ class NetworkResource(Resource):
                             type=network_all_attributes[attr].get('type'),
                             required=network_all_attributes[attr].get('required', False),
                             help=network_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @classmethod
     @marshal_with(network_all_fields)

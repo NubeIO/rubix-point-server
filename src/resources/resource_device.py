@@ -11,7 +11,7 @@ class DeviceResource(Resource):
                             type=device_all_attributes[attr]['type'],
                             required=device_all_attributes[attr].get('required', False),
                             help=device_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @classmethod
     @marshal_with(device_all_fields)

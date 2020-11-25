@@ -38,7 +38,7 @@ from src.models.point.model_point_store_history import PointStoreHistoryModel  #
 db.create_all()
 
 with app.app_context():
-    if not os.environ.get("WERKZEUG_RUN_MAIN"):
+    if os.environ.get("WERKZEUG_RUN_MAIN") or os.environ.get('SERVER_SOFTWARE'):
         from src.background import Background
 
         Background.run()

@@ -1,5 +1,6 @@
 from src import db
 from src.models.model_base import ModelBase
+from src.event_dispatcher import EventType
 
 
 class NetworkModel(ModelBase):
@@ -11,8 +12,6 @@ class NetworkModel(ModelBase):
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     devices = db.relationship('DeviceModel', cascade="all,delete", backref='network', lazy=True)
     driver = db.Column(db.String(80))
-    created_on = db.Column(db.DateTime, server_default=db.func.now())
-    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     __mapper_args__ = {
         'polymorphic_identity': 'network',
@@ -25,3 +24,9 @@ class NetworkModel(ModelBase):
     @classmethod
     def find_by_uuid(cls, network_uuid):
         return cls.query.filter_by(uuid=network_uuid).first()
+
+    def get_model_event_name(self) -> str:
+        return 'network'
+
+    def get_model_event_type(self) -> str:
+        return EventType.NETWORK_UPDATE

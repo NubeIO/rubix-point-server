@@ -13,7 +13,7 @@ class ModbusPointBase(Resource):
                             type=modbus_point_all_attributes[attr]['type'],
                             required=modbus_point_all_attributes[attr].get('required', False),
                             help=modbus_point_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @staticmethod
     def create_point_model_obj(uuid, data):
@@ -37,29 +37,36 @@ class ModbusPointBase(Resource):
 
     @staticmethod
     def validate_modbus_point_json(data: dict):
-        point_type = ModbusPointType[data.get('type')]
-        reg_length = int(data.get('reg_length'))
-        if point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_REGISTER \
-                or point_type == ModbusPointType.WRITE_COILS or point_type == ModbusPointType.WRITE_REGISTERS:
-            data['writable'] = True
-            if data.get('write_value') is None:
-                data['write_value'] = 0.0
+        # TODO: take point obj to allow for patch on existing fields that are missing from data
 
-            if reg_length > 1 and point_type == ModbusPointType.WRITE_COIL:
-                data['type'] = ModbusPointType.WRITE_COILS
-            elif reg_length == 1 and point_type == ModbusPointType.WRITE_COILS:
-                data['type'] = ModbusPointType.WRITE_COIL
-            elif reg_length > 1 and point_type == ModbusPointType.WRITE_REGISTER:
-                data['type'] = ModbusPointType.WRITE_REGISTERS
-            elif reg_length == 1 and point_type == ModbusPointType.WRITE_REGISTERS:
-                data['type'] = ModbusPointType.WRITE_REGISTER
+        point_type = data.get('type')
+        reg_length = data.get('reg_length')
 
-        data_type = ModbusDataType[data.get('data_type')]
-        if point_type == ModbusPointType.READ_DISCRETE_INPUTS or point_type == ModbusPointType.READ_COILS or \
-                point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_COILS:
-            data_type = ModbusDataType.DIGITAL
-            data['data_type'] = ModbusDataType.DIGITAL
-            data['data_round']
+        if point_type is not None and reg_length is not None:
+            point_type = ModbusPointType[data.get('type')]
+            reg_length = int(data.get('reg_length'))
+            if point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_REGISTER \
+                    or point_type == ModbusPointType.WRITE_COILS or point_type == ModbusPointType.WRITE_REGISTERS:
+                data['writable'] = True
+                if data.get('write_value') is None:
+                    data['write_value'] = 0.0
 
-        if data_type == ModbusDataType.FLOAT or data_type == ModbusDataType.INT32 or data_type == ModbusDataType.UINT32:
-            assert reg_length % 2 == 0, f'reg_length invalid for data_type {data_type}'
+                if reg_length > 1 and point_type == ModbusPointType.WRITE_COIL:
+                    data['type'] = ModbusPointType.WRITE_COILS
+                elif reg_length == 1 and point_type == ModbusPointType.WRITE_COILS:
+                    data['type'] = ModbusPointType.WRITE_COIL
+                elif reg_length > 1 and point_type == ModbusPointType.WRITE_REGISTER:
+                    data['type'] = ModbusPointType.WRITE_REGISTERS
+                elif reg_length == 1 and point_type == ModbusPointType.WRITE_REGISTERS:
+                    data['type'] = ModbusPointType.WRITE_REGISTER
+
+            data_type = ModbusDataType[data.get('data_type')]
+            if point_type is not None or data_type is not None:
+                if point_type == ModbusPointType.READ_DISCRETE_INPUTS or point_type == ModbusPointType.READ_COILS or \
+                        point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_COILS:
+                    data_type = ModbusDataType.DIGITAL
+                    data['data_type'] = ModbusDataType.DIGITAL
+
+                if data_type == ModbusDataType.FLOAT or data_type == ModbusDataType.INT32 or \
+                        data_type == ModbusDataType.UINT32:
+                    assert reg_length % 2 == 0, f'reg_length invalid for data_type {data_type}'

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from src.services.event_service_base import EventServiceBase, EventTypes, Event
+from src.services.event_service_base import EventServiceBase, EventType, Event
 
 
 class EventDispatcher:
@@ -16,7 +16,7 @@ class EventDispatcher:
 
     @classmethod
     def get_instance(cls) -> EventDispatcher:
-        if not cls._instance:
+        if cls._instance is None:
             cls()
         return cls._instance
 

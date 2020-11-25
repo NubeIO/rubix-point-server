@@ -11,7 +11,7 @@ class ModbusNetworkBase(Resource):
                             type=modbus_network_all_attributes[attr].get('type'),
                             required=modbus_network_all_attributes[attr].get('required', False),
                             help=modbus_network_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @staticmethod
     def create_network_model_obj(uuid, data):

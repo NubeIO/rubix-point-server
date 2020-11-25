@@ -5,6 +5,7 @@ from src import db
 from src.interfaces.point import HistoryType
 from src.models.model_base import ModelBase
 from src.models.point.model_point_store import PointStoreModel
+from src.event_dispatcher import EventType
 
 
 class PointModel(ModelBase):
@@ -20,8 +21,6 @@ class PointModel(ModelBase):
     writable = db.Column(db.Boolean, nullable=False, default=False)
     write_value = db.Column(db.Float, nullable=True, default=None)  # TODO: more data types...
     driver = db.Column(db.String(80))
-    created_on = db.Column(db.DateTime, server_default=db.func.now())
-    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',
@@ -55,3 +54,9 @@ class PointModel(ModelBase):
         if self.history_type == HistoryType.INTERVAL and value is not None and value < 1:
             raise ValueError("history_interval needs to be at least 1, default is 15 (in minutes)")
         return value
+
+    def get_model_event_name(self) -> str:
+        return 'point'
+
+    def get_model_event_type(self) -> str:
+        return EventType.POINT_UPDATE

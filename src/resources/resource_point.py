@@ -13,7 +13,7 @@ class PointResource(Resource):
                             type=point_all_attributes[attr]['type'],
                             required=point_all_attributes[attr].get('required', False),
                             help=point_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @classmethod
     @marshal_with(point_all_fields)

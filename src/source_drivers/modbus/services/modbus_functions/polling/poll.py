@@ -7,7 +7,7 @@ from src.event_dispatcher import EventDispatcher
 from src.interfaces.point import HistoryType
 from src.loggers import modbus_debug_poll
 from src.models.point.model_point_store import PointStoreModel
-from src.services.event_service_base import EventServiceBase, EventTypes, Event
+from src.services.event_service_base import EventServiceBase, EventType, Event
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
@@ -37,13 +37,13 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     if transport == ModbusType.RTU:
         connection = RtuRegistry.get_rtu_connections().get(RtuRegistry.create_connection_key_by_network(network))
         if not connection:
-            RtuRegistry.get_instance().add_network(network)
+            connection = RtuRegistry.get_instance().add_network(network)
     if transport == ModbusType.TCP:
         host = device.tcp_ip
         port = device.tcp_port
         connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
         if not connection:
-            TcpRegistry.get_instance().add_device(device)
+            connection = TcpRegistry.get_instance().add_device(device)
 
     try:
         device_address = device.address
@@ -148,7 +148,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     except Exception:
         return
     if is_updated:
-        EventDispatcher.dispatch_from_source(service, Event(EventTypes.POINT_COV, {
+        EventDispatcher.dispatch_from_source(service, Event(EventType.POINT_COV, {
             'point': point,
             'point_store': point_store_new,
             'device': device,

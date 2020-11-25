@@ -39,16 +39,18 @@ class TcpRegistry:
             if device.type is ModbusType.TCP:
                 self.add_device(device)
 
-    def add_device(self, device):
+    def add_device(self, device) -> ModbusTcpClient:
         host = device.tcp_ip
         port = device.tcp_port
         self.remove_connection_if_exist(host, port)
-        self.add_connection(host, port)
+        connection = self.add_connection(host, port)
+        return connection
 
-    def add_connection(self, host, port):
+    def add_connection(self, host, port) -> ModbusTcpClient:
         key = TcpRegistry.create_connection_key(host, port)
         logger.debug(f'Adding tcp_connection {key}')
         self.tcp_connections[key] = ModbusTcpClient(host, port)
+        return self.tcp_connections[key]
 
     def remove_connection_if_exist(self, host, port):
         key = TcpRegistry.create_connection_key(host, port)

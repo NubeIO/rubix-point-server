@@ -14,7 +14,10 @@ class ModbusPointSingular(ModbusPointBase):
 
     patch_parser = reqparse.RequestParser()
     for attr in modbus_point_all_attributes:
-        patch_parser.add_argument(attr, type=modbus_point_all_attributes[attr]['type'], required=False)
+        patch_parser.add_argument(attr,
+                                  type=modbus_point_all_attributes[attr]['type'],
+                                  required=False,
+                                  store_missing=False)
 
     @classmethod
     @marshal_with(modbus_point_all_fields)
@@ -48,8 +51,6 @@ class ModbusPointSingular(ModbusPointBase):
         if point is None:
             return cls.add_point(data, uuid)
         else:
-            device_uuid = data.device_uuid if data.device_uuid else point.device_uuid
-            cls.abort_if_device_does_not_exist(device_uuid)
             try:
                 cls.validate_modbus_point_json(data)
                 point.update(**data)
@@ -66,7 +67,7 @@ class ModbusPointSingular(ModbusPointBase):
 
 # from flask_restful import Resource
 # from src.event_dispatcher import EventDispatcher
-# from src.services.event_service_base import Event, EventCallableBlocking, EventTypes
+# from src.services.event_service_base import Event, EventCallableBlocking, EventType
 # from src.source_drivers.modbus.services.rtu_polling import RtuPolling
 #
 #

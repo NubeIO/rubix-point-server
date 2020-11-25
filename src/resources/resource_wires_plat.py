@@ -12,7 +12,7 @@ class WiresPlatResource(Resource):
                             type=wires_plat_all_attributes[attr]['type'],
                             required=wires_plat_all_attributes[attr].get('required', False),
                             help=wires_plat_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @classmethod
     @marshal_with(wires_plat_all_fields)

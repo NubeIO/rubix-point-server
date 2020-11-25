@@ -7,7 +7,7 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.utils.model_utils import ModelUtils
-from src.services.event_service_base import EventServiceBase, EventTypes, Event, EventCallableBlocking
+from src.services.event_service_base import EventServiceBase, EventType, Event, EventCallableBlocking
 from src.event_dispatcher import EventDispatcher
 
 SERVICE_NAME_HISTORIES_LOCAL = 'histories_local'
@@ -29,8 +29,8 @@ class HistoryLocal(EventServiceBase):
             raise Exception("HISTORY SYNC: HistoryInterval class is a singleton class!")
         else:
             super().__init__()
-            self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
-            # self.supported_events[EventTypes.POINT_COV] = True
+            self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
+            # self.supported_events[EventType.POINT_COV] = True
             EventDispatcher.add_service(self)
             HistoryLocal._instance = self
 
@@ -44,7 +44,7 @@ class HistoryLocal(EventServiceBase):
         while True:
             self._set_internal_service_timeout(self.SYNC_PERIOD)
             event = self._event_queue.get()
-            if event.event_type is not EventTypes.INTERNAL_SERVICE_TIMEOUT:
+            if event.event_type is not EventType.INTERNAL_SERVICE_TIMEOUT:
                 raise Exception('History Local: invalid event received somehow... should be impossible')
             for network in NetworkModel.query.all():
                 for device in network.devices:

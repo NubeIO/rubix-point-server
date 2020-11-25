@@ -34,7 +34,7 @@ class RtuRegistry:
             network_service.add_network(network)
         logger.info("Finished registration")
 
-    def add_network(self, network):
+    def add_network(self, network) -> SerialClient:
         port = network.rtu_port
         baudrate = network.rtu_speed
         stopbits = network.rtu_stop_bits
@@ -43,10 +43,11 @@ class RtuRegistry:
         timeout = network.timeout
 
         self.remove_connection_if_exist(port, baudrate, stopbits, parity, bytesize, timeout)
-        self.add_connection(port, baudrate, stopbits, parity, bytesize, timeout)
+        connection = self.add_connection(port, baudrate, stopbits, parity, bytesize, timeout)
+        return connection
 
     # TODO retries=0, retry_on_empty=False fix these up
-    def add_connection(self, port, baudrate, stopbits, parity, bytesize, timeout):
+    def add_connection(self, port, baudrate, stopbits, parity, bytesize, timeout) -> SerialClient:
         method = 'rtu'
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)
         logger.debug(f'Adding rtu_connection {key}')
@@ -54,6 +55,7 @@ class RtuRegistry:
                                                  parity=parity, bytesize=bytesize, timeout=timeout, retries=0,
                                                  retry_on_empty=False)
         self.rtu_connections[key].connect()
+        return self.rtu_connections[key]
 
     def remove_connection_if_exist(self, port, baudrate, stopbits, parity, bytesize, timeout):
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)
