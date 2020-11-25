@@ -97,7 +97,8 @@ class MqttClient(EventServiceBase):
             except Exception as e:
                 # catching so can set __client to None so publish_cov doesn't stack messages forever
                 MqttClient.__client = None
-                raise e
+                logger.error(str(e))
+                return
         MqttClient.__client.loop_forever()
 
     @staticmethod

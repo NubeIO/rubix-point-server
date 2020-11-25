@@ -22,12 +22,8 @@ class DeviceModel(ModelBase):
     def __repr__(self):
         return f"Device(device_uuid = {self.device_uuid})"
 
-    @classmethod
-    def find_by_uuid(cls, device_uuid):
-        return cls.query.filter_by(uuid=device_uuid).first()
-
     def get_model_event_name(self) -> str:
         return 'device'
 
-    def get_model_event_type(self) -> str:
+    def get_model_event_type(self) -> EventType:
         return EventType.DEVICE_UPDATE

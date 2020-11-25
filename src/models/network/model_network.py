@@ -21,12 +21,8 @@ class NetworkModel(ModelBase):
     def __repr__(self):
         return f"Network(uuid = {self.uuid})"
 
-    @classmethod
-    def find_by_uuid(cls, network_uuid):
-        return cls.query.filter_by(uuid=network_uuid).first()
-
     def get_model_event_name(self) -> str:
         return 'network'
 
-    def get_model_event_type(self) -> str:
+    def get_model_event_type(self) -> EventType:
         return EventType.NETWORK_UPDATE

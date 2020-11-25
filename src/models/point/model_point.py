@@ -31,10 +31,6 @@ class PointModel(ModelBase):
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
 
-    @classmethod
-    def find_by_uuid(cls, uuid):
-        return cls.query.filter_by(uuid=uuid).first()
-
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         db.session.add(self)
@@ -59,5 +55,5 @@ class PointModel(ModelBase):
     def get_model_event_name(self) -> str:
         return 'point'
 
-    def get_model_event_type(self) -> str:
+    def get_model_event_type(self) -> EventType:
         return EventType.POINT_UPDATE

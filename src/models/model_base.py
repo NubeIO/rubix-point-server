@@ -17,6 +17,14 @@ class ModelBase(db.Model):
     def updated_on(cls):
         return db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
+    @classmethod
+    def find_by_uuid(cls, device_uuid):
+        return cls.query.filter_by(uuid=device_uuid).first()
+
+    @classmethod
+    def find_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

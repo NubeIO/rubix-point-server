@@ -60,6 +60,12 @@ class ModbusPointBase(Resource):
                 elif reg_length == 1 and point_type == ModbusPointType.WRITE_REGISTERS:
                     data['type'] = ModbusPointType.WRITE_REGISTER
 
+            elif point_type == ModbusPointType.READ_COILS or point_type == ModbusPointType.READ_DISCRETE_INPUTS or \
+                    point_type == ModbusPointType.READ_HOLDING_REGISTERS or \
+                    point_type == ModbusPointType.READ_INPUT_REGISTERS:
+                data['writable'] = False
+                data['write_value'] = None
+
             data_type = ModbusDataType[data.get('data_type')]
             if point_type is not None or data_type is not None:
                 if point_type == ModbusPointType.READ_DISCRETE_INPUTS or point_type == ModbusPointType.READ_COILS or \
