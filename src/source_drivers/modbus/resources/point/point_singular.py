@@ -49,7 +49,7 @@ class ModbusPointSingular(ModbusPointBase):
         data = ModbusPointSingular.patch_parser.parse_args()
         point = ModbusPointModel.find_by_uuid(uuid)
         if point is None:
-            return cls.add_point(data, uuid)
+            abort(404, message=f'Modbus Point not found')
         else:
             try:
                 cls.validate_modbus_point_json(data)
