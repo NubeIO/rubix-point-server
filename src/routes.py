@@ -16,7 +16,7 @@ from src.source_drivers.modbus.resources.point.point_singular import ModbusPoint
 from src.source_drivers.modbus.resources.point.point_stores import ModbusPointPluralPointStore, ModbusPointStore, \
     ModbusDevicePointPluralPointStore
 from src.system.resources.memory import GetSystemMem
-from src.system.resources.systemctl_services import SystemctlStatus, SystemctlCommand
+from src.system.resources.ping import Ping
 
 api_prefix = 'api'
 api = Api(app)
@@ -58,5 +58,4 @@ api.add_resource(WiresPlatResource, f'/{wires_api_prefix}/plat')
 
 system_api_prefix = f'{api_prefix}/system'
 api.add_resource(GetSystemMem, f'/{system_api_prefix}/memory')
-api.add_resource(SystemctlCommand, f'/{system_api_prefix}/service')
-api.add_resource(SystemctlStatus, f'/{system_api_prefix}/service/<string:service>')
+api.add_resource(Ping, f'/{system_api_prefix}/ping')
