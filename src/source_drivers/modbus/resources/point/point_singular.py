@@ -36,7 +36,6 @@ class ModbusPointSingular(ModbusPointBase):
             return cls.add_point(data, uuid)
         else:
             try:
-                # cls.validate_modbus_point_json(data)
                 point.update(**data)
                 return ModbusPointModel.find_by_uuid(uuid)
             except Exception as e:
@@ -51,7 +50,6 @@ class ModbusPointSingular(ModbusPointBase):
             abort(404, message=f'Modbus Point not found')
         else:
             try:
-                # cls.validate_modbus_point_json(data)
                 point.update(**data)
                 return ModbusPointModel.find_by_uuid(uuid)
             except Exception as e:
