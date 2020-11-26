@@ -29,6 +29,9 @@ class InfluxDB(HistoryBinding):
             self.username = config.get('influx_db', 'username', fallback='')
             self.password = config.get('influx_db', 'password', fallback='')
             self.verify_ssl = config.getboolean('influx_db', 'verify_ssl', fallback=False)
+            self.timeout = config.getint('influx_db', 'timeout', fallback=None)
+            self.retries = config.getint('influx_db', 'retries', fallback=3)
+            self.path = config.get('influx_db', 'path', fallback=None)
             self.measurement = config.get('influx_db', 'measurement', fallback='history')
             self.push_period_minutes = config.getint('influx_db', 'timer', fallback=1)
             InfluxDB.__instance = self
@@ -50,17 +53,20 @@ class InfluxDB(HistoryBinding):
                 InfluxDB.__is_connected = True
             except Exception as e:
                 InfluxDB.__is_connected = False
-                logger.error(str(e))
+                logger.error(f'Syncing Error: {str(e)}')
 
         return inner
 
     def register(self):
-        logger.info("Register InfluxDB")
-        # schedule.every(5).seconds.do(self.sync)  # for testing
-        schedule.every(self.push_period_minutes).minutes.do(self.sync)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
+        if InfluxDB.__is_connected:
+            logger.info("Registering InfluxDB for scheduler job")
+            # schedule.every(5).seconds.do(self.sync)  # for testing
+            schedule.every(self.push_period_minutes).minutes.do(self.sync)
+            while True:
+                schedule.run_pending()
+                time.sleep(1)
+        else:
+            logger.error("InfluxDB can't be registered with not working client details")
 
     def connect(self):
         if InfluxDB.__client:
@@ -72,9 +78,15 @@ class InfluxDB(HistoryBinding):
                                                username=self.username,
                                                password=self.password,
                                                database=self.database,
-                                               verify_ssl=self.verify_ssl)
+                                               verify_ssl=self.verify_ssl,
+                                               timeout=self.timeout,
+                                               retries=self.retries,
+                                               path=self.path)
+            InfluxDB.__client.ping()
+            InfluxDB.__is_connected = True
         except Exception as e:
-            logger.error(str(e))
+            InfluxDB.__is_connected = False
+            logger.error(f'Connection Error: {str(e)}')
 
     @exception_handling_decorator
     def sync(self):
