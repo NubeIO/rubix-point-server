@@ -5,6 +5,7 @@ from datetime import datetime
 from flask_restful import Resource
 
 from src.ini_config import config
+from src.services.histories.sync.influxdb import InfluxDB
 from src.services.mqtt_client.mqtt_client import MqttClient
 
 start_time = time.time()
@@ -31,15 +32,20 @@ class Ping(Resource):
         enable_rtu = config.getboolean('settings', 'enable_rtu', fallback=False)
         enable_histories = config.getboolean('settings', 'enable_histories', fallback=False)
         enable_cleaner = config.getboolean('settings', 'enable_cleaner', fallback=False)
+        enable_history_sync = config.getboolean('settings', 'enable_history_sync', fallback=False)
         return {
             'up_time_date': up_time_date,
             'up_min': up_min,
             'up_hour': up_hour,
             'deployment_mode': deployment_mode,
-            'settings': {'enable_mqtt': enable_mqtt,
-                         'enable_tcp': enable_tcp,
-                         'enable_rtu': enable_rtu,
-                         'enable_histories': enable_histories,
-                         'enable_cleaner': enable_cleaner},
-            'mqtt_status': MqttClient.get_instance().status()
+            'settings': {
+                'enable_mqtt': enable_mqtt,
+                'enable_tcp': enable_tcp,
+                'enable_rtu': enable_rtu,
+                'enable_histories': enable_histories,
+                'enable_cleaner': enable_cleaner,
+                'enable_history_sync': enable_history_sync,
+            },
+            'mqtt_status': MqttClient.get_instance().status(),
+            'influx_db_status': InfluxDB.get_instance().status()
         }

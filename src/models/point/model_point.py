@@ -1,5 +1,5 @@
-from sqlalchemy.orm import validates
 from sqlalchemy import and_
+from sqlalchemy.orm import validates
 
 from src import db
 from src.interfaces.point import HistoryType
@@ -19,6 +19,7 @@ class PointModel(ModelBase):
     history_interval = db.Column(db.Integer, nullable=False, default=15)
     cov_threshold = db.Column(db.Float, nullable=False, default=0)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
+    point_store_history = db.relationship('PointStoreHistoryModel', backref='point')
     writable = db.Column(db.Boolean, nullable=False, default=False)
     write_value = db.Column(db.Float, nullable=True, default=None)  # TODO: more data types...
     driver = db.Column(db.String(80))
