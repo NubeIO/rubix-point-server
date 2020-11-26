@@ -2,7 +2,7 @@ import logging
 
 from src import db
 from src.event_dispatcher import EventDispatcher
-from src.services.event_service_base import EventServiceBase, EventTypes
+from src.services.event_service_base import EventServiceBase, EventType
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
@@ -30,8 +30,8 @@ class TcpPolling(EventServiceBase):
             raise Exception("TcpPolling class is a singleton class!")
         else:
             super().__init__()
-            self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
-            self.supported_events[EventTypes.CALLABLE] = True
+            self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
+            self.supported_events[EventType.CALLABLE] = True
             EventDispatcher.add_source_driver(self)
             TcpPolling._instance = self
 
@@ -40,7 +40,7 @@ class TcpPolling(EventServiceBase):
         logger.info("TCP Polling started")
         while True:
             event = self._event_queue.get()
-            if event.event_type is EventTypes.INTERNAL_SERVICE_TIMEOUT:
+            if event.event_type is EventType.INTERNAL_SERVICE_TIMEOUT:
                 self.__poll()
                 self._set_internal_service_timeout(TcpPolling._polling_period)
             else:

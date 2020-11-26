@@ -1,5 +1,6 @@
 from src import db
 from src.models.model_base import ModelBase
+from src.event_dispatcher import EventType
 
 
 class DeviceModel(ModelBase):
@@ -12,8 +13,6 @@ class DeviceModel(ModelBase):
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     points = db.relationship('PointModel', cascade="all,delete", backref='device', lazy=True)
     driver = db.Column(db.String(80))
-    created_on = db.Column(db.DateTime, server_default=db.func.now())
-    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     __mapper_args__ = {
         'polymorphic_identity': 'device',
@@ -23,6 +22,8 @@ class DeviceModel(ModelBase):
     def __repr__(self):
         return f"Device(device_uuid = {self.device_uuid})"
 
-    @classmethod
-    def find_by_uuid(cls, device_uuid):
-        return cls.query.filter_by(uuid=device_uuid).first()
+    def get_model_event_name(self) -> str:
+        return 'device'
+
+    def get_model_event_type(self) -> EventType:
+        return EventType.DEVICE_UPDATE

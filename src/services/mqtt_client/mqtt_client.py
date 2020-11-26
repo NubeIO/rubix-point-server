@@ -6,9 +6,10 @@ import paho.mqtt.client as mqtt
 
 from src.event_dispatcher import EventDispatcher
 from src.ini_config import config
+from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
-from src.services.event_service_base import EventServiceBase, Event, EventTypes
+from src.services.event_service_base import EventServiceBase, Event, EventType
 
 SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
@@ -17,6 +18,13 @@ MQTT_TOPIC = 'rubix/points'
 MQTT_TOPIC_MIN = len(MQTT_TOPIC.split('/')) + 1
 MQTT_TOPIC_ALL = 'all'
 MQTT_TOPIC_DRIVER = 'driver'
+MQTT_TOPIC_UPDATE = 'update'
+MQTT_TOPIC_UPDATE_POINT = 'point'
+MQTT_TOPIC_UPDATE_DEVICE = 'device'
+MQTT_TOPIC_UPDATE_NETWORK = 'network'
+MQTT_TOPIC_COV = 'cov'
+MQTT_TOPIC_COV_ALL = 'all'
+MQTT_TOPIC_COV_VALUE = 'value'
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +61,10 @@ class MqttClient(EventServiceBase):
             MqttClient.__attempt_reconnect_secs = config.getint('mqtt', 'attempt_reconnect_secs', fallback=5)
             MqttClient.__debug = config.getboolean('mqtt', 'debug', fallback=False)
 
-            self.supported_events[EventTypes.POINT_COV] = True
+            self.supported_events[EventType.POINT_COV] = True
+            self.supported_events[EventType.POINT_UPDATE] = True
+            self.supported_events[EventType.DEVICE_UPDATE] = True
+            self.supported_events[EventType.NETWORK_UPDATE] = True
             EventDispatcher.add_service(self)
             MqttClient.__instance = self
 
@@ -90,7 +101,8 @@ class MqttClient(EventServiceBase):
             except Exception as e:
                 # catching so can set __client to None so publish_cov doesn't stack messages forever
                 MqttClient.__client = None
-                raise e
+                logger.error(str(e))
+                return
         MqttClient.__client.loop_forever()
 
     @staticmethod
@@ -100,9 +112,10 @@ class MqttClient(EventServiceBase):
             return
         if point is None or point_store is None or device_uuid is None or network_uuid is None \
                 or source_driver is None or network_name is None or device_name is None:
-            raise Exception('Bad MQTT publish arguments')
-        topic = f'{MQTT_TOPIC}/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}' \
-                f'/{point.uuid}/{point.name}'
+            raise Exception('Invalid MQTT publish arguments')
+
+        topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_COV}/{MQTT_TOPIC_COV_ALL}/{point.uuid}/{point.name}/' \
+                f'{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}'
 
         payload = {
             'value': point_store.value,
@@ -111,12 +124,26 @@ class MqttClient(EventServiceBase):
             'fault_message': point_store.fault_message,
         }
         if MqttClient.__debug:
-            logger.info(f'MQTT PUB: {topic}/data > {payload}')
-        MqttClient.__client.publish(f'{topic}/data', json.dumps(payload), MqttClient.__qos, MqttClient.__retain)
+            logger.info(f'MQTT PUB: {topic} > {payload}')
+        MqttClient.__client.publish(topic, json.dumps(payload), MqttClient.__qos, MqttClient.__retain)
         if MqttClient.__publish_value and not point_store.fault:
+            topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
             if MqttClient.__debug:
-                logger.info(f'MQTT PUB: {topic}/value > {point_store.value}')
-            MqttClient.__client.publish(f'{topic}/value', point_store.value, MqttClient.__qos, MqttClient.__retain)
+                logger.info(f'MQTT PUB: {topic} > {point_store.value}')
+            MqttClient.__client.publish(topic, point_store.value, MqttClient.__qos, MqttClient.__retain)
+
+    @staticmethod
+    def publish_update(model: ModelBase, updates: dict):
+        if MqttClient.__client is None:
+            return
+        if model is None or updates is None or len(updates) == 0:
+            raise Exception('Invalid MQTT publish arguments')
+
+        topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_UPDATE}/{model.get_model_event_name()}/{model.uuid}'
+
+        if MqttClient.__debug:
+            logger.info(f'MQTT PUB: {topic} > {updates}')
+        MqttClient.__client.publish(topic, json.dumps(updates), MqttClient.__qos, MqttClient.__retain)
 
     @staticmethod
     def __on_connect(client, userdata, flags, reason_code, properties=None):
@@ -155,10 +182,14 @@ class MqttClient(EventServiceBase):
         pass
 
     def _run_event(self, event: Event):
-        if event.event_type == EventTypes.POINT_COV:
-            if event.data is not None:
-                # TODO: maybe data checking or leave up to developer to speed up?
-                MqttClient.publish_cov(event.data.get('point'), event.data.get('point_store'),
-                                       event.data.get('device').uuid, event.data.get('device').name,
-                                       event.data.get('network').uuid, event.data.get('network').name,
-                                       event.data.get('source_driver'))
+        if event.data is None:
+            return
+
+        if event.event_type == EventType.POINT_COV:
+            MqttClient.publish_cov(event.data.get('point'), event.data.get('point_store'),
+                                   event.data.get('device').uuid, event.data.get('device').name,
+                                   event.data.get('network').uuid, event.data.get('network').name,
+                                   event.data.get('source_driver'))
+
+        elif event.event_type == EventType.POINT_UPDATE or EventType.DEVICE_UPDATE or EventType.NETWORK_UPDATE:
+            MqttClient.publish_update(event.data.get('model'), event.data.get('updates'))

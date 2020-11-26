@@ -11,7 +11,7 @@ class DeviceResource(Resource):
                             type=device_all_attributes[attr]['type'],
                             required=device_all_attributes[attr].get('required', False),
                             help=device_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @classmethod
     @marshal_with(device_all_fields)
@@ -23,8 +23,18 @@ class DeviceResource(Resource):
         return device
 
 
+class DeviceResourceByName(Resource):
+    @classmethod
+    @marshal_with(device_all_fields)
+    def get(cls, name):
+        device = DeviceModel.find_by_name(name)
+        if not device:
+            abort(404, message='Device not found')
+        return device
+
+
 class DeviceResourceList(Resource):
     @classmethod
-    @marshal_with(device_all_fields, envelope="devices")
+    @marshal_with(device_all_fields)
     def get(cls):
         return DeviceModel.query.all()

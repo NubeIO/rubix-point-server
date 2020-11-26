@@ -5,6 +5,7 @@ from src import db
 from src.interfaces.point import HistoryType
 from src.models.model_base import ModelBase
 from src.models.point.model_point_store import PointStoreModel
+from src.event_dispatcher import EventType
 
 
 class PointModel(ModelBase):
@@ -16,13 +17,12 @@ class PointModel(ModelBase):
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
+    cov_threshold = db.Column(db.Float, nullable=False, default=0)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point')
     writable = db.Column(db.Boolean, nullable=False, default=False)
     write_value = db.Column(db.Float, nullable=True, default=None)  # TODO: more data types...
     driver = db.Column(db.String(80))
-    created_on = db.Column(db.DateTime, server_default=db.func.now())
-    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',
@@ -31,10 +31,6 @@ class PointModel(ModelBase):
 
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
-
-    @classmethod
-    def find_by_uuid(cls, uuid):
-        return cls.query.filter_by(uuid=uuid).first()
 
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
@@ -56,3 +52,9 @@ class PointModel(ModelBase):
         if self.history_type == HistoryType.INTERVAL and value is not None and value < 1:
             raise ValueError("history_interval needs to be at least 1, default is 15 (in minutes)")
         return value
+
+    def get_model_event_name(self) -> str:
+        return 'point'
+
+    def get_model_event_type(self) -> EventType:
+        return EventType.POINT_UPDATE
