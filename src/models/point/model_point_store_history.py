@@ -22,5 +22,9 @@ class PointStoreHistoryModel(db.Model):
         db.session.add(self)
 
     @classmethod
+    def get_all_after(cls, _id):
+        return cls.query.filter(cls.id > _id).all()
+
+    @classmethod
     def get_latest(cls, point_uuid):
         return cls.query.filter_by(point_uuid=point_uuid).order_by(cls.__table__.c.ts.desc()).first()

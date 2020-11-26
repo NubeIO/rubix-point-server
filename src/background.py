@@ -4,6 +4,7 @@ from threading import Thread
 from src.ini_config import config
 from src.services.histories.history_local import HistoryLocal
 from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
+from src.services.histories.sync.influxdb import InfluxDB
 from src.services.mqtt_client.mqtt_client import MqttClient
 from src.source_drivers.modbus.services.rtu_polling import RtuPolling
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
@@ -37,3 +38,7 @@ class Background:
         if config.getboolean('settings', 'enable_cleaner', fallback=False):
             point_cleaner_thread = Thread(target=PointStoreHistoryCleaner.register, daemon=True)
             point_cleaner_thread.start()
+
+        if config.getboolean('settings', 'enable_history_sync', fallback=False):
+            history_sync_thread = Thread(target=InfluxDB.get_instance().register)
+            history_sync_thread.start()

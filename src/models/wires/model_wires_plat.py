@@ -18,11 +18,13 @@ class WiresPlatModel(ModelBase):
     site_country = db.Column(db.String(80), nullable=False)
     site_lat = db.Column(db.String(80), nullable=False)
     site_lon = db.Column(db.String(80), nullable=False)
-    created_on = db.Column(db.DateTime, server_default=db.func.now())
-    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
         return f"Wires({self.uuid})"
+
+    @classmethod
+    def find_one(cls):
+        return cls.query.first()
 
     @classmethod
     def find_by_uuid(cls, wires_uuid):
@@ -31,3 +33,8 @@ class WiresPlatModel(ModelBase):
     @classmethod
     def filter_by_uuid(cls, wires_uuid):
         return cls.query.filter_by(uuid=wires_uuid)
+
+    @classmethod
+    def delete_from_db(cls):
+        cls.query.delete()
+        db.session.commit()
