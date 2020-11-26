@@ -9,7 +9,10 @@ from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import
 class ModbusDeviceSingular(ModbusDeviceBase):
     patch_parser = reqparse.RequestParser()
     for attr in modbus_device_all_attributes:
-        patch_parser.add_argument(attr, type=modbus_device_all_attributes[attr]['type'], required=False)
+        patch_parser.add_argument(attr,
+                                  type=modbus_device_all_attributes[attr]['type'],
+                                  required=False,
+                                  store_missing=False)
 
     @classmethod
     @marshal_with(modbus_device_all_fields)
@@ -42,9 +45,6 @@ class ModbusDeviceSingular(ModbusDeviceBase):
         if device is None:
             abort(404, message=f"Does not exist {uuid}")
         else:
-            network_uuid = data.network_uuid if data.network_uuid else device.network_uuid
-            type_ = data.type if data.type else device.type
-            cls.abort_if_network_does_not_exist_and_type_mismatch(network_uuid, type_)
             try:
                 device.update(**data)
                 return ModbusDeviceModel.find_by_uuid(uuid)

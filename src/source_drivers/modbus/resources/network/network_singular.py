@@ -9,7 +9,10 @@ from src.source_drivers.modbus.resources.rest_schema.schema_modbus_network impor
 class ModbusNetworkSingular(ModbusNetworkBase):
     patch_parser = reqparse.RequestParser()
     for attr in modbus_network_all_attributes:
-        patch_parser.add_argument(attr, type=modbus_network_all_attributes[attr].get('type'), required=False)
+        patch_parser.add_argument(attr,
+                                  type=modbus_network_all_attributes[attr].get('type'),
+                                  required=False,
+                                  store_missing=False)
 
     @classmethod
     @marshal_with(modbus_network_all_fields)

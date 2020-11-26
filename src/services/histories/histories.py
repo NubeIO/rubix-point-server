@@ -3,7 +3,7 @@ from src import db
 from src.models.network.model_network import NetworkModel
 from src.models.device.model_device import DeviceModel
 from src.models.point.model_point import PointModel
-from src.services.event_service_base import EventServiceBase, EventTypes, Event
+from src.services.event_service_base import EventServiceBase, EventType, Event
 from src.event_dispatcher import EventDispatcher
 from influxdb import InfluxDBClient
 
@@ -26,8 +26,8 @@ class Histories(EventServiceBase):
         else:
             super().__init__()
             Histories._instance = self
-            self.supported_events[EventTypes.INTERNAL_SERVICE_TIMEOUT] = True
-            # self.supported_events[EventTypes.POINT_COV] = True
+            self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
+            # self.supported_events[EventType.POINT_COV] = True
         # TODO: create bindings
 
     @staticmethod
@@ -45,7 +45,7 @@ class Histories(EventServiceBase):
         while True:
             event = self._event_queue.get()
             print('HISTORIES: event', event.event_type)
-            if event.event_type is EventTypes.INTERNAL_SERVICE_TIMEOUT:
+            if event.event_type is EventType.INTERNAL_SERVICE_TIMEOUT:
                 self._set_internal_service_timeout(self._push_period_minutes * 3)
 
             # self.connect_binding()

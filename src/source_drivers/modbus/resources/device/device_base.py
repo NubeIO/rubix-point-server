@@ -12,7 +12,7 @@ class ModbusDeviceBase(Resource):
                             type=modbus_device_all_attributes[attr]['type'],
                             required=modbus_device_all_attributes[attr].get('required', False),
                             help=modbus_device_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @staticmethod
     def create_device_model_obj(uuid, data):

@@ -1,9 +1,9 @@
 from flask_restful import Api
 
 from src import app
-from src.resources.resource_device import DeviceResource, DeviceResourceList
-from src.resources.resource_network import NetworkResource, NetworkResourceList
-from src.resources.resource_point import PointResource, PointResourceList
+from src.resources.resource_device import DeviceResource, DeviceResourceByName, DeviceResourceList
+from src.resources.resource_network import NetworkResource, NetworkResourceByName, NetworkResourceList
+from src.resources.resource_point import PointResource, PointResourceByName, PointResourceList
 from src.resources.resource_wires_plat import WiresPlatResource
 # from src.source_drivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
 # from src.source_drivers.bacnet.resources.network import Network, NetworkList, NetworksIds
@@ -22,11 +22,14 @@ api_prefix = 'api'
 api = Api(app)
 
 # common parent inheritance endpoints
-api.add_resource(NetworkResource, f'/{api_prefix}/networks/<string:uuid>')
+api.add_resource(NetworkResource, f'/{api_prefix}/networks/uuid/<string:uuid>')
+api.add_resource(NetworkResourceByName, f'/{api_prefix}/networks/name/<string:name>')
 api.add_resource(NetworkResourceList, f'/{api_prefix}/networks')
-api.add_resource(DeviceResource, f'/{api_prefix}/devices/<string:uuid>')
+api.add_resource(DeviceResource, f'/{api_prefix}/devices/uuid/<string:uuid>')
+api.add_resource(DeviceResourceByName, f'/{api_prefix}/devices/name/<string:name>')
 api.add_resource(DeviceResourceList, f'/{api_prefix}/devices')
-api.add_resource(PointResource, f'/{api_prefix}/points/<string:uuid>')
+api.add_resource(PointResource, f'/{api_prefix}/points/uuid/<string:uuid>')
+api.add_resource(PointResourceByName, f'/{api_prefix}/points/name/<string:name>')
 api.add_resource(PointResourceList, f'/{api_prefix}/points')
 # api.add_resource(PointReadOnlyResourceList, f'/{api_prefix}/points/readonly')
 # api.add_resource(PointWriteableResourceList, f'/{api_prefix}/points/writable')

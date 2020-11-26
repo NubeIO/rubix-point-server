@@ -13,7 +13,7 @@ class PointResource(Resource):
                             type=point_all_attributes[attr]['type'],
                             required=point_all_attributes[attr].get('required', False),
                             help=point_all_attributes[attr].get('help', None),
-                            )
+                            store_missing=False)
 
     @classmethod
     @marshal_with(point_all_fields)
@@ -31,16 +31,27 @@ class PointResource(Resource):
         return '', 204
 
 
+class PointResourceByName(Resource):
+    @classmethod
+    @marshal_with(point_all_fields)
+    def get(cls, name):
+        point = PointModel.find_by_name(name)
+        if not point:
+            abort(404, message='Point not found')
+        return point
+
+
 class PointResourceList(Resource):
     @classmethod
-    @marshal_with(point_all_fields, envelope="points")
+    @marshal_with(point_all_fields)
     def get(cls):
         result = PointModel.query.all()
         return result
 
+
 # class PointWriteableResourceList(Resource):
 #     @classmethod
-#     @marshal_with(point_all_fields, envelope="points_writable")
+#     @marshal_with(point_all_fields)
 #     def get(cls):
 #         result = PointModelWritable.query.all()
 #         return result
