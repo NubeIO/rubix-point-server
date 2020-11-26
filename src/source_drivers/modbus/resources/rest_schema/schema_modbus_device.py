@@ -4,10 +4,6 @@ from src.resources.rest_schema.schema_device import *
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields
 
 modbus_device_all_attributes = deepcopy(device_all_attributes)
-modbus_device_all_attributes['type'] = {
-    'type': str,
-    'required': True,
-}
 modbus_device_all_attributes['address'] = {
     'type': int,
     'required': True,
@@ -37,6 +33,9 @@ modbus_device_all_attributes['timeout_global'] = {
 modbus_device_return_attributes = deepcopy(device_return_attributes)
 modbus_device_return_attributes['points'] = {
     'type': fields.List(fields.Nested(modbus_point_all_fields))
+}
+modbus_device_return_attributes['type'] = {
+    'type': str,
 }
 
 modbus_device_all_fields = {}

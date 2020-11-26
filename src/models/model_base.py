@@ -25,11 +25,8 @@ class ModelBase(db.Model):
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
 
-    @staticmethod
-    def check_can_add(data: dict) -> bool:
-        raise NotImplementedError
-
     def save_to_db(self):
+        self.check_self()
         db.session.add(self)
         db.session.commit()
 
@@ -42,6 +39,7 @@ class ModelBase(db.Model):
         for key, value in kwargs.items():
             if hasattr(self, key) and value is not None:
                 setattr(self, key, value)
+        self.check_self()
         db.session.commit()
         event = Event(self.get_model_event_type(), {
             'model': self,
@@ -55,6 +53,9 @@ class ModelBase(db.Model):
 
     def get_model_event_type(self) -> EventType:
         raise NotImplemented
+
+    def check_self(self) -> (bool, any):
+        return True
 
     @validates('name')
     def validate_name(self, _, name):

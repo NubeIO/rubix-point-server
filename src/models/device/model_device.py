@@ -1,6 +1,5 @@
 from src import db
 from src.models.model_base import ModelBase
-from src.models.network.model_network import NetworkModel
 from src.event_dispatcher import EventType
 
 
@@ -28,9 +27,3 @@ class DeviceModel(ModelBase):
 
     def get_model_event_type(self) -> EventType:
         return EventType.DEVICE_UPDATE
-
-    @staticmethod
-    def check_can_add(data: dict) -> bool:
-        if not NetworkModel.find_by_uuid(data.get('network_uuid')):
-            raise ValueError('Network does not exist for that network_uuid')
-        return True
