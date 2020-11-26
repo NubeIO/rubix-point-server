@@ -1,5 +1,6 @@
 from src import db
 from src.models.model_base import ModelBase
+from src.models.network.model_network import NetworkModel
 
 
 class DeviceModel(ModelBase):
@@ -23,6 +24,8 @@ class DeviceModel(ModelBase):
     def __repr__(self):
         return f"Device(device_uuid = {self.device_uuid})"
 
-    @classmethod
-    def find_by_uuid(cls, device_uuid):
-        return cls.query.filter_by(uuid=device_uuid).first()
+    @staticmethod
+    def check_can_add(data: dict) -> bool:
+        if not NetworkModel.find_by_uuid(data.get('network_uuid')):
+            raise ValueError('Network does not exist for that network_uuid')
+        return True

@@ -22,6 +22,6 @@ class NetworkModel(ModelBase):
     def __repr__(self):
         return f"Network(uuid = {self.uuid})"
 
-    @classmethod
-    def find_by_uuid(cls, network_uuid):
-        return cls.query.filter_by(uuid=network_uuid).first()
+    @staticmethod
+    def check_can_add(data: dict) -> bool:
+        return True

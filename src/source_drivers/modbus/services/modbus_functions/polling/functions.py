@@ -4,7 +4,7 @@ from pymodbus.bit_write_message import WriteSingleCoilResponse
 from pymodbus.exceptions import ModbusIOException
 
 from src.loggers import modbus_debug
-from src.source_drivers.modbus.interfaces.point.points import ModbusPointType, ModbusDataType, ModbusDataEndian
+from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 from src.source_drivers.modbus.services.modbus_functions.function_utils import _set_data_length, _assertion, \
     _mod_point_data_endian, _select_data_type, _builder_data_type
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(modbus_debug)
 
 
 def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
-                  endian: ModbusDataEndian, func: ModbusPointType) -> (any, list):
+                  endian: ModbusDataEndian, func: ModbusFunctionCode) -> (any, list):
     """
     Read holding or input register
     :param client: modbus client
@@ -26,9 +26,9 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     """
     debug_log('read_analogue', _unit, func, reg_length, reg_start)
     reg_length = _set_data_length(data_type, reg_length)
-    if func == ModbusPointType.READ_HOLDING_REGISTERS:
+    if func == ModbusFunctionCode.READ_HOLDING_REGISTERS:
         read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
-    elif func == ModbusPointType.READ_INPUT_REGISTERS:
+    elif func == ModbusFunctionCode.READ_INPUT_REGISTERS:
         read = client.read_input_registers(reg_start, reg_length, unit=_unit)
     else:
         raise Exception('Invalid Modbus function code', func)
@@ -47,7 +47,7 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
         raise read
 
 
-def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: ModbusPointType) -> (any, list):
+def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: ModbusFunctionCode) -> (any, list):
     """
     Read coil or digital input register
     :param client: modbus client
@@ -60,9 +60,9 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
     debug_log('read_digital', _unit, func, reg_length, reg_start)
     data_type = 'digital'
     reg_length = _set_data_length(data_type, reg_length)
-    if func == ModbusPointType.READ_COILS:
+    if func == ModbusFunctionCode.READ_COILS:
         read = client.read_coils(reg_start, reg_length, unit=_unit)
-    elif func == ModbusPointType.READ_DISCRETE_INPUTS:
+    elif func == ModbusFunctionCode.READ_DISCRETE_INPUTS:
         read = client.read_discrete_inputs(reg_start, reg_length, unit=_unit)
     else:
         raise Exception('Invalid Modbus function code', func)
@@ -79,7 +79,7 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
         raise read
 
 
-def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_value: int, func: ModbusPointType) -> \
+def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_value: int, func: ModbusFunctionCode) -> \
         (any, list):
     """
     Write coil
@@ -94,9 +94,9 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_val
     debug_log('write_digital', _unit, func, reg_length, reg_start)
     data_type = 'digital'
     reg_length = _set_data_length(data_type, reg_length)
-    if func == ModbusPointType.WRITE_COIL:
+    if func == ModbusFunctionCode.WRITE_COIL:
         write = client.write_coil(reg_start, write_value, unit=_unit)
-    elif func == ModbusPointType.WRITE_COILS:
+    elif func == ModbusFunctionCode.WRITE_COILS:
         write = client.write_coils(reg_start, [write_value] * reg_length, unit=_unit)
     else:
         raise Exception('Invalid Modbus function code', func)
@@ -114,7 +114,7 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_val
 
 
 def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
-                   endian: ModbusDataEndian, write_value: float, func: ModbusPointType) -> (any, list):
+                   endian: ModbusDataEndian, write_value: float, func: ModbusFunctionCode) -> (any, list):
     """
     Write holding reg
     :param client: modbus client
@@ -131,9 +131,9 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     reg_length = _set_data_length(data_type, reg_length)
     byteorder, word_order = _mod_point_data_endian(endian)
     payload = _builder_data_type(write_value, data_type, byteorder, word_order)
-    if func == ModbusPointType.WRITE_REGISTER:
+    if func == ModbusFunctionCode.WRITE_REGISTER:
         write = client.write_register(reg_start, payload, unit=_unit)
-    elif func == ModbusPointType.WRITE_REGISTERS:
+    elif func == ModbusFunctionCode.WRITE_REGISTERS:
         write = client.write_registers(reg_start, payload, unit=_unit)
     else:
         raise Exception('Invalid Modbus function code', func)

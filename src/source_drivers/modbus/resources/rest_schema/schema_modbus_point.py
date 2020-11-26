@@ -2,15 +2,15 @@ from copy import deepcopy
 from src.resources.rest_schema.schema_point import *
 
 modbus_point_all_attributes = deepcopy(point_all_attributes)
-modbus_point_all_attributes['reg'] = {
+modbus_point_all_attributes['register'] = {
     'type': int,
     'required': True,
 }
-modbus_point_all_attributes['reg_length'] = {
+modbus_point_all_attributes['register_length'] = {
     'type': int,
     'required': True,
 }
-modbus_point_all_attributes['type'] = {
+modbus_point_all_attributes['function_code'] = {
     'type': str,
     'required': True,
 }

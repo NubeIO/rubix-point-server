@@ -4,6 +4,7 @@ from sqlalchemy import and_
 from src import db
 from src.interfaces.point import HistoryType
 from src.models.model_base import ModelBase
+from src.models.device.model_device import DeviceModel
 from src.models.point.model_point_store import PointStoreModel
 
 
@@ -31,14 +32,15 @@ class PointModel(ModelBase):
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
 
-    @classmethod
-    def find_by_uuid(cls, uuid):
-        return cls.query.filter_by(uuid=uuid).first()
+    @staticmethod
+    def check_can_add(data: dict) -> bool:
+        if not DeviceModel.find_by_uuid(data.get('device_uuid')):
+            raise ValueError('Device does not exist for that device_uuid')
+        return True
 
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
-        db.session.add(self)
-        db.session.commit()
+        super().save_to_db()
 
     # TODO: use this for writing endpoint and produce COV event
     def write_point(self, uuid: str, value: float) -> bool:

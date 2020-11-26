@@ -7,33 +7,33 @@ from src.source_drivers.modbus.services.modbus_functions.polling.functions impor
 logger = logging.getLogger(modbus_debug)
 
 
-def read_digital_handle(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_type):
-    val, array = read_digital(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_type)
-    debug_log(mod_point_type, array, val)
+def read_digital_handle(connection, reg, point_reg_length, device_addr, point_fc):
+    val, array = read_digital(connection, reg, point_reg_length, device_addr, point_fc)
+    debug_log(point_fc, array, val)
     return val, array
 
 
-def write_coil_handle(connection, reg, mod_point_reg_length, mod_device_addr, write_value, mod_point_type):
-    val, array = write_digital(connection, reg, mod_point_reg_length, mod_device_addr, write_value, mod_point_type)
-    debug_log(mod_point_type, array, val)
+def write_coil_handle(connection, reg, point_reg_length, device_addr, write_value, point_fc):
+    val, array = write_digital(connection, reg, point_reg_length, device_addr, write_value, point_fc)
+    debug_log(point_fc, array, val)
     return val, array
 
 
-def read_analog_handle(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
-                       mod_point_data_endian, mod_point_type):
-    val, array = read_analogue(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
-                               mod_point_data_endian, mod_point_type)
-    debug_log(mod_point_type, array, val)
+def read_analog_handle(connection, reg, point_reg_length, device_addr, point_data_type,
+                       point_data_endian, point_fc):
+    val, array = read_analogue(connection, reg, point_reg_length, device_addr, point_data_type,
+                               point_data_endian, point_fc)
+    debug_log(point_fc, array, val)
     return val, array
 
 
-def write_holding_registers_handle(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
-                                   mod_point_data_endian, write_value, mod_point_type):
-    val, array = write_analogue(connection, reg, mod_point_reg_length, mod_device_addr, mod_point_data_type,
-                                mod_point_data_endian, write_value, mod_point_type)
-    debug_log(mod_point_type, array, val)
+def write_holding_registers_handle(connection, reg, point_reg_length, device_addr, point_data_type,
+                                   point_data_endian, write_value, point_fc):
+    val, array = write_analogue(connection, reg, point_reg_length, device_addr, point_data_type,
+                                point_data_endian, write_value, point_fc)
+    debug_log(point_fc, array, val)
     return val, array
 
 
-def debug_log(mod_point_type, array, val):
-    logger.debug(f'Returned value: {{"type": {mod_point_type}, "array": {array}, "val": {val}}}')
+def debug_log(point_fc, array, val):
+    logger.debug(f'Returned value: {{"FC": {point_fc}, "array": {array}, "val": {val}}}')

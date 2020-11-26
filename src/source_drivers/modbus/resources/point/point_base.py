@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse, abort
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_attributes
-from src.source_drivers.modbus.interfaces.point.points import ModbusPointType, ModbusDataType
+from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType
 
 
 class ModbusPointBase(Resource):
@@ -37,29 +37,29 @@ class ModbusPointBase(Resource):
 
     @staticmethod
     def validate_modbus_point_json(data: dict):
-        point_type = ModbusPointType[data.get('type')]
-        reg_length = int(data.get('reg_length'))
-        if point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_REGISTER \
-                or point_type == ModbusPointType.WRITE_COILS or point_type == ModbusPointType.WRITE_REGISTERS:
+        point_fc = ModbusFunctionCode[data.get('function_code')]
+        register_length = int(data.get('register_length'))
+        if point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_REGISTER \
+                or point_fc == ModbusFunctionCode.WRITE_COILS or point_fc == ModbusFunctionCode.WRITE_REGISTERS:
             data['writable'] = True
             if data.get('write_value') is None:
                 data['write_value'] = 0.0
 
-            if reg_length > 1 and point_type == ModbusPointType.WRITE_COIL:
-                data['type'] = ModbusPointType.WRITE_COILS
-            elif reg_length == 1 and point_type == ModbusPointType.WRITE_COILS:
-                data['type'] = ModbusPointType.WRITE_COIL
-            elif reg_length > 1 and point_type == ModbusPointType.WRITE_REGISTER:
-                data['type'] = ModbusPointType.WRITE_REGISTERS
-            elif reg_length == 1 and point_type == ModbusPointType.WRITE_REGISTERS:
-                data['type'] = ModbusPointType.WRITE_REGISTER
+            if register_length > 1 and point_fc == ModbusFunctionCode.WRITE_COIL:
+                data['function_code'] = ModbusFunctionCode.WRITE_COILS
+            elif register_length == 1 and point_fc == ModbusFunctionCode.WRITE_COILS:
+                data['function_code'] = ModbusFunctionCode.WRITE_COIL
+            elif register_length > 1 and point_fc == ModbusFunctionCode.WRITE_REGISTER:
+                data['function_code'] = ModbusFunctionCode.WRITE_REGISTERS
+            elif register_length == 1 and point_fc == ModbusFunctionCode.WRITE_REGISTERS:
+                data['function_code'] = ModbusFunctionCode.WRITE_REGISTER
 
         data_type = ModbusDataType[data.get('data_type')]
-        if point_type == ModbusPointType.READ_DISCRETE_INPUTS or point_type == ModbusPointType.READ_COILS or \
-                point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_COILS:
+        if point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS or point_fc == ModbusFunctionCode.READ_COILS or \
+                point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_COILS:
             data_type = ModbusDataType.DIGITAL
             data['data_type'] = ModbusDataType.DIGITAL
             data['data_round']
 
         if data_type == ModbusDataType.FLOAT or data_type == ModbusDataType.INT32 or data_type == ModbusDataType.UINT32:
-            assert reg_length % 2 == 0, f'reg_length invalid for data_type {data_type}'
+            assert register_length % 2 == 0, f'register_length invalid for data_type {data_type}'

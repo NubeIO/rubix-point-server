@@ -9,7 +9,7 @@ from src.loggers import modbus_debug_poll
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventTypes, Event
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
-from src.source_drivers.modbus.interfaces.point.points import ModbusPointType
+from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
@@ -48,10 +48,10 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     try:
         device_address = device.address
         zero_based = device.zero_based
-        reg = point.reg
+        point_register = point.register
         point_uuid = point.uuid
-        point_reg_length = point.reg_length
-        point_type = point.type
+        point_register_length = point.register_length
+        point_fc = point.function_code
         point_data_type = point.data_type
         point_data_endian = point.data_endian
         write_value = point.write_value
@@ -60,20 +60,21 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
 
     logger.debug('@@@ START MODBUS POLL !!!')
     logger.debug({'network': network,
-                  'device': device,
-                  'point': point_uuid,
                   'transport': transport,
+                  'device_uuid': device.uuid,
                   'device_address': device_address,
-                  'reg': reg,
-                  'point_reg_length': point_reg_length,
-                  'point_type': point_type,
+                  'point_uuid': point_uuid,
+                  'point_register': point_register,
+                  'point_register_length': point_register_length,
+                  'point_fc': point_fc,
                   'point_data_type': point_data_type,
                   'point_data_endian': point_data_endian,
                   'write_value': write_value
                   })
     if not zero_based:
-        reg -= 1
-        logger.debug(f"MODBUS DEBUG: device zero_based True. reg -= 1: {reg + 1} -> {reg}")
+        point_register -= 1
+        logger.debug(f"MODBUS DEBUG: device zero_based True. point_register -= 1: {point_register + 1} "
+                     f"-> {point_register}")
 
     fault = False
     fault_message = ""
@@ -85,44 +86,44 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         """
         read_coils read_discrete_inputs
         """
-        if point_type == ModbusPointType.READ_COILS or point_type == ModbusPointType.READ_DISCRETE_INPUTS:
+        if point_fc == ModbusFunctionCode.READ_COILS or point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS:
             val, array = read_digital_handle(connection,
-                                             reg,
-                                             point_reg_length,
+                                             point_register,
+                                             point_register_length,
                                              device_address,
-                                             point_type)
+                                             point_fc)
         """
         read_holding_registers read_input_registers
         """
-        if point_type == ModbusPointType.READ_HOLDING_REGISTERS or point_type == ModbusPointType.READ_INPUT_REGISTERS:
+        if point_fc == ModbusFunctionCode.READ_HOLDING_REGISTERS or point_fc == ModbusFunctionCode.READ_INPUT_REGISTERS:
             val, array = read_analog_handle(connection,
-                                            reg,
-                                            point_reg_length,
+                                            point_register,
+                                            point_register_length,
                                             device_address,
                                             point_data_type,
                                             point_data_endian,
-                                            point_type)
+                                            point_fc)
         """
         write_coils
         """
-        if point_type == ModbusPointType.WRITE_COIL or point_type == ModbusPointType.WRITE_COILS:
-            val, array = write_coil_handle(connection, reg,
-                                           point_reg_length,
+        if point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_COILS:
+            val, array = write_coil_handle(connection, point_register,
+                                           point_register_length,
                                            device_address,
                                            write_value,
-                                           point_type)
+                                           point_fc)
         """
         write_registers
         """
-        if point_type == ModbusPointType.WRITE_REGISTER or point_type == ModbusPointType.WRITE_REGISTERS:
+        if point_fc == ModbusFunctionCode.WRITE_REGISTER or point_fc == ModbusFunctionCode.WRITE_REGISTERS:
             val, array = write_holding_registers_handle(connection,
-                                                        reg,
-                                                        point_reg_length,
+                                                        point_register,
+                                                        point_register_length,
                                                         device_address,
                                                         point_data_type,
                                                         point_data_endian,
                                                         write_value,
-                                                        point_type)
+                                                        point_fc)
 
         """
         Save modbus data in database

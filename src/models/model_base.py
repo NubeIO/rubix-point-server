@@ -5,6 +5,10 @@ from src import db
 class ModelBase(db.Model):
     __abstract__ = True
 
+    @staticmethod
+    def check_can_add(data: dict) -> bool:
+        raise NotImplementedError
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()

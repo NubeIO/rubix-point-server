@@ -1,7 +1,7 @@
 import enum
 
 
-class ModbusPointType(enum.Enum):
+class ModbusFunctionCode(enum.Enum):
     READ_COILS = 1
     READ_DISCRETE_INPUTS = 2
     READ_HOLDING_REGISTERS = 3
