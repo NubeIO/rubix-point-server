@@ -18,8 +18,6 @@ class WiresPlatModel(ModelBase):
     site_country = db.Column(db.String(80), nullable=False)
     site_lat = db.Column(db.String(80), nullable=False)
     site_lon = db.Column(db.String(80), nullable=False)
-    created_on = db.Column(db.DateTime, server_default=db.func.now())
-    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     def __repr__(self):
         return f"Wires({self.uuid})"
