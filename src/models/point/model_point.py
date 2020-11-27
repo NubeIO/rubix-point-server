@@ -34,8 +34,7 @@ class PointModel(ModelBase):
 
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
-        db.session.add(self)
-        db.session.commit()
+        super().save_to_db()
 
     # TODO: use this for writing endpoint and produce COV event
     def write_point(self, uuid: str, value: float) -> bool:

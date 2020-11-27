@@ -22,6 +22,8 @@ class ModbusNetworkSingular(ModbusNetworkBase):
             abort(404, message='Modbus Network not found')
         return network
 
+    # TODO: don't allow type in patch
+
     @classmethod
     @marshal_with(modbus_network_all_fields)
     def put(cls, uuid):

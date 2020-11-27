@@ -30,7 +30,6 @@ class ModbusDeviceSingular(ModbusDeviceBase):
         if device is None:
             return cls.add_device(uuid, data)
         else:
-            cls.abort_if_network_does_not_exist_and_type_mismatch(data.network_uuid, data.type)
             try:
                 device.update(**data)
                 return ModbusDeviceModel.find_by_uuid(uuid)
