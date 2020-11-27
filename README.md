@@ -6,7 +6,21 @@
 git clone --depth 1 https://github.com/NubeDev/bac-rest && cd bac-rest/
 ```
 
-#### RPi
+### Running on Production
+
+#### One time setup:
+- Clone [this](https://github.com/NubeIO/common-py-libs)
+- Create `venv` on inside that directory (follow instruction on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
+
+#### Commands:
+```bash
+sudo bash script.bash start -u=<pi|debian> -dir=<bac-rest_dir> -lib_dir=<common-py-libs-dir>
+sudo bash script.bash -h
+```
+
+##### Note: _change /data/bac-flask/config.ini  as you want and restart -- `sudo bash script.bash restart`_
+
+### RPi
 
 Dependencies:
 ```bash
