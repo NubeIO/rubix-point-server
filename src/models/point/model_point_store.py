@@ -21,7 +21,7 @@ class PointStoreModel(db.Model):
 
     @classmethod
     def create_new_point_store_model(cls, point_uuid):
-        return PointStoreModel(point_uuid=point_uuid, value=0)
+        return PointStoreModel(point_uuid=point_uuid, value=0, value_array="")
 
     def update(self, cov_threshold: float = 0) -> bool:
         if not self.fault:
@@ -32,6 +32,7 @@ class PointStoreModel(db.Model):
                                              fault=False, fault_message=None)
                                      .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                                  or_(db.func.abs(self.__table__.c.value - self.value) >= cov_threshold,
+                                                     self.__table__.c.value_array != self.value_array,
                                                      self.__table__.c.fault != self.fault))))
         else:
             res = db.session.execute(self.__table__
