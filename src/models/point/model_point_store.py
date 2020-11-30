@@ -31,7 +31,8 @@ class PointStoreModel(db.Model):
                                      .values(value=self.value, value_array=self.value_array,
                                              fault=False, fault_message=None)
                                      .where(and_(self.__table__.c.point_uuid == self.point_uuid,
-                                                 or_(db.func.abs(self.__table__.c.value - self.value) >= cov_threshold,
+                                                 or_(self.__table__.c.value == None,
+                                                     db.func.abs(self.__table__.c.value - self.value) >= cov_threshold,
                                                      self.__table__.c.fault != self.fault))))
         else:
             res = db.session.execute(self.__table__
