@@ -21,7 +21,7 @@ class PointStoreModel(db.Model):
 
     @classmethod
     def create_new_point_store_model(cls, point_uuid):
-        return PointStoreModel(point_uuid=point_uuid, value=0)
+        return PointStoreModel(point_uuid=point_uuid, value=None, value_array="")
 
     def update(self, cov_threshold: float = 0) -> bool:
         if not self.fault:
