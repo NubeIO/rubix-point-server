@@ -5,7 +5,7 @@ import time
 import paho.mqtt.client as mqtt
 
 from src.event_dispatcher import EventDispatcher
-from src.ini_config import config
+from src.ini_config import *
 from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
@@ -34,33 +34,12 @@ class MqttClient(EventServiceBase):
     threaded = False
     __instance = None
     __client = None
-    __host = None
-    __port = None
-    __keepalive = None
-    __qos = None
-    __retain = None
-    __publish_value = None
-    __attempt_reconnect_on_unavailable = None
-    __attempt_reconnect_secs = None
-    __debug = None
 
     def __init__(self):
         if MqttClient.__instance:
             raise Exception("MqttClient class is a singleton class!")
         else:
             super().__init__()
-            MqttClient.__host = config.get('mqtt', 'host', fallback='localhost')
-            MqttClient.__port = config.getint('mqtt', 'port', fallback=1883)
-            MqttClient.__keepalive = config.getint('mqtt', 'keepalive', fallback=60)
-            MqttClient.__qos = config.getint('mqtt', 'qos', fallback=1)
-            MqttClient.__retain = int(config.getboolean('mqtt', 'retain', fallback=True))
-            MqttClient.__publish_value = config.getboolean('mqtt', 'publish_value', fallback=False)
-            MqttClient.__attempt_reconnect_on_unavailable = config.getboolean('mqtt',
-                                                                              'attempt_reconnect_on_unavailable',
-                                                                              fallback=True)
-            MqttClient.__attempt_reconnect_secs = config.getint('mqtt', 'attempt_reconnect_secs', fallback=5)
-            MqttClient.__debug = config.getboolean('mqtt', 'debug', fallback=False)
-
             self.supported_events[EventType.POINT_COV] = True
             self.supported_events[EventType.POINT_UPDATE] = True
             self.supported_events[EventType.DEVICE_UPDATE] = True
@@ -84,20 +63,20 @@ class MqttClient(EventServiceBase):
         MqttClient.__client = mqtt.Client(MQTT_CLIENT_NAME)
         MqttClient.__client.on_connect = MqttClient.__on_connect
         MqttClient.__client.on_message = MqttClient.__on_message
-        if MqttClient.__attempt_reconnect_on_unavailable:
+        if mqtt__attempt_reconnect_on_unavailable:
             while True:
                 try:
-                    MqttClient.__client.connect(MqttClient.__host, MqttClient.__port, MqttClient.__keepalive)
+                    MqttClient.__client.connect(mqtt__host, mqtt__port, mqtt__keepalive)
                     break
                 except ConnectionRefusedError:
-                    if MqttClient.__debug:
+                    if mqtt__debug:
                         logger.info(
                             f'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in '
-                            f'{MqttClient.__attempt_reconnect_secs} seconds')
-                    time.sleep(MqttClient.__attempt_reconnect_secs)
+                            f'{mqtt__attempt_reconnect_secs} seconds')
+                    time.sleep(mqtt__attempt_reconnect_secs)
         else:
             try:
-                MqttClient.__client.connect(MqttClient.__host, MqttClient.__port, MqttClient.__keepalive)
+                MqttClient.__client.connect(mqtt__host, mqtt__port, mqtt__keepalive)
             except Exception as e:
                 # catching so can set __client to None so publish_cov doesn't stack messages forever
                 MqttClient.__client = None
@@ -108,7 +87,8 @@ class MqttClient(EventServiceBase):
     @staticmethod
     def publish_cov(point: PointModel, point_store: PointStoreModel, device_uuid: str, device_name: str,
                     network_uuid: str, network_name: str, source_driver: str):
-        if MqttClient.__client is None:
+        if not MqttClient.get_instance().status():
+            logger.error("MQTT is not connected...")
             return
         if point is None or point_store is None or device_uuid is None or network_uuid is None \
                 or source_driver is None or network_name is None or device_name is None:
@@ -123,27 +103,28 @@ class MqttClient(EventServiceBase):
             'fault': point_store.fault,
             'fault_message': point_store.fault_message,
         }
-        if MqttClient.__debug:
+        if mqtt__debug:
             logger.info(f'MQTT PUB: {topic} > {payload}')
-        MqttClient.__client.publish(topic, json.dumps(payload), MqttClient.__qos, MqttClient.__retain)
-        if MqttClient.__publish_value and not point_store.fault:
+        MqttClient.__client.publish(topic, json.dumps(payload), mqtt__qos, mqtt__retain)
+        if mqtt__publish_value and not point_store.fault:
             topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
-            if MqttClient.__debug:
+            if mqtt__debug:
                 logger.info(f'MQTT PUB: {topic} > {point_store.value}')
-            MqttClient.__client.publish(topic, point_store.value, MqttClient.__qos, MqttClient.__retain)
+            MqttClient.__client.publish(topic, point_store.value, mqtt__qos, mqtt__retain)
 
     @staticmethod
     def publish_update(model: ModelBase, updates: dict):
-        if MqttClient.__client is None:
+        if not MqttClient.get_instance().status():
+            logger.error("MQTT is not connected...")
             return
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
 
         topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_UPDATE}/{model.get_model_event_name()}/{model.uuid}'
 
-        if MqttClient.__debug:
+        if mqtt__debug:
             logger.info(f'MQTT PUB: {topic} > {updates}')
-        MqttClient.__client.publish(topic, json.dumps(updates), MqttClient.__qos, MqttClient.__retain)
+        MqttClient.__client.publish(topic, json.dumps(updates), mqtt__qos, mqtt__retain)
 
     @staticmethod
     def __on_connect(client, userdata, flags, reason_code, properties=None):
