@@ -1,4 +1,5 @@
 from copy import deepcopy
+
 from src.resources.rest_schema.schema_point import *
 
 modbus_point_all_attributes = deepcopy(point_all_attributes)
@@ -36,6 +37,14 @@ modbus_point_all_attributes['timeout'] = {
 }
 modbus_point_all_attributes['timeout_global'] = {
     'type': bool,
+    'required': False,
+}
+modbus_point_all_attributes['math_operation'] = {
+    'type': str,
+    'required': False,
+}
+modbus_point_all_attributes['math_operation_value'] = {
+    'type': float,
     'required': False,
 }
 
