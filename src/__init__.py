@@ -4,7 +4,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine.base import Engine
 from sqlalchemy import event
 
 from src.event_dispatcher import EventDispatcher

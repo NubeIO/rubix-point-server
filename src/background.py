@@ -5,7 +5,7 @@ from src.ini_config import *
 from src.services.histories.history_local import HistoryLocal
 from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
 from src.services.histories.sync.influxdb import InfluxDB
-from src.services.mqtt_client.mqtt_client import MqttClient
+from src.services.mqtt_client.mqtt_client import create_mqtt_client
 from src.source_drivers.modbus.services.rtu_polling import RtuPolling
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 from src.source_drivers.modbus.services.tcp_polling import TcpPolling
@@ -19,8 +19,15 @@ class Background:
     def run():
         logger.info("Running Background Task...")
         if settings__enable_mqtt:
-            mqtt_thread = Thread(target=MqttClient.get_instance().start, daemon=True)
-            mqtt_thread.start()
+            mqtt_client_list = filter(lambda section: 'mqtt_' in section, config.sections())
+            mqtt_clients = []
+            mqtt_threads = []
+            for client_config_title in mqtt_client_list:
+                mqtt_client = create_mqtt_client(client_config_title)
+                mqtt_thread = Thread(target=mqtt_client.start, daemon=True)
+                mqtt_thread.start()
+                mqtt_clients.append(mqtt_client)
+                mqtt_threads.append(mqtt_thread)
 
         if settings__enable_tcp:
             TcpRegistry.get_instance().register()

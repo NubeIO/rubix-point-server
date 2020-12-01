@@ -32,62 +32,60 @@ logger = logging.getLogger(__name__)
 class MqttClient(EventServiceBase):
     service_name = SERVICE_NAME_MQTT_CLIENT
     threaded = False
-    __instance = None
-    __client = None
 
-    def __init__(self):
-        if MqttClient.__instance:
-            raise Exception("MqttClient class is a singleton class!")
-        else:
-            super().__init__()
-            self.supported_events[EventType.POINT_COV] = True
-            self.supported_events[EventType.POINT_UPDATE] = True
-            self.supported_events[EventType.DEVICE_UPDATE] = True
-            self.supported_events[EventType.NETWORK_UPDATE] = True
-            EventDispatcher.add_service(self)
-            MqttClient.__instance = self
-
-    @staticmethod
-    def get_instance():
-        if MqttClient.__instance is None:
-            MqttClient()
-        return MqttClient.__instance
+    def __init__(self, host: str, port: int, keepalive: int, retain: bool, qos: int,
+                 attempt_reconnect_on_unavailable: bool, attempt_reconnect_secs: int, publish_value: bool):
+        super().__init__()
+        self.__client = None
+        self.__host = host
+        self.__port = port
+        self.__keepalive = keepalive
+        self.__retain = retain
+        self.__qos = qos
+        self.__attempt_reconnect_on_unavailable = attempt_reconnect_on_unavailable
+        self.__attempt_reconnect_secs = attempt_reconnect_secs
+        self.__publish_value = publish_value
+        self.supported_events[EventType.POINT_COV] = True
+        self.supported_events[EventType.POINT_UPDATE] = True
+        self.supported_events[EventType.DEVICE_UPDATE] = True
+        self.supported_events[EventType.NETWORK_UPDATE] = True
+        EventDispatcher.add_service(self)
 
     def status(self):
-        if not MqttClient.__client:
+        if not self.__client:
             return False
         else:
-            return MqttClient.__client.is_connected()
+            return self.__client.is_connected()
 
     def start(self):
-        MqttClient.__client = mqtt.Client(MQTT_CLIENT_NAME)
-        MqttClient.__client.on_connect = MqttClient.__on_connect
-        MqttClient.__client.on_message = MqttClient.__on_message
-        if mqtt__attempt_reconnect_on_unavailable:
+        self.__client = mqtt.Client(MQTT_CLIENT_NAME)
+        self.__client.on_connect = self.__on_connect
+        self.__client.on_message = self.__on_message
+        if self.__attempt_reconnect_on_unavailable:
             while True:
                 try:
-                    MqttClient.__client.connect(mqtt__host, mqtt__port, mqtt__keepalive)
+                    self.__client.connect(self.__host, self.__port, self.__keepalive)
                     break
                 except ConnectionRefusedError:
-                    if mqtt__debug:
-                        logger.info(
-                            f'MQTT connection failure: ConnectionRefusedError. Attempting reconnect in '
-                            f'{mqtt__attempt_reconnect_secs} seconds')
-                    time.sleep(mqtt__attempt_reconnect_secs)
+                    logger.error(
+                        f'MQTT connection failure {self.__host}:{self.__port} -> '
+                        f'ConnectionRefusedError. Attempting reconnect in '
+                        f'{self.__attempt_reconnect_secs} seconds')
+                    time.sleep(self.__attempt_reconnect_secs)
         else:
             try:
-                MqttClient.__client.connect(mqtt__host, mqtt__port, mqtt__keepalive)
+                self.__client.connect(self.__host, self.__port, self.__keepalive)
             except Exception as e:
                 # catching so can set __client to None so publish_cov doesn't stack messages forever
-                MqttClient.__client = None
+                self.__client = None
                 logger.error(str(e))
                 return
-        MqttClient.__client.loop_forever()
+        logger.info(f'MQTT client connected {self.__host}:{self.__port}')
+        self.__client.loop_forever()
 
-    @staticmethod
-    def publish_cov(point: PointModel, point_store: PointStoreModel, device_uuid: str, device_name: str,
+    def publish_cov(self, point: PointModel, point_store: PointStoreModel, device_uuid: str, device_name: str,
                     network_uuid: str, network_name: str, source_driver: str):
-        if not MqttClient.get_instance().status():
+        if not self.status():
             logger.error("MQTT is not connected...")
             return
         if point is None or point_store is None or device_uuid is None or network_uuid is None \
@@ -103,18 +101,17 @@ class MqttClient(EventServiceBase):
             'fault': point_store.fault,
             'fault_message': point_store.fault_message,
         }
-        if mqtt__debug:
-            logger.info(f'MQTT PUB: {topic} > {payload}')
-        MqttClient.__client.publish(topic, json.dumps(payload), mqtt__qos, mqtt__retain)
-        if mqtt__publish_value and not point_store.fault:
-            topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
-            if mqtt__debug:
-                logger.info(f'MQTT PUB: {topic} > {point_store.value}')
-            MqttClient.__client.publish(topic, point_store.value, mqtt__qos, mqtt__retain)
 
-    @staticmethod
-    def publish_update(model: ModelBase, updates: dict):
-        if not MqttClient.get_instance().status():
+        logger.info(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {payload}')
+
+        self.__client.publish(topic, json.dumps(payload), self.__qos, self.__retain)
+        if self.__publish_value and not point_store.fault:
+            topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
+            logger.info(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {point_store.value}')
+            self.__client.publish(topic, point_store.value, self.__qos, self.__retain)
+
+    def publish_update(self, model: ModelBase, updates: dict):
+        if not self.status():
             logger.error("MQTT is not connected...")
             return
         if model is None or updates is None or len(updates) == 0:
@@ -122,12 +119,10 @@ class MqttClient(EventServiceBase):
 
         topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_UPDATE}/{model.get_model_event_name()}/{model.uuid}'
 
-        if mqtt__debug:
-            logger.info(f'MQTT PUB: {topic} > {updates}')
-        MqttClient.__client.publish(topic, json.dumps(updates), mqtt__qos, mqtt__retain)
+        logger.info(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {updates}')
+        self.__client.publish(topic, json.dumps(updates), self.__qos, self.__retain)
 
-    @staticmethod
-    def __on_connect(client, userdata, flags, reason_code, properties=None):
+    def __on_connect(self, client, userdata, flags, reason_code, properties=None):
         if reason_code > 0:
             reasons = {
                 1: 'Connection refused - incorrect protocol version',
@@ -137,29 +132,26 @@ class MqttClient(EventServiceBase):
                 5: 'Connection refused - not authorised'
             }
             reason = reasons.get(reason_code, 'unknown')
-            MqttClient.__client = None
+            self.__client = None
             raise Exception(f'MQTT Connection Failure: {reason}')
-        MqttClient.__client.subscribe(f'{MQTT_TOPIC}/#')
+        self.__client.subscribe(f'{MQTT_TOPIC}/#')
 
-    @staticmethod
-    def __on_message(client, userdata, message):
+    def __on_message(self, client, userdata, message):
         pass
         # topic_split = message.topic.split('/')
         # if len(topic_split) < MQTT_TOPIC_MIN:
         #     return
         # if topic_split[MQTT_TOPIC_MIN] == MQTT_TOPIC_ALL:
-        #     MqttClient.__handle_all_message(topic_split, message)
+        #     self.__handle_all_message(topic_split, message)
         # elif topic_split[MQTT_TOPIC_MIN] == MQTT_TOPIC_DRIVER:
-        #     MqttClient.__handle_driver_message(topic_split, message)
+        #     self.__handle_driver_message(topic_split, message)
         # else:
         #     return
 
-    @staticmethod
-    def __handle_all_message(topic_split, message):
+    def __handle_all_message(self, topic_split, message):
         pass
 
-    @staticmethod
-    def __handle_driver_message(topic_split, message):
+    def __handle_driver_message(self, topic_split, message):
         pass
 
     def _run_event(self, event: Event):
@@ -167,10 +159,24 @@ class MqttClient(EventServiceBase):
             return
 
         if event.event_type == EventType.POINT_COV:
-            MqttClient.publish_cov(event.data.get('point'), event.data.get('point_store'),
-                                   event.data.get('device').uuid, event.data.get('device').name,
-                                   event.data.get('network').uuid, event.data.get('network').name,
-                                   event.data.get('source_driver'))
+            self.publish_cov(event.data.get('point'), event.data.get('point_store'),
+                             event.data.get('device').uuid, event.data.get('device').name,
+                             event.data.get('network').uuid, event.data.get('network').name,
+                             event.data.get('source_driver'))
 
-        elif event.event_type == EventType.POINT_UPDATE or EventType.DEVICE_UPDATE or EventType.NETWORK_UPDATE:
-            MqttClient.publish_update(event.data.get('model'), event.data.get('updates'))
+        elif event.event_type == EventType.POINT_UPDATE or event.event_type == EventType.DEVICE_UPDATE or \
+                event.event_type == EventType.NETWORK_UPDATE:
+            self.publish_update(event.data.get('model'), event.data.get('updates'))
+
+
+def create_mqtt_client(client_config_title: str) -> MqttClient:
+    return MqttClient(
+        config.get(client_config_title, 'host', fallback='0.0.0.0'),
+        config.getint(client_config_title, 'port', fallback=1883),
+        config.getint(client_config_title, 'keepalive', fallback=60),
+        config.getboolean(client_config_title, 'retain', fallback=False),
+        config.getint(client_config_title, 'qos', fallback=1),
+        config.getboolean(client_config_title, 'attempt_reconnect_on_unavailable', fallback=True),
+        config.getint(client_config_title, 'attempt_reconnect_secs', fallback=5),
+        config.getboolean(client_config_title, 'publish_value', fallback=True),
+    )
