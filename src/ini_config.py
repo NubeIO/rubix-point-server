@@ -18,16 +18,6 @@ settings__enable_histories = config.getboolean('settings', 'enable_histories', f
 settings__enable_cleaner = config.getboolean('settings', 'enable_cleaner', fallback=False)
 settings__enable_history_sync = config.getboolean('settings', 'enable_history_sync', fallback=False)
 
-mqtt__host = config.get('mqtt', 'host', fallback='0.0.0.0')
-mqtt__port = config.getint('mqtt', 'port', fallback=1883)
-mqtt__keepalive = config.getint('mqtt', 'keepalive', fallback=60)
-mqtt__qos = config.getint('mqtt', 'qos', fallback=1)
-mqtt__retain = config.getboolean('mqtt', 'retain', fallback=False)
-mqtt__publish_value = config.getboolean('mqtt', 'publish_value', fallback=True)
-mqtt__attempt_reconnect_on_unavailable = config.getboolean('mqtt', 'attempt_reconnect_on_unavailable', fallback=True)
-mqtt__attempt_reconnect_secs = config.getint('mqtt', 'attempt_reconnect_secs', fallback=5)
-mqtt__debug = config.getboolean('mqtt', 'debug', fallback=False)
-
 influx_db__host = config.get('influx_db', 'host', fallback='0.0.0.0')
 influx_db__port = config.getint('influx_db', 'port', fallback=8086)
 influx_db__database = config.get('influx_db', 'database', fallback='db')
