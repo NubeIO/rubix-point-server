@@ -2,10 +2,10 @@ from sqlalchemy import and_
 from sqlalchemy.orm import validates
 
 from src import db
-from src.interfaces.point import HistoryType
+from src.interfaces.point import HistoryType, MathOperation
 from src.models.model_base import ModelBase
 from src.models.point.model_point_store import PointStoreModel
-from src.event_dispatcher import EventType
+from src.services.event_service_base import EventType
 
 
 class PointModel(ModelBase):
@@ -17,11 +17,14 @@ class PointModel(ModelBase):
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
-    cov_threshold = db.Column(db.Float, nullable=False, default=0)
-    point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
-    point_store_history = db.relationship('PointStoreHistoryModel', backref='point')
     writable = db.Column(db.Boolean, nullable=False, default=False)
     write_value = db.Column(db.Float, nullable=True, default=None)  # TODO: more data types...
+    cov_threshold = db.Column(db.Float, nullable=False, default=0)
+    value_round = db.Column(db.Integer(), nullable=False, default=2)
+    value_offset = db.Column(db.Float(), nullable=False, default=0)
+    value_operation = db.Column(db.Enum(MathOperation), nullable=True)
+    point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
+    point_store_history = db.relationship('PointStoreHistoryModel', backref='point')
     driver = db.Column(db.String(80))
 
     __mapper_args__ = {
@@ -57,3 +60,25 @@ class PointModel(ModelBase):
 
     def get_model_event_type(self) -> EventType:
         return EventType.POINT_UPDATE
+
+    @classmethod
+    def update(self, **kwargs):
+        value_round = kwargs.get('value_round')
+        value_offset = kwargs.get('value_offset')
+        value_operation = kwargs.get('value_operation')
+        update_point_store = False
+        if (value_round is not None and value_round != self.value_round) or \
+                (value_offset is not None and value_offset != self.value_offset) or \
+                (value_operation is not None and value_operation != self.value_operation):
+            # not doing first as want to publish UPDATE event before COV event
+            update_point_store = True
+
+        super().update(self, kwargs)
+
+        if update_point_store:
+            point_store = PointStoreModel(PointStoreModel.find_by_point_uuid(self.uuid))
+            updated = point_store.update(self)
+            if updated:
+                point_store.publish_cov(self)
+
+        return self

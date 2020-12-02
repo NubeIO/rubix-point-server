@@ -2,8 +2,7 @@ from sqlalchemy import UniqueConstraint
 
 from src import db
 from src.models.point.model_point_mixin import PointMixinModel
-from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian, \
-    MathOperation
+from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 
 
 class ModbusPointModel(PointMixinModel):
@@ -14,12 +13,8 @@ class ModbusPointModel(PointMixinModel):
     function_code = db.Column(db.Enum(ModbusFunctionCode), nullable=False)
     data_type = db.Column(db.Enum(ModbusDataType), nullable=False)
     data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False, default=ModbusDataEndian.BEB_LEW)
-    data_round = db.Column(db.Integer(), nullable=False, default=2)
-    data_offset = db.Column(db.Integer(), nullable=False, default=0)
     timeout = db.Column(db.Float(), nullable=False, default=1)  # TODO: not used
     timeout_global = db.Column(db.Boolean(), nullable=False, default=True)  # TODO: not used
-    math_operation = db.Column(db.Enum(MathOperation), nullable=True)
-    math_operation_value = db.Column(db.Float(), nullable=False, default=0)
     modbus_device_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (
@@ -65,7 +60,7 @@ class ModbusPointModel(PointMixinModel):
                 point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_COILS:
             data_type = ModbusDataType.DIGITAL
             self.data_type = ModbusDataType.DIGITAL
-            self.data_round = 0
+            self.value_round = 0
 
         if data_type == ModbusDataType.FLOAT or data_type == ModbusDataType.INT32 or \
                 data_type == ModbusDataType.UINT32:

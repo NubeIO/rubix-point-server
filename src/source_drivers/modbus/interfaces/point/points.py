@@ -28,11 +28,3 @@ class ModbusDataEndian(enum.Enum):
     LEB_LEW = 2
     BEB_LEW = 3
     BEB_BEW = 4
-
-
-class MathOperation(enum.Enum):
-    ADD = 0
-    SUBTRACT = 1
-    MULTIPLY = 2
-    DIVIDE = 3
-    BOOL_INVERT = 4

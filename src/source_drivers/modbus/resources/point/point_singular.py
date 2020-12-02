@@ -11,7 +11,7 @@ from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import 
 class ModbusPointSingular(ModbusPointBase):
     """
     It returns point with point_store object value, which has the current values of point_store for that particular
-    point with last not null value and value_array
+    point with last not null value and value_raw
     """
     patch_parser = reqparse.RequestParser()
     for attr in modbus_point_all_attributes:
@@ -60,16 +60,6 @@ class ModbusPointSingular(ModbusPointBase):
         if point:
             point.delete_from_db()
         return '', 204
-
-    @classmethod
-    def update_point(cls, data, point, uuid):
-        point.update(**data)
-        point = ModbusPointModel.find_by_uuid(uuid)
-        point_store = PointStoreModel.find_by_point_uuid(uuid)
-        point_store.value = point_store.raw_value()
-        db.session.commit()  # why this is needed, clueless
-        point_store.update(point)
-        return point
 
 # from flask_restful import Resource
 # from src.event_dispatcher import EventDispatcher

@@ -131,7 +131,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         """
         logger.debug(f'MODBUS DEBUG: READ/WRITE WAS DONE: {{"transport": {transport}, "val": {val}}}')
         if isinstance(val, numbers.Number):
-            point_store_new = PointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
+            point_store_new = PointStoreModel(value=val, value_raw=str(array), point_uuid=point.uuid)
         else:
             fault = True
             fault_message = "Got non numeric value"
@@ -151,13 +151,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         logger.error(e)
         return
     if is_updated:
-        EventDispatcher.dispatch_from_source(service, Event(EventType.POINT_COV, {
-            'point': point,
-            'point_store': point_store_new,
-            'device': device,
-            'network': network,
-            'source_driver': service.service_name
-        }))
+        point_store_new.publish_cov(point, device, network, service.service_name)
         # TODO: move this to history service local as the dispatch event will handle it
         if point.history_type == HistoryType.COV and network.history_enable and \
                 device.history_enable and point.history_enable:

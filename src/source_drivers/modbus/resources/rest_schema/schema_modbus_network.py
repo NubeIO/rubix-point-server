@@ -7,6 +7,8 @@ modbus_network_all_attributes = deepcopy(network_all_attributes)
 modbus_network_all_attributes['type'] = {
     'type': str,
     'required': True,
+    'nested': True,
+    'dict': 'type.name'
 }
 modbus_network_all_attributes['timeout'] = {
     'type': float,
@@ -28,6 +30,8 @@ modbus_network_all_attributes['rtu_stop_bits'] = {
 }
 modbus_network_all_attributes['rtu_parity'] = {
     'type': str,
+    'nested': True,
+    'dict': 'rtu_parity.name'
 }
 modbus_network_all_attributes['rtu_byte_size'] = {
     'type': int,
