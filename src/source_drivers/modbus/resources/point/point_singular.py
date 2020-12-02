@@ -37,7 +37,7 @@ class ModbusPointSingular(ModbusPointBase):
             return cls.add_point(data, uuid)
         else:
             try:
-                return point.update(point)
+                return point.update(**data)
             except Exception as e:
                 abort(500, message=str(e))
 
@@ -50,7 +50,7 @@ class ModbusPointSingular(ModbusPointBase):
             abort(404, message=f'Modbus Point not found')
         else:
             try:
-                return point.update(data)
+                return point.update(**data)
             except Exception as e:
                 abort(500, message=str(e))
 

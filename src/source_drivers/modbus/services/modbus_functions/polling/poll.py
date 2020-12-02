@@ -131,7 +131,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         """
         logger.debug(f'MODBUS DEBUG: READ/WRITE WAS DONE: {{"transport": {transport}, "val": {val}}}')
         if isinstance(val, numbers.Number):
-            point_store_new = PointStoreModel(value=val, value_raw=str(array), point_uuid=point.uuid)
+            point_store_new = PointStoreModel(value_original=val, value_raw=str(array), point_uuid=point.uuid)
         else:
             fault = True
             fault_message = "Got non numeric value"

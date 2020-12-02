@@ -33,8 +33,8 @@ class EventDispatcher:
             raise Exception('Invalid driver type added', new_driver)
         else:
             for driver in cls.get_instance().source_drivers:
-                if driver.service_name == new_driver.service_name:
-                    raise Exception('driver already registered:', new_driver.service_name)
+                if driver == new_driver:
+                    raise Exception('driver already registered:', new_driver)
             cls.get_instance().source_drivers.append(new_driver)
 
     @classmethod

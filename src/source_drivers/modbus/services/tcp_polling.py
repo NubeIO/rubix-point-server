@@ -1,6 +1,7 @@
 import logging
 
 from src import db
+from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import EventServiceBase, EventType
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
@@ -8,14 +9,13 @@ from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusT
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
 
-SERVICE_NAME_MODBUS_TCP = 'modbus_tcp'
 logger = logging.getLogger(__name__)
 
 
 class TcpPolling(EventServiceBase):
     _instance = None
     _polling_period = 1
-    service_name = SERVICE_NAME_MODBUS_TCP
+    service_name = MODBUS_SERVICE_NAME
     threaded = True
     _count = 0
 
@@ -27,7 +27,7 @@ class TcpPolling(EventServiceBase):
 
     def __init__(self):
         if TcpPolling._instance:
-            raise Exception("TcpPolling class is a singleton class!")
+            raise Exception("MODBUS: TcpPolling class is a singleton class!")
         else:
             super().__init__()
             self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
@@ -48,12 +48,11 @@ class TcpPolling(EventServiceBase):
 
     def __poll(self):
         self._count += 1
-        logger.debug(f'Looping TCP {self._count}...')
+        logger.debug(f'MODBUS: Looping TCP   {self._count}...')
         results = self.__get_all_points()
         # TODO: separate thread for each network
         for network, device, point in results:
-            if all(v is not None for v in results):
-                poll_point(self, network, device, point, ModbusType.TCP)
+            poll_point(self, network, device, point, ModbusType.TCP)
         db.session.commit()
 
     def __get_all_points(self):

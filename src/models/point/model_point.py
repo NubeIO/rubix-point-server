@@ -66,22 +66,12 @@ class PointModel(ModelBase):
         return EventType.POINT_UPDATE
 
     def update(self, **kwargs):
-        value_round = kwargs.get('value_round')
-        value_offset = kwargs.get('value_offset')
-        value_operation = kwargs.get('value_operation')
-        update_point_store = False
-        if (value_round is not None and value_round != self.value_round) or \
-                (value_offset is not None and value_offset != self.value_offset) or \
-                (value_operation is not None and value_operation != self.value_operation):
-            # not doing first as want to publish UPDATE event before COV event
-            update_point_store = True
+        super().update(**kwargs)
 
-        super().update(kwargs)
-
-        if update_point_store:
-            point_store = PointStoreModel(PointStoreModel.find_by_point_uuid(self.uuid))
-            updated = point_store.update(self)
-            if updated:
-                point_store.publish_cov(self)
+        point_store = PointStoreModel.find_by_point_uuid(self.uuid)
+        updated = point_store.update(self, 0)
+        self.point_store = point_store
+        if updated:
+            point_store.publish_cov(self)
 
         return self
