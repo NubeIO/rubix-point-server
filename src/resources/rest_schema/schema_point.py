@@ -1,9 +1,11 @@
 from flask_restful import fields
+
 from src.resources.utils import map_rest_schema
 
 point_store_fields = {
     'point_uuid': fields.String,
     'value': fields.Float,
+    'value_original': fields.Float,
     'value_raw': fields.String,
     'fault': fields.Boolean,
     'fault_message': fields.String,
