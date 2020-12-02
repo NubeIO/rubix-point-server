@@ -37,7 +37,7 @@ class ModelBase(db.Model):
     # Issue #85 filter_by(...).update(...) is not working in inheritance
     def update(self, **kwargs):
         for key, value in kwargs.items():
-            if hasattr(self, key) and value is not None:
+            if hasattr(self, key):
                 setattr(self, key, value)
         self.check_self()
         db.session.commit()
