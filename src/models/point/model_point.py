@@ -23,6 +23,10 @@ class PointModel(ModelBase):
     value_round = db.Column(db.Integer(), nullable=False, default=2)
     value_offset = db.Column(db.Float(), nullable=False, default=0)
     value_operation = db.Column(db.Enum(MathOperation), nullable=True)
+    input_min = db.Column(db.Float())
+    input_max = db.Column(db.Float())
+    scale_min = db.Column(db.Float())
+    scale_max = db.Column(db.Float())
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point')
     driver = db.Column(db.String(80))
@@ -61,7 +65,6 @@ class PointModel(ModelBase):
     def get_model_event_type(self) -> EventType:
         return EventType.POINT_UPDATE
 
-    @classmethod
     def update(self, **kwargs):
         value_round = kwargs.get('value_round')
         value_offset = kwargs.get('value_offset')
@@ -73,7 +76,7 @@ class PointModel(ModelBase):
             # not doing first as want to publish UPDATE event before COV event
             update_point_store = True
 
-        super().update(self, kwargs)
+        super().update(kwargs)
 
         if update_point_store:
             point_store = PointStoreModel(PointStoreModel.find_by_point_uuid(self.uuid))

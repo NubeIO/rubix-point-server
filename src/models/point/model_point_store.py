@@ -43,7 +43,7 @@ class PointStoreModel(db.Model):
                      value_round: int) -> float:
         """Do calculations on original value with the help of point details"""
         if original_value is None:
-            return None
+            return original_value
         value = original_value
         if value_operation == MathOperation.ADD:
             value += value_offset
@@ -58,8 +58,18 @@ class PointStoreModel(db.Model):
         value = round(value, value_round)
         return value
 
+    @classmethod
+    def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
+            -> float:
+        if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
+            return value
+        value = ((value - input_min) * (output_max - output_min)) / (input_max - input_min) + output_min
+        return value
+
     def update(self, point) -> bool:
         if not self.fault:
+            self.value = PointStoreModel.apply_scale(self.value, point.input_min, point.input_max, point.scale_min,
+                                                     point.scale_max)
             self.value = PointStoreModel.apply_offset(self.value, point.value_offset, point.value_operation,
                                                       point.value_round)
             self.fault = bool(self.fault)
@@ -100,7 +110,7 @@ class PointStoreModel(db.Model):
             # TODO: get service_name of source driver that owns point
             raise NotImplementedError('NEED TO ADD IN LOOKUP TABLE BASED OF MODEL DRIVER')
 
-        EventDispatcher.dispatch_from_service(EventType.POINT_COV, Event(EventType.POINT_COV, {
+        EventDispatcher.dispatch_from_source(None, Event(EventType.POINT_COV, {
             'point': point,
             'point_store': self,
             'device': device,

@@ -51,6 +51,18 @@ point_all_attributes = {
         'nested': True,
         'dict': 'value_operation.name'
     },
+    'input_min': {
+        'type': float,
+    },
+    'input_max': {
+        'type': float,
+    },
+    'scale_min': {
+        'type': float,
+    },
+    'scale_max': {
+        'type': float,
+    },
 }
 
 point_return_attributes = {
