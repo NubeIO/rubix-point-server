@@ -1,6 +1,7 @@
 import logging
 
 from src import db
+from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import EventServiceBase, EventType
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
@@ -8,15 +9,13 @@ from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusT
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
 
-SERVICE_NAME_MODBUS_RTU = 'modbus_rtu'
-
 logger = logging.getLogger(__name__)
 
 
 class RtuPolling(EventServiceBase):
     _instance = None
     _polling_period = 1
-    service_name = SERVICE_NAME_MODBUS_RTU
+    service_name = MODBUS_SERVICE_NAME
     threaded = True
     _count = 0
 

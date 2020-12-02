@@ -103,8 +103,9 @@ class InfluxDB(HistoryBinding):
             })
             fields = {
                 'id': point_store_history.id,
-                'val': point_store_history.value,
-                'value_array': point_store_history.value_array,
+                'value': point_store_history.value,
+                'value_original': point_store_history.value_original,
+                'value_raw': point_store_history.value_raw,
                 'fault': point_store_history.fault,
                 'fault_message': point_store_history.fault_message,
             }

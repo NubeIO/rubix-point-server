@@ -66,10 +66,10 @@ class MqttClient(EventServiceBase):
                 try:
                     self.__client.connect(self.__host, self.__port, self.__keepalive)
                     break
-                except ConnectionRefusedError:
+                except (ConnectionRefusedError, OSError) as e:
                     logger.error(
                         f'MQTT connection failure {self.__host}:{self.__port} -> '
-                        f'ConnectionRefusedError. Attempting reconnect in '
+                        f'{type(e).__name__}. Attempting reconnect in '
                         f'{self.__attempt_reconnect_secs} seconds')
                     time.sleep(self.__attempt_reconnect_secs)
         else:
@@ -97,17 +97,17 @@ class MqttClient(EventServiceBase):
 
         payload = {
             'value': point_store.value,
-            'value_array': point_store.value_array,
+            'value_raw': point_store.value_raw,
             'fault': point_store.fault,
             'fault_message': point_store.fault_message,
         }
 
-        logger.info(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {payload}')
+        logger.debug(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {payload}')
 
         self.__client.publish(topic, json.dumps(payload), self.__qos, self.__retain)
         if self.__publish_value and not point_store.fault:
             topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
-            logger.info(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {point_store.value}')
+            logger.debug(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {point_store.value}')
             self.__client.publish(topic, point_store.value, self.__qos, self.__retain)
 
     def publish_update(self, model: ModelBase, updates: dict):
@@ -119,7 +119,7 @@ class MqttClient(EventServiceBase):
 
         topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_UPDATE}/{model.get_model_event_name()}/{model.uuid}'
 
-        logger.info(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {updates}')
+        logger.debug(f'MQTT PUB: {self.__host}:{self.__port} {topic} > {updates}')
         self.__client.publish(topic, json.dumps(updates), self.__qos, self.__retain)
 
     def __on_connect(self, client, userdata, flags, reason_code, properties=None):

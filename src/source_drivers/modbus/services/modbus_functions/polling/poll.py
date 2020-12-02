@@ -8,6 +8,7 @@ from src.interfaces.point import HistoryType
 from src.loggers import modbus_debug_poll
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventType, Event
+from src.services.histories.history_local import HistoryLocal
 from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
@@ -55,7 +56,6 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         point_data_type = point.data_type
         point_data_endian = point.data_endian
         write_value = point.write_value
-        point_cov_threshold = point.cov_threshold
     except ObjectDeletedError:
         return
 
@@ -131,7 +131,7 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
         """
         logger.debug(f'MODBUS DEBUG: READ/WRITE WAS DONE: {{"transport": {transport}, "val": {val}}}')
         if isinstance(val, numbers.Number):
-            point_store_new = PointStoreModel(value=val, value_array=str(array), point_uuid=point.uuid)
+            point_store_new = PointStoreModel(value_original=val, value_raw=str(array), point_uuid=point.uuid)
         else:
             fault = True
             fault_message = "Got non numeric value"
@@ -146,19 +146,13 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     logger.debug("!!! END MODBUS POLL @@@")
 
     try:
-        is_updated = point_store_new.update(point_cov_threshold)
-    except Exception:
+        is_updated = point_store_new.update(point)
+    except Exception as e:
+        logger.error(e)
         return
     if is_updated:
-        EventDispatcher.dispatch_from_source(service, Event(EventType.POINT_COV, {
-            'point': point,
-            'point_store': point_store_new,
-            'device': device,
-            'network': network,
-            'source_driver': service.service_name
-        }))
+        point_store_new.publish_cov(point, device, network, service.service_name)
         # TODO: move this to history service local as the dispatch event will handle it
         if point.history_type == HistoryType.COV and network.history_enable and \
                 device.history_enable and point.history_enable:
-            from src import HistoryLocal
             HistoryLocal.add_point_history_on_cov(point.uuid)

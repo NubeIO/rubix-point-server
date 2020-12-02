@@ -36,6 +36,8 @@ modbus_device_return_attributes['points'] = {
 }
 modbus_device_return_attributes['type'] = {
     'type': str,
+    'nested': True,
+    'dict': 'type.name'
 }
 
 modbus_device_all_fields = {}

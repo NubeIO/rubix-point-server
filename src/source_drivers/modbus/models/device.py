@@ -2,6 +2,7 @@ from sqlalchemy.orm import validates
 from sqlalchemy import UniqueConstraint
 
 from src import db
+from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.models.network.model_network import NetworkModel
 from src.models.device.model_device_mixin import DeviceMixinModel
 from src.source_drivers.modbus.models.network import ModbusType
@@ -31,7 +32,7 @@ class ModbusDeviceModel(DeviceMixinModel):
 
     @classmethod
     def get_polymorphic_identity(cls):
-        return 'Modbus'
+        return MODBUS_SERVICE_NAME
 
     @validates('tcp_ip')
     def validate_tcp_ip(self, _, value):

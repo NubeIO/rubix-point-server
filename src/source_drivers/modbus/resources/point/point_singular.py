@@ -1,5 +1,7 @@
 from flask_restful import abort, marshal_with, reqparse
 
+from src import db
+from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields, \
@@ -9,9 +11,8 @@ from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import 
 class ModbusPointSingular(ModbusPointBase):
     """
     It returns point with point_store object value, which has the current values of point_store for that particular
-    point with last not null value and value_array
+    point with last not null value and value_raw
     """
-
     patch_parser = reqparse.RequestParser()
     for attr in modbus_point_all_attributes:
         patch_parser.add_argument(attr,
@@ -36,8 +37,7 @@ class ModbusPointSingular(ModbusPointBase):
             return cls.add_point(data, uuid)
         else:
             try:
-                point.update(**data)
-                return ModbusPointModel.find_by_uuid(uuid)
+                return point.update(**data)
             except Exception as e:
                 abort(500, message=str(e))
 
@@ -50,8 +50,7 @@ class ModbusPointSingular(ModbusPointBase):
             abort(404, message=f'Modbus Point not found')
         else:
             try:
-                point.update(**data)
-                return ModbusPointModel.find_by_uuid(uuid)
+                return point.update(**data)
             except Exception as e:
                 abort(500, message=str(e))
 

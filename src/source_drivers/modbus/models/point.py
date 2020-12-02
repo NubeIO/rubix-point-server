@@ -1,7 +1,7 @@
 from sqlalchemy import UniqueConstraint
 
 from src import db
-
+from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.models.point.model_point_mixin import PointMixinModel
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 
@@ -14,8 +14,6 @@ class ModbusPointModel(PointMixinModel):
     function_code = db.Column(db.Enum(ModbusFunctionCode), nullable=False)
     data_type = db.Column(db.Enum(ModbusDataType), nullable=False)
     data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False, default=ModbusDataEndian.BEB_LEW)
-    data_round = db.Column(db.Integer(), nullable=False, default=2)  # TODO: not used
-    data_offset = db.Column(db.String(80), nullable=False, default=0)  # TODO: not used
     timeout = db.Column(db.Float(), nullable=False, default=1)  # TODO: not used
     timeout_global = db.Column(db.Boolean(), nullable=False, default=True)  # TODO: not used
     modbus_device_uuid_constraint = db.Column(db.String, nullable=False)
@@ -26,7 +24,7 @@ class ModbusPointModel(PointMixinModel):
 
     @classmethod
     def get_polymorphic_identity(cls):
-        return "Modbus"
+        return MODBUS_SERVICE_NAME
 
     def check_self(self) -> (bool, any):
         super().check_self()
@@ -63,7 +61,7 @@ class ModbusPointModel(PointMixinModel):
                 point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_COILS:
             data_type = ModbusDataType.DIGITAL
             self.data_type = ModbusDataType.DIGITAL
-            self.data_round = 0
+            self.value_round = 0
 
         if data_type == ModbusDataType.FLOAT or data_type == ModbusDataType.INT32 or \
                 data_type == ModbusDataType.UINT32:
