@@ -13,7 +13,7 @@ if len(sys.argv) == 4:
         print('invalid numbers')
         exit(1)
 else:
-    print('please provide network num, device num and point num ' \
+    print('please provide network num, device num and point num '
           '(i.e. "this.py 1 2 3" for 1 network with 2 devices with 3 points each')
     exit(1)
 
@@ -24,7 +24,7 @@ port = 1515
 url = f'http://{ip}:{port}/api'
 network_url = f'{url}/modbus/networks'
 devices_url = f'{url}/modbus/devices'
-reg_type = "READ_HOLDING_REGISTERS"
+fc = "READ_HOLDING_REGISTERS"
 data_type = "RAW"
 points_url = f'{url}/modbus/points'
 
@@ -34,13 +34,8 @@ for n in range(1, networks+1):
         "type": "RTU",
         "enable": True,
         "timeout": 0.2,
-        "device_timeout_global": 1000,
-        "point_timeout_global": 2000,
-        "rtu_port": "/dev/ttyUSB2",
+        "rtu_port": f"/dev/ttyUSB{n}",
         "rtu_speed": 9600,
-        "rtu_stop_bits": 1,
-        "rtu_parity": "N",
-        "rtu_byte_size": 8
     }
 
     response_n = requests.post(f'{network_url}', data=network_obj)
@@ -56,15 +51,9 @@ for n in range(1, networks+1):
     for d in range(1, devices+1):
 
         devices_obj = {
-            "name": f'device_{d}',
+            "name": f'device_{n}_{d}',
             "enable": True,
-            "type": "RTU",
             "address": d,
-            "ping_point_type": "mod_ping_point_type",
-            "ping_point_address": 1,
-            "zero_mode": False,
-            "timeout": 1,
-            "timeout_global": False,
             "network_uuid": network_uuid
         }
 
@@ -79,19 +68,16 @@ for n in range(1, networks+1):
             continue
 
         for r in range(1, points+1):
-            name = f'point_{r}'
+            name = f'point_{n}_{d}_{r}'
             point_obj = {
                 "name": f'{name}\\{d}\\{r}',
-                "reg": r,
-                "reg_length": 2,
-                "type": reg_type,
+                "register": r,
+                "register_length": 2,
+                "function_code": fc,
                 "enable": True,
                 "data_type": data_type,
-                "data_endian": "BEB_BEW",
-                "data_round": 22,
-                "data_offset": 2,
-                "timeout": 1,
-                "timeout_global": True,
+                "data_endian": "BEB_LEW",
+                "data_round": 2,
                 "device_uuid": device_uuid
             }
             response_p = requests.post(f'{points_url}', data=point_obj)

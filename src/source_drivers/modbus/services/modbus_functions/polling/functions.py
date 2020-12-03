@@ -3,12 +3,13 @@ import logging
 from pymodbus.bit_write_message import WriteSingleCoilResponse
 from pymodbus.exceptions import ModbusIOException
 
-from src.loggers import modbus_debug
+from src.loggers import modbus_poll_debug_log
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 from src.source_drivers.modbus.services.modbus_functions.function_utils import _set_data_length, _assertion, \
-    _mod_point_data_endian, _select_data_type, _builder_data_type
+    _mod_point_data_endian, convert_to_data_type, _builder_data_type
+from src.source_drivers.modbus.services import modbus_poll_debug
 
-logger = logging.getLogger(modbus_debug)
+logger = logging.getLogger(modbus_poll_debug_log)
 
 
 def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
@@ -33,13 +34,13 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(read):  # checking for errors
-        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
+    if not _assertion(read):
+        assertion_ok_debug_log()
         if data_type is not ModbusDataType.RAW:
             byteorder, word_order = _mod_point_data_endian(endian)
-            val = _select_data_type(read, data_type, byteorder, word_order)
+            val = convert_to_data_type(read, data_type, byteorder, word_order)
         else:
-            val = read.registers[0]  # first register
+            val = read.registers[0]
         return val, read.registers
     else:
         if not isinstance(read, ModbusIOException):
@@ -58,8 +59,7 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
     :return: tuple (val: any, array: list)
     """
     debug_log('read_digital', _unit, func, reg_length, reg_start)
-    data_type = 'digital'
-    reg_length = _set_data_length(data_type, reg_length)
+    reg_length = _set_data_length(ModbusDataType.DIGITAL, reg_length)
     if func == ModbusFunctionCode.READ_COILS:
         read = client.read_coils(reg_start, reg_length, unit=_unit)
     elif func == ModbusFunctionCode.READ_DISCRETE_INPUTS:
@@ -67,8 +67,8 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(read):  # checking for errors
-        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
+    if not _assertion(read):
+        assertion_ok_debug_log()
         for ind in range(len(read.bits)):
             read.bits[ind] = int(read.bits[ind])
         val = read.bits[0]
@@ -101,8 +101,8 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_val
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(write):  # checking for errors
-        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
+    if not _assertion(write):
+        assertion_ok_debug_log()
         if isinstance(write, WriteSingleCoilResponse):
             return int(write.value), [int(write.value)]
         else:
@@ -138,8 +138,8 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     else:
         raise Exception('Invalid Modbus function code', func)
 
-    if not _assertion(write):  # checking for errors
-        assertion_ok_debug_log(_unit, func, reg_length, reg_start)
+    if not _assertion(write):
+        assertion_ok_debug_log()
         return write_value, payload
     else:
         if not isinstance(write, ModbusIOException):
@@ -147,11 +147,10 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
         raise write
 
 
-def debug_log(name, _unit, func, reg_length, reg_start):
-    logger.debug(
-        f'{name}, check reg_length {{"reg_start": {reg_start}, "reg_length": {reg_length}, "_unit:" {_unit}}}, "func": {func}}}')
+def debug_log(function, _unit, fc, reg_length, reg_start):
+    modbus_poll_debug(logger, f'{function}, "reg_start": {reg_start}, "reg_length": {reg_length}, '
+                              f'"_unit:" {_unit}}}, "FC": {fc}}}')
 
 
-def assertion_ok_debug_log(_unit, func, reg_length, reg_start):
-    logger.debug(
-        f'_assertion OK {{"reg_start": {reg_start}, "reg_length": {reg_length}, "unit:" {_unit}}}, "func": {func}}}')
+def assertion_ok_debug_log():
+    modbus_poll_debug(logger, 'Assertion OK')

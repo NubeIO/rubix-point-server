@@ -27,3 +27,7 @@ class DeviceModel(ModelBase):
 
     def get_model_event_type(self) -> EventType:
         return EventType.DEVICE_UPDATE
+
+    def set_fault(self, is_fault: bool):
+        self.fault = is_fault
+        db.session.commit()

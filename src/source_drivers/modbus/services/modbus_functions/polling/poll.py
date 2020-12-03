@@ -2,49 +2,37 @@ import logging
 import numbers
 
 from sqlalchemy.orm.exc import ObjectDeletedError
+from pymodbus.exceptions import ModbusIOException
 
-from src.event_dispatcher import EventDispatcher
 from src.interfaces.point import HistoryType
-from src.loggers import modbus_debug_poll
+from src.loggers import modbus_poll_debug_log
 from src.models.point.model_point_store import PointStoreModel
-from src.services.event_service_base import EventServiceBase, EventType, Event
+from src.services.event_service_base import EventServiceBase
 from src.services.histories.history_local import HistoryLocal
-from src.source_drivers.modbus.interfaces.network.network import ModbusType
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.source_drivers.modbus.services.modbus_functions.polling.poll_funcs import read_digital_handle, \
-    read_analog_handle, write_coil_handle, write_holding_registers_handle
-from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
-
-logger = logging.getLogger(modbus_debug_poll)
+from src.source_drivers.modbus.services.modbus_functions.polling.functions import read_digital, write_digital, \
+    read_analogue, write_analogue
+from src.source_drivers.modbus.services import modbus_poll_debug
 
 
-def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: ModbusDeviceModel,
-               point: ModbusPointModel, transport: ModbusType) -> None:
+logger = logging.getLogger(modbus_poll_debug_log)
+
+
+def poll_point(service: EventServiceBase, connection, network: ModbusNetworkModel, device: ModbusDeviceModel,
+               point: ModbusPointModel, update: bool) -> None:
     """
     Main modbus polling loop
     :param service: EventServiceBase object that's calling this (for point COV events)
+    :param connection: pymodbus network connection
     :param network: modbus network class
     :param device: modbus device class
     :param point: modbus point class
-    :param transport: modbus transport as in TCP or RTU
-    :return: None
+    :param update: update point store or not
+    :return: PointStoreModel
     """
-
-    connection = None
-    if transport == ModbusType.RTU:
-        connection = RtuRegistry.get_rtu_connections().get(RtuRegistry.create_connection_key_by_network(network))
-        if not connection:
-            connection = RtuRegistry.get_instance().add_network(network)
-    if transport == ModbusType.TCP:
-        host = device.tcp_ip
-        port = device.tcp_port
-        connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
-        if not connection:
-            connection = TcpRegistry.get_instance().add_device(device)
 
     try:
         device_address = device.address
@@ -59,100 +47,104 @@ def poll_point(service: EventServiceBase, network: ModbusNetworkModel, device: M
     except ObjectDeletedError:
         return
 
-    logger.debug('@@@ START MODBUS POLL !!!')
-    logger.debug({'network': network,
-                  'transport': transport,
-                  'device_uuid': device.uuid,
-                  'device_address': device_address,
-                  'point_uuid': point_uuid,
-                  'point_register': point_register,
-                  'point_register_length': point_register_length,
-                  'point_fc': point_fc,
-                  'point_data_type': point_data_type,
-                  'point_data_endian': point_data_endian,
-                  'write_value': write_value
-                  })
+    modbus_poll_debug(logger, '--------------- START MODBUS POLL POINT ---------------')
+    modbus_poll_debug(logger, {'network': network,
+                               'device_uuid': device.uuid,
+                               'device_address': device_address,
+                               'point_uuid': point_uuid,
+                               'point_fc': point_fc,
+                               'point_register': point_register,
+                               'point_register_length': point_register_length,
+                               'point_data_type': point_data_type,
+                               'point_data_endian': point_data_endian,
+                               'writable': point.writable,
+                               'write_value': write_value
+                               })
     if not zero_based:
         point_register -= 1
-        logger.debug(f"MODBUS DEBUG: device zero_based True. point_register -= 1: {point_register + 1} "
-                     f"-> {point_register}")
+        modbus_poll_debug(logger, f"device zero_based True. point_register -= 1: {point_register + 1} "
+                                  f"-> {point_register}")
 
     fault = False
     fault_message = ""
     point_store_new = None
+    error = None
 
     try:
         val = None
         array = ""
-        """
-        read_coils read_discrete_inputs
-        """
-        if point_fc == ModbusFunctionCode.READ_COILS or point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS:
-            val, array = read_digital_handle(connection,
-                                             point_register,
-                                             point_register_length,
-                                             device_address,
-                                             point_fc)
-        """
-        read_holding_registers read_input_registers
-        """
-        if point_fc == ModbusFunctionCode.READ_HOLDING_REGISTERS or point_fc == ModbusFunctionCode.READ_INPUT_REGISTERS:
-            val, array = read_analog_handle(connection,
-                                            point_register,
-                                            point_register_length,
-                                            device_address,
-                                            point_data_type,
-                                            point_data_endian,
-                                            point_fc)
-        """
-        write_coils
-        """
-        if point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_COILS:
-            val, array = write_coil_handle(connection, point_register,
-                                           point_register_length,
-                                           device_address,
-                                           write_value,
-                                           point_fc)
-        """
-        write_registers
-        """
-        if point_fc == ModbusFunctionCode.WRITE_REGISTER or point_fc == ModbusFunctionCode.WRITE_REGISTERS:
-            val, array = write_holding_registers_handle(connection,
-                                                        point_register,
-                                                        point_register_length,
-                                                        device_address,
-                                                        point_data_type,
-                                                        point_data_endian,
-                                                        write_value,
-                                                        point_fc)
 
-        """
-        Save modbus data in database
-        """
-        logger.debug(f'MODBUS DEBUG: READ/WRITE WAS DONE: {{"transport": {transport}, "val": {val}}}')
+        if point_fc == ModbusFunctionCode.READ_COILS or \
+                point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS:
+            val, array = read_digital(connection,
+                                      point_register,
+                                      point_register_length,
+                                      device_address,
+                                      point_fc)
+
+        elif point_fc == ModbusFunctionCode.READ_HOLDING_REGISTERS or \
+                point_fc == ModbusFunctionCode.READ_INPUT_REGISTERS:
+            val, array = read_analogue(connection,
+                                       point_register,
+                                       point_register_length,
+                                       device_address,
+                                       point_data_type,
+                                       point_data_endian,
+                                       point_fc)
+
+        elif point_fc == ModbusFunctionCode.WRITE_COIL or \
+                point_fc == ModbusFunctionCode.WRITE_COILS:
+            val, array = write_digital(connection, point_register,
+                                       point_register_length,
+                                       device_address,
+                                       write_value,
+                                       point_fc)
+        elif point_fc == ModbusFunctionCode.WRITE_REGISTER or \
+                point_fc == ModbusFunctionCode.WRITE_REGISTERS:
+            val, array = write_analogue(connection,
+                                        point_register,
+                                        point_register_length,
+                                        device_address,
+                                        point_data_type,
+                                        point_data_endian,
+                                        write_value,
+                                        point_fc)
+
+        modbus_poll_debug(logger, f'READ/WRITE SUCCESS: val: {val}, array: {array}')
+
         if isinstance(val, numbers.Number):
             point_store_new = PointStoreModel(value_original=val, value_raw=str(array), point_uuid=point.uuid)
         else:
+            modbus_poll_debug(logger, f"ERROR: non number received, NOTIFY DEVELOPER. type {type(val)}")
             fault = True
-            fault_message = "Got non numeric value"
+            fault_message = f"ERROR: non number received, NOTIFY DEVELOPER. type {type(val)}"
+
     except ObjectDeletedError:
+        modbus_poll_debug(logger, 'ERROR: point no longer exists. Returning.')
         return
-    except Exception as e:
-        logger.debug(f'MODBUS ERROR: in poll main function {str(e)}')
+    except ModbusIOException as e:
+        modbus_poll_debug(logger, f'ERROR: {str(e)}')
         fault = True
         fault_message = str(e)
+        error = e
+
     if not point_store_new:
         point_store_new = PointStoreModel(fault=fault, fault_message=fault_message, point_uuid=point.uuid)
-    logger.debug("!!! END MODBUS POLL @@@")
 
-    try:
-        is_updated = point_store_new.update(point)
-    except Exception as e:
-        logger.error(e)
-        return
-    if is_updated:
-        point_store_new.publish_cov(point, device, network, service.service_name)
-        # TODO: move this to history service local as the dispatch event will handle it
-        if point.history_type == HistoryType.COV and network.history_enable and \
-                device.history_enable and point.history_enable:
-            HistoryLocal.add_point_history_on_cov(point.uuid)
+    modbus_poll_debug(logger, "--------------- END MODBUS POLL POINT ---------------")
+
+    if update:
+        try:
+            is_updated = point_store_new.update(point)
+        except Exception as e:
+            logger.error(e)
+            return
+        if is_updated:
+            point_store_new.publish_cov(point, device, network, service.service_name)
+            # TODO: move this to history service local as the dispatch event will handle it
+            if point.history_type == HistoryType.COV and network.history_enable and \
+                    device.history_enable and point.history_enable:
+                HistoryLocal.add_point_history_on_cov(point.uuid)
+
+    if error is not None:
+        raise error

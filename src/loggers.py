@@ -1,2 +1,1 @@
-modbus_debug_poll = 'modbus_debug_poll'
-modbus_debug = 'modbus_debug'
+modbus_poll_debug_log = 'modbus_poll_debug'
