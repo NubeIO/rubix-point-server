@@ -34,6 +34,65 @@ modbus_point_all_attributes['timeout_global'] = {
     'type': bool,
 }
 
+modbud_poll_non_existing_attributes = {
+    'network_type': {
+        'type': str,
+        'required': True
+    },
+    'network_rtu_port': {
+        'type': str,
+    },
+    'network_rtu_speed': {
+        'type': int,
+    },
+    'network_rtu_stop_bits': {
+        'type': int,
+    },
+    'network_rtu_parity': {
+        'type': str,
+    },
+    'network_rtu_byte_size': {
+        'type': int,
+    },
+    'network_timeout': {
+        'type': int,
+    },
+    'device_address': {
+        'type': int,
+        'required': True
+    },
+    'device_ip': {
+        'type': str,
+    },
+    'device_port': {
+        'type': int,
+    },
+    'device_zero_based': {
+        'type': bool,
+    },
+    'point_register': {
+        'type': int,
+        'required': True
+    },
+    'point_register_length': {
+        'type': int,
+        'required': True
+    },
+    'point_function_code': {
+        'type': str,
+        'required': True
+    },
+    'point_write_value': {
+        'type': float,
+    },
+    'point_data_type': {
+        'type': str,
+    },
+    'point_data_endian': {
+        'type': str,
+    },
+}
+
 modbus_point_return_attributes = deepcopy(point_return_attributes)
 
 modbus_point_all_fields = {}

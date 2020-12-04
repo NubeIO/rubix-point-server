@@ -12,7 +12,8 @@ from src.source_drivers.modbus.resources.device.device_singular import ModbusDev
 from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
 from src.source_drivers.modbus.resources.network.network_singular import ModbusNetworkSingular
 from src.source_drivers.modbus.resources.point.point_plural import ModbusPointPlural
-from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingular
+from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingular, ModbusPointPoll, \
+    ModbusPointPollNonExisting
 from src.source_drivers.modbus.resources.point.point_stores import ModbusPointPluralPointStore, ModbusPointStore, \
     ModbusDevicePointPluralPointStore
 from src.system.resources.memory import GetSystemMem
@@ -52,6 +53,8 @@ api.add_resource(ModbusDevicePlural, f'/{modbus_api_prefix}/devices')
 api.add_resource(ModbusDeviceSingular, f'/{modbus_api_prefix}/devices/<string:uuid>')
 api.add_resource(ModbusPointPlural, f'/{modbus_api_prefix}/points')
 api.add_resource(ModbusPointSingular, f'/{modbus_api_prefix}/points/<string:uuid>')
+api.add_resource(ModbusPointPoll, f'/{modbus_api_prefix}/poll/point/<string:uuid>')
+api.add_resource(ModbusPointPollNonExisting, f'/{modbus_api_prefix}/poll/point')
 api.add_resource(ModbusPointPluralPointStore, f'/{modbus_api_prefix}/point_stores')
 api.add_resource(ModbusPointStore, f'/{modbus_api_prefix}/point_stores/<string:uuid>')
 api.add_resource(ModbusDevicePointPluralPointStore, f'/{modbus_api_prefix}/<string:device_uuid>/point_stores')

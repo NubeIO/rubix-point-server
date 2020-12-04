@@ -44,6 +44,8 @@ class ModbusDeviceModel(DeviceMixinModel):
 
     def check_self(self) -> (bool, any):
         super().check_self()
+        if self.network_uuid is None:  # for temporary models
+            return True
         network = NetworkModel.find_by_uuid(self.network_uuid)
         # can't get sqlalchemy column default to do this so this is solution
         if network is None:

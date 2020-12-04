@@ -1,7 +1,6 @@
 import logging
 import numbers
 
-from sqlalchemy.orm.exc import ObjectDeletedError
 from pymodbus.exceptions import ModbusIOException
 
 from src.interfaces.point import HistoryType
@@ -22,7 +21,7 @@ logger = logging.getLogger(modbus_poll_debug_log)
 
 
 def poll_point(service: EventServiceBase, connection, network: ModbusNetworkModel, device: ModbusDeviceModel,
-               point: ModbusPointModel, update: bool) -> None:
+               point: ModbusPointModel, update: bool) -> PointStoreModel:
     """
     Main modbus polling loop
     :param service: EventServiceBase object that's calling this (for point COV events)
@@ -34,18 +33,15 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
     :return: PointStoreModel
     """
 
-    try:
-        device_address = device.address
-        zero_based = device.zero_based
-        point_register = point.register
-        point_uuid = point.uuid
-        point_register_length = point.register_length
-        point_fc = point.function_code
-        point_data_type = point.data_type
-        point_data_endian = point.data_endian
-        write_value = point.write_value
-    except ObjectDeletedError:
-        return
+    device_address = device.address
+    zero_based = device.zero_based
+    point_register = point.register
+    point_uuid = point.uuid
+    point_register_length = point.register_length
+    point_fc = point.function_code
+    point_data_type = point.data_type
+    point_data_endian = point.data_endian
+    write_value = point.write_value
 
     modbus_poll_debug(logger, '--------------- START MODBUS POLL POINT ---------------')
     modbus_poll_debug(logger, {'network': network,
@@ -119,9 +115,6 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
             fault = True
             fault_message = f"ERROR: non number received, NOTIFY DEVELOPER. type {type(val)}"
 
-    except ObjectDeletedError:
-        modbus_poll_debug(logger, 'ERROR: point no longer exists. Returning.')
-        return
     except ModbusIOException as e:
         modbus_poll_debug(logger, f'ERROR: {str(e)}')
         fault = True
@@ -136,9 +129,9 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
     if update:
         try:
             is_updated = point_store_new.update(point)
-        except Exception as e:
+        except BaseException as e:
             logger.error(e)
-            return
+            return point_store_new
         if is_updated:
             point_store_new.publish_cov(point, device, network, service.service_name)
             # TODO: move this to history service local as the dispatch event will handle it
@@ -148,3 +141,5 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
 
     if error is not None:
         raise error
+
+    return point_store_new

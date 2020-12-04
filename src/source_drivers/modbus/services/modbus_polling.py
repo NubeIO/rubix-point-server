@@ -1,11 +1,13 @@
 import time
 import logging
+from sqlalchemy.orm.exc import ObjectDeletedError
 from pymodbus.exceptions import ConnectionException, ModbusIOException
 
 from src import db
 from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.event_dispatcher import EventDispatcher
-from src.services.event_service_base import EventServiceBase, EventType
+from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException
+from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
@@ -37,6 +39,8 @@ class ModbusPolling(EventServiceBase):
             if event.event_type is EventType.INTERNAL_SERVICE_TIMEOUT:
                 self.__poll()
                 self._set_internal_service_timeout(ModbusPolling._polling_period)
+            elif event.event_type is EventType.CALLABLE:
+                self._handle_internal_callable(event)
             else:
                 self._handle_internal_callable(event)
 
@@ -65,9 +69,8 @@ class ModbusPolling(EventServiceBase):
                 current_network = network
             if ping_point is not None:
                 try:
-                    self.__poll_point(current_connection, ping_point, device, network, False)
+                    self.__poll_point(current_connection, ping_point, device, network, True, False)
                 except ConnectionException:
-                    # TODO: test TCP connection errors
                     unavailable_networks.append(network.uuid)
                     continue
                 except ModbusIOException:
@@ -78,6 +81,9 @@ class ModbusPolling(EventServiceBase):
             """
             points = device.points
             for point in points:
+                if self.event_count() > 0:
+                    self.__log_debug('Breaking poll loop due to waiting event')
+                    return
                 try:
                     self.__poll_point(current_connection, point, device, network, True)
                 except ConnectionException:
@@ -97,30 +103,55 @@ class ModbusPolling(EventServiceBase):
             .join(ModbusPointModel, ModbusPointModel.uuid == ModbusDeviceModel.ping_point_uuid, isouter=True)
         return results
 
+    def poll_point_not_existing(self, point: ModbusPointModel, device: ModbusDeviceModel, network: ModbusNetworkModel):
+        self.__log_debug(f'Manual poll request Non Existing Point {point}')
+        connection = self._get_connection(network, device)
+        if network.type is not self.__network_type:
+            raise HandledByDifferentServiceException
+        point_store = self.__poll_point(connection, point, device, network, False, False)
+        return point_store
+
+    def poll_point(self, point: ModbusPointModel) -> ModbusPointModel:
+        self.__log_debug(f'Manual poll request {point}')
+        device = ModbusDeviceModel.find_by_uuid(point.device_uuid)
+        if device.type is not self.__network_type:
+            raise HandledByDifferentServiceException
+        network = ModbusNetworkModel.find_by_uuid(device.network_uuid)
+        self.__log_debug(f'Manual poll request: network: {network.uuid}, device: {device.uuid}, point: {point.uuid}')
+        connection = self._get_connection(network, device)
+        self.__poll_point(connection, point, device, network)
+        return point
+
     def __poll_point(self, connection, point: ModbusPointModel, device: ModbusDeviceModel, network: ModbusNetworkModel,
-                     update: bool):
-        error = None
-        try:
-            poll_point(self, connection, network, device, point, update)
-        except ConnectionException as e:
-            if not network.fault:
-                self.__log_debug(f'Network {network.name} unreachable')
-                network.set_fault(True)
-            error = e
-        except ModbusIOException as e:
-            error = e
-        if network.fault and not isinstance(error, ConnectionException):
-            network.set_fault(False)
-        elif not network.fault and isinstance(error, ConnectionException):
-            network.set_fault(True)
+                     update_all: bool = True, update_point_store: bool = True) -> PointStoreModel:
+        point_store = None
+        if update_all:
+            try:
+                error = None
+                try:
+                    point_store = poll_point(self, connection, network, device, point, update_point_store)
+                except ConnectionException as e:
+                    if not network.fault:
+                        network.set_fault(True)
+                    error = e
+                except ModbusIOException as e:
+                    if not device.fault:
+                        device.set_fault(True)
+                    error = e
 
-        if device.fault and not isinstance(error, ModbusIOException):
-            device.set_fault(False)
-        elif not device.fault and isinstance(error, ModbusIOException):
-            device.set_fault(True)
+                if network.fault and not isinstance(error, ConnectionException):
+                    network.set_fault(False)
+                elif device.fault and not isinstance(error, ModbusIOException) and \
+                        not isinstance(error, ConnectionException):
+                    device.set_fault(False)
 
-        if error is not None:
-            raise error
+                if error is not None:
+                    raise error
+            except ObjectDeletedError:
+                return None
+        else:
+            point_store = poll_point(self, connection, network, device, point, update_point_store)
+        return point_store
 
     def _get_connection(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
         raise NotImplementedError

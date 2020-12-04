@@ -22,39 +22,26 @@ class ModbusNetworkModel(NetworkMixinModel):
     def get_polymorphic_identity(cls):
         return MODBUS_SERVICE_NAME
 
+    @validates('type')
+    def validate_type(self, _, value):
+        if isinstance(value, ModbusType):
+            return value
+        if not value or value not in ModbusType.__members__:
+            raise ValueError("Invalid network type")
+        return ModbusType[value]
+
     @validates('rtu_port')
     def validate_rtu_port(self, _, value):
         if not value and self.type == ModbusType.RTU.name:
             raise ValueError("rtu_port should be be there on type MTU")
         return value
 
-    @validates('rtu_speed')
-    def validate_rtu_speed(self, _, value):
-        if not value and self.type == ModbusType.RTU.name:
-            raise ValueError("rtu_speed should be be there on rtu_speed MTU")
-        return value
-
-    @validates('rtu_stop_bits')
-    def validate_rtu_stop_bits(self, _, value):
-        msg = "rtu_stop_bits The number of bits sent after each character in a message to indicate the end of the " \
-              "byte. This defaults to 1 "
-        if not value and self.type == ModbusType.RTU.name:
-            raise ValueError(msg)
-        return value
-
-    @validates('rtu_parity')
-    def validate_rtu_parity(self, _, value):
-        if not value and self.type == ModbusType.RTU.name:
-            raise ValueError("rtu_parity should be be there on type MTU")
-        return value
-
     @validates('rtu_byte_size')
     def validate_rtu_byte_size(self, _, value):
         msg = "rtu_byte_size The number of bits in a byte of serial data. This can be one of 5, 6, 7, or 8. This " \
               "defaults to 8"
-        if self.type == ModbusType.RTU.name:
-            if value not in range(5, 9):
-                raise ValueError(msg)
-            elif not value:
-                raise ValueError(msg)
+        if value not in range(5, 9):
+            raise ValueError(msg)
+        elif not value:
+            raise ValueError(msg)
         return value
