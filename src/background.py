@@ -15,19 +15,23 @@ logger = logging.getLogger(__name__)
 
 
 class Background:
+    __mqtt_clients = []
+
+    @staticmethod
+    def get_mqtt_client():
+        return Background.__mqtt_clients
+
     @staticmethod
     def run():
         logger.info("Running Background Task...")
         if settings__enable_mqtt:
             mqtt_client_list = filter(lambda section: 'mqtt_' in section, config.sections())
-            mqtt_clients = []
-            mqtt_threads = []
+            Background.__mqtt_clients = []
             for client_config_title in mqtt_client_list:
                 mqtt_client = create_mqtt_client(client_config_title)
                 mqtt_thread = Thread(target=mqtt_client.start, daemon=True)
                 mqtt_thread.start()
-                mqtt_clients.append(mqtt_client)
-                mqtt_threads.append(mqtt_thread)
+                Background.__mqtt_clients.append(mqtt_client)
 
         if settings__enable_tcp:
             TcpRegistry.get_instance().register()
