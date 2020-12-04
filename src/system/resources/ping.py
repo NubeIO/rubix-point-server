@@ -3,9 +3,9 @@ from datetime import datetime
 
 from flask_restful import Resource
 
+from src.background import Background
 from src.ini_config import *
 from src.services.histories.sync.influxdb import InfluxDB
-from src.services.mqtt_client.mqtt_client import MqttClient
 
 start_time = time.time()
 up_time_date = str(datetime.now())
@@ -26,12 +26,15 @@ class Ping(Resource):
         up_hour = up_time / 3600
         up_hour = "{:.2f}".format(up_hour)
         deployment_mode = 'production' if os.environ.get("data_dir") is not None else 'development'
+        mqtt_client_status = []
+        for mqtt_client in Background.get_mqtt_client():
+            mqtt_client_status.append({mqtt_client.to_string(): mqtt_client.status()})
         return {
             'up_time_date': up_time_date,
             'up_min': up_min,
             'up_hour': up_hour,
             'deployment_mode': deployment_mode,
-            'mqtt_client_status': MqttClient.get_instance().status(),
+            'mqtt_client_status': mqtt_client_status,
             'influx_db_status': InfluxDB.get_instance().status(),
             'settings': {
                 'enable_mqtt': settings__enable_mqtt,

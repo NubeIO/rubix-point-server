@@ -51,6 +51,9 @@ class MqttClient(EventServiceBase):
         self.supported_events[EventType.NETWORK_UPDATE] = True
         EventDispatcher.add_service(self)
 
+    def to_string(self) -> str:
+        return f'{self.__host}:{self.__port}'
+
     def status(self):
         if not self.__client:
             return False
