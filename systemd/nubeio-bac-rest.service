@@ -6,12 +6,12 @@ After=network.target
 Type=simple
 User=<user>
 WorkingDirectory=<working_dir>
-ExecStart=<lib_dir>/venv/bin/gunicorn -b 0.0.0.0:1515 --log-level=DEBUG --worker-class gevent -w 1 run:app -e data_dir=/data/bac-rest
+ExecStart=<lib_dir>/venv/bin/gunicorn -b 0.0.0.0:1515 --log-level=DEBUG --worker-class gevent -w 1 run:app -e data_dir=/data/point-server
 Restart=always
 RestartSec=10
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=bac-rest
+SyslogIdentifier=point-server
 
 [Install]
 WantedBy=multi-user.target

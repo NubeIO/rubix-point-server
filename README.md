@@ -2,9 +2,6 @@
 
 ## Install
 
-```bash
-git clone --depth 1 https://github.com/NubeDev/bac-rest && cd bac-rest/
-```
 
 ### Running on Production
 
@@ -14,7 +11,7 @@ git clone --depth 1 https://github.com/NubeDev/bac-rest && cd bac-rest/
 
 #### Commands:
 ```bash
-sudo bash script.bash start -u=<pi|debian> -dir=<bac-rest_dir> -lib_dir=<common-py-libs-dir>
+sudo bash script.bash start -u=<pi|debian> -dir=<point-server_dir> -lib_dir=<common-py-libs-dir>
 sudo bash script.bash -h
 ```
 
@@ -72,26 +69,26 @@ python3 run.py
 ```
 **System Service**
 ```bash
-mkdir /data/bac-rest
-cp settings/config.example.ini /data/bac-rest/config.ini
+mkdir /data/point-server
+cp settings/config.example.ini /data/point-server/config.ini
 
 # copy and edit service file
-sudo cp systemd/nubeio-bac-rest.service /etc/systemd/system/
-sudo nano /etc/systemd/system/nubeio-bac-rest.service
+sudo cp systemd/nubeio-point-server.service /etc/systemd/system/
+sudo nano /etc/systemd/system/nubeio-point-server.service
 
 # load service
-sudo systemctl daemon-reload && sudo systemctl enable nubeio-bac-rest.service
-sudo systemctl start nubeio-bac-rest.service
+sudo systemctl daemon-reload && sudo systemctl enable nubeio-point-server.service
+sudo systemctl start nubeio-point-server.service
 
 # check its running
-sudo journalctl -f -u nubeio-bac-rest.service
+sudo journalctl -f -u nubeio-point-server.service
 ```
 Other:
 ```
-sudo systemctl start nubeio-bac-rest.service
-sudo systemctl stop nubeio-bac-rest.service
-sudo systemctl restart nubeio-bac-rest.service
-sudo journalctl -f -u nubeio-bac-rest.service
+sudo systemctl start nubeio-point-server.service
+sudo systemctl stop nubeio-point-server.service
+sudo systemctl restart nubeio-point-server.service
+sudo journalctl -f -u nubeio-point-server.service
 ```
 
 ## DOCS
