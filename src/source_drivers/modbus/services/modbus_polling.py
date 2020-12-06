@@ -54,11 +54,7 @@ class ModbusPolling(EventServiceBase):
         current_network = None
         current_connection = None
         for row in results:
-            if len(row) == 3:
-                network, device, ping_point = row
-            else:
-                network, device = row
-                ping_point = None
+            network, device = row
             """
             Create and test network connection
             """
@@ -67,22 +63,24 @@ class ModbusPolling(EventServiceBase):
             if current_network != network:
                 current_connection = self._get_connection(network, device)
                 current_network = network
-            if ping_point is not None:
+            if device.ping_point:
                 try:
+                    ping_point = ModbusPointModel.create_temporary_from_string(device.ping_point)
                     self.__poll_point(current_connection, ping_point, device, network, True, False)
                 except ConnectionException:
                     unavailable_networks.append(network.uuid)
                     continue
                 except ModbusIOException:
                     continue
-
+                except ValueError as e:
+                    logger.error(f'Modbus device ping_point error: {e}')
             """
             Poll device points if connection successful
             """
-            points = device.points
+            points = self.__get_all_device_points(device.uuid)
             for point in points:
                 if self.event_count() > 0:
-                    self.__log_debug('Breaking poll loop due to waiting event')
+                    self.__log_debug('Breaking poll loop due to queued event')
                     return
                 try:
                     self.__poll_point(current_connection, point, device, network, True)
@@ -100,7 +98,12 @@ class ModbusPolling(EventServiceBase):
         results = db.session.query(ModbusNetworkModel, ModbusDeviceModel). \
             select_from(ModbusNetworkModel).filter_by(type=self.__network_type, enable=True) \
             .join(ModbusDeviceModel).filter_by(type=self.__network_type, enable=True) \
-            .join(ModbusPointModel, ModbusPointModel.uuid == ModbusDeviceModel.ping_point_uuid, isouter=True)
+            .all()
+        return results
+
+    def __get_all_device_points(self, device_uuid: str):
+        results = db.session.query(ModbusPointModel).filter_by(device_uuid=device_uuid, enable=True) \
+            .all()
         return results
 
     def poll_point_not_existing(self, point: ModbusPointModel, device: ModbusDeviceModel, network: ModbusNetworkModel):

@@ -6,6 +6,7 @@ from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.models.network.model_network import NetworkModel
 from src.models.device.model_device_mixin import DeviceMixinModel
 from src.source_drivers.modbus.models.network import ModbusType
+from src.source_drivers.modbus.models.point import ModbusPointModel
 
 
 class ModbusDeviceModel(DeviceMixinModel):
@@ -18,7 +19,7 @@ class ModbusDeviceModel(DeviceMixinModel):
     zero_based = db.Column(db.Boolean(), nullable=False, default=False)
     timeout = db.Column(db.Float(), nullable=False, default=1)
     timeout_global = db.Column(db.Boolean(), nullable=False, default=True)
-    ping_point_uuid = db.Column(db.String, db.ForeignKey('modbus_points.uuid'))
+    ping_point = db.Column(db.String(10))
     modbus_network_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (
@@ -40,6 +41,13 @@ class ModbusDeviceModel(DeviceMixinModel):
     def validate_tcp_port(self, _, value):
         if not value and self.type == ModbusType.TCP.name:
             raise ValueError("tcp_port should be be there on type TCP")
+        return value
+
+    @validates('ping_point')
+    def validate_ping_point(self, _, value):
+        if not value:
+            raise ValueError("Invalid ping_point")
+        ModbusPointModel.create_temporary_from_string(value)
         return value
 
     def check_self(self) -> (bool, any):
