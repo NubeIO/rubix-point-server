@@ -96,7 +96,7 @@ class ModbusPointPollNonExisting(Resource):
 
     @classmethod
     @marshal_with(point_store_fields)
-    def get(cls):
+    def post(cls):
         data = cls.parser.parse_args()
         network_data = {k.replace('network_', ''): v for k, v in data.items() if 'network_' in k}
         device_data = {k.replace('device_', ''): v for k, v in data.items() if 'device_' in k}
