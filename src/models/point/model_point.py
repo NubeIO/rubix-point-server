@@ -1,5 +1,6 @@
 from sqlalchemy import and_
 from sqlalchemy.orm import validates
+from sqlalchemy import UniqueConstraint
 
 from src import db
 from src.interfaces.point import HistoryType, MathOperation
@@ -11,7 +12,7 @@ from src.services.event_service_base import EventType
 class PointModel(ModelBase):
     __tablename__ = 'points'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
-    name = db.Column(db.String(80), nullable=False, unique=True)
+    name = db.Column(db.String(80), nullable=False)
     device_uuid = db.Column(db.String, db.ForeignKey('devices.uuid'), nullable=False)
     enable = db.Column(db.Boolean(), nullable=False)
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
@@ -35,6 +36,10 @@ class PointModel(ModelBase):
         'polymorphic_identity': 'point',
         'polymorphic_on': driver
     }
+
+    __table_args__ = (
+        UniqueConstraint('name', 'device_uuid'),
+    )
 
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"

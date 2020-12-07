@@ -1,3 +1,5 @@
+from sqlalchemy import UniqueConstraint
+
 from src import db
 from src.models.model_base import ModelBase
 from src.event_dispatcher import EventType
@@ -7,7 +9,7 @@ class DeviceModel(ModelBase):
     __tablename__ = 'devices'
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     network_uuid = db.Column(db.String, db.ForeignKey('networks.uuid'), nullable=False)
-    name = db.Column(db.String(80), nullable=False, unique=True)
+    name = db.Column(db.String(80), nullable=False)
     enable = db.Column(db.String(80), nullable=False)
     fault = db.Column(db.Boolean(), nullable=True)
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
@@ -18,6 +20,10 @@ class DeviceModel(ModelBase):
         'polymorphic_identity': 'device',
         'polymorphic_on': driver
     }
+
+    __table_args__ = (
+        UniqueConstraint('name', 'network_uuid'),
+    )
 
     def __repr__(self):
         return f"Device(device_uuid = {self.device_uuid})"
