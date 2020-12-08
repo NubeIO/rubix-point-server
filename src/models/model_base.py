@@ -34,6 +34,14 @@ class ModelBase(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    @classmethod
+    def create_temporary(cls, **kwargs):
+        keys = kwargs.keys()
+        for col in cls.__table__.c:
+            if col.default is not None and col.description not in keys:
+                kwargs[col.description] = col.default.arg
+        return cls(**kwargs)
+
     # Issue #85 filter_by(...).update(...) is not working in inheritance
     def update(self, **kwargs):
         for key, value in kwargs.items():

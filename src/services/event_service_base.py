@@ -1,7 +1,11 @@
+import logging
+
 from queue import Queue
 from enum import IntEnum, unique, auto
 from threading import Timer, Event as ThreadingEvent
 from typing import Callable
+
+logger = logging.getLogger(__name__)
 
 
 @unique
@@ -18,6 +22,11 @@ class EventType(IntEnum):
 # TODO: potentially need to add thread lock to event
 
 
+class HandledByDifferentServiceException(BaseException):
+    def __init__(self, *arg, **kw):
+        super(HandledByDifferentServiceException, self).__init__(*arg, **kw)
+
+
 class Event:
     def __init__(self, event_type: EventType, data: any = None):
         self.event_type = event_type
@@ -28,7 +37,7 @@ class EventCallableBlocking(Event):
     def __init__(self, func: Callable, args: tuple = None, kwargs=None):
         super().__init__(EventType.CALLABLE, None)
         self.func = func
-        self. args = args
+        self.args = args
         self.kwargs = kwargs
         self.condition = ThreadingEvent()  # could use threading.Condition to ensure exclusive access
         self.error = False
@@ -46,6 +55,9 @@ class EventServiceBase:
         self._event_queue = Queue()
         self.supported_events = [False] * len(EventType)
         self._internal_timeout_thread = None
+
+    def event_count(self):
+        return self._event_queue.qsize()
 
     # TODO: look at way to make certain methods runnable instead of adding to thread queue if threaded service
     def add_event(self, event: Event):
@@ -75,9 +87,13 @@ class EventServiceBase:
                     event.data = event.func(self, *event.args)
                 else:
                     event.data = event.func(self)
-            except:
+            except HandledByDifferentServiceException:
+                return
+            except BaseException as e:
+                logger.error(e)
                 event.error = True
-            finally:
-                event.condition.set()
+                event.data = e
+
+            event.condition.set()
         else:
             raise Exception(self.service_name, 'unsupported event error', event.event_type)

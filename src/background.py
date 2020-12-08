@@ -6,10 +6,9 @@ from src.services.histories.history_local import HistoryLocal
 from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
 from src.services.histories.sync.influxdb import InfluxDB
 from src.services.mqtt_client.mqtt_client import create_mqtt_client
-from src.source_drivers.modbus.services.rtu_polling import RtuPolling
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-from src.source_drivers.modbus.services.tcp_polling import TcpPolling
 from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
+from src.source_drivers.modbus.services.modbus_polling import RtuPolling, TcpPolling
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +34,12 @@ class Background:
 
         if settings__enable_tcp:
             TcpRegistry.get_instance().register()
-            tcp_polling_thread = Thread(target=TcpPolling.get_instance().polling, daemon=True)
+            tcp_polling_thread = Thread(target=TcpPolling().polling, daemon=True)
             tcp_polling_thread.start()
 
         if settings__enable_rtu:
             RtuRegistry.get_instance().register()
-            rtu_polling_thread = Thread(target=RtuPolling.get_instance().polling, daemon=True)
+            rtu_polling_thread = Thread(target=RtuPolling().polling, daemon=True)
             rtu_polling_thread.start()
 
         if settings__enable_histories:

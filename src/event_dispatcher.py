@@ -50,7 +50,6 @@ class EventDispatcher:
             for driver in cls.get_instance().source_drivers:
                 if driver.service_name == source_driver_name:
                     driver.add_event(event)
-                    break
 
     @classmethod
     def dispatch_from_source(cls, origin_source_driver: EventServiceBase, event: Event):

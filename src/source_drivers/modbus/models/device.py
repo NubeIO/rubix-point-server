@@ -6,6 +6,7 @@ from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.models.network.model_network import NetworkModel
 from src.models.device.model_device_mixin import DeviceMixinModel
 from src.source_drivers.modbus.models.network import ModbusType
+from src.source_drivers.modbus.models.point import ModbusPointModel
 
 
 class ModbusDeviceModel(DeviceMixinModel):
@@ -18,11 +19,7 @@ class ModbusDeviceModel(DeviceMixinModel):
     zero_based = db.Column(db.Boolean(), nullable=False, default=False)
     timeout = db.Column(db.Float(), nullable=False, default=1)
     timeout_global = db.Column(db.Boolean(), nullable=False, default=True)
-    # TODO: implement. used for "known working register"
-    #   if can't read, device is considered "offline", break device loop
-    #   else continue reading all points
-    ping_point_type = db.Column(db.String(80))
-    ping_point_address = db.Column(db.Integer())
+    ping_point = db.Column(db.String(10))
     modbus_network_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (
@@ -46,8 +43,17 @@ class ModbusDeviceModel(DeviceMixinModel):
             raise ValueError("tcp_port should be be there on type TCP")
         return value
 
+    @validates('ping_point')
+    def validate_ping_point(self, _, value):
+        if not value:
+            raise ValueError("Invalid ping_point")
+        ModbusPointModel.create_temporary_from_string(value)
+        return value
+
     def check_self(self) -> (bool, any):
         super().check_self()
+        if self.network_uuid is None:  # for temporary models
+            return True
         network = NetworkModel.find_by_uuid(self.network_uuid)
         # can't get sqlalchemy column default to do this so this is solution
         if network is None:

@@ -1,3 +1,4 @@
+from sqlalchemy.orm import validates
 from sqlalchemy import UniqueConstraint
 
 from src import db
@@ -12,7 +13,7 @@ class ModbusPointModel(PointMixinModel):
     register = db.Column(db.Integer(), nullable=False)
     register_length = db.Column(db.Integer(), nullable=False)
     function_code = db.Column(db.Enum(ModbusFunctionCode), nullable=False)
-    data_type = db.Column(db.Enum(ModbusDataType), nullable=False)
+    data_type = db.Column(db.Enum(ModbusDataType), nullable=False, default=ModbusDataType.RAW)
     data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False, default=ModbusDataEndian.BEB_LEW)
     timeout = db.Column(db.Float(), nullable=False, default=1)  # TODO: not used
     timeout_global = db.Column(db.Boolean(), nullable=False, default=True)  # TODO: not used
@@ -25,6 +26,63 @@ class ModbusPointModel(PointMixinModel):
     @classmethod
     def get_polymorphic_identity(cls):
         return MODBUS_SERVICE_NAME
+
+    @classmethod
+    def create_temporary_from_string(cls, string: str):
+        split_string = string.split(':')
+        if len(split_string) != 3:
+            raise ValueError('Invalid Modbus Point string format ("<FC>:<Register>:<Length>')
+        data = {
+            'function_code': int(split_string[0]),
+            'register': int(split_string[1]),
+            'register_length': int(split_string[2]),
+        }
+        point = cls.create_temporary(**data)
+        point.validate_function_code(None, point.function_code)
+        point.validate_register(None, point.register)
+        point.validate_register_length(None, point.register_length)
+        return point
+
+    @validates('function_code')
+    def validate_function_code(self, _, value):
+        if isinstance(value, ModbusFunctionCode):
+            return value
+        elif isinstance(value, int):
+            try:
+                return ModbusFunctionCode(value)
+            except:
+                raise ValueError("Invalid function code")
+        elif not value or value not in ModbusFunctionCode.__members__:
+            raise ValueError("Invalid function code")
+        return ModbusFunctionCode[value]
+
+    @validates('register')
+    def validate_register(self, _, value):
+        if value < 0 or value > 65535:
+            raise ValueError('Invalid register')
+        return value
+
+    @validates('register_length')
+    def validate_register_length(self, _, value):
+        if value < 0 or value > 65535:
+            raise ValueError('Invalid register length')
+        return value
+
+    @validates('data_type')
+    def validate_data_type(self, _, value):
+        if isinstance(value, ModbusDataType):
+            return value
+        if not value or value not in ModbusDataType.__members__:
+            raise ValueError("Invalid data type")
+        return ModbusDataType[value]
+
+    @validates('data_endian')
+    def validate_data_endian(self, _, value):
+        if isinstance(value, ModbusDataEndian):
+            return value
+        if not value or value not in ModbusDataEndian.__members__:
+            raise ValueError("Invalid data endian")
+        return ModbusDataEndian[value]
 
     def check_self(self) -> (bool, any):
         super().check_self()
