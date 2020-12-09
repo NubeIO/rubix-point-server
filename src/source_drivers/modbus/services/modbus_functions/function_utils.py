@@ -83,13 +83,13 @@ def _builder_data_type(payload, data_type: ModbusDataType, byteorder: Endian, wo
     """
     builder = BinaryPayloadBuilder(byteorder=byteorder, wordorder=word_order)
     if data_type == ModbusDataType.INT16:
-        builder.add_16bit_int(payload)
+        builder.add_16bit_int(int(payload))
     if data_type == ModbusDataType.UINT16:
-        builder.add_16bit_uint(payload)
+        builder.add_16bit_uint(int(payload))
     if data_type == ModbusDataType.INT32:
-        builder.add_32bit_int(payload)
+        builder.add_32bit_int(int(payload))
     if data_type == ModbusDataType.UINT32:
-        builder.add_32bit_uint(payload)
+        builder.add_32bit_uint(int(payload))
     if data_type == ModbusDataType.FLOAT:
         builder.add_32bit_float(payload)
     elif data_type == ModbusDataType.DOUBLE:
