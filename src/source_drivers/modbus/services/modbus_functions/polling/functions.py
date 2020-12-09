@@ -130,10 +130,11 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     debug_log('write_analogue', _unit, func, reg_length, reg_start)
     reg_length = _set_data_length(data_type, reg_length)
     byteorder, word_order = _mod_point_data_endian(endian)
-    payload = _builder_data_type(write_value, data_type, byteorder, word_order)
     if func == ModbusFunctionCode.WRITE_REGISTER:
-        write = client.write_register(reg_start, payload, unit=_unit)
+        payload = [int(write_value)]
+        write = client.write_register(reg_start, int(write_value), unit=_unit)
     elif func == ModbusFunctionCode.WRITE_REGISTERS:
+        payload = _builder_data_type(write_value, data_type, byteorder, word_order)
         write = client.write_registers(reg_start, payload, unit=_unit)
     else:
         raise Exception('Invalid Modbus function code', func)
