@@ -9,10 +9,12 @@ from src.services.event_service_base import Event, EventType
 class ModelBase(db.Model):
     __abstract__ = True
 
+    @classmethod
     @declared_attr
     def created_on(cls):
         return db.Column(db.DateTime, server_default=db.func.now())
 
+    @classmethod
     @declared_attr
     def updated_on(cls):
         return db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
@@ -20,10 +22,6 @@ class ModelBase(db.Model):
     @classmethod
     def find_by_uuid(cls, device_uuid):
         return cls.query.filter_by(uuid=device_uuid).first()
-
-    @classmethod
-    def find_by_name(cls, name):
-        return cls.query.filter_by(name=name).first()
 
     def save_to_db(self):
         self.check_self()

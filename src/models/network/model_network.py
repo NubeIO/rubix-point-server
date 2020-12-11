@@ -1,6 +1,6 @@
 from src import db
 from src.models.model_base import ModelBase
-from src.event_dispatcher import EventType
+from src.services.event_service_base import EventType
 
 
 class NetworkModel(ModelBase):
@@ -20,6 +20,12 @@ class NetworkModel(ModelBase):
 
     def __repr__(self):
         return f"Network(uuid = {self.uuid})"
+
+    @classmethod
+    def find_by_name(cls, network_name: str):
+        results = cls.query.filter_by(name=network_name) \
+            .first()
+        return results
 
     def get_model_event_name(self) -> str:
         return 'network'

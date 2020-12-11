@@ -128,12 +128,12 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
 
     if update:
         try:
-            is_updated = point_store_new.update(point)
+            is_updated = point.update_point_value(point_store_new)
         except BaseException as e:
             logger.error(e)
             return point_store_new
         if is_updated:
-            point_store_new.publish_cov(point, device, network, service.service_name)
+            point.publish_cov(point_store_new, device, network, service.service_name)
             # TODO: move this to history service local as the dispatch event will handle it
             if point.history_type == HistoryType.COV and network.history_enable and \
                     device.history_enable and point.history_enable:

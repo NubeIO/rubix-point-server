@@ -1,5 +1,5 @@
 from __future__ import annotations
-from src.services.event_service_base import EventServiceBase, EventType, Event
+from src.services.event_service_base import EventServiceBase, Event
 
 
 class EventDispatcher:
@@ -52,6 +52,6 @@ class EventDispatcher:
                     driver.add_event(event)
 
     @classmethod
-    def dispatch_from_source(cls, origin_source_driver: EventServiceBase, event: Event):
+    def dispatch_from_source(cls, origin_source_driver: EventServiceBase or None, event: Event):
         for service in cls.get_instance().services:
             service.add_event(event)

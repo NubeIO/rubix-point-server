@@ -34,8 +34,8 @@ class PointResource(Resource):
 class PointResourceByName(Resource):
     @classmethod
     @marshal_with(point_all_fields)
-    def get(cls, name):
-        point = PointModel.find_by_name(name)
+    def get(cls, network_name: str, device_name: str, point_name: str):
+        point = PointModel.find_by_name(point_name, device_name, network_name)
         if not point:
             abort(404, message='Point not found')
         return point
@@ -47,6 +47,13 @@ class PointResourceList(Resource):
     def get(cls):
         result = PointModel.query.all()
         return result
+
+    @classmethod
+    def delete(cls):
+        points = PointModel.query.all()
+        for point in points:
+            point.delete_from_db()
+        return '', 204
 
 
 # class PointWriteableResourceList(Resource):

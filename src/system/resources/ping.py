@@ -19,6 +19,7 @@ def get_up_time():
 
 
 class Ping(Resource):
+
     def get(self):
         up_time = get_up_time()
         up_min = up_time / 60
@@ -26,22 +27,27 @@ class Ping(Resource):
         up_hour = up_time / 3600
         up_hour = "{:.2f}".format(up_hour)
         deployment_mode = 'production' if os.environ.get("data_dir") is not None else 'development'
-        mqtt_client_status = []
+        mqtt_client_statuses = []
         for mqtt_client in Background.get_mqtt_client():
-            mqtt_client_status.append({mqtt_client.to_string(): mqtt_client.status()})
+            mqtt_client_statuses.append({mqtt_client.to_string(): mqtt_client.status()})
         return {
             'up_time_date': up_time_date,
             'up_min': up_min,
             'up_hour': up_hour,
             'deployment_mode': deployment_mode,
-            'mqtt_client_status': mqtt_client_status,
+            'mqtt_client_statuses': mqtt_client_statuses,
             'influx_db_status': InfluxDB.get_instance().status(),
             'settings': {
-                'enable_mqtt': settings__enable_mqtt,
-                'enable_tcp': settings__enable_tcp,
-                'enable_rtu': settings__enable_rtu,
-                'enable_histories': settings__enable_histories,
-                'enable_cleaner': settings__enable_cleaner,
-                'enable_history_sync': settings__enable_history_sync,
+                'services': {
+                    'mqtt': settings__enable_mqtt,
+                    'histories': settings__enable_histories,
+                    'cleaner': settings__enable_cleaner,
+                    'history_sync': settings__enable_history_sync,
+                },
+                'drivers': {
+                    'generic': settings__enable_generic,
+                    'modbus_rtu': settings__enable_modbus_rtu,
+                    'modbus_tcp': settings__enable_modbus_tcp,
+                }
             }
         }
