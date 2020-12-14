@@ -1,4 +1,3 @@
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import validates
 
 from src import db
@@ -9,15 +8,8 @@ from src.services.event_service_base import Event, EventType
 class ModelBase(db.Model):
     __abstract__ = True
 
-    @classmethod
-    @declared_attr
-    def created_on(cls):
-        return db.Column(db.DateTime, server_default=db.func.now())
-
-    @classmethod
-    @declared_attr
-    def updated_on(cls):
-        return db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
+    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     @classmethod
     def find_by_uuid(cls, device_uuid):
