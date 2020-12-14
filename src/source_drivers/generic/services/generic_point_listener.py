@@ -2,6 +2,7 @@ import logging
 from json import loads as json_loads, JSONDecodeError
 from sqlalchemy.orm.exc import ObjectDeletedError
 
+from src import db
 from src.source_drivers.generic.services import GENERIC_SERVICE_NAME
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import EventServiceBase
@@ -69,23 +70,28 @@ class GenericPointListener(MqttClientBase, EventServiceBase):
         network_name = topic[-1]
         try:
             payload = json_loads(message.payload)
-            if not payload or 'value' not in payload.keys():
-                raise ValueError('No value provided in payload')
+            if not payload and ('value' not in payload.keys() or 'fault' not in payload.keys()):
+                raise ValueError('No value or fault provided')
         except (JSONDecodeError, ValueError) as e:
             logger.warning(f'Invalid generic point COV payload. point={point_name}, device={device_name}, '
                            f'network={network_name}. error=({str(e)})')
             return
+
         point: PointModel = PointModel.find_by_name(point_name, device_name, network_name)
         if point is None or point.driver != GENERIC_SERVICE_NAME:
             logger.warning(f'Unknown generic point COV received with name={point_name}')
             return
-        value = payload.get('value')
+        value = payload.get('value', None)
         value_raw = payload.get('value_raw', value)
-        point_store = PointStoreModel(point_uuid=point.uuid, value_original=value, value_raw=value_raw)
+        fault = payload.get('fault', None)
+        fault_message = payload.get('fault_message', '')
+        point_store = PointStoreModel(point_uuid=point.uuid, value_original=value, value_raw=value_raw, fault=fault,
+                                      fault_message=fault_message)
         try:
             updated = point.update_point_value(point_store)
             if updated:
                 point.publish_cov(point_store)
+                db.session.commit()
         except ObjectDeletedError:
             logger.debug(f'Generic point removed when attempting to update point_store')
             return

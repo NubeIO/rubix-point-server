@@ -4,15 +4,18 @@ from sqlalchemy import and_, or_
 from src import db
 
 
-class PointStoreModel(db.Model):
-    __tablename__ = 'point_stores'
-    point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
+class PointStoreModelMixin(object):
     value = db.Column(db.Float(), nullable=True)
     value_original = db.Column(db.Float(), nullable=True)
     value_raw = db.Column(db.String(), nullable=True)
     fault = db.Column(db.Boolean(), default=False, nullable=False)
     fault_message = db.Column(db.String())
     ts = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+
+class PointStoreModel(PointStoreModelMixin, db.Model):
+    __tablename__ = 'point_stores'
+    point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
 
     def __repr__(self):
         return f"PointStore(point_uuid = {self.point_uuid})"
@@ -55,7 +58,6 @@ class PointStoreModel(db.Model):
                     .values(fault=self.fault, fault_message=self.fault_message)
                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                 or_(self.__table__.c.fault != self.fault,
-                                    self.__table__.c.fault_message != self.fault_message,
-                                    self.__table__.c.fault != self.fault))))
+                                    self.__table__.c.fault_message != self.fault_message))))
         db.session.commit()
         return bool(res.rowcount)

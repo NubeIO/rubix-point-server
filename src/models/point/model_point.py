@@ -7,8 +7,10 @@ from src.models.model_base import ModelBase
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
+from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import Event, EventType
+from src.utils.model_utils import ModelUtils
 
 
 class PointModel(ModelBase):
@@ -134,7 +136,10 @@ class PointModel(ModelBase):
         if service_name is None:
             service_name = network.driver
 
-        # TODO: history
+        if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
+                device.history_enable:
+            self.create_history(point_store)
+
         EventDispatcher.dispatch_from_source(None, Event(EventType.POINT_COV, {
             'point': self,
             'point_store': point_store,
@@ -142,3 +147,8 @@ class PointModel(ModelBase):
             'network': network,
             'source_driver': service_name
         }))
+
+    def create_history(self, point_store: PointStoreModel):
+        data = ModelUtils.row2dict_default(point_store)
+        _point_store_history = PointStoreHistoryModel(**data)
+        _point_store_history.save_to_db_no_commit()
