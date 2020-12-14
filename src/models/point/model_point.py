@@ -11,6 +11,7 @@ from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import Event, EventType
 from src.utils.model_utils import ModelUtils
+from src.ini_config import settings__enable_histories
 
 
 class PointModel(ModelBase):
@@ -149,6 +150,7 @@ class PointModel(ModelBase):
         }))
 
     def create_history(self, point_store: PointStoreModel):
-        data = ModelUtils.row2dict_default(point_store)
-        _point_store_history = PointStoreHistoryModel(**data)
-        _point_store_history.save_to_db_no_commit()
+        if settings__enable_histories:
+            data = ModelUtils.row2dict_default(point_store)
+            _point_store_history = PointStoreHistoryModel(**data)
+            _point_store_history.save_to_db_no_commit()
