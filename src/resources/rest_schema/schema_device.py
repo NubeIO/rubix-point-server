@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from flask_restful import fields
 from src.resources.utils import map_rest_schema
 
@@ -36,12 +38,15 @@ device_return_attributes = {
     },
     'updated_on': {
         'type': str,
-    },
-    'points': {
-        'type': fields.List(fields.Nested(point_all_fields))
     }
 }
 
 device_all_fields = {}
 map_rest_schema(device_return_attributes, device_all_fields)
 map_rest_schema(device_all_attributes, device_all_fields)
+
+device_all_fields_with_children_base = {
+    'points': fields.List(fields.Nested(point_all_fields))
+}
+device_all_fields_with_children = deepcopy(device_all_fields)
+device_all_fields_with_children.update(device_all_fields_with_children_base)

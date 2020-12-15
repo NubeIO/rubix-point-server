@@ -2,7 +2,14 @@ from flask_restful import Resource, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
 from src.source_drivers.generic.models.device import GenericDeviceModel
-from src.source_drivers.generic.resources.rest_schema.schema_generic_device import generic_device_all_attributes
+from src.source_drivers.generic.resources.rest_schema.schema_generic_device import generic_device_all_attributes, \
+    generic_device_all_fields, generic_device_all_fields_with_children
+from src.resources.utils import model_marshaller_with_children
+
+
+def generic_device_marshaller(data: any, args: dict):
+    return model_marshaller_with_children(data, args, generic_device_all_fields,
+                                          generic_device_all_fields_with_children)
 
 
 class GenericDeviceBase(Resource):

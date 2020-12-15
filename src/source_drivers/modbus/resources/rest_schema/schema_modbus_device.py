@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from src.resources.rest_schema.schema_device import *
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields
 
@@ -28,9 +26,6 @@ modbus_device_all_attributes['timeout_global'] = {
 }
 
 modbus_device_return_attributes = deepcopy(device_return_attributes)
-modbus_device_return_attributes['points'] = {
-    'type': fields.List(fields.Nested(modbus_point_all_fields))
-}
 modbus_device_return_attributes['type'] = {
     'type': str,
     'nested': True,
@@ -40,3 +35,7 @@ modbus_device_return_attributes['type'] = {
 modbus_device_all_fields = {}
 map_rest_schema(modbus_device_return_attributes, modbus_device_all_fields)
 map_rest_schema(modbus_device_all_attributes, modbus_device_all_fields)
+
+modbus_device_all_fields_with_children = deepcopy(modbus_device_all_fields)
+modbus_device_all_fields_with_children.update(device_all_fields_with_children_base)
+modbus_device_all_fields_with_children['points'] = fields.List(fields.Nested(modbus_point_all_fields))

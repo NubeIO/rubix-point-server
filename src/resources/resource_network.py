@@ -1,39 +1,34 @@
-from flask_restful import Resource, reqparse, marshal_with, abort
+from flask_restful import Resource, abort
+from flask_restful.reqparse import request
 
 from src.models.network.model_network import NetworkModel
-from src.resources.rest_schema.schema_network import network_all_attributes, network_all_fields
+from src.resources.rest_schema.schema_network import network_all_fields, network_all_fields_with_children
+from src.resources.utils import model_marshaller_with_children
+
+
+def network_marshaller(data: any, args: dict):
+    return model_marshaller_with_children(data, args, network_all_fields, network_all_fields_with_children)
 
 
 class NetworkResource(Resource):
-    parser = reqparse.RequestParser()
-    for attr in network_all_attributes:
-        parser.add_argument(attr,
-                            type=network_all_attributes[attr].get('type'),
-                            required=network_all_attributes[attr].get('required', False),
-                            help=network_all_attributes[attr].get('help', None),
-                            store_missing=False)
-
     @classmethod
-    @marshal_with(network_all_fields)
     def get(cls, uuid):
         network = NetworkModel.find_by_uuid(uuid)
         if not network:
             abort(404, message='Network not found')
-        return network
+        return network_marshaller(network, request.args)
 
 
 class NetworkResourceByName(Resource):
     @classmethod
-    @marshal_with(network_all_fields)
     def get(cls, name):
         network = NetworkModel.find_by_name(name)
         if not network:
             abort(404, message='Network not found')
-        return network
+        return network_marshaller(network, request.args)
 
 
 class NetworkResourceList(Resource):
     @classmethod
-    @marshal_with(network_all_fields)
     def get(cls):
-        return NetworkModel.query.all()
+        return network_marshaller(NetworkModel.query.all(), request.args)

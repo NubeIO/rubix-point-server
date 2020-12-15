@@ -1,21 +1,19 @@
 import uuid
-from flask_restful import marshal_with
+
+from flask_restful.reqparse import request
 
 from src.source_drivers.generic.models.network import GenericNetworkModel
-from src.source_drivers.generic.resources.network.network_base import GenericNetworkBase
-from src.source_drivers.generic.resources.rest_schema.schema_generic_network import generic_network_all_fields
+from src.source_drivers.generic.resources.network.network_base import GenericNetworkBase, generic_network_marshaller
 
 
 class GenericNetworkPlural(GenericNetworkBase):
 
     @classmethod
-    @marshal_with(generic_network_all_fields)
     def get(cls):
-        return GenericNetworkModel.query.all()
+        return generic_network_marshaller(GenericNetworkModel.query.all(), request.args)
 
     @classmethod
-    @marshal_with(generic_network_all_fields)
     def post(cls):
         _uuid = str(uuid.uuid4())
         data = GenericNetworkPlural.parser.parse_args()
-        return cls.add_network(_uuid, data)
+        return generic_network_marshaller(cls.add_network(_uuid, data), request.args)

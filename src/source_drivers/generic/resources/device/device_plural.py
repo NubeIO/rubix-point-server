@@ -1,21 +1,19 @@
 import uuid
-from flask_restful import marshal_with
+
+from flask_restful.reqparse import request
 
 from src.source_drivers.generic.models.device import GenericDeviceModel
-from src.source_drivers.generic.resources.device.device_base import GenericDeviceBase
-from src.source_drivers.generic.resources.rest_schema.schema_generic_device import generic_device_all_fields
+from src.source_drivers.generic.resources.device.device_base import GenericDeviceBase, generic_device_marshaller
 
 
 class GenericDevicePlural(GenericDeviceBase):
 
     @classmethod
-    @marshal_with(generic_device_all_fields)
     def get(cls):
-        return GenericDeviceModel.query.all()
+        return generic_device_marshaller(GenericDeviceModel.query.all(), request.args)
 
     @classmethod
-    @marshal_with(generic_device_all_fields)
     def post(cls):
         _uuid = str(uuid.uuid4())
         data = GenericDevicePlural.parser.parse_args()
-        return cls.add_device(_uuid, data)
+        return generic_device_marshaller(cls.add_device(_uuid, data), request.args)

@@ -1,9 +1,9 @@
-from flask_restful import marshal_with, abort, reqparse
+from flask_restful import abort, reqparse
+from flask_restful.reqparse import request
 
 from src.source_drivers.generic.models.network import GenericNetworkModel
-from src.source_drivers.generic.resources.network.network_base import GenericNetworkBase
-from src.source_drivers.generic.resources.rest_schema.schema_generic_network import generic_network_all_fields, \
-    generic_network_all_attributes
+from src.source_drivers.generic.resources.network.network_base import GenericNetworkBase, generic_network_marshaller
+from src.source_drivers.generic.resources.rest_schema.schema_generic_network import generic_network_all_attributes
 
 
 class GenericNetworkSingular(GenericNetworkBase):
@@ -15,29 +15,26 @@ class GenericNetworkSingular(GenericNetworkBase):
                                   store_missing=False)
 
     @classmethod
-    @marshal_with(generic_network_all_fields)
     def get(cls, uuid):
         network = GenericNetworkModel.find_by_uuid(uuid)
         if not network:
             abort(404, message='Generic Network not found')
-        return network
+        return generic_network_marshaller(network, request.args)
 
     @classmethod
-    @marshal_with(generic_network_all_fields)
     def put(cls, uuid):
         data = GenericNetworkSingular.parser.parse_args()
         network = GenericNetworkModel.find_by_uuid(uuid)
         if network is None:
-            return cls.add_network(uuid, data)
+            return generic_network_marshaller(cls.add_network(uuid, data), request.args)
         else:
             try:
                 network.update(**data)
-                return GenericNetworkModel.find_by_uuid(uuid)
+                return generic_network_marshaller(GenericNetworkModel.find_by_uuid(uuid), request.args)
             except Exception as e:
                 abort(500, message=str(e))
 
     @classmethod
-    @marshal_with(generic_network_all_fields)
     def patch(cls, uuid):
         data = GenericNetworkSingular.patch_parser.parse_args()
         network = GenericNetworkModel.find_by_uuid(uuid)
@@ -46,7 +43,7 @@ class GenericNetworkSingular(GenericNetworkBase):
         else:
             try:
                 network.update(**data)
-                return GenericNetworkModel.find_by_uuid(uuid)
+                return generic_network_marshaller(GenericNetworkModel.find_by_uuid(uuid), request.args)
             except Exception as e:
                 abort(500, message=str(e))
 
