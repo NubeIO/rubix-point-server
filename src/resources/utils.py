@@ -13,7 +13,6 @@ def model_marshaller_with_children(data: any, args: dict, base_fields: dict, chi
             abort(400, message='Invalid query string')
 
     if with_children:
-        print('WITH CHILDREN', children_fields)
         return marshal(data, children_fields)
     else:
         return marshal(data, base_fields)
