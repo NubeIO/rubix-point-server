@@ -1,40 +1,34 @@
-from flask_restful import Resource, reqparse, abort, marshal_with
+from flask_restful import Resource, abort
+from flask_restful.reqparse import request
 
 from src.models.device.model_device import DeviceModel
-from src.resources.rest_schema.schema_device import device_all_attributes, device_all_fields
+from src.resources.rest_schema.schema_device import device_all_fields, device_all_fields_with_children
+from src.resources.utils import model_marshaller_with_children
+
+
+def device_marshaller(data: any, args: dict):
+    return model_marshaller_with_children(data, args, device_all_fields, device_all_fields_with_children)
 
 
 class DeviceResource(Resource):
-    parser = reqparse.RequestParser()
-    for attr in device_all_attributes:
-        parser.add_argument(attr,
-                            type=device_all_attributes[attr]['type'],
-                            required=device_all_attributes[attr].get('required', False),
-                            help=device_all_attributes[attr].get('help', None),
-                            store_missing=False)
-
     @classmethod
-    @marshal_with(device_all_fields)
     def get(cls, uuid):
         device = DeviceModel.find_by_uuid(uuid)
         if not device:
             abort(404, message='Device not found')
-
-        return device
+        return device_marshaller(device, request.args)
 
 
 class DeviceResourceByName(Resource):
     @classmethod
-    @marshal_with(device_all_fields)
     def get(cls, network_name: str, device_name: str):
         device = DeviceModel.find_by_name(device_name, network_name)
         if not device:
             abort(404, message='Device not found')
-        return device
+        return device_marshaller(device, request.args)
 
 
 class DeviceResourceList(Resource):
     @classmethod
-    @marshal_with(device_all_fields)
     def get(cls):
-        return DeviceModel.query.all()
+        return device_marshaller(DeviceModel.query.all(), request.args)

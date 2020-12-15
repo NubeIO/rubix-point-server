@@ -1,9 +1,9 @@
-from flask_restful import abort, marshal_with, reqparse
+from flask_restful import abort, reqparse
+from flask_restful.reqparse import request
 
 from src.source_drivers.generic.models.device import GenericDeviceModel
-from src.source_drivers.generic.resources.device.device_base import GenericDeviceBase
-from src.source_drivers.generic.resources.rest_schema.schema_generic_device import generic_device_all_fields, \
-    generic_device_all_attributes
+from src.source_drivers.generic.resources.device.device_base import GenericDeviceBase, generic_device_marshaller
+from src.source_drivers.generic.resources.rest_schema.schema_generic_device import generic_device_all_attributes
 
 
 class GenericDeviceSingular(GenericDeviceBase):
@@ -15,29 +15,26 @@ class GenericDeviceSingular(GenericDeviceBase):
                                   store_missing=False)
 
     @classmethod
-    @marshal_with(generic_device_all_fields)
     def get(cls, uuid):
         device = GenericDeviceModel.find_by_uuid(uuid)
         if not device:
             abort(404, message='Generic Device not found')
-        return device
+        return generic_device_marshaller(device, request.args)
 
     @classmethod
-    @marshal_with(generic_device_all_fields)
     def put(cls, uuid):
         data = GenericDeviceSingular.parser.parse_args()
         device = GenericDeviceModel.find_by_uuid(uuid)
         if device is None:
-            return cls.add_device(uuid, data)
+            return generic_device_marshaller(cls.add_device(uuid, data), request.args)
         else:
             try:
                 device.update(**data)
-                return GenericDeviceModel.find_by_uuid(uuid)
+                return generic_device_marshaller(GenericDeviceModel.find_by_uuid(uuid), request.args)
             except Exception as e:
                 abort(500, message=str(e))
 
     @classmethod
-    @marshal_with(generic_device_all_fields)
     def patch(cls, uuid):
         data = GenericDeviceSingular.patch_parser.parse_args()
         device = GenericDeviceModel.find_by_uuid(uuid)
@@ -46,7 +43,7 @@ class GenericDeviceSingular(GenericDeviceBase):
         else:
             try:
                 device.update(**data)
-                return GenericDeviceModel.find_by_uuid(uuid)
+                return generic_device_marshaller(GenericDeviceModel.find_by_uuid(uuid), request.args)
             except Exception as e:
                 abort(500, message=str(e))
 

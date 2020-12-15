@@ -2,7 +2,14 @@ from flask_restful import Resource, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
-from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_attributes
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_attributes, \
+    modbus_device_all_fields, modbus_device_all_fields_with_children
+from src.resources.utils import model_marshaller_with_children
+
+
+def modbus_device_marshaller(data: any, args: dict):
+    return model_marshaller_with_children(data, args, modbus_device_all_fields,
+                                          modbus_device_all_fields_with_children)
 
 
 class ModbusDeviceBase(Resource):

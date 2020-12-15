@@ -1,4 +1,22 @@
+from distutils.util import strtobool
+
 from flask_restful import fields
+from flask_restful import abort, marshal
+
+
+def model_marshaller_with_children(data: any, args: dict, base_fields: dict, children_fields: dict):
+    with_children = False
+    if 'with_children' in args:
+        try:
+            with_children = bool(strtobool(args['with_children']))
+        except:
+            abort(400, message='Invalid query string')
+
+    if with_children:
+        print('WITH CHILDREN', children_fields)
+        return marshal(data, children_fields)
+    else:
+        return marshal(data, base_fields)
 
 
 def get_field_type(attr_type):

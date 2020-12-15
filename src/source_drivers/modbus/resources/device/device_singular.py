@@ -1,9 +1,9 @@
-from flask_restful import abort, marshal_with, reqparse
+from flask_restful import abort, reqparse
+from flask_restful.reqparse import request
 
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
-from src.source_drivers.modbus.resources.device.device_base import ModbusDeviceBase
-from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_fields, \
-    modbus_device_all_attributes
+from src.source_drivers.modbus.resources.device.device_base import ModbusDeviceBase, modbus_device_marshaller
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_attributes
 
 
 class ModbusDeviceSingular(ModbusDeviceBase):
@@ -15,29 +15,26 @@ class ModbusDeviceSingular(ModbusDeviceBase):
                                   store_missing=False)
 
     @classmethod
-    @marshal_with(modbus_device_all_fields)
     def get(cls, uuid):
         device = ModbusDeviceModel.find_by_uuid(uuid)
         if not device:
             abort(404, message='Modbus Device not found')
-        return device
+        return modbus_device_marshaller(device, request.args)
 
     @classmethod
-    @marshal_with(modbus_device_all_fields)
     def put(cls, uuid):
         data = ModbusDeviceSingular.parser.parse_args()
         device = ModbusDeviceModel.find_by_uuid(uuid)
         if device is None:
-            return cls.add_device(uuid, data)
+            return modbus_device_marshaller(cls.add_device(uuid, data), request.args)
         else:
             try:
                 device.update(**data)
-                return ModbusDeviceModel.find_by_uuid(uuid)
+                return modbus_device_marshaller(ModbusDeviceModel.find_by_uuid(uuid), request.args)
             except Exception as e:
                 abort(500, message=str(e))
 
     @classmethod
-    @marshal_with(modbus_device_all_fields)
     def patch(cls, uuid):
         data = ModbusDeviceSingular.patch_parser.parse_args()
         device = ModbusDeviceModel.find_by_uuid(uuid)
@@ -46,7 +43,7 @@ class ModbusDeviceSingular(ModbusDeviceBase):
         else:
             try:
                 device.update(**data)
-                return ModbusDeviceModel.find_by_uuid(uuid)
+                return modbus_device_marshaller(ModbusDeviceModel.find_by_uuid(uuid), request.args)
             except Exception as e:
                 abort(500, message=str(e))
 
