@@ -9,7 +9,10 @@ from sqlalchemy import event
 
 from src.event_dispatcher import EventDispatcher
 
-logging.config.fileConfig('logging/logging.conf')
+try:
+    logging.config.fileConfig('logging/logging.conf')
+except Exception as e:
+    raise Exception('Failed to load logging config file. Assure the example config is cloned as logging.conf')
 
 app = Flask(__name__)
 CORS(app)

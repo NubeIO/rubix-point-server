@@ -3,11 +3,9 @@ import numbers
 
 from pymodbus.exceptions import ModbusIOException
 
-from src.interfaces.point import HistoryType
 from src.loggers import modbus_poll_debug_log
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase
-from src.services.histories.history_local import HistoryLocal
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
@@ -128,16 +126,12 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
 
     if update:
         try:
-            is_updated = point_store_new.update(point)
+            is_updated = point.update_point_value(point_store_new)
         except BaseException as e:
             logger.error(e)
             return point_store_new
         if is_updated:
-            point_store_new.publish_cov(point, device, network, service.service_name)
-            # TODO: move this to history service local as the dispatch event will handle it
-            if point.history_type == HistoryType.COV and network.history_enable and \
-                    device.history_enable and point.history_enable:
-                HistoryLocal.add_point_history_on_cov(point.uuid)
+            point.publish_cov(point_store_new, device, network, service.service_name)
 
     if error is not None:
         raise error

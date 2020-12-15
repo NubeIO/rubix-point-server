@@ -2,7 +2,8 @@ from sqlalchemy import UniqueConstraint
 
 from src import db
 from src.models.model_base import ModelBase
-from src.event_dispatcher import EventType
+from src.models.network.model_network import NetworkModel
+from src.services.event_service_base import EventType
 
 
 class DeviceModel(ModelBase):
@@ -27,6 +28,13 @@ class DeviceModel(ModelBase):
 
     def __repr__(self):
         return f"Device(device_uuid = {self.device_uuid})"
+
+    @classmethod
+    def find_by_name(cls, device_name: str, network_name: str):
+        results = cls.query.filter_by(name=device_name) \
+            .join(NetworkModel).filter_by(name=network_name) \
+            .first()
+        return results
 
     def get_model_event_name(self) -> str:
         return 'device'

@@ -1,4 +1,3 @@
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import validates
 
 from src import db
@@ -9,26 +8,21 @@ from src.services.event_service_base import Event, EventType
 class ModelBase(db.Model):
     __abstract__ = True
 
-    @declared_attr
-    def created_on(cls):
-        return db.Column(db.DateTime, server_default=db.func.now())
-
-    @declared_attr
-    def updated_on(cls):
-        return db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
+    updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     @classmethod
     def find_by_uuid(cls, device_uuid):
         return cls.query.filter_by(uuid=device_uuid).first()
 
-    @classmethod
-    def find_by_name(cls, name):
-        return cls.query.filter_by(name=name).first()
-
     def save_to_db(self):
         self.check_self()
         db.session.add(self)
         db.session.commit()
+
+    def save_to_db_no_commit(self):
+        self.check_self()
+        db.session.add(self)
 
     def delete_from_db(self):
         db.session.delete(self)

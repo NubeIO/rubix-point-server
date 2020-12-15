@@ -26,8 +26,8 @@ class DeviceResource(Resource):
 class DeviceResourceByName(Resource):
     @classmethod
     @marshal_with(device_all_fields)
-    def get(cls, name):
-        device = DeviceModel.find_by_name(name)
+    def get(cls, network_name: str, device_name: str):
+        device = DeviceModel.find_by_name(device_name, network_name)
         if not device:
             abort(404, message='Device not found')
         return device

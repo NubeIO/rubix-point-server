@@ -1,12 +1,17 @@
-from sqlalchemy import and_
 from sqlalchemy.orm import validates
 from sqlalchemy import UniqueConstraint
 
 from src import db
 from src.interfaces.point import HistoryType, MathOperation
 from src.models.model_base import ModelBase
+from src.models.device.model_device import DeviceModel
+from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
-from src.services.event_service_base import EventType
+from src.models.point.model_point_store_history import PointStoreHistoryModel
+from src.event_dispatcher import EventDispatcher
+from src.services.event_service_base import Event, EventType
+from src.utils.model_utils import ModelUtils
+from src.ini_config import settings__enable_histories
 
 
 class PointModel(ModelBase):
@@ -44,19 +49,31 @@ class PointModel(ModelBase):
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
 
+    @classmethod
+    def find_by_name(cls, point_name: str, device_name: str, network_name: str):
+        results = cls.query.filter_by(name=point_name) \
+            .join(DeviceModel).filter_by(name=device_name) \
+            .join(NetworkModel).filter_by(name=network_name) \
+            .first()
+        return results
+
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         super().save_to_db()
 
-    # TODO: use this for writing endpoint and produce COV event
-    def write_point(self, uuid: str, value: float) -> bool:
-        assert type(value) == float
-        res = db.session.execute(self.__table__
-                                     .update()
-                                     .values(write_value=value)
-                                     .where(and_(self.__table__.c.uuid == self.point_uuid,
-                                                 self.__table__.c.writable == True)))
-        return bool(res.rowcount)
+    def update_point_value(self, point_store: PointStoreModel, cov_threshold: float = None) -> bool:
+        if not point_store.fault:
+            if cov_threshold is None:
+                cov_threshold = self.cov_threshold
+
+            value = point_store.value_original
+            if value is not None:
+                value = self.apply_scale(value, self.input_min, self.input_max, self.scale_min,
+                                         self.scale_max)
+                value = self.apply_offset(value, self.value_offset, self.value_operation)
+                value = round(value, self.value_round)
+            point_store.value = value
+        return point_store.update(cov_threshold)
 
     @validates('history_interval')
     def validate_history_interval(self, _, value):
@@ -73,10 +90,67 @@ class PointModel(ModelBase):
     def update(self, **kwargs):
         super().update(**kwargs)
 
-        point_store = PointStoreModel.find_by_point_uuid(self.uuid)
-        updated = point_store.update(self, 0)
+        point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
+        updated = point_store.update(0)
         self.point_store = point_store
         if updated:
-            point_store.publish_cov(self)
+            self.publish_cov(self.point_store)
 
         return self
+
+    @classmethod
+    def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:
+        """Do calculations on original value with the help of point details"""
+        if original_value is None or value_operation is None:
+            return original_value
+        value = original_value
+        if value_operation == MathOperation.ADD:
+            value += value_offset
+        elif value_operation == MathOperation.SUBTRACT:
+            value -= value_offset
+        elif value_operation == MathOperation.MULTIPLY:
+            value *= value_offset
+        elif value_operation == MathOperation.DIVIDE:
+            value /= value_offset
+        elif value_operation == MathOperation.BOOL_INVERT:
+            value = not bool(value)
+        return value
+
+    @classmethod
+    def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
+            -> float or None:
+        if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
+            return value
+        value = ((value - input_min) * (output_max - output_min)) / (input_max - input_min) + output_min
+        return value
+
+    def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,
+                    service_name: str = None):
+        if point_store is None:
+            raise Exception('Point.publish_cov point_store cannot be None')
+        if device is None:
+            device = DeviceModel.find_by_uuid(self.device_uuid)
+        if network is None:
+            network = NetworkModel.find_by_uuid(device.network_uuid)
+        if device is None or network is None:
+            raise Exception(f'Cannot find network or device for point {self.uuid}')
+        if service_name is None:
+            service_name = network.driver
+
+        if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
+                device.history_enable:
+            self.create_history(point_store)
+
+        EventDispatcher.dispatch_from_source(None, Event(EventType.POINT_COV, {
+            'point': self,
+            'point_store': point_store,
+            'device': device,
+            'network': network,
+            'source_driver': service_name
+        }))
+
+    def create_history(self, point_store: PointStoreModel):
+        if settings__enable_histories:
+            data = ModelUtils.row2dict_default(point_store)
+            _point_store_history = PointStoreHistoryModel(**data)
+            _point_store_history.save_to_db_no_commit()
