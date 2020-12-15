@@ -133,7 +133,7 @@ class PointModel(ModelBase):
         if network is None:
             network = NetworkModel.find_by_uuid(device.network_uuid)
         if device is None or network is None:
-            raise Exception(f'Cannot find network or device for point {self.point_uuid}')
+            raise Exception(f'Cannot find network or device for point {self.uuid}')
         if service_name is None:
             service_name = network.driver
 
