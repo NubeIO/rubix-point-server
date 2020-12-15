@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 MQTT_CLIENT_NAME = 'rubix_points_generic_point'
 
 GENERIC_POINT_MQTT_TOPIC = 'rubix/points/generic/cov'
-GENERIC_POINT_MQTT_TOPIC_EXAMPLE = f'{GENERIC_POINT_MQTT_TOPIC}/point_name/device_name/network_name'
+GENERIC_POINT_MQTT_TOPIC_EXAMPLE = f'{GENERIC_POINT_MQTT_TOPIC}/<point_name>/<device_name>/<network_name>'
 MQTT_TOPIC_MIN = len(GENERIC_POINT_MQTT_TOPIC_EXAMPLE.split('/'))
 
 

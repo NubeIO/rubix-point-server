@@ -45,8 +45,8 @@ class ModbusDeviceModel(DeviceMixinModel):
 
     @validates('ping_point')
     def validate_ping_point(self, _, value):
-        if not value:
-            raise ValueError("Invalid ping_point")
+        if value is None:
+            return value
         ModbusPointModel.create_temporary_from_string(value)
         return value
 
