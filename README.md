@@ -11,7 +11,8 @@
 
 #### Commands:
 ```bash
-sudo bash script.bash start -u=<pi|debian> -dir=<point-server_dir> -lib_dir=<common-py-libs-dir>
+sudo bash script.bash start -service_name=<service_name> -u=<pi|debian> -dir=<working_dir> -lib_dir=<common-py-libs-dir> -data_dir=<data_dir> -p=<port>
+sudo bash script.bash start -service_name=nubeio-point-server.service -u=pi -dir=/home/pi/rubix-point-server -lib_dir=/home/pi/common-py-libs -data_dir=/data/point-server -p=1515
 sudo bash script.bash -h
 ```
 
