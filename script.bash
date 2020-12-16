@@ -45,13 +45,6 @@ copyLoggingIfNotExist() {
     fi
 }
 
-installPythonRequirements() {
-    echo -e "${GREEN}Installing requirements in ${LIB_DIR}...${DEFAULT}"
-    source ${LIB_DIR}/venv/bin/activate
-    pip install -r requirements.txt
-    deactivate
-}
-
 showServiceNameWarningIfNotEdited() {
     if [ ${SERVICE_NAME_EDITED} == false ]; then
         echo -e "${RED}We are using default service_name=${SERVICE_NAME}!${DEFAULT}"
@@ -99,12 +92,11 @@ install() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" && ${LIB_DIR} != "" ]]; then
         createDirIfNotExist
         copyConfigurationIfNotExist
-        installPythonRequirements
         createLinuxService
         startNewLinuxService
         echo -e "${GREEN}Service is created and started.${DEFAULT}"
     else
-        echo -e ${RED}"-u=<user> -dir=<working_dir> -lib_dir=<lib_dir> these parameters should be on you input (-h, --help for help)${DEFAULT}"
+        echo -e ${RED}"Invalid parameters (-h, --help for help)${DEFAULT}"
     fi
 }
 
@@ -153,22 +145,22 @@ parseCommand() {
             help
             exit 0
             ;;
-        -s | --service-name=* | -service_name=*)
-            SERVICE_NAME="${i#*=}"
-            SERVICE_NAME_EDITED=true
-            ;;
         -u=* | --user=*)
             USER="${i#*=}"
             ;;
         -d=* | --dir=* | --working-dir=* | -dir=*)
             WORKING_DIR="${i#*=}"
             ;;
-        --lib-dir=* | -lib_dir=*)
+        -l=* | --lib-dir=* | -lib_dir=*)
             LIB_DIR="${i#*=}"
             ;;
         --data-dir=* | -data_dir=*)
             DATA_DIR="${i#*=}"
             DATA_DIR_EDITED=true
+            ;;
+        -s=* | --service-name=* | -service_name=*)
+            SERVICE_NAME="${i#*=}"
+            SERVICE_NAME_EDITED=true
             ;;
         -p=* | --port=*)
             PORT="${i#*=}"
@@ -186,20 +178,23 @@ parseCommand() {
 
 help() {
     echo "Service commands:"
-    echo -e "   ${GREEN}install -s=<service_name> -u=<user> -d=<working_dir> --lib-dir=<lib_dir> --data-dir=<data_dir> -p=<port>${DEFAULT}              Install and start the service"
-    echo -e "   ${GREEN}disable${DEFAULT}                                                                                                               Disable the service"
-    echo -e "   ${GREEN}enable${DEFAULT}                                                                                                                Enable the service"
-    echo -e "   ${GREEN}delete${DEFAULT}                                                                                                                Delete the service"
-    echo -e "   ${GREEN}restart${DEFAULT}                                                                                                               Restart the service"
+    echo -e "   ${GREEN}install -u=<user> -d=<working_dir> -l=<lib_dir> [--data-dir=<data_dir>] [-s=<service_name>] [-p=<port>]${DEFAULT}                Install and start the service"
+    echo -e "   ${GREEN}disable${DEFAULT}                                                                                                                Disable the service"
+    echo -e "   ${GREEN}enable${DEFAULT}                                                                                                                 Enable the service"
+    echo -e "   ${GREEN}delete${DEFAULT}                                                                                                                 Delete the service"
+    echo -e "   ${GREEN}restart${DEFAULT}                                                                                                                Restart the service"
+    echo
+    echo -e "   ${GREEN}-h, --help${DEFAULT}                                                                                                             Show this help"
     echo
     echo "Install parameters:"
-    echo -e "   ${GREEN}-h --help${DEFAULT}                                                                                                             Show this help"
-    echo -e "   ${GREEN}-u --user=<user>${DEFAULT}                                                                                                      Which <user> is starting the service"
-    echo -e "   ${GREEN}-d --dir --working-dir=<working_dir>${DEFAULT}                                                                                  Project absolute dir"
-    echo -e "   ${GREEN}--lib-dir=<common-py-lib_dir>${DEFAULT}                                                                                         Absolute dir to install requirements"
-    echo -e "   ${GREEN}--data-dir=<data_dir>${DEFAULT}                                                                                                 Data and config absolute dir"
-    echo -e "   ${GREEN}-s --service-name=<service_name>${DEFAULT}                                                                                      Name of system service to create"
-    echo -e "   ${GREEN}-p --port=<port>${DEFAULT}                                                                                                      HTTP server port"
+    echo "    required:"
+    echo -e "   ${GREEN}-u, --user=<user>${DEFAULT}                                                                                                      Which <user> is starting the service"
+    echo -e "   ${GREEN}-d, --dir --working-dir=<working_dir>${DEFAULT}                                                                                  Project absolute dir"
+    echo -e "   ${GREEN}-l, --lib-dir=<common-py-lib_dir>${DEFAULT}                                                                                      Absolute dir to install requirements"
+    echo "    optional:"
+    echo -e "   ${GREEN}--data-dir=<data_dir>${DEFAULT}                                                                                                  Data and config absolute dir"
+    echo -e "   ${GREEN}-s, --service-name=<service_name>${DEFAULT}                                                                                      Name of system service to create"
+    echo -e "   ${GREEN}-p, --port=<port>${DEFAULT}                                                                                                      HTTP server port"
 }
 
 runCommand() {

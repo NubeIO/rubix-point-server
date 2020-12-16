@@ -12,11 +12,11 @@ ___
 2. Install common libs in that directory (follow instructions on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
 3. Run install script
    ```
-   sudo bash script.bash start -s=<service_name> -u=<pi|debian> -d=<working_dir> --lib-dir=<common-py-libs-dir> --data-dir=<data_dir> -p=<port>
+   sudo bash script.bash install --user=<pi|debian> --dir=<working_dir> --lib-dir=<common-py-libs-dir> --data-dir=<data_dir> --service-name=<service_name> --port=<port>
    ```
    i.e.
    ```
-   sudo bash script.bash start -s=nubeio-point-server.service -u=pi -d=/home/pi/rubix-point-server --lib-dir=/home/pi/common-py-libs --data-dir=/data/point-server -p=1515
+   sudo bash script.bash install -u=pi -d=/home/pi/rubix-point-server -l=/home/pi/common-py-libs --data-dir=/data/point-server -s=nubeio-point-server.service -p=1515
    ```
 4. _change /data/point-server/config.ini  as you want and restart -- `sudo bash script.bash restart`_
 
