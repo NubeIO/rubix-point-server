@@ -23,7 +23,7 @@ setup(
         'run.py',
         'settings/config.example.ini',
         'logging/logging.example.conf',
-        'systemd/nubeio-point-server.service',
+        'systemd/nubeio-point-server.template.service',
         'script.bash',
         'runtime.txt',
         'requirements.txt',
