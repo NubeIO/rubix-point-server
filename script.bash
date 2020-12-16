@@ -154,20 +154,20 @@ parseCommand() {
             help
             exit 0
             ;;
-        --service-name=*)
+        --service-name=* | -service_name=*)
             SERVICE_NAME="${i#*=}"
             SERVICE_NAME_EDITED=true
             ;;
         -u=* | --user=*)
             USER="${i#*=}"
             ;;
-        -d | --dir=* | --working-dir=*)
+        -d=* | --dir=* | --working-dir=* | -dir=*)
             WORKING_DIR="${i#*=}"
             ;;
-        --lib-dir=*)
+        --lib-dir=* | -lib_dir=*)
             LIB_DIR="${i#*=}"
             ;;
-        --data-dir=*)
+        --data-dir=* | -data_dir=*)
             DATA_DIR="${i#*=}"
             DATA_DIR_EDITED=true
             ;;
