@@ -9,10 +9,15 @@ from sqlalchemy import event
 
 from src.event_dispatcher import EventDispatcher
 
+if os.environ.get("data_dir") is None:
+    logging_file = 'logging/logging.conf'
+else:
+    logging_file = os.path.join(os.environ.get("data_dir"), 'logging.conf')
 try:
-    logging.config.fileConfig('logging/logging.conf')
+    logging.config.fileConfig(logging_file)
 except Exception as e:
-    raise Exception('Failed to load logging config file. Assure the example config is cloned as logging.conf')
+    raise Exception(f'Failed to load logging config file {logging_file}. '
+                    f'Assure the example config is cloned as logging.conf')
 
 app = Flask(__name__)
 CORS(app)

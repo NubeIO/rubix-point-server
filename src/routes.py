@@ -80,4 +80,4 @@ api.add_resource(WiresPlatResource, f'/{wires_api_prefix}/plat')
 
 system_api_prefix = f'{api_prefix}/system'
 api.add_resource(GetSystemMem, f'/{system_api_prefix}/memory')
-api.add_resource(Ping, f'/{system_api_prefix}/ping')
+api.add_resource(Ping, f'/{system_api_prefix}', f'/{system_api_prefix}/ping')
