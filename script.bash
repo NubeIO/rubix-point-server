@@ -31,7 +31,7 @@ createDirIfNotExist() {
 
 copyConfigurationIfNotExist() {
     if [ ! -s ${DATA_DIR}/${CONFIG} ]; then
-        echo -e "${RED}${CONFIG} file doesn't exist or it is empty. ${GREEN}Creating${DEFAULT}"
+        echo -e "${RED}${CONFIG} file doesn't exist or it is empty. ${GREEN}Creating...${DEFAULT}"
         cp ${WORKING_DIR}/${CONFIG_EXAMPLE} ${DATA_DIR}/${CONFIG}
         sudo chmod -R +755 ${DATA_DIR}/${CONFIG}
     fi
@@ -39,17 +39,17 @@ copyConfigurationIfNotExist() {
 
 copyLoggingIfNotExist() {
     if [ ! -s ${DATA_DIR}/${LOGGING} ]; then
-        echo -e "${RED}${LOGGING} file doesn't exist or it is empty. ${GREEN}Creating${DEFAULT}"
+        echo -e "${RED}${LOGGING} file doesn't exist or it is empty. ${GREEN}Creating...${DEFAULT}"
         cp ${WORKING_DIR}/${LOGGING_EXAMPLE} ${DATA_DIR}/${LOGGING}
         sudo chmod -R +755 ${DATA_DIR}/${LOGGING}
     fi
 }
 
 installPythonRequirements() {
-  echo -e "${GREEN}Installing requirements in ${LIB_DIR}...${DEFAULT}"
-  source ${LIB_DIR}/venv/bin/activate
-  pip install -r requirements.txt
-  deactivate
+    echo -e "${GREEN}Installing requirements in ${LIB_DIR}...${DEFAULT}"
+    source ${LIB_DIR}/venv/bin/activate
+    pip install -r requirements.txt
+    deactivate
 }
 
 showServiceNameWarningIfNotEdited() {
@@ -137,7 +137,6 @@ delete() {
     echo -e "${GREEN}Hitting daemon-reload...${DEFAULT}"
     sudo systemctl daemon-reload
     echo -e "${GREEN}Service is deleted.${DEFAULT}"
-    # TODO: remove other data and requirements
 }
 
 restart() {
@@ -206,7 +205,7 @@ runCommand() {
     install)
         install
         ;;
-    start) # for backward compatibility
+    start)
         install
         ;;
     disable)
