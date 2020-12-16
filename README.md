@@ -1,4 +1,4 @@
-# BACnet/IP, Modbus Master and Modbus RTU RESTful APIs
+# Rubix Point Server
 
 ## Install
 ___
@@ -12,11 +12,11 @@ ___
 2. Install common libs in that directory (follow instructions on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
 3. Run install script
    ```
-   sudo bash script.bash install -u=<pi|debian> -dir=<point-server_dir> -lib_dir=<common-py-libs-dir>
+   sudo bash script.bash start --service-name=<service_name> -u=<pi|debian> --dir=<working_dir> --lib-dir=<common-py-libs-dir> --data-dir=<data_dir> -p=<port>
    ```
    i.e.
    ```
-   sudo bash script.bash install -u=pi -dir=/home/pi/point-server-1.1.3/ -lib_dir=/home/pi/common-py-libs/
+   sudo bash script.bash start --service-name=nubeio-point-server.service -u=pi --dir=/home/pi/rubix-point-server --lib-dir=/home/pi/common-py-libs --data-dir=/data/point-server -p=1515
    ```
 4. _change /data/point-server/config.ini  as you want and restart -- `sudo bash script.bash restart`_
 
@@ -78,6 +78,7 @@ ___
 #### Development
 ```bash
 cp settings/config.example.ini settings/config.ini
+cp logging/logging.example.conf logging/logging.conf
 ```
 
 ### MQTT client
