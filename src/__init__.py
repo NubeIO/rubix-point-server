@@ -1,4 +1,3 @@
-import logging.config
 import os
 
 from flask import Flask
@@ -10,7 +9,10 @@ from sqlalchemy import event
 from src.event_dispatcher import EventDispatcher
 
 try:
-    logging.config.fileConfig('logging/logging.conf')
+    if os.environ.get("data_dir") is None:
+        filename = 'logging/logging.conf'
+    else:
+        filename = os.path.join(os.environ.get("data_dir"), 'logging.conf')
 except Exception as e:
     raise Exception('Failed to load logging config file. Assure the example config is cloned as logging.conf')
 
@@ -32,6 +34,7 @@ else:
         url = f'sqlite:///{os.environ.get("data_dir")}/data.db?timeout=60'
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', url)
+
 
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):

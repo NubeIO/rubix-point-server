@@ -22,7 +22,7 @@ CONFIG_EXAMPLE=settings/config.example.ini
 CONFIG=config.ini
 
 LOGGING_EXAMPLE=logging/logging.example.conf
-LOGGING=logging/logging.conf
+LOGGING=logging.conf
 
 createDirIfNotExist() {
     mkdir -p ${DATA_DIR}
@@ -31,7 +31,7 @@ createDirIfNotExist() {
 
 copyConfigurationIfNotExist() {
     if [ ! -s ${DATA_DIR}/${CONFIG} ]; then
-        echo -e "${RED}config.ini file doesn't exist (or it is empty)${DEFAULT}"
+        echo -e "${RED}${CONFIG} file doesn't exist (or it is empty)${DEFAULT}"
         cp ${WORKING_DIR}/${CONFIG_EXAMPLE} ${DATA_DIR}/${CONFIG}
         sudo chmod -R +755 ${DATA_DIR}/${CONFIG}
     fi
@@ -39,7 +39,7 @@ copyConfigurationIfNotExist() {
 
 copyLoggingIfNotExist() {
     if [ ! -s ${DATA_DIR}/${LOGGING} ]; then
-        echo -e "${RED}logging.ini file doesn't exist (or it is empty)${DEFAULT}"
+        echo -e "${RED}${LOGGING} file doesn't exist (or it is empty)${DEFAULT}"
         cp ${WORKING_DIR}/${LOGGING_EXAMPLE} ${DATA_DIR}/${LOGGING}
         sudo chmod -R +755 ${DATA_DIR}/${LOGGING}
     fi
@@ -92,6 +92,7 @@ start() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" && ${LIB_DIR} != "" ]]; then
         createDirIfNotExist
         copyConfigurationIfNotExist
+        copyLoggingIfNotExist
         createLinuxService
         startNewLinuxService
         echo -e "${GREEN}Service is created and started.${DEFAULT}"
