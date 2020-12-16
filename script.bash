@@ -153,7 +153,7 @@ parseCommand() {
             help
             exit 0
             ;;
-        --service-name=* | -service_name=*)
+        -s | --service-name=* | -service_name=*)
             SERVICE_NAME="${i#*=}"
             SERVICE_NAME_EDITED=true
             ;;
@@ -186,18 +186,20 @@ parseCommand() {
 
 help() {
     echo "Service commands:"
-    echo -e "   ${GREEN}install --service-name=<service_name> -u=<user> --dir=<working_dir> --lib-dir=<lib_dir> --data-dir=<data_dir>${DEFAULT}         Install and start the service"
+    echo -e "   ${GREEN}install -s=<service_name> -u=<user> -d=<working_dir> --lib-dir=<lib_dir> --data-dir=<data_dir> -p=<port>${DEFAULT}              Install and start the service"
     echo -e "   ${GREEN}disable${DEFAULT}                                                                                                               Disable the service"
     echo -e "   ${GREEN}enable${DEFAULT}                                                                                                                Enable the service"
     echo -e "   ${GREEN}delete${DEFAULT}                                                                                                                Delete the service"
     echo -e "   ${GREEN}restart${DEFAULT}                                                                                                               Restart the service"
     echo
-    echo "Service parameters:"
+    echo "Install parameters:"
     echo -e "   ${GREEN}-h --help${DEFAULT}                                                                                                             Show this help"
     echo -e "   ${GREEN}-u --user=<user>${DEFAULT}                                                                                                      Which <user> is starting the service"
-    echo -e "   ${GREEN}--dir --working-dir=<working_dir>${DEFAULT}                                                                                     Project dir"
-    echo -e "   ${GREEN}--lib-dir=<lib_dir>${DEFAULT}                                                                                                   Python requirements lib dir"
-    echo -e "   ${GREEN}--data-dir=<lib_dir>${DEFAULT}                                                                                                  Config dir"
+    echo -e "   ${GREEN}-d --dir --working-dir=<working_dir>${DEFAULT}                                                                                  Project absolute dir"
+    echo -e "   ${GREEN}--lib-dir=<common-py-lib_dir>${DEFAULT}                                                                                         Absolute dir to install requirements"
+    echo -e "   ${GREEN}--data-dir=<data_dir>${DEFAULT}                                                                                                 Data and config absolute dir"
+    echo -e "   ${GREEN}-s --service-name=<service_name>${DEFAULT}                                                                                      Name of system service to create"
+    echo -e "   ${GREEN}-p --port=<port>${DEFAULT}                                                                                                      HTTP server port"
 }
 
 runCommand() {
