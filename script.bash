@@ -17,8 +17,12 @@ PORT_EDITED=false
 SERVICE_DIR=/lib/systemd/system
 SERVICE_DIR_SOFT_LINK=/etc/systemd/system/multi-user.target.wants
 SERVICE_TEMPLATE=systemd/nubeio-point-server.template.service
+
 CONFIG_EXAMPLE=settings/config.example.ini
 CONFIG=config.ini
+
+LOGGING_EXAMPLE=logging/logging.example.conf
+LOGGING=logging/logging.conf
 
 createDirIfNotExist() {
     mkdir -p ${DATA_DIR}
@@ -30,6 +34,14 @@ copyConfigurationIfNotExist() {
         echo -e "${RED}config.ini file doesn't exist (or it is empty)${DEFAULT}"
         cp ${WORKING_DIR}/${CONFIG_EXAMPLE} ${DATA_DIR}/${CONFIG}
         sudo chmod -R +755 ${DATA_DIR}/${CONFIG}
+    fi
+}
+
+copyLoggingIfNotExist() {
+    if [ ! -s ${DATA_DIR}/${LOGGING} ]; then
+        echo -e "${RED}logging.ini file doesn't exist (or it is empty)${DEFAULT}"
+        cp ${WORKING_DIR}/${LOGGING_EXAMPLE} ${DATA_DIR}/${LOGGING}
+        sudo chmod -R +755 ${DATA_DIR}/${LOGGING}
     fi
 }
 
