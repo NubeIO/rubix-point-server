@@ -22,7 +22,7 @@ CONFIG_EXAMPLE=settings/config.example.ini
 CONFIG=config.ini
 
 LOGGING_EXAMPLE=logging/logging.example.conf
-LOGGING=logging/logging.conf
+LOGGING=logging.conf
 
 createDirIfNotExist() {
     mkdir -p ${DATA_DIR}
@@ -31,7 +31,7 @@ createDirIfNotExist() {
 
 copyConfigurationIfNotExist() {
     if [ ! -s ${DATA_DIR}/${CONFIG} ]; then
-        echo -e "${RED}config.ini file doesn't exist (or it is empty)${DEFAULT}"
+        echo -e "${RED}${CONFIG} file doesn't exist or it is empty. ${GREEN}Creating...${DEFAULT}"
         cp ${WORKING_DIR}/${CONFIG_EXAMPLE} ${DATA_DIR}/${CONFIG}
         sudo chmod -R +755 ${DATA_DIR}/${CONFIG}
     fi
@@ -39,7 +39,7 @@ copyConfigurationIfNotExist() {
 
 copyLoggingIfNotExist() {
     if [ ! -s ${DATA_DIR}/${LOGGING} ]; then
-        echo -e "${RED}logging.ini file doesn't exist (or it is empty)${DEFAULT}"
+        echo -e "${RED}${LOGGING} file doesn't exist or it is empty. ${GREEN}Creating...${DEFAULT}"
         cp ${WORKING_DIR}/${LOGGING_EXAMPLE} ${DATA_DIR}/${LOGGING}
         sudo chmod -R +755 ${DATA_DIR}/${LOGGING}
     fi
@@ -47,22 +47,22 @@ copyLoggingIfNotExist() {
 
 showServiceNameWarningIfNotEdited() {
     if [ ${SERVICE_NAME_EDITED} == false ]; then
-        echo -e "${RED}We are using by default service_name=${SERVICE_NAME}!${DEFAULT}"
+        echo -e "${RED}We are using default service_name=${SERVICE_NAME}!${DEFAULT}"
     fi
 }
 
 showWarningIfNotEdited() {
     showServiceNameWarningIfNotEdited
     if [ ${DATA_DIR_EDITED} == false ]; then
-        echo -e "${RED}We are using by default data_dir=${DATA_DIR}!${DEFAULT}"
+        echo -e "${RED}We are using default data_dir=${DATA_DIR}!${DEFAULT}"
     fi
     if [ ${PORT_EDITED} == false ]; then
-        echo -e "${RED}We are using by default port=${PORT}!${DEFAULT}"
+        echo -e "${RED}We are using default port=${PORT}!${DEFAULT}"
     fi
 }
 
 createLinuxService() {
-    echo -e "${GREEN}Creating Linux Service...${SERVICE_NAME}"
+    echo -e "${GREEN}Creating Linux Service ${SERVICE_NAME}..."
     sudo cp ${SERVICE_TEMPLATE} ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's/<user>/'"${USER}"'/' ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's,<working_dir>,'"${WORKING_DIR}"',' ${SERVICE_DIR}/${SERVICE_NAME}
@@ -88,15 +88,16 @@ startNewLinuxService() {
     sudo systemctl restart ${SERVICE_NAME}
 }
 
-start() {
+install() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" && ${LIB_DIR} != "" ]]; then
         createDirIfNotExist
         copyConfigurationIfNotExist
+        copyLoggingIfNotExist
         createLinuxService
         startNewLinuxService
         echo -e "${GREEN}Service is created and started.${DEFAULT}"
     else
-        echo -e ${RED}"-u=<user> -dir=<working_dir> -lib_dir=<lib_dir> these parameters should be on you input (-h, --help for help)${DEFAULT}"
+        echo -e ${RED}"Invalid parameters (-h, --help for help)${DEFAULT}"
     fi
 }
 
@@ -145,28 +146,28 @@ parseCommand() {
             help
             exit 0
             ;;
-        -service_name=*)
-            SERVICE_NAME="${i#*=}"
-            SERVICE_NAME_EDITED=true
-            ;;
         -u=* | --user=*)
             USER="${i#*=}"
             ;;
-        -dir=* | --working-dir=*)
+        -d=* | --dir=* | --working-dir=* | -dir=*)
             WORKING_DIR="${i#*=}"
             ;;
-        -lib_dir=*)
+        -l=* | --lib-dir=* | -lib_dir=*)
             LIB_DIR="${i#*=}"
             ;;
-        -data_dir=*)
+        --data-dir=* | -data_dir=*)
             DATA_DIR="${i#*=}"
             DATA_DIR_EDITED=true
+            ;;
+        -s=* | --service-name=* | -service_name=*)
+            SERVICE_NAME="${i#*=}"
+            SERVICE_NAME_EDITED=true
             ;;
         -p=* | --port=*)
             PORT="${i#*=}"
             PORT_EDITED=true
             ;;
-        start | disable | enable | delete | restart)
+        install | start | disable | enable | delete | restart)
             COMMAND=${i}
             ;;
         *)
@@ -178,23 +179,32 @@ parseCommand() {
 
 help() {
     echo "Service commands:"
-    echo -e "   ${GREEN}start -service_name=<service_name> -u=<user> -dir=<working_dir> -lib_dir=<lib_dir> -data_dir=<data_dir> -t=<token>${DEFAULT}    Start the service"
-    echo -e "   ${GREEN}disable${DEFAULT}                                                                                                               Disable the service"
-    echo -e "   ${GREEN}enable${DEFAULT}                                                                                                                Enable the stopped service"
-    echo -e "   ${GREEN}delete${DEFAULT}                                                                                                                Delete the service"
-    echo -e "   ${GREEN}restart${DEFAULT}                                                                                                               Restart the service"
+    echo -e "   ${GREEN}install -u=<user> -d=<working_dir> -l=<lib_dir> [--data-dir=<data_dir>] [-s=<service_name>] [-p=<port>]${DEFAULT}                Install and start the service"
+    echo -e "   ${GREEN}disable${DEFAULT}                                                                                                                Disable the service"
+    echo -e "   ${GREEN}enable${DEFAULT}                                                                                                                 Enable the service"
+    echo -e "   ${GREEN}delete${DEFAULT}                                                                                                                 Delete the service"
+    echo -e "   ${GREEN}restart${DEFAULT}                                                                                                                Restart the service"
     echo
-    echo "Service parameters:"
-    echo -e "   ${GREEN}-h --help${DEFAULT}                                                                                                             Show this help"
-    echo -e "   ${GREEN}-u --user=<user>${DEFAULT}                                                                                                      Which <user> is starting the service"
-    echo -e "   ${GREEN}-dir --working-dir=<working_dir>${DEFAULT}                                                                                      From where wires is starting"
-    echo -e "   ${GREEN}-dir --lib_dir-dir=<lib_dir>${DEFAULT}                                                                                          From where lib should load"
+    echo -e "   ${GREEN}-h, --help${DEFAULT}                                                                                                             Show this help"
+    echo
+    echo "Install parameters:"
+    echo "    required:"
+    echo -e "   ${GREEN}-u, --user=<user>${DEFAULT}                                                                                                      Which <user> is starting the service"
+    echo -e "   ${GREEN}-d, --dir --working-dir=<working_dir>${DEFAULT}                                                                                  Project absolute dir"
+    echo -e "   ${GREEN}-l, --lib-dir=<common-py-lib_dir>${DEFAULT}                                                                                      Absolute dir to install requirements"
+    echo "    optional:"
+    echo -e "   ${GREEN}--data-dir=<data_dir>${DEFAULT}                                                                                                  Data and config absolute dir"
+    echo -e "   ${GREEN}-s, --service-name=<service_name>${DEFAULT}                                                                                      Name of system service to create"
+    echo -e "   ${GREEN}-p, --port=<port>${DEFAULT}                                                                                                      HTTP server port"
 }
 
 runCommand() {
     case ${COMMAND} in
+    install)
+        install
+        ;;
     start)
-        start
+        install
         ;;
     disable)
         disable

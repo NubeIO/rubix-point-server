@@ -1,28 +1,31 @@
-# BACnet/IP, Modbus Master and Modbus RTU RESTful APIs
+# Rubix Point Server
 
 ## Install
+___
 
+### Production
 
-### Running on Production
+1. Clone [common-pi-libs](https://github.com/NubeIO/common-py-libs)
+   ```
+   git clone https://github.com/NubeIO/common-py-libs.git
+   ```
+2. Install common libs in that directory (follow instructions on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
+3. Run install script
+   ```
+   sudo bash script.bash install --user=<pi|debian> --dir=<working_dir> --lib-dir=<common-py-libs-dir> --data-dir=<data_dir> --service-name=<service_name> --port=<port>
+   ```
+   i.e.
+   ```
+   sudo bash script.bash install -u=pi -d=/home/pi/rubix-point-server -l=/home/pi/common-py-libs --data-dir=/data/point-server -s=nubeio-point-server.service -p=1515
+   ```
+4. _change /data/point-server/config.ini  as you want and restart -- `sudo bash script.bash restart`_
 
-#### One time setup:
-- Clone [this](https://github.com/NubeIO/common-py-libs)
-- Create `venv` on inside that directory (follow instruction on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
+### Development
 
-#### Commands:
-```bash
-sudo bash script.bash start -service_name=<service_name> -u=<pi|debian> -dir=<working_dir> -lib_dir=<common-py-libs-dir> -data_dir=<data_dir> -p=<port>
-sudo bash script.bash start -service_name=nubeio-point-server.service -u=pi -dir=/home/pi/rubix-point-server -lib_dir=/home/pi/common-py-libs -data_dir=/data/point-server -p=1515
-sudo bash script.bash -h
-```
-
-##### Note: _change /data/bac-flask/config.ini  as you want and restart -- `sudo bash script.bash restart`_
-
-### RPi
-
+#### RPi
 Dependencies:
 ```bash
-sudo apt install -y python3-venv -y
+sudo apt install -y python3-venv
 ```
 Activate venv:
 ```bash
@@ -33,7 +36,7 @@ Other:
 pip install --upgrade pip && pip install -r requirements.txt
 ```
 
-### BBB
+#### BBB
 
 Dependencies:  
 (Had to update the BBB from 3.5 to 3.7 but didn't work)
@@ -61,44 +64,21 @@ Other:
 pip3 install -r requirements.txt
 ```
 
-## Running (linux)
+#### Running (linux)
 
-**Manually**  
 (make sure `venv` still active. If not, follow above commands for `venv`)
 ```bash
-python3 run.py
-```
-**System Service**
-```bash
-mkdir /data/point-server
-cp settings/config.example.ini /data/point-server/config.ini
-
-# copy and edit service file
-sudo cp systemd/nubeio-point-server.service /etc/systemd/system/
-sudo nano /etc/systemd/system/nubeio-point-server.service
-
-# load service
-sudo systemctl daemon-reload && sudo systemctl enable nubeio-point-server.service
-sudo systemctl start nubeio-point-server.service
-
-# check its running
-sudo journalctl -f -u nubeio-point-server.service
-```
-Other:
-```
-sudo systemctl start nubeio-point-server.service
-sudo systemctl stop nubeio-point-server.service
-sudo systemctl restart nubeio-point-server.service
-sudo journalctl -f -u nubeio-point-server.service
+python run.py
 ```
 
 ## DOCS
-
+___
 ### Config
 
 #### Development
 ```bash
 cp settings/config.example.ini settings/config.ini
+cp logging/logging.example.conf logging/logging.conf
 ```
 
 ### MQTT client
@@ -145,4 +125,13 @@ device:
 
 point:
   rubix/points/update/point/example_point_uuid
+```
+
+### Generic Point MQTT client
+
+All generic point values are updated over MQTT.  
+These COVs are then broadcast again over the normal MQTT clients as above
+#### Topic structure:
+```
+rubix/points/generic/cov/<point_name>/<device_name>/<network_name>
 ```

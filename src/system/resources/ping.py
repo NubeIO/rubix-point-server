@@ -9,6 +9,8 @@ from src.services.histories.sync.influxdb import InfluxDB
 
 start_time = time.time()
 up_time_date = str(datetime.now())
+with open('VERSION') as version_file:
+    version = version_file.read().strip()
 
 
 def get_up_time():
@@ -31,6 +33,7 @@ class Ping(Resource):
         for mqtt_client in Background.get_mqtt_client():
             mqtt_client_statuses.append({mqtt_client.to_string(): mqtt_client.status()})
         return {
+            'version': version,
             'up_time_date': up_time_date,
             'up_min': up_min,
             'up_hour': up_hour,
