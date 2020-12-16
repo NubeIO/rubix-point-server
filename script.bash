@@ -22,7 +22,7 @@ CONFIG_EXAMPLE=settings/config.example.ini
 CONFIG=config.ini
 
 LOGGING_EXAMPLE=logging/logging.example.conf
-LOGGING=logging/logging.conf
+LOGGING=logging.conf
 
 createDirIfNotExist() {
     mkdir -p ${DATA_DIR}
@@ -62,7 +62,7 @@ showWarningIfNotEdited() {
 }
 
 createLinuxService() {
-    echo -e "${GREEN}Creating Linux Service...${SERVICE_NAME}"
+    echo -e "${GREEN}Creating Linux Service ${SERVICE_NAME}..."
     sudo cp ${SERVICE_TEMPLATE} ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's/<user>/'"${USER}"'/' ${SERVICE_DIR}/${SERVICE_NAME}
     sed -i -e 's,<working_dir>,'"${WORKING_DIR}"',' ${SERVICE_DIR}/${SERVICE_NAME}
@@ -92,6 +92,7 @@ install() {
     if [[ ${USER} != "" && ${WORKING_DIR} != "" && ${LIB_DIR} != "" ]]; then
         createDirIfNotExist
         copyConfigurationIfNotExist
+        copyLoggingIfNotExist
         createLinuxService
         startNewLinuxService
         echo -e "${GREEN}Service is created and started.${DEFAULT}"
