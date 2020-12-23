@@ -18,3 +18,9 @@ logging.conf
 config.ini
 dist/
 *.egg-info
+
+build/
+out/*
+!out/.gitkeep
+!docker/.env
+*.iml
