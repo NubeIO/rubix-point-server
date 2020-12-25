@@ -1,12 +1,12 @@
 import json
 import logging
 
-from src.services.mqtt_client.mqtt_client_base import MqttClientBase
-from src.event_dispatcher import EventDispatcher
+from src import EventDispatcher
 from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
+from src.services.mqtt_client.mqtt_client_base import MqttClientBase
 
 SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
@@ -54,7 +54,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
             logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
         if point is None or point_store is None or device_uuid is None or network_uuid is None \
-                or source_driver is None or network_name is None or device_name is None:
+            or source_driver is None or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
 
         topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_COV}/{MQTT_TOPIC_COV_ALL}/{point.uuid}/{point.name}/' \
@@ -119,5 +119,5 @@ class MqttClient(MqttClientBase, EventServiceBase):
                              event.data.get('source_driver'))
 
         elif event.event_type == EventType.POINT_UPDATE or event.event_type == EventType.DEVICE_UPDATE or \
-                event.event_type == EventType.NETWORK_UPDATE:
+            event.event_type == EventType.NETWORK_UPDATE:
             self.publish_update(event.data.get('model'), event.data.get('updates'))

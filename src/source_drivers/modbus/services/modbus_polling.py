@@ -4,8 +4,7 @@ import time
 from pymodbus.exceptions import ConnectionException, ModbusIOException
 from sqlalchemy.orm.exc import ObjectDeletedError
 
-from src import db
-from src.event_dispatcher import EventDispatcher
+from src import db, EventDispatcher
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException
 from src.source_drivers.modbus.models.device import ModbusDeviceModel

@@ -1,6 +1,6 @@
+from flask import Blueprint
 from flask_restful import Api
 
-from src import app
 from src.resources.resource_device import DeviceResource, DeviceResourceByName, DeviceResourceList
 from src.resources.resource_network import NetworkResource, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResource, PointResourceByName, PointResourceList
@@ -13,7 +13,6 @@ from src.source_drivers.generic.resources.network.network_plural import GenericN
 from src.source_drivers.generic.resources.network.network_singular import GenericNetworkSingular
 from src.source_drivers.generic.resources.point.point_plural import GenericPointPlural
 from src.source_drivers.generic.resources.point.point_singular import GenericPointSingular
-
 from src.source_drivers.modbus.resources.device.device_plural import ModbusDevicePlural
 from src.source_drivers.modbus.resources.device.device_singular import ModbusDeviceSingular
 from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
@@ -26,22 +25,27 @@ from src.source_drivers.modbus.resources.point.point_stores import ModbusPointPl
 from src.system.resources.memory import GetSystemMem
 from src.system.resources.ping import Ping
 
-api_prefix = 'api'
-api = Api(app)
+bp_network = Blueprint('networks', __name__, url_prefix='/api/networks')
+api_network = Api(bp_network)
+api_network.add_resource(NetworkResource, '/uuid/<string:uuid>')
+api_network.add_resource(NetworkResourceByName, '/name/<string:name>')
+api_network.add_resource(NetworkResourceList, '/')
+
+bp_device = Blueprint('devices', __name__, url_prefix='/api/devices')
+api_network = Api(bp_device)
+api_network.add_resource(DeviceResource, '/uuid/<string:uuid>')
+api_network.add_resource(DeviceResourceByName, '/name/<string:network_name>/<string:device_name>')
+api_network.add_resource(DeviceResourceList, '/')
+
+bp_point = Blueprint('points', __name__, url_prefix='/api/points')
+api_point = Api(bp_point)
+api_point.add_resource(PointResource, '/uuid/<string:uuid>')
+api_point.add_resource(PointResourceByName, '/name/<string:network_name>/<string:device_name>/<string:point_name>')
+api_point.add_resource(PointResourceList, '/')
 
 # common parent inheritance endpoints
-api.add_resource(NetworkResource, f'/{api_prefix}/networks/uuid/<string:uuid>')
-api.add_resource(NetworkResourceByName, f'/{api_prefix}/networks/name/<string:name>')
-api.add_resource(NetworkResourceList, f'/{api_prefix}/networks')
-api.add_resource(DeviceResource, f'/{api_prefix}/devices/uuid/<string:uuid>')
-api.add_resource(DeviceResourceByName, f'/{api_prefix}/devices/name/<string:network_name>/<string:device_name>')
-api.add_resource(DeviceResourceList, f'/{api_prefix}/devices')
-api.add_resource(PointResource, f'/{api_prefix}/points/uuid/<string:uuid>')
-api.add_resource(PointResourceByName, f'/{api_prefix}/points/name/<string:network_name>/<string:device_name>/'
-                                      f'<string:point_name>')
-api.add_resource(PointResourceList, f'/{api_prefix}/points')
-# api.add_resource(PointReadOnlyResourceList, f'/{api_prefix}/points/readonly')
-# api.add_resource(PointWriteableResourceList, f'/{api_prefix}/points/writable')
+# api.add_resource(PointReadOnlyResourceList, '/readonly')
+# api.add_resource(PointWriteableResourceList, '/writable')
 
 # bacnet_api_prefix = f'{api_prefix}/bacnet'
 # api.add_resource(Device, f'/{bacnet_api_prefix}/dev/<string:uuid>')
@@ -54,30 +58,33 @@ api.add_resource(PointResourceList, f'/{api_prefix}/points')
 # api.add_resource(NetworkList, f'/{bacnet_api_prefix}/networks')
 # api.add_resource(NetworksIds, f'/{bacnet_api_prefix}/networks/ids')
 
-generic_api_prefix = f'{api_prefix}/generic'
-api.add_resource(GenericNetworkPlural, f'/{generic_api_prefix}/networks')
-api.add_resource(GenericNetworkSingular, f'/{generic_api_prefix}/networks/<string:uuid>')
-api.add_resource(GenericDevicePlural, f'/{generic_api_prefix}/devices')
-api.add_resource(GenericDeviceSingular, f'/{generic_api_prefix}/devices/<string:uuid>')
-api.add_resource(GenericPointPlural, f'/{generic_api_prefix}/points')
-api.add_resource(GenericPointSingular, f'/{generic_api_prefix}/points/<string:uuid>')
+bp_generic = Blueprint('generic', __name__, url_prefix='/api/generic')
+api_generic = Api(bp_generic)
+api_generic.add_resource(GenericNetworkPlural, '/networks')
+api_generic.add_resource(GenericNetworkSingular, '/networks/<string:uuid>')
+api_generic.add_resource(GenericDevicePlural, '/devices')
+api_generic.add_resource(GenericDeviceSingular, '/devices/<string:uuid>')
+api_generic.add_resource(GenericPointPlural, '/points')
+api_generic.add_resource(GenericPointSingular, '/points/<string:uuid>')
 
-modbus_api_prefix = f'{api_prefix}/modbus'
-api.add_resource(ModbusNetworkPlural, f'/{modbus_api_prefix}/networks')
-api.add_resource(ModbusNetworkSingular, f'/{modbus_api_prefix}/networks/<string:uuid>')
-api.add_resource(ModbusDevicePlural, f'/{modbus_api_prefix}/devices')
-api.add_resource(ModbusDeviceSingular, f'/{modbus_api_prefix}/devices/<string:uuid>')
-api.add_resource(ModbusPointPlural, f'/{modbus_api_prefix}/points')
-api.add_resource(ModbusPointSingular, f'/{modbus_api_prefix}/points/<string:uuid>')
-api.add_resource(ModbusPointPoll, f'/{modbus_api_prefix}/poll/point/<string:uuid>')
-api.add_resource(ModbusPointPollNonExisting, f'/{modbus_api_prefix}/poll/point')
-api.add_resource(ModbusPointPluralPointStore, f'/{modbus_api_prefix}/point_stores')
-api.add_resource(ModbusPointStore, f'/{modbus_api_prefix}/point_stores/<string:uuid>')
-api.add_resource(ModbusDevicePointPluralPointStore, f'/{modbus_api_prefix}/<string:device_uuid>/point_stores')
+bp_modbus = Blueprint('modbus', __name__, url_prefix='/api/modbus')
+api_modbus = Api(bp_modbus)
+api_modbus.add_resource(ModbusNetworkPlural, '/networks')
+api_modbus.add_resource(ModbusNetworkSingular, '/networks/<string:uuid>')
+api_modbus.add_resource(ModbusDevicePlural, '/devices')
+api_modbus.add_resource(ModbusDeviceSingular, '/devices/<string:uuid>')
+api_modbus.add_resource(ModbusPointPlural, '/points')
+api_modbus.add_resource(ModbusPointSingular, '/points/<string:uuid>')
+api_modbus.add_resource(ModbusPointPoll, '/poll/point/<string:uuid>')
+api_modbus.add_resource(ModbusPointPollNonExisting, '/poll/point')
+api_modbus.add_resource(ModbusPointPluralPointStore, '/point_stores')
+api_modbus.add_resource(ModbusPointStore, '/point_stores/<string:uuid>')
+api_modbus.add_resource(ModbusDevicePointPluralPointStore, '/<string:device_uuid>/point_stores')
 
-wires_api_prefix = f'{api_prefix}/wires'
-api.add_resource(WiresPlatResource, f'/{wires_api_prefix}/plat')
+bp_wires = Blueprint('wires', __name__, url_prefix='/api/wires')
+Api(bp_wires).add_resource(WiresPlatResource, '/plat')
 
-system_api_prefix = f'{api_prefix}/system'
-api.add_resource(GetSystemMem, f'/{system_api_prefix}/memory')
-api.add_resource(Ping, f'/{system_api_prefix}', f'/{system_api_prefix}/ping')
+bp_system = Blueprint('system', __name__, url_prefix='/api/system')
+api_system = Api(bp_system)
+api_system.add_resource(GetSystemMem, '/memory')
+api_system.add_resource(Ping, '/', '/ping')

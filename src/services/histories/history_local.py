@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from src import db
-from src.event_dispatcher import EventDispatcher
+from src import db, EventDispatcher
 from src.interfaces.point import HistoryType
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel

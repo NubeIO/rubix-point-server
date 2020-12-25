@@ -3,8 +3,7 @@ from json import loads as json_loads, JSONDecodeError
 
 from sqlalchemy.orm.exc import ObjectDeletedError
 
-from src import db
-from src.event_dispatcher import EventDispatcher
+from src import db, EventDispatcher
 from src.ini_config import *
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
