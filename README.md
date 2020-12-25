@@ -1,75 +1,67 @@
 # Rubix Point Server
 
-## Install
-___
+## Running in development
 
-### Production
+- Use [`poetry`](https://github.com/python-poetry/poetry) to manage dependencies
+- Simple script to install
 
-1. Clone [common-pi-libs](https://github.com/NubeIO/common-py-libs)
-   ```
-   git clone https://github.com/NubeIO/common-py-libs.git
-   ```
-2. Install common libs in that directory (follow instructions on [here](https://github.com/NubeIO/common-py-libs#how-to-create))
-3. Run install script
-   ```
-   sudo bash script.bash install --user=<pi|debian> --dir=<working_dir> --lib-dir=<common-py-libs-dir> --data-dir=<data_dir> --service-name=<service_name> --port=<port>
-   ```
-   i.e.
-   ```
-   sudo bash script.bash install -u=pi -d=/home/pi/rubix-point-server -l=/home/pi/common-py-libs --data-dir=/data/point-server -s=nubeio-point-server.service -p=1515
-   ```
-4. _change /data/point-server/config.ini  as you want and restart -- `sudo bash script.bash restart`_
+    ```bash
+    ./setup.sh
+    ```
 
-### Development
+- Join `venv`
 
-#### RPi
-Dependencies:
+    ```bash
+    poetry shell
+    ```
+
+- Build local binary
+
+    ```bash
+    poetry run pyinstaller run.py -n rubix-point --clean --onefile --add-data VERSION:VERSION
+    ```
+
+  The output is: `dist/rubix-point`
+
+## Docker build
+
+### Build
+
 ```bash
-sudo apt install -y python3-venv
-```
-Activate venv:
-```bash
-python3 -m venv venv && source venv/bin/activate
-```
-Other:
-```bash
-pip install --upgrade pip && pip install -r requirements.txt
+./docker.sh
 ```
 
-#### BBB
+The output image is: `rubix-point:dev`
 
-Dependencies:  
-(Had to update the BBB from 3.5 to 3.7 but didn't work)
+### Run
+
 ```bash
-sudo apt update
-sudo apt install -y software-properties-common
-
-## had issue on install and needed to install this:
-sudo apt install -y dirmngr
-
-# Python
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt install -y python3.7
-sudo apt install -y build-essential python-dev python-setuptools python-pip python-smbus python3-pip virtualenv -y
-pip install -U pip setuptools wheel
-
-rm -r venv
-```
-Activate venv:
-```bash
-virtualenv -p python3 venv && source venv/bin/activate
-```
-Other:
-```bash
-pip3 install -r requirements.txt
+docker volume create rubix-point-data
+docker run --rm -it -p 1515:1515 -v rubix-point-data:/data --name rubix-point rubix-point:dev
 ```
 
-#### Running (linux)
+## Deploy on Production
 
-(make sure `venv` still active. If not, follow above commands for `venv`)
+- Download release artifact
+- Review help and start
+
 ```bash
-python run.py
+$ rubix-point -h
+Usage: rubix-point [OPTIONS]
+
+Options:
+  -p, --port INTEGER              Port  [default: 1515]
+  -d, --data-dir PATH             Application data dir
+  --prod                          Production mode
+  -s, --setting-file TEXT         Rubix-Lora: setting ini file
+  -l, --logging-conf TEXT         Rubix-Lora: logging config file
+  --workers INTEGER               Gunicorn: The number of worker processes for handling requests.
+  -c, --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
+  --log-level [FATAL|ERROR|WARN|INFO|DEBUG]
+                                  Logging level
+  -h, --help                      Show this message and exit.
 ```
+
 
 ## DOCS
 ___
@@ -77,8 +69,8 @@ ___
 
 #### Development
 ```bash
-cp settings/config.example.ini settings/config.ini
-cp logging/logging.example.conf logging/logging.conf
+cp config/config.example.ini config/config.ini
+cp config/logging.example.conf config/logging.conf
 ```
 
 ### MQTT client
