@@ -39,7 +39,7 @@ class Ping(Resource):
             'up_hour': up_hour,
             'deployment_mode': deployment_mode,
             'mqtt_client_statuses': mqtt_client_statuses,
-            'influx_db_status': InfluxDB.get_instance().status(),
+            'influx_db_status': InfluxDB().status(),
             'settings': {
                 'services': {
                     'mqtt': settings__enable_mqtt,

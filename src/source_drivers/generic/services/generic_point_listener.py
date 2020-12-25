@@ -1,15 +1,17 @@
 import logging
 from json import loads as json_loads, JSONDecodeError
+
 from sqlalchemy.orm.exc import ObjectDeletedError
 
 from src import db
-from src.source_drivers.generic.services import GENERIC_SERVICE_NAME
 from src.event_dispatcher import EventDispatcher
-from src.services.event_service_base import EventServiceBase
-from src.services.mqtt_client.mqtt_client_base import MqttClientBase
 from src.ini_config import *
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
+from src.services.event_service_base import EventServiceBase
+from src.services.mqtt_client.mqtt_client_base import MqttClientBase
+from src.source_drivers.generic.services import GENERIC_SERVICE_NAME
+from src.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -20,34 +22,22 @@ GENERIC_POINT_MQTT_TOPIC_EXAMPLE = f'{GENERIC_POINT_MQTT_TOPIC}/<point_name>/<de
 MQTT_TOPIC_MIN = len(GENERIC_POINT_MQTT_TOPIC_EXAMPLE.split('/'))
 
 
-class GenericPointListener(MqttClientBase, EventServiceBase):
-    __instance = None
+class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=Singleton):
     service_name = GENERIC_SERVICE_NAME
-    threaded = False
 
     def __init__(self):
-        if GenericPointListener.__instance:
-            raise Exception("GenericPointListener class is a singleton class!")
-        else:
-            GenericPointListener.__instance = self
-            MqttClientBase.__init__(
-                self,
-                generic_point__host,
-                generic_point__port,
-                generic_point__keepalive,
-                generic_point__retain,
-                generic_point__qos,
-                generic_point__attempt_reconnect_on_unavailable,
-                generic_point__attempt_reconnect_secs,
-            )
-            EventServiceBase.__init__(self)
-            EventDispatcher.add_source_driver(self)
-
-    @staticmethod
-    def get_instance():
-        if GenericPointListener.__instance is None:
-            GenericPointListener()
-        return GenericPointListener.__instance
+        MqttClientBase.__init__(
+            self,
+            generic_point__host,
+            generic_point__port,
+            generic_point__keepalive,
+            generic_point__retain,
+            generic_point__qos,
+            generic_point__attempt_reconnect_on_unavailable,
+            generic_point__attempt_reconnect_secs,
+        )
+        EventServiceBase.__init__(self)
+        EventDispatcher().add_source_driver(self)
 
     def start(self, client_name: str = MQTT_CLIENT_NAME):
         logger.info(f"Generic Point MQTT listener started")

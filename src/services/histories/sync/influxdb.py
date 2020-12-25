@@ -8,29 +8,22 @@ from src.ini_config import *
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.wires.model_wires_plat import WiresPlatModel
 from src.services.histories.history_binding import HistoryBinding
+from src.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
 
-class InfluxDB(HistoryBinding):
+class InfluxDB(HistoryBinding, metaclass=Singleton):
     __wires_plat = None
     __is_connected = False
 
-    __instance = None
     __client = None
 
     def __init__(self):
-        if InfluxDB.__instance:
-            raise Exception("InfluxDB class is a singleton class!")
-        else:
-            InfluxDB.__instance = self
-            InfluxDB.__instance.connect()
-
-    @staticmethod
-    def get_instance():
-        if InfluxDB.__instance is None:
-            InfluxDB()
-        return InfluxDB.__instance
+        self.logger = None
+        self.__config = None
+        self.__client = None
+        self.__wires_plat = None
 
     def status(self) -> bool:
         return InfluxDB.__is_connected

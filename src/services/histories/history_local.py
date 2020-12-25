@@ -3,17 +3,18 @@ from datetime import datetime
 from src import db
 from src.event_dispatcher import EventDispatcher
 from src.interfaces.point import HistoryType
-from src.models.network.model_network import NetworkModel
 from src.models.device.model_device import DeviceModel
+from src.models.network.model_network import NetworkModel
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.event_service_base import EventServiceBase, EventType
+from src.utils import Singleton
 
 SERVICE_NAME_HISTORIES_LOCAL = 'histories_local'
 
 
-class HistoryLocal(EventServiceBase):
+class HistoryLocal(EventServiceBase, metaclass=Singleton):
     """
     A simple history saving protocol for those points which has `history_type=INTERVAL`
     """
@@ -21,23 +22,12 @@ class HistoryLocal(EventServiceBase):
     service_name = SERVICE_NAME_HISTORIES_LOCAL
     threaded = True
 
-    _instance = None
     binding = None
 
     def __init__(self):
-        if HistoryLocal._instance:
-            raise Exception("HISTORY SYNC: HistoryInterval class is a singleton class!")
-        else:
-            super().__init__()
-            self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
-            EventDispatcher.add_service(self)
-            HistoryLocal._instance = self
-
-    @staticmethod
-    def get_instance():
-        if not HistoryLocal._instance:
-            HistoryLocal()
-        return HistoryLocal._instance
+        super().__init__()
+        self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
+        EventDispatcher().add_service(self)
 
     def sync_interval(self):
         while True:
@@ -70,4 +60,3 @@ class HistoryLocal(EventServiceBase):
         elif (datetime.utcnow() - latest_point_store_history.ts).total_seconds() >= point.history_interval * 60:
             point_store.ts = datetime.utcnow().replace(second=0, microsecond=0)
             point.create_history(point_store)
-

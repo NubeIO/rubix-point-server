@@ -42,7 +42,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
         self.supported_events[EventType.POINT_UPDATE] = True
         self.supported_events[EventType.DEVICE_UPDATE] = True
         self.supported_events[EventType.NETWORK_UPDATE] = True
-        EventDispatcher.add_service(self)
+        EventDispatcher().add_service(self)
 
     def start(self, client_name: str = MQTT_CLIENT_NAME):
         logger.info(f"MQTT Client {self.to_string()} started")

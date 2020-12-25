@@ -1,16 +1,17 @@
-import time
 import logging
-from sqlalchemy.orm.exc import ObjectDeletedError
+import time
+
 from pymodbus.exceptions import ConnectionException, ModbusIOException
+from sqlalchemy.orm.exc import ObjectDeletedError
 
 from src import db
-from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.event_dispatcher import EventDispatcher
-from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException
 from src.models.point.model_point_store import PointStoreModel
+from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
+from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
 from src.source_drivers.modbus.services.modbus_functions.polling.poll import poll_point
 from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
 from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
@@ -29,7 +30,7 @@ class ModbusPolling(EventServiceBase):
         self.__network_type = network_type
         self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
         self.supported_events[EventType.CALLABLE] = True
-        EventDispatcher.add_source_driver(self)
+        EventDispatcher().add_source_driver(self)
 
     def polling(self):
         self._set_internal_service_timeout(1)
@@ -145,7 +146,7 @@ class ModbusPolling(EventServiceBase):
                 if network.fault and not isinstance(error, ConnectionException):
                     network.set_fault(False)
                 elif device.fault and not isinstance(error, ModbusIOException) and \
-                        not isinstance(error, ConnectionException):
+                    not isinstance(error, ConnectionException):
                     device.set_fault(False)
 
                 if error is not None:
@@ -171,7 +172,7 @@ class RtuPolling(ModbusPolling):
     def _get_connection(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
         connection = RtuRegistry.get_rtu_connections().get(RtuRegistry.create_connection_key_by_network(network))
         if not connection:
-            connection = RtuRegistry.get_instance().add_network(network)
+            connection = RtuRegistry().add_network(network)
         return connection
 
 
@@ -185,5 +186,5 @@ class TcpPolling(ModbusPolling):
         port = device.tcp_port
         connection = TcpRegistry.get_tcp_connections().get(TcpRegistry.create_connection_key(host, port))
         if not connection:
-            connection = TcpRegistry.get_instance().add_device(device)
+            connection = TcpRegistry().add_device(device)
         return connection
