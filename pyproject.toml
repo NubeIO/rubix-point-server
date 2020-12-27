@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "rubix-point-server"
+name = "rubix-point"
 version = "0.1.0"
 description = "Rubix Point Service"
 authors = ["NubeIO"]
@@ -12,8 +12,8 @@ Flask-Cors = "^3.0.9"
 Flask-SQLAlchemy = "^2.4.4"
 gunicorn = "^20.0.4"
 gevent = [
-    { version = "20.12.0", markers = "platform_machine == 'x86_64'" },
-    { git = "https://github.com/gevent/gevent.git", tag = "20.12.0", markers = "platform_machine != 'x86_64'" }
+    { version = "20.12.1", markers = "platform_machine == 'x86_64'" },
+    { git = "https://github.com/gevent/gevent.git", tag = "20.12.1", markers = "platform_machine != 'x86_64'" }
 ]
 SQLAlchemy = "^1.3.22"
 pymodbus = "^2.4.0"
