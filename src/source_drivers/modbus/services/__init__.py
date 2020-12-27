@@ -1,5 +1,3 @@
-MODBUS_SERVICE_NAME = 'modbus'
-
-
-def modbus_poll_debug(logger, msg):
-    logger.debug(f'MODBUS DEBUG: {msg}')
+from .modbus_polling import RtuPolling, TcpPolling, ModbusPolling
+from .rtu_registry import RtuRegistry
+from .tcp_registry import TcpRegistry

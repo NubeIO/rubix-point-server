@@ -4,10 +4,9 @@ from pymodbus.bit_write_message import WriteSingleCoilResponse
 from pymodbus.exceptions import ModbusIOException
 
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
-from src.source_drivers.modbus.services import modbus_poll_debug
 from src.source_drivers.modbus.services.modbus_functions.function_utils import _set_data_length, _assertion, \
     _mod_point_data_endian, convert_to_data_type, _builder_data_type
-from src.source_drivers.modbus.services.modbus_functions.polling import modbus_poll_debug_log
+from src.source_drivers.modbus.services.modbus_functions.polling import modbus_poll_debug_log, modbus_poll_debug
 
 logger = logging.getLogger(modbus_poll_debug_log)
 
@@ -79,8 +78,8 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
         raise read
 
 
-def write_digital(client, reg_start: int, reg_length: int, _unit: int, write_value: int, func: ModbusFunctionCode) -> \
-        (any, list):
+def write_digital(client, reg_start: int, reg_length: int, _unit: int,
+                  write_value: int, func: ModbusFunctionCode) -> (any, list):
     """
     Write coil
     :param client: modbus client

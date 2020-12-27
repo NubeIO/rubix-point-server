@@ -1,8 +1,8 @@
+from flask import current_app
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
-from src import db, EventDispatcher
-from src.ini_config import settings__enable_histories
+from src import db
 from src.interfaces.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
@@ -140,6 +140,7 @@ class PointModel(ModelBase):
             device.history_enable:
             self.create_history(point_store)
 
+        from src import EventDispatcher
         EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
             'point': self,
             'point_store': point_store,
@@ -149,7 +150,9 @@ class PointModel(ModelBase):
         }))
 
     def create_history(self, point_store: PointStoreModel):
-        if settings__enable_histories:
+        from src import AppSetting
+        setting: AppSetting = current_app.config[AppSetting.KEY]
+        if setting.services.histories:
             data = ModelUtils.row2dict_default(point_store)
             _point_store_history = PointStoreHistoryModel(**data)
             _point_store_history.save_to_db_no_commit()

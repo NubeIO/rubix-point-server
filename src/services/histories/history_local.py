@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src import db, EventDispatcher
+from src import db
 from src.interfaces.point import HistoryType
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
@@ -18,17 +18,16 @@ class HistoryLocal(EventServiceBase, metaclass=Singleton):
     A simple history saving protocol for those points which has `history_type=INTERVAL`
     """
     SYNC_PERIOD = 5
-    service_name = SERVICE_NAME_HISTORIES_LOCAL
-    threaded = True
 
     binding = None
 
     def __init__(self):
-        super().__init__()
+        super().__init__(SERVICE_NAME_HISTORIES_LOCAL, True)
         self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
-        EventDispatcher().add_service(self)
 
     def sync_interval(self):
+        from src import EventDispatcher
+        EventDispatcher().add_service(self)
         while True:
             self._set_internal_service_timeout(self.SYNC_PERIOD)
             event = self._event_queue.get()

@@ -9,8 +9,7 @@ from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.source_drivers.modbus.services import modbus_poll_debug
-from src.source_drivers.modbus.services.modbus_functions.polling import modbus_poll_debug_log
+from src.source_drivers.modbus.services.modbus_functions.polling import modbus_poll_debug_log, modbus_poll_debug
 from src.source_drivers.modbus.services.modbus_functions.polling.functions import read_digital, write_digital, \
     read_analogue, write_analogue
 

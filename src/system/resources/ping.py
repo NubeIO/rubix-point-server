@@ -1,11 +1,8 @@
 import time
 from datetime import datetime
 
+from flask import current_app
 from flask_restful import Resource
-
-from src.background import Background
-from src.ini_config import *
-from src.services.histories.sync.influxdb import InfluxDB
 
 start_time = time.time()
 up_time_date = str(datetime.now())
@@ -28,29 +25,30 @@ class Ping(Resource):
         up_min = "{:.2f}".format(up_min)
         up_hour = up_time / 3600
         up_hour = "{:.2f}".format(up_hour)
-        deployment_mode = 'production' if os.environ.get("data_dir") is not None else 'development'
-        mqtt_client_statuses = []
-        for mqtt_client in Background.get_mqtt_client():
-            mqtt_client_statuses.append({mqtt_client.to_string(): mqtt_client.status()})
+        from src import AppSetting
+        from src.services.histories.sync.influxdb import InfluxDB
+        from src.services.mqtt_client import MqttRegistry
+        setting: AppSetting = current_app.config[AppSetting.KEY]
+        deployment_mode = 'production' if setting.prod else 'development'
         return {
             'version': version,
             'up_time_date': up_time_date,
             'up_min': up_min,
             'up_hour': up_hour,
             'deployment_mode': deployment_mode,
-            'mqtt_client_statuses': mqtt_client_statuses,
+            'mqtt_client_statuses': [{mqttc.to_string(): mqttc.status()} for mqttc in MqttRegistry().clients()],
             'influx_db_status': InfluxDB().status(),
             'settings': {
                 'services': {
-                    'mqtt': settings__enable_mqtt,
-                    'histories': settings__enable_histories,
-                    'cleaner': settings__enable_cleaner,
-                    'history_sync': settings__enable_history_sync,
+                    'mqtt': setting.services.mqtt,
+                    'histories': setting.services.histories,
+                    'cleaner': setting.services.cleaner,
+                    'history_sync': setting.services.history_sync,
                 },
                 'drivers': {
-                    'generic': settings__enable_generic,
-                    'modbus_rtu': settings__enable_modbus_rtu,
-                    'modbus_tcp': settings__enable_modbus_tcp,
+                    'generic': setting.drivers.generic,
+                    'modbus_rtu': setting.drivers.modbus_rtu,
+                    'modbus_tcp': setting.drivers.modbus_tcp,
                 }
             }
         }

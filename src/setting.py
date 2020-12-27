@@ -1,5 +1,6 @@
 import os
 from configparser import ConfigParser
+from typing import List
 
 from flask import Flask
 
@@ -8,35 +9,43 @@ class BaseSetting:
 
     def reload(self, setting: dict):
         if setting is not None:
-            self.__dict__ = {k: setting[k] or v for k, v in self.__dict__.items()}
+            self.__dict__ = {k: setting.get(k, v) for k, v in self.__dict__.items()}
         return self
 
 
 class ServiceSetting(BaseSetting):
+    """
+    Declares an availability service(enabled/disabled option)
+    """
+
     KEY = 'services'
 
     def __init__(self):
-        self.enable_mqtt = False
-        self.enable_histories = False
-        self.enable_cleaner = False
-        self.enable_history_sync = False
+        self.mqtt = True
+        self.histories = True
+        self.cleaner = True
+        self.history_sync = True
 
 
 class DriverSetting(BaseSetting):
+    """
+    Declares an availability driver(enabled/disabled option)
+    """
+
     KEY = 'drivers'
 
     def __init__(self):
-        self.generic: bool = False
-        self.modbus_rtu: bool = False
-        self.modbus_tcp: bool = False
+        self.generic: bool = True
+        self.modbus_rtu: bool = True
+        self.modbus_tcp: bool = True
 
 
 class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = False
-        self.name = 'bacnet-server-mqtt'
+        self.enabled = True
+        self.name = 'rubix_points'
         self.host = '0.0.0.0'
         self.port = 1883
         self.keepalive = 60
@@ -48,18 +57,30 @@ class MqttSetting(BaseSetting):
         self.topic = 'rubix/points'
 
 
-class GenericListener(MqttSetting):
+class GenericListenerSetting(MqttSetting):
     KEY = 'generic_point_listener'
 
     def __init__(self):
-        super(GenericListener, self).__init__()
+        super(GenericListenerSetting, self).__init__()
+        self.name = 'rubix_points_generic_point'
+        self.topic = 'rubix/points/generic/cov'
 
 
 class InfluxSetting(BaseSetting):
     KEY = 'influx'
 
     def __init__(self):
-        pass
+        self.host = '0.0.0.0'
+        self.port = 8086
+        self.database = 'db'
+        self.username = 'username'
+        self.password = 'password'
+        self.verify_ssl = False
+        self.timeout = 5
+        self.retries = 3
+        self.timer = 1
+        self.path = ''
+        self.measurement = 'history'
 
 
 class AppSetting:
@@ -68,10 +89,13 @@ class AppSetting:
     default_data_dir: str = 'out'
 
     def __init__(self, **kwargs):
-        self.__data_dir = self.__compute_dir(kwargs['data_dir'], AppSetting.default_data_dir)
-        self.__prod = kwargs['prod'] or False
-        self.__mqtt_setting = MqttSetting()
-        self.__bacnet_setting = DriverSetting()
+        self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
+        self.__prod = kwargs.get('prod') or False
+        self.__service_setting = ServiceSetting()
+        self.__driver_setting = DriverSetting()
+        self.__influx_setting = InfluxSetting()
+        self.__listener_setting = GenericListenerSetting()
+        self.__mqtt_settings: List[MqttSetting] = []
 
     @property
     def data_dir(self):
@@ -82,17 +106,35 @@ class AppSetting:
         return self.__prod
 
     @property
-    def mqtt(self) -> MqttSetting:
-        return self.__mqtt_setting
+    def services(self) -> ServiceSetting:
+        return self.__service_setting
 
     @property
-    def bacnet(self) -> DriverSetting:
-        return self.__bacnet_setting
+    def drivers(self) -> DriverSetting:
+        return self.__driver_setting
+
+    @property
+    def influx(self) -> InfluxSetting:
+        return self.__influx_setting
+
+    @property
+    def mqtt_settings(self) -> List[MqttSetting]:
+        return self.__mqtt_settings
+
+    @property
+    def listener(self) -> GenericListenerSetting:
+        return self.__listener_setting
 
     def reload(self, setting_file: str, logging_file: str):
         parser = self.__read_file(setting_file, self.__data_dir)
-        self.__mqtt_setting = self.__mqtt_setting.reload(self.__load_setting('mqtt', parser))
-        self.__bacnet_setting = self.__bacnet_setting.reload(self.__load_setting('bacnet', parser))
+        return self._reload(parser)
+
+    def _reload(self, parser):
+        self.__driver_setting = self.__driver_setting.reload(self.__load(parser, DriverSetting.KEY))
+        self.__service_setting = self.__service_setting.reload(self.__load(parser, ServiceSetting.KEY))
+        self.__influx_setting = self.__influx_setting.reload(self.__load(parser, InfluxSetting.KEY))
+        self.__listener_setting = self.__listener_setting.reload(self.__load(parser, GenericListenerSetting.KEY))
+        self.__mqtt_settings = self.__load_mqtt(parser, MqttSetting.KEY)
         return self
 
     def init_app(self, app: Flask):
@@ -118,7 +160,13 @@ class AppSetting:
         return parser
 
     @staticmethod
-    def __load_setting(section: str, parser: ConfigParser):
+    def __load(parser: ConfigParser, section: str) -> dict:
         if parser is None:
-            return None
+            return {}
         return dict(parser.items(section)) if parser.has_section(section) else None
+
+    @staticmethod
+    def __load_mqtt(parser: ConfigParser, prefix: str) -> List[MqttSetting]:
+        if parser is None:
+            return []
+        return [MqttSetting().reload(AppSetting.__load(parser, s)) for s in parser.sections() if s.startswith(prefix)]

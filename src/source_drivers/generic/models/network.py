@@ -1,4 +1,4 @@
-from src.source_drivers.generic.services import GENERIC_SERVICE_NAME
+from src.source_drivers import GENERIC_SERVICE_NAME
 from src.models.network.model_network_mixin import NetworkMixinModel
 
 

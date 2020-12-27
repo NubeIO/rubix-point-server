@@ -22,7 +22,7 @@ class GunicornFlaskApplication(BaseApplication, ABC):
 
 
 def on_exit(server: Arbiter):
-    server.log.info('Stop server')
+    server.log.info('Server is stopped')
 
 
 def when_ready(server: Arbiter):

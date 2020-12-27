@@ -1,18 +1,16 @@
 import json
-import logging
+from logging import Logger
 
-from src import EventDispatcher
+from src import MqttSetting
 from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
-from src.services.mqtt_client.mqtt_client_base import MqttClientBase
+from .mqtt_client_base import MqttClientBase
+from .mqtt_registry import MqttRegistry
 
 SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
-MQTT_CLIENT_NAME = 'rubix_points'
-MQTT_TOPIC = 'rubix/points'
-MQTT_TOPIC_MIN = len(MQTT_TOPIC.split('/')) + 1
 MQTT_TOPIC_ALL = 'all'
 MQTT_TOPIC_DRIVER = 'driver'
 MQTT_TOPIC_UPDATE = 'update'
@@ -23,42 +21,34 @@ MQTT_TOPIC_COV = 'cov'
 MQTT_TOPIC_COV_ALL = 'all'
 MQTT_TOPIC_COV_VALUE = 'value'
 
-logger = logging.getLogger(__name__)
-
 
 class MqttClient(MqttClientBase, EventServiceBase):
-    service_name = SERVICE_NAME_MQTT_CLIENT
-    threaded = False
 
-    def __init__(self, host: str, port: int, keepalive: int, retain: bool, qos: int,
-                 attempt_reconnect_on_unavailable: bool, attempt_reconnect_secs: int, publish_value: bool):
-        MqttClientBase.__init__(self, host, port, keepalive, retain, qos, attempt_reconnect_on_unavailable,
-                                attempt_reconnect_secs)
-        EventServiceBase.__init__(self)
-
-        self.__publish_value = publish_value
-
+    def __init__(self):
+        MqttClientBase.__init__(self)
+        EventServiceBase.__init__(self, SERVICE_NAME_MQTT_CLIENT, False)
         self.supported_events[EventType.POINT_COV] = True
         self.supported_events[EventType.POINT_UPDATE] = True
         self.supported_events[EventType.DEVICE_UPDATE] = True
         self.supported_events[EventType.NETWORK_UPDATE] = True
-        EventDispatcher().add_service(self)
 
-    def start(self, client_name: str = MQTT_CLIENT_NAME):
-        logger.info(f"MQTT Client {self.to_string()} started")
-        MqttClientBase.start(self, client_name)
+    def start(self, config: MqttSetting, logger: Logger):
+        super(MqttClient, self).start(config, logger)
+        from src import EventDispatcher
+        EventDispatcher().add_service(self)
+        MqttRegistry().add(self)
 
     def publish_cov(self, point: PointModel, point_store: PointStoreModel, device_uuid: str, device_name: str,
                     network_uuid: str, network_name: str, source_driver: str):
         if not self.status():
-            logger.error(f"MQTT client {self.to_string()} is not connected...")
+            self._logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
-        if point is None or point_store is None or device_uuid is None or network_uuid is None \
-            or source_driver is None or network_name is None or device_name is None:
+        if point is None or point_store is None or device_uuid is None or network_uuid is None or source_driver is \
+            None or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
 
-        topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_COV}/{MQTT_TOPIC_COV_ALL}/{point.uuid}/{point.name}/' \
-                f'{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}'
+        topic = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, point.uuid, point.name,
+                                 device_uuid, device_name, network_uuid, network_name, source_driver))
 
         payload = {
             'value': point_store.value,
@@ -67,28 +57,27 @@ class MqttClient(MqttClientBase, EventServiceBase):
             'fault_message': point_store.fault_message,
         }
 
-        logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
-
-        self._client.publish(topic, json.dumps(payload), self._qos, self._retain)
-        if self.__publish_value and not point_store.fault:
+        self._logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
+        self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)
+        if self.config.publish_value and not point_store.fault:
             topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
-            logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
-            self._client.publish(topic, point_store.value, self._qos, self._retain)
+            self._logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
+            self._client.publish(topic, point_store.value, self.config.qos, self.config.retain)
 
     def publish_update(self, model: ModelBase, updates: dict):
         if not self.status():
-            logger.error(f"MQTT client {self.to_string()} is not connected...")
+            self._logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
 
-        topic = f'{MQTT_TOPIC}/{MQTT_TOPIC_UPDATE}/{model.get_model_event_name()}/{model.uuid}'
+        topic = self.make_topic((self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), model.uuid))
 
-        logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {updates}')
-        self._client.publish(topic, json.dumps(updates), self._qos, self._retain)
+        self._logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {updates}')
+        self._client.publish(topic, json.dumps(updates), self.config.qos, self.config.retain)
 
     def _on_connection_successful(self):
-        self._client.subscribe(f'{MQTT_TOPIC}/#')
+        self._client.subscribe(f'{self.config.topic}/#')
 
     def _on_message(self, client, userdata, message):
         pass
@@ -101,6 +90,9 @@ class MqttClient(MqttClientBase, EventServiceBase):
         #     self.__handle_driver_message(topic_split, message)
         # else:
         #     return
+
+    def _mqtt_topic_min(self):
+        return len(self.config.topic.split('/') + 1)
 
     def __handle_all_message(self, topic_split, message):
         pass

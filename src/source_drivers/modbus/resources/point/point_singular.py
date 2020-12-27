@@ -4,14 +4,14 @@ from flask_restful import abort, marshal_with, reqparse
 from src import EventDispatcher
 from src.resources.rest_schema.schema_point import point_store_fields
 from src.services.event_service_base import EventCallableBlocking
+from src.source_drivers import MODBUS_SERVICE_NAME
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields, \
     modbus_point_all_attributes, modbud_poll_non_existing_attributes
-from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
-from src.source_drivers.modbus.services.modbus_polling import ModbusPolling
+from src.source_drivers.modbus.services import ModbusPolling
 
 
 class ModbusPointSingular(ModbusPointBase):

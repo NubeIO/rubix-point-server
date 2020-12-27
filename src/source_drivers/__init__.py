@@ -1,0 +1,2 @@
+MODBUS_SERVICE_NAME = 'modbus'
+GENERIC_SERVICE_NAME = 'generic'
