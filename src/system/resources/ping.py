@@ -6,8 +6,11 @@ from flask_restful import Resource
 
 start_time = time.time()
 up_time_date = str(datetime.now())
-with open('VERSION') as version_file:
-    version = version_file.read().strip()
+try:
+    with open('VERSION') as version_file:
+        version = version_file.read().strip()
+except FileNotFoundError:
+    version = 'Fake'
 
 
 def get_up_time():
@@ -39,16 +42,7 @@ class Ping(Resource):
             'mqtt_client_statuses': [{mqttc.to_string(): mqttc.status()} for mqttc in MqttRegistry().clients()],
             'influx_db_status': InfluxDB().status(),
             'settings': {
-                'services': {
-                    'mqtt': setting.services.mqtt,
-                    'histories': setting.services.histories,
-                    'cleaner': setting.services.cleaner,
-                    'history_sync': setting.services.history_sync,
-                },
-                'drivers': {
-                    'generic': setting.drivers.generic,
-                    'modbus_rtu': setting.drivers.modbus_rtu,
-                    'modbus_tcp': setting.drivers.modbus_tcp,
-                }
+                setting.services.KEY: setting.services.to_dict(),
+                setting.drivers.KEY: setting.drivers.to_dict()
             }
         }
