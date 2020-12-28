@@ -2,7 +2,7 @@
 name = "rubix-point"
 version = "1.2.0-rc.1"
 description = "Rubix Point Service"
-authors = ["NubeIO"]
+authors = ["NubeIO <tech-support@nube-io.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"

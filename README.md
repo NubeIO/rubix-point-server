@@ -53,8 +53,8 @@ Options:
   -p, --port INTEGER              Port  [default: 1515]
   -d, --data-dir PATH             Application data dir
   --prod                          Production mode
-  -s, --setting-file TEXT         Rubix-Lora: setting ini file
-  -l, --logging-conf TEXT         Rubix-Lora: logging config file
+  -s, --setting-file TEXT         Rubix-Point: setting json file
+  -l, --logging-conf TEXT         Rubix-Point: logging config file
   --workers INTEGER               Gunicorn: The number of worker processes for handling requests.
   -c, --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
   --log-level [FATAL|ERROR|WARN|INFO|DEBUG]
@@ -69,8 +69,9 @@ ___
 
 #### Development
 ```bash
-cp config/config.example.ini config/config.ini
-cp config/logging.example.conf config/logging.conf
+cp config/config.example.json config/config.json
+
+python run.py -s config/config.json
 ```
 
 ### MQTT client

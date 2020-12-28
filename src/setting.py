@@ -1,5 +1,5 @@
+import json
 import os
-from configparser import ConfigParser
 from typing import List
 
 from flask import Flask
@@ -11,6 +11,12 @@ class BaseSetting:
         if setting is not None:
             self.__dict__ = {k: setting.get(k, v) for k, v in self.__dict__.items()}
         return self
+
+    def serialize(self, pretty=True) -> str:
+        return json.dumps(self, default=lambda o: o.__dict__, indent=2 if pretty else None)
+
+    def to_dict(self):
+        return json.loads(self.serialize(pretty=False))
 
 
 class ServiceSetting(BaseSetting):
@@ -125,16 +131,25 @@ class AppSetting:
     def listener(self) -> GenericListenerSetting:
         return self.__listener_setting
 
-    def reload(self, setting_file: str, logging_file: str):
-        parser = self.__read_file(setting_file, self.__data_dir)
-        return self._reload(parser)
+    def serialize(self, pretty=True) -> str:
+        m = {
+            DriverSetting.KEY: self.drivers,
+            ServiceSetting.KEY: self.services,
+            InfluxSetting.KEY: self.influx,
+            GenericListenerSetting.KEY: self.listener,
+            MqttSetting.KEY: [s.to_dict() for s in self.mqtt_settings],
+            'prod': self.prod, 'data_dir': self.data_dir
+        }
+        return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
+                          indent=2 if pretty else None)
 
-    def _reload(self, parser):
-        self.__driver_setting = self.__driver_setting.reload(self.__load(parser, DriverSetting.KEY))
-        self.__service_setting = self.__service_setting.reload(self.__load(parser, ServiceSetting.KEY))
-        self.__influx_setting = self.__influx_setting.reload(self.__load(parser, InfluxSetting.KEY))
-        self.__listener_setting = self.__listener_setting.reload(self.__load(parser, GenericListenerSetting.KEY))
-        self.__mqtt_settings = self.__load_mqtt(parser, MqttSetting.KEY)
+    def reload(self, setting_file: str, logging_file: str, is_json_str=False):
+        data = self.__read_file(setting_file, self.__data_dir, is_json_str)
+        self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
+        self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
+        self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
+        self.__listener_setting = self.__listener_setting.reload(data.get(GenericListenerSetting.KEY))
+        self.__mqtt_settings = [MqttSetting().reload(s) for s in data.get(MqttSetting.KEY, [])]
         return self
 
     def init_app(self, app: Flask):
@@ -149,24 +164,13 @@ class AppSetting:
         return d
 
     @staticmethod
-    def __read_file(setting_file: str, _dir: str):
+    def __read_file(setting_file: str, _dir: str, is_json_str=False):
+        if is_json_str:
+            return json.loads(setting_file)
         if setting_file is None or setting_file.strip() == '':
-            return None
+            return {}
         s = setting_file if os.path.isabs(setting_file) else os.path.join(_dir, setting_file)
         if not os.path.isfile(s) or not os.path.exists(s):
-            return None
-        parser = ConfigParser()
-        parser.read(setting_file)
-        return parser
-
-    @staticmethod
-    def __load(parser: ConfigParser, section: str) -> dict:
-        if parser is None:
             return {}
-        return dict(parser.items(section)) if parser.has_section(section) else None
-
-    @staticmethod
-    def __load_mqtt(parser: ConfigParser, prefix: str) -> List[MqttSetting]:
-        if parser is None:
-            return []
-        return [MqttSetting().reload(AppSetting.__load(parser, s)) for s in parser.sections() if s.startswith(prefix)]
+        with open(s) as json_file:
+            return json.load(json_file)
