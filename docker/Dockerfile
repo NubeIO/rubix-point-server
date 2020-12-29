@@ -37,6 +37,6 @@ USER rubix:nubeio
 
 VOLUME $RUBIX_POINT_DATA
 
-EXPOSE 1717
+EXPOSE 1515
 
 ENTRYPOINT [ "./rubix-point" ]
