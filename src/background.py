@@ -1,66 +1,70 @@
-import logging
+from logging import Logger
 from threading import Thread
 
-from src.ini_config import *
-from src.services.histories.history_local import HistoryLocal
-from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
-from src.services.histories.sync.influxdb import InfluxDB
-from src.services.mqtt_client.mqtt_client_base import create_mqtt_client
-from src.services.mqtt_client.mqtt_client import MqttClient
-from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
-from src.source_drivers.modbus.services.rtu_registry import RtuRegistry
-from src.source_drivers.modbus.services.tcp_registry import TcpRegistry
-from src.source_drivers.modbus.services.modbus_polling import RtuPolling, TcpPolling
+from flask import current_app
+from werkzeug.local import LocalProxy
 
-logger = logging.getLogger(__name__)
+
+class FlaskThread(Thread):
+    """
+    To make every new thread behinds Flask app context.
+    Maybe using another lightweight solution but richer: APScheduler <https://github.com/agronholm/apscheduler>
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.app = current_app._get_current_object()
+
+    def run(self):
+        with self.app.app_context():
+            super().run()
 
 
 class Background:
-    __mqtt_clients = []
-
-    @staticmethod
-    def get_mqtt_client():
-        return Background.__mqtt_clients
 
     @staticmethod
     def run():
+        from src import AppSetting
+        setting: AppSetting = current_app.config[AppSetting.KEY]
+        logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
         logger.info("Starting Services...")
 
         # Services
-        if settings__enable_mqtt:
-            mqtt_client_list = filter(lambda section: 'mqtt_' in section, config.sections())
-            Background.__mqtt_clients = []
-            for client_config_title in mqtt_client_list:
-                mqtt_client = create_mqtt_client(client_config_title, MqttClient)
-                mqtt_thread = Thread(target=mqtt_client.start, daemon=True)
-                mqtt_thread.start()
-                Background.__mqtt_clients.append(mqtt_client)
+        if setting.services.mqtt:
+            from src.services.mqtt_client import MqttClient
+            for config in setting.mqtt_settings:
+                if not config.enabled:
+                    continue
+                mqtt_client = MqttClient()
+                FlaskThread(target=mqtt_client.start, daemon=True, kwargs={'config': config, 'logger': logger}).start()
 
-        if settings__enable_histories:
-            histories_thread = Thread(target=HistoryLocal.get_instance().sync_interval, daemon=True)
-            histories_thread.start()
+        if setting.services.histories:
+            from src.services.histories.history_local import HistoryLocal
+            FlaskThread(target=HistoryLocal().sync_interval, daemon=True).start()
 
-        if settings__enable_cleaner:
-            point_cleaner_thread = Thread(target=PointStoreHistoryCleaner.register, daemon=True)
-            point_cleaner_thread.start()
+        if setting.services.cleaner:
+            from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
+            FlaskThread(target=PointStoreHistoryCleaner().setup, daemon=True, kwargs={'logger': logger}).start()
 
-        if settings__enable_history_sync:
-            history_sync_thread = Thread(target=InfluxDB.get_instance().register)
-            history_sync_thread.start()
+        if setting.services.history_sync:
+            from src.services.histories.sync.influxdb import InfluxDB
+            FlaskThread(target=InfluxDB().setup, daemon=True,
+                        kwargs={'config': setting.influx, 'logger': logger}).start()
 
         # Drivers
         logger.info("Starting Drivers...")
 
-        if settings__enable_generic:
-            generic_listener_thread = Thread(target=GenericPointListener().start, daemon=True)
-            generic_listener_thread.start()
+        if setting.drivers.generic:
+            from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
+            FlaskThread(target=GenericPointListener().start, daemon=True,
+                        kwargs={'config': setting.listener, 'logger': logger}).start()
 
-        if settings__enable_modbus_tcp:
-            TcpRegistry.get_instance().register()
-            tcp_polling_thread = Thread(target=TcpPolling().polling, daemon=True)
-            tcp_polling_thread.start()
+        if setting.drivers.modbus_tcp:
+            from src.source_drivers.modbus.services import TcpPolling, TcpRegistry
+            TcpRegistry().register()
+            FlaskThread(target=TcpPolling().polling, daemon=True).start()
 
-        if settings__enable_modbus_rtu:
-            RtuRegistry.get_instance().register()
-            rtu_polling_thread = Thread(target=RtuPolling().polling, daemon=True)
-            rtu_polling_thread.start()
+        if setting.drivers.modbus_rtu:
+            from src.source_drivers.modbus.services import RtuPolling, RtuRegistry
+            RtuRegistry().register()
+            FlaskThread(target=RtuPolling().polling, daemon=True).start()

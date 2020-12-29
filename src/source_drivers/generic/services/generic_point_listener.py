@@ -1,69 +1,50 @@
-import logging
 from json import loads as json_loads, JSONDecodeError
+from logging import Logger
+
 from sqlalchemy.orm.exc import ObjectDeletedError
 
-from src import db
-from src.source_drivers.generic.services import GENERIC_SERVICE_NAME
-from src.event_dispatcher import EventDispatcher
-from src.services.event_service_base import EventServiceBase
-from src.services.mqtt_client.mqtt_client_base import MqttClientBase
-from src.ini_config import *
+from src import db, GenericListenerSetting, MqttSetting
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
-
-logger = logging.getLogger(__name__)
-
-MQTT_CLIENT_NAME = 'rubix_points_generic_point'
-
-GENERIC_POINT_MQTT_TOPIC = 'rubix/points/generic/cov'
-GENERIC_POINT_MQTT_TOPIC_EXAMPLE = f'{GENERIC_POINT_MQTT_TOPIC}/<point_name>/<device_name>/<network_name>'
-MQTT_TOPIC_MIN = len(GENERIC_POINT_MQTT_TOPIC_EXAMPLE.split('/'))
+from src.services.event_service_base import EventServiceBase
+from src.services.mqtt_client.mqtt_client_base import MqttClientBase
+from src.source_drivers import GENERIC_SERVICE_NAME
+from src.utils import Singleton
 
 
-class GenericPointListener(MqttClientBase, EventServiceBase):
-    __instance = None
-    service_name = GENERIC_SERVICE_NAME
-    threaded = False
+class MqttListenerMetadata(Singleton, type(MqttClientBase), type(EventServiceBase)):
+    pass
+
+
+class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListenerMetadata):
 
     def __init__(self):
-        if GenericPointListener.__instance:
-            raise Exception("GenericPointListener class is a singleton class!")
-        else:
-            GenericPointListener.__instance = self
-            MqttClientBase.__init__(
-                self,
-                generic_point__host,
-                generic_point__port,
-                generic_point__keepalive,
-                generic_point__retain,
-                generic_point__qos,
-                generic_point__attempt_reconnect_on_unavailable,
-                generic_point__attempt_reconnect_secs,
-            )
-            EventServiceBase.__init__(self)
-            EventDispatcher.add_source_driver(self)
+        MqttClientBase.__init__(self)
+        EventServiceBase.__init__(self, GENERIC_SERVICE_NAME, False)
 
-    @staticmethod
-    def get_instance():
-        if GenericPointListener.__instance is None:
-            GenericPointListener()
-        return GenericPointListener.__instance
+    @property
+    def config(self) -> GenericListenerSetting:
+        return self._config
 
-    def start(self, client_name: str = MQTT_CLIENT_NAME):
-        logger.info(f"Generic Point MQTT listener started")
-        MqttClientBase.start(self, client_name)
+    def start(self, config: MqttSetting, logger: Logger):
+        super().start(config, logger)
+        from src import EventDispatcher
+        EventDispatcher().add_source_driver(self)
 
     def _on_connection_successful(self):
-        logger.debug(f'MQTT sub to {GENERIC_POINT_MQTT_TOPIC}/#')
-        self._client.subscribe(f'{GENERIC_POINT_MQTT_TOPIC}/#')
+        self._logger.debug(f'MQTT sub to {self.config.topic}/#')
+        self._client.subscribe(f'{self.config.topic}/#')
 
     def _on_message(self, client, userdata, message):
-        if GENERIC_POINT_MQTT_TOPIC in message.topic:
+        if self.config.topic in message.topic:
             self.__update_point(message)
+
+    def _mqtt_topic_min(self):
+        return len(self.make_topic((self.config.topic, '<point_name>', '<device_name>', '<network_name>')).split('/'))
 
     def __update_point(self, message):
         topic = message.topic.split('/')
-        if len(topic) != MQTT_TOPIC_MIN:
+        if len(topic) != self._mqtt_topic_min():
             return
         point_name = topic[-3]
         device_name = topic[-2]
@@ -73,13 +54,13 @@ class GenericPointListener(MqttClientBase, EventServiceBase):
             if not payload and ('value' not in payload.keys() or 'fault' not in payload.keys()):
                 raise ValueError('No value or fault provided')
         except (JSONDecodeError, ValueError) as e:
-            logger.warning(f'Invalid generic point COV payload. point={point_name}, device={device_name}, '
-                           f'network={network_name}. error=({str(e)})')
+            self._logger.warning(f'Invalid generic point COV payload. point={point_name}, device={device_name}, '
+                                 f'network={network_name}. error=({str(e)})')
             return
 
         point: PointModel = PointModel.find_by_name(point_name, device_name, network_name)
         if point is None or point.driver != GENERIC_SERVICE_NAME:
-            logger.warning(f'Unknown generic point COV received with name={point_name}')
+            self._logger.warning(f'Unknown generic point COV received with name={point_name}')
             return
         value = payload.get('value', None)
         value_raw = payload.get('value_raw', value)
@@ -93,5 +74,4 @@ class GenericPointListener(MqttClientBase, EventServiceBase):
                 point.publish_cov(point_store)
                 db.session.commit()
         except ObjectDeletedError:
-            logger.debug(f'Generic point removed when attempting to update point_store')
-            return
+            self._logger.debug(f'Generic point removed when attempting to update point_store')

@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "rubix-point"
+version = "1.2.0-rc.2"
+description = "Rubix Point Service"
+authors = ["NubeIO <tech-support@nube-io.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+Flask = "^1.1.2"
+Flask-RESTful = "^0.3.8"
+Flask-Cors = "^3.0.9"
+Flask-SQLAlchemy = "^2.4.4"
+gunicorn = "^20.0.4"
+gevent = [
+    { version = "20.12.1", markers = "platform_machine == 'x86_64'" },
+    { git = "https://github.com/gevent/gevent.git", tag = "20.12.1", markers = "platform_machine != 'x86_64'" }
+]
+SQLAlchemy = "^1.3.22"
+pymodbus = "^2.4.0"
+influxdb = "^5.3.1"
+influxdb-client = "^1.13.0"
+BAC0 = "^20.11.21"
+schedule = "^0.6.0"
+paho-mqtt = "^1.5.1"
+
+[tool.poetry.dev-dependencies]
+pyinstaller = "^4.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -48,7 +48,7 @@ class ModelBase(db.Model):
             'updates': kwargs
         })
         # TODO: source_driver name to publish change to source driver
-        EventDispatcher.dispatch_from_service(None, event, None)
+        EventDispatcher().dispatch_from_service(None, event, None)
 
     def get_model_event_name(self) -> str:
         raise NotImplemented

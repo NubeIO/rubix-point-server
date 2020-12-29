@@ -20,7 +20,9 @@ dist/
 *.egg-info
 
 build/
+dist/
 out/*
 !out/.gitkeep
 !docker/.env
+*.spec
 *.iml

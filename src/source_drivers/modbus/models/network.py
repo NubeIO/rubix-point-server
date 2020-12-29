@@ -1,7 +1,7 @@
 from sqlalchemy.orm import validates
 
 from src import db
-from src.source_drivers.modbus.services import MODBUS_SERVICE_NAME
+from src.source_drivers import MODBUS_SERVICE_NAME
 from src.models.network.model_network_mixin import NetworkMixinModel
 from src.source_drivers.modbus.interfaces.network.network import ModbusType, ModbusRtuParity
 

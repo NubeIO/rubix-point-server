@@ -1,17 +1,16 @@
-from sqlalchemy.orm import validates
+from flask import current_app
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import validates
 
 from src import db
 from src.interfaces.point import HistoryType, MathOperation
-from src.models.model_base import ModelBase
 from src.models.device.model_device import DeviceModel
+from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
-from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import Event, EventType
 from src.utils.model_utils import ModelUtils
-from src.ini_config import settings__enable_histories
 
 
 class PointModel(ModelBase):
@@ -118,7 +117,7 @@ class PointModel(ModelBase):
 
     @classmethod
     def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
-            -> float or None:
+        -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
         value = ((value - input_min) * (output_max - output_min)) / (input_max - input_min) + output_min
@@ -138,10 +137,11 @@ class PointModel(ModelBase):
             service_name = network.driver
 
         if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
-                device.history_enable:
+            device.history_enable:
             self.create_history(point_store)
 
-        EventDispatcher.dispatch_from_source(None, Event(EventType.POINT_COV, {
+        from src import EventDispatcher
+        EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
             'point': self,
             'point_store': point_store,
             'device': device,
@@ -150,7 +150,9 @@ class PointModel(ModelBase):
         }))
 
     def create_history(self, point_store: PointStoreModel):
-        if settings__enable_histories:
+        from src import AppSetting
+        setting: AppSetting = current_app.config[AppSetting.KEY]
+        if setting.services.histories:
             data = ModelUtils.row2dict_default(point_store)
             _point_store_history = PointStoreHistoryModel(**data)
             _point_store_history.save_to_db_no_commit()

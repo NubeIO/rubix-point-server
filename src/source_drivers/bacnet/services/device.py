@@ -1,26 +1,17 @@
 from src.source_drivers.bacnet.services.network import Network
+from src.utils import Singleton
 
 
-class Device:
-    __instance = None
-
-    @staticmethod
-    def get_instance():
-        if Device.__instance is None:
-            Device()
-        return Device.__instance
+class Device(metaclass=Singleton):
 
     def __init__(self):
-        if Device.__instance is not None:
-            raise Exception("Device class is a singleton!")
-        else:
-            Device.__instance = self
+        pass
 
     def get_dev_url(self, device):
         return f"{device.bac_device_ip}:{device.bac_device_port}"
 
     def get_network(self, device):
-        return Network.get_instance().get_network(device.network)
+        return Network().get_network(device.network)
 
     def get_points(self, device):
         dev_url = self.get_dev_url(device)

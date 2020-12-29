@@ -3,17 +3,15 @@ import numbers
 
 from pymodbus.exceptions import ModbusIOException
 
-from src.loggers import modbus_poll_debug_log
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
+from src.source_drivers.modbus.services.modbus_functions.polling import modbus_poll_debug_log, modbus_poll_debug
 from src.source_drivers.modbus.services.modbus_functions.polling.functions import read_digital, write_digital, \
     read_analogue, write_analogue
-from src.source_drivers.modbus.services import modbus_poll_debug
-
 
 logger = logging.getLogger(modbus_poll_debug_log)
 
@@ -69,7 +67,7 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
         array = ""
 
         if point_fc == ModbusFunctionCode.READ_COILS or \
-                point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS:
+            point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS:
             val, array = read_digital(connection,
                                       point_register,
                                       point_register_length,
@@ -77,7 +75,7 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
                                       point_fc)
 
         elif point_fc == ModbusFunctionCode.READ_HOLDING_REGISTERS or \
-                point_fc == ModbusFunctionCode.READ_INPUT_REGISTERS:
+            point_fc == ModbusFunctionCode.READ_INPUT_REGISTERS:
             val, array = read_analogue(connection,
                                        point_register,
                                        point_register_length,
@@ -87,14 +85,14 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
                                        point_fc)
 
         elif point_fc == ModbusFunctionCode.WRITE_COIL or \
-                point_fc == ModbusFunctionCode.WRITE_COILS:
+            point_fc == ModbusFunctionCode.WRITE_COILS:
             val, array = write_digital(connection, point_register,
                                        point_register_length,
                                        device_address,
                                        write_value,
                                        point_fc)
         elif point_fc == ModbusFunctionCode.WRITE_REGISTER or \
-                point_fc == ModbusFunctionCode.WRITE_REGISTERS:
+            point_fc == ModbusFunctionCode.WRITE_REGISTERS:
             val, array = write_analogue(connection,
                                         point_register,
                                         point_register_length,

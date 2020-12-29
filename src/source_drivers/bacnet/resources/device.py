@@ -102,7 +102,7 @@ class DevicePoints(Resource):
         response['bac_device_uuid'] = device.bac_device_uuid
         response['bac_device_mac'] = device.bac_device_mac
         try:
-            response['points'] = DeviceService.get_instance().get_points(device)
+            response['points'] = DeviceService().get_points(device)
         except Exception as e:
             abort(500, message=str(e))
         return response
@@ -120,7 +120,7 @@ class DevicePoint(Resource):
         response['pnt_type'] = obj
         response['pnt_id'] = obj_instance
         try:
-            response['point'] = DeviceService.get_instance().get_point(device, obj, obj_instance, prop)
+            response['point'] = DeviceService().get_point(device, obj, obj_instance, prop)
         except Exception as e:
             abort(500, message=str(e))
 

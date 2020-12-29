@@ -44,10 +44,10 @@ class EventCallableBlocking(Event):
 
 
 class EventServiceBase:
-    service_name = None
-    threaded = None
 
-    def __init__(self):
+    def __init__(self, service_name, threaded):
+        self.service_name = service_name
+        self.threaded = threaded
         if self.service_name is None:
             raise Exception('service name was not created')
         if self.threaded is None:
