@@ -1,6 +1,14 @@
 # CHANGELOG
 
-## [v1.2.0-rc.2](https://github.com/NubeIO/rubix-point-server/tree/v1.2.0-rc.2) (2020-12-28
+## [v1.2.0](https://github.com/NubeIO/rubix-point-server/tree/v1.2.0) (2020-12-29)
+
+### Added
+
+- **Breaking Changes**: Make delivery artifact as `binary`
+- Dockerize
+- Change setting file format from `.ini` to `.json`
+
+## [v1.2.0-rc.2](https://github.com/NubeIO/rubix-point-server/tree/v1.2.0-rc.2) (2020-12-28)
 
 ### Changed
 
