@@ -5,8 +5,6 @@ from src.resources.resource_device import DeviceResource, DeviceResourceByName, 
 from src.resources.resource_network import NetworkResource, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResource, PointResourceByName, PointResourceList
 from src.resources.resource_wires_plat import WiresPlatResource
-# from src.source_drivers.bacnet.resources.device import Device, DeviceList, DevicePoints, DevicePoint
-# from src.source_drivers.bacnet.resources.network import Network, NetworkList, NetworksIds
 from src.source_drivers.generic.resources.device.device_plural import GenericDevicePlural
 from src.source_drivers.generic.resources.device.device_singular import GenericDeviceSingular
 from src.source_drivers.generic.resources.network.network_plural import GenericNetworkPlural
@@ -42,21 +40,6 @@ api_point = Api(bp_point)
 api_point.add_resource(PointResource, '/uuid/<string:uuid>')
 api_point.add_resource(PointResourceByName, '/name/<string:network_name>/<string:device_name>/<string:point_name>')
 api_point.add_resource(PointResourceList, '/')
-
-# common parent inheritance endpoints
-# api.add_resource(PointReadOnlyResourceList, '/readonly')
-# api.add_resource(PointWriteableResourceList, '/writable')
-
-# bacnet_api_prefix = f'{api_prefix}/bacnet'
-# api.add_resource(Device, f'/{bacnet_api_prefix}/dev/<string:uuid>')
-# api.add_resource(Network, f'/{bacnet_api_prefix}/network/<string:uuid>')
-# api.add_resource(DeviceList, f'/{bacnet_api_prefix}/devices')
-# api.add_resource(DevicePoints, f'/{bacnet_api_prefix}/points/objects/<string:dev_uuid>')
-# # get a point /dev_uuid/analogInput/1
-# api.add_resource(DevicePoint,
-#                  f'/{bacnet_api_prefix}/point/read/<string:dev_uuid>/<string:obj>/<string:obj_instance>/<string:prop>')
-# api.add_resource(NetworkList, f'/{bacnet_api_prefix}/networks')
-# api.add_resource(NetworksIds, f'/{bacnet_api_prefix}/networks/ids')
 
 bp_generic = Blueprint('generic', __name__, url_prefix='/api/generic')
 api_generic = Api(bp_generic)
