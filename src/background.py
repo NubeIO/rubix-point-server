@@ -4,6 +4,8 @@ from threading import Thread
 from flask import current_app
 from werkzeug.local import LocalProxy
 
+from .setting import AppSetting
+
 
 class FlaskThread(Thread):
     """
@@ -24,7 +26,6 @@ class Background:
 
     @staticmethod
     def run():
-        from src import AppSetting
         setting: AppSetting = current_app.config[AppSetting.KEY]
         logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
         logger.info("Starting Services...")

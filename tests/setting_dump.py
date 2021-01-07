@@ -62,6 +62,8 @@ if __name__ == '__main__':
     print(type(app_setting.services))
     print(type(app_setting.services.mqtt))
     print('-' * 30)
-    print('-' * 30)
     assert len(app_setting.mqtt_settings) == 1
     print(app_setting.serialize())
+    print('=' * 30)
+    print('Default')
+    print(AppSetting().serialize())

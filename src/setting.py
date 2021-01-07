@@ -27,10 +27,10 @@ class ServiceSetting(BaseSetting):
     KEY = 'services'
 
     def __init__(self):
-        self.mqtt = True
-        self.histories = True
-        self.cleaner = True
-        self.history_sync = True
+        self.mqtt = False
+        self.histories = False
+        self.cleaner = False
+        self.history_sync = False
 
 
 class DriverSetting(BaseSetting):
@@ -41,16 +41,16 @@ class DriverSetting(BaseSetting):
     KEY = 'drivers'
 
     def __init__(self):
-        self.generic: bool = True
-        self.modbus_rtu: bool = True
-        self.modbus_tcp: bool = True
+        self.generic: bool = False
+        self.modbus_rtu: bool = False
+        self.modbus_tcp: bool = False
 
 
 class MqttSetting(BaseSetting):
     KEY = 'mqtt'
 
     def __init__(self):
-        self.enabled = True
+        self.enabled = False
         self.name = 'rubix_points'
         self.host = '0.0.0.0'
         self.port = 1883
@@ -101,7 +101,7 @@ class AppSetting:
         self.__driver_setting = DriverSetting()
         self.__influx_setting = InfluxSetting()
         self.__listener_setting = GenericListenerSetting()
-        self.__mqtt_settings: List[MqttSetting] = []
+        self.__mqtt_settings: List[MqttSetting] = [MqttSetting()]
 
     @property
     def data_dir(self):

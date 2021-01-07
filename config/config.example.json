@@ -1,14 +1,14 @@
 {
   "drivers": {
-    "generic": true,
-    "modbus_rtu": true,
-    "modbus_tcp": true
+    "generic": false,
+    "modbus_rtu": false,
+    "modbus_tcp": false
   },
   "services": {
-    "mqtt": true,
-    "histories": true,
-    "cleaner": true,
-    "history_sync": true
+    "mqtt": false,
+    "histories": false,
+    "cleaner": false,
+    "history_sync": false
   },
   "influx": {
     "host": "0.0.0.0",
@@ -24,7 +24,7 @@
     "measurement": "history"
   },
   "generic_point_listener": {
-    "enabled": true,
+    "enabled": false,
     "name": "rubix_points_generic_point",
     "host": "0.0.0.0",
     "port": 1883,
@@ -38,7 +38,7 @@
   },
   "mqtt": [
     {
-      "enabled": true,
+      "enabled": false,
       "name": "rubix_points",
       "host": "0.0.0.0",
       "port": 1883,

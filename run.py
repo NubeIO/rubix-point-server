@@ -21,8 +21,7 @@ def number_of_workers():
 @click.option('--prod', is_flag=True, help='Production mode')
 @click.option('-s', '--setting-file', help='Rubix Point: setting json file')
 @click.option('-l', '--logging-conf', help='Rubix Point: logging config file')
-@click.option('--workers', type=int, default=lambda: number_of_workers(),
-              help='Gunicorn: The number of worker processes for handling requests.')
+@click.option('--workers', type=int, help='Gunicorn: The number of worker processes for handling requests.')
 @click.option('-c', '--gunicorn-config', help='Gunicorn: config file(gunicorn.conf.py)')
 @click.option('--log-level', type=click.Choice(['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG'], case_sensitive=False),
               show_default=True, help='Logging level')
@@ -30,8 +29,8 @@ def cli(port, data_dir, prod, workers, setting_file, logging_conf, gunicorn_conf
     setting = AppSetting(data_dir=data_dir, prod=prod).reload(setting_file, logging_conf)
     options = {
         'bind': '%s:%s' % ('0.0.0.0', port),
-        'workers': workers if prod else 1,
-        'log_level': ('INFO' if prod else 'DEBUG' if log_level is None else log_level).lower(),
+        'workers': workers if workers is not None else number_of_workers() if prod else 1,
+        'loglevel': (log_level if log_level is not None else 'INFO' if prod else 'DEBUG').lower(),
         'preload_app': True,
         'config': gunicorn_config
     }
