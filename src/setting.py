@@ -1,8 +1,11 @@
 import json
+import logging.config
 import os
 from typing import List
 
 from flask import Flask
+
+from src.pyinstaller import resource_path
 
 
 class BaseSetting:
@@ -27,7 +30,7 @@ class ServiceSetting(BaseSetting):
     KEY = 'services'
 
     def __init__(self):
-        self.mqtt = False
+        self.mqtt = True
         self.histories = False
         self.cleaner = False
         self.history_sync = False
@@ -42,7 +45,7 @@ class DriverSetting(BaseSetting):
 
     def __init__(self):
         self.generic: bool = False
-        self.modbus_rtu: bool = False
+        self.modbus_rtu: bool = True
         self.modbus_tcp: bool = False
 
 
@@ -93,6 +96,10 @@ class AppSetting:
     DATA_DIR_ENV = 'RUBIX_POINT_DATA'
     KEY: str = 'APP_SETTING'
     default_data_dir: str = 'out'
+    default_setting_file: str = 'config.json'
+    default_logging_conf: str = 'logging.conf'
+    fallback_logging_conf: str = 'config/logging.example.conf'
+    fallback_prod_logging_conf: str = 'config/logging.prod.example.conf'
 
     def __init__(self, **kwargs):
         self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
@@ -143,7 +150,17 @@ class AppSetting:
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def reload(self, setting_file: str, logging_file: str, is_json_str=False):
+    def reload(self, setting_file: str, logging_file: str):
+        self.reload_logging(logging_file)
+        return self.reload_settings(setting_file)
+
+    def reload_logging(self, logging_file: str):
+        logging_file = os.path.join(self.__data_dir, logging_file)
+        if not os.path.isfile(logging_file):
+            logging_file = AppSetting.fallback_prod_logging_conf if self.prod else AppSetting.fallback_logging_conf
+        logging.config.fileConfig(resource_path(logging_file))
+
+    def reload_settings(self, setting_file: str, is_json_str=False):
         data = self.__read_file(setting_file, self.__data_dir, is_json_str)
         self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))

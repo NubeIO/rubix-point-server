@@ -19,8 +19,8 @@ def number_of_workers():
 @click.option('-d', '--data-dir', type=click.Path(), help='Application data dir',
               default=lambda: os.environ.get(AppSetting.DATA_DIR_ENV, AppSetting.default_data_dir))
 @click.option('--prod', is_flag=True, help='Production mode')
-@click.option('-s', '--setting-file', help='Rubix Point: setting json file')
-@click.option('-l', '--logging-conf', help='Rubix Point: logging config file')
+@click.option('-s', '--setting-file', help='Rubix Point: setting json file', default=AppSetting.default_setting_file)
+@click.option('-l', '--logging-conf', help='Rubix Point: logging config file', default=AppSetting.default_logging_conf)
 @click.option('--workers', type=int, help='Gunicorn: The number of worker processes for handling requests.')
 @click.option('-c', '--gunicorn-config', help='Gunicorn: config file(gunicorn.conf.py)')
 @click.option('--log-level', type=click.Choice(['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG'], case_sensitive=False),
@@ -29,9 +29,10 @@ def cli(port, data_dir, prod, workers, setting_file, logging_conf, gunicorn_conf
     setting = AppSetting(data_dir=data_dir, prod=prod).reload(setting_file, logging_conf)
     options = {
         'bind': '%s:%s' % ('0.0.0.0', port),
-        'workers': workers if workers is not None else number_of_workers() if prod else 1,
+        # 'workers': workers if workers is not None else number_of_workers() if prod else 1,
+        'workers': 1,
         'loglevel': (log_level if log_level is not None else 'INFO' if prod else 'DEBUG').lower(),
-        'preload_app': True,
+        'preload_app': False,
         'config': gunicorn_config
     }
     GunicornFlaskApplication(setting, options).run()

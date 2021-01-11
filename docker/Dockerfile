@@ -10,8 +10,11 @@ ADD poetry.lock pyproject.toml ./
 RUN $HOME/.poetry/bin/poetry install
 
 ADD src src
-ADD run.py ./
-RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-point --clean --onefile
+ADD config config
+ADD run.py VERSION ./
+RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-point --clean --onefile \
+    --add-data VERSION:. \
+    --add-data config:config
 
 FROM python:$BASE_IMAGE_VERSION-slim
 

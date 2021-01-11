@@ -140,7 +140,7 @@ class PointModel(ModelBase):
             device.history_enable:
             self.create_history(point_store)
 
-        from src import EventDispatcher
+        from src.event_dispatcher import EventDispatcher
         EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
             'point': self,
             'point_store': point_store,

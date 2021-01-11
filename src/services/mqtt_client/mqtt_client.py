@@ -34,7 +34,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
 
     def start(self, config: MqttSetting, logger: Logger):
         super(MqttClient, self).start(config, logger)
-        from src import EventDispatcher
+        from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_service(self)
         MqttRegistry().add(self)
 

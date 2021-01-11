@@ -5,7 +5,7 @@ from gunicorn.arbiter import Arbiter
 from gunicorn.glogging import Logger
 from gunicorn.workers.ggevent import GeventWorker
 
-from .app import create_app
+from .app import create_app, db
 from .setting import AppSetting
 
 
@@ -26,7 +26,6 @@ def on_exit(server: Arbiter):
 
 def when_ready(server: Arbiter):
     server.log.info("Server is ready. Doing something before spawning workers...")
-    server.app.application.setup()
 
 
 class GunicornFlaskApplication(BaseApplication, ABC):
@@ -45,3 +44,11 @@ class GunicornFlaskApplication(BaseApplication, ABC):
     def load(self):
         self.application = create_app(self._app_setting)
         return self.application
+
+    def wsgi(self):
+        output = super(GunicornFlaskApplication, self).wsgi()
+        with self.application.app_context():
+            db.create_all()
+            from src.background import Background
+            Background.run()
+        return output
