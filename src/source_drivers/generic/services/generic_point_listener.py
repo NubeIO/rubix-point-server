@@ -28,7 +28,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
 
     def start(self, config: MqttSetting, logger: Logger):
         super().start(config, logger)
-        from src import EventDispatcher
+        from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_source_driver(self)
 
     def _on_connection_successful(self):

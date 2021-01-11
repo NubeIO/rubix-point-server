@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask_restful import abort, marshal_with, reqparse
 
-from src import EventDispatcher
+from src.event_dispatcher import EventDispatcher
 from src.resources.rest_schema.schema_point import point_store_fields
 from src.services.event_service_base import EventCallableBlocking
 from src.source_drivers import MODBUS_SERVICE_NAME

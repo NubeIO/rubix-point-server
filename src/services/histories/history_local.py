@@ -26,7 +26,7 @@ class HistoryLocal(EventServiceBase, metaclass=Singleton):
         self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
 
     def sync_interval(self):
-        from src import EventDispatcher
+        from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_service(self)
         while True:
             self._set_internal_service_timeout(self.SYNC_PERIOD)

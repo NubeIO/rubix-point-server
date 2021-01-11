@@ -14,7 +14,7 @@ ADD config config
 ADD run.py VERSION ./
 RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-point --clean --onefile \
     --add-data VERSION:. \
-    --add-data config:config --hidden-import=src.utils.color_formatter
+    --add-data config:config
 
 FROM python:$BASE_IMAGE_VERSION-slim
 

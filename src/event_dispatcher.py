@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from src.services.event_service_base import EventServiceBase, Event
 from src.utils import Singleton
 

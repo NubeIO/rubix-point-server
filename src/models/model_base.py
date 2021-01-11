@@ -1,7 +1,7 @@
 from sqlalchemy.orm import validates
 
 from src import db
-from src import EventDispatcher
+from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import Event, EventType
 
 

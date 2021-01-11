@@ -20,8 +20,7 @@
     ```bash
     poetry run pyinstaller run.py -n rubix-point --clean --onefile \
         --add-data VERSION:. \
-        --add-data config:config \
-        --hidden-import=src.utils.color_formatter
+        --add-data config:config
     ```
 
   The output is: `dist/rubix-point`
