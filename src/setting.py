@@ -27,7 +27,7 @@ class ServiceSetting(BaseSetting):
     KEY = 'services'
 
     def __init__(self):
-        self.mqtt = False
+        self.mqtt = True
         self.histories = False
         self.cleaner = False
         self.history_sync = False
@@ -42,7 +42,7 @@ class DriverSetting(BaseSetting):
 
     def __init__(self):
         self.generic: bool = False
-        self.modbus_rtu: bool = False
+        self.modbus_rtu: bool = True
         self.modbus_tcp: bool = False
 
 
