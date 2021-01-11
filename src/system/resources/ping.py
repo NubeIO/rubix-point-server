@@ -4,10 +4,12 @@ from datetime import datetime
 from flask import current_app
 from flask_restful import Resource
 
+from src.pyinstaller import resource_path
+
 start_time = time.time()
 up_time_date = str(datetime.now())
 try:
-    with open('VERSION') as version_file:
+    with open(resource_path('VERSION')) as version_file:
         version = version_file.read().strip()
 except FileNotFoundError:
     version = 'Fake'

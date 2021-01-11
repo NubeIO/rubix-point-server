@@ -1,10 +1,11 @@
-from logging import Logger
+import logging
 from threading import Thread
 
 from flask import current_app
-from werkzeug.local import LocalProxy
 
 from .setting import AppSetting
+
+logger = logging.getLogger(__name__)
 
 
 class FlaskThread(Thread):
@@ -27,7 +28,6 @@ class Background:
     @staticmethod
     def run():
         setting: AppSetting = current_app.config[AppSetting.KEY]
-        logger = LocalProxy(lambda: current_app.logger) or Logger(__name__)
         logger.info("Starting Services...")
 
         # Services
