@@ -1,5 +1,5 @@
 from json import loads as json_loads, JSONDecodeError
-from logging import Logger
+import logging
 
 from sqlalchemy.orm.exc import ObjectDeletedError
 
@@ -10,6 +10,9 @@ from src.services.event_service_base import EventServiceBase
 from src.services.mqtt_client.mqtt_client_base import MqttClientBase
 from src.source_drivers import GENERIC_SERVICE_NAME
 from src.utils import Singleton
+
+
+logger = logging.getLogger(__name__)
 
 
 class MqttListenerMetadata(Singleton, type(MqttClientBase), type(EventServiceBase)):
@@ -26,13 +29,13 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
     def config(self) -> GenericListenerSetting:
         return self._config
 
-    def start(self, config: MqttSetting, logger: Logger):
-        super().start(config, logger)
+    def start(self, config: MqttSetting):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_source_driver(self)
+        super().start(config)
 
     def _on_connection_successful(self):
-        self._logger.debug(f'MQTT sub to {self.config.topic}/#')
+        logger.debug(f'MQTT sub to {self.config.topic}/#')
         self._client.subscribe(f'{self.config.topic}/#')
 
     def _on_message(self, client, userdata, message):
@@ -54,13 +57,14 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
             if not payload and ('value' not in payload.keys() or 'fault' not in payload.keys()):
                 raise ValueError('No value or fault provided')
         except (JSONDecodeError, ValueError) as e:
-            self._logger.warning(f'Invalid generic point COV payload. point={point_name}, device={device_name}, '
+            logger.warning(f'Invalid generic point COV payload. point={point_name}, device={device_name}, '
                                  f'network={network_name}. error=({str(e)})')
             return
 
         point: PointModel = PointModel.find_by_name(point_name, device_name, network_name)
         if point is None or point.driver != GENERIC_SERVICE_NAME:
-            self._logger.warning(f'Unknown generic point COV received with name={point_name}')
+            logger.warning(f'Unknown generic point COV received with point name={point_name}, device name={device_name}'
+                           f', network name={network_name}')
             return
         value = payload.get('value', None)
         value_raw = payload.get('value_raw', value)
@@ -74,4 +78,4 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
                 point.publish_cov(point_store)
                 db.session.commit()
         except ObjectDeletedError:
-            self._logger.debug(f'Generic point removed when attempting to update point_store')
+            logger.debug(f'Generic point removed when attempting to update point_store')

@@ -37,7 +37,7 @@ class Background:
                 if not config.enabled:
                     continue
                 mqtt_client = MqttClient()
-                FlaskThread(target=mqtt_client.start, daemon=True, kwargs={'config': config, 'logger': logger}).start()
+                FlaskThread(target=mqtt_client.start, daemon=True, kwargs={'config': config}).start()
 
         if setting.services.histories:
             from src.services.histories.history_local import HistoryLocal
@@ -45,12 +45,12 @@ class Background:
 
         if setting.services.cleaner:
             from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
-            FlaskThread(target=PointStoreHistoryCleaner().setup, daemon=True, kwargs={'logger': logger}).start()
+            FlaskThread(target=PointStoreHistoryCleaner().setup, daemon=True).start()
 
         if setting.services.history_sync:
             from src.services.histories.sync.influxdb import InfluxDB
             FlaskThread(target=InfluxDB().setup, daemon=True,
-                        kwargs={'config': setting.influx, 'logger': logger}).start()
+                        kwargs={'config': setting.influx}).start()
 
         # Drivers
         logger.info("Starting Drivers...")
@@ -58,7 +58,7 @@ class Background:
         if setting.drivers.generic:
             from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
             FlaskThread(target=GenericPointListener().start, daemon=True,
-                        kwargs={'config': setting.listener, 'logger': logger}).start()
+                        kwargs={'config': setting.listener}).start()
 
         if setting.drivers.modbus_tcp:
             from src.source_drivers.modbus.services import TcpPolling, TcpRegistry

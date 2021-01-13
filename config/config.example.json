@@ -47,7 +47,7 @@
       "retain": false,
       "attempt_reconnect_on_unavailable": true,
       "attempt_reconnect_secs": 5,
-      "publish_value": true,
+      "publish_value": false,
       "topic": "rubix/points"
     }
   ]

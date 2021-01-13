@@ -1,6 +1,6 @@
 import time
 from functools import wraps
-from logging import Logger
+import logging
 
 import schedule
 from influxdb import InfluxDBClient
@@ -12,6 +12,9 @@ from src.services.histories.history_binding import HistoryBinding
 from src.utils import Singleton
 
 
+logger = logging.getLogger(__name__)
+
+
 def exception_handling_decorator(func):
     @wraps(func)
     def inner(self, *args, **kwargs):
@@ -19,7 +22,7 @@ def exception_handling_decorator(func):
             return func(self, *args, **kwargs)
         except Exception as e:
             self.disconnect()
-            self.logger.error(f'Syncing Error: {str(e)}')
+            logger.error(f'Syncing Error: {str(e)}')
 
     return inner
 
@@ -27,7 +30,6 @@ def exception_handling_decorator(func):
 class InfluxDB(HistoryBinding, metaclass=Singleton):
 
     def __init__(self):
-        self.logger = None
         self.__config = None
         self.__client = None
         self.__wires_plat = None
@@ -43,19 +45,18 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     def disconnect(self):
         self.__is_connected = False
 
-    def setup(self, config: InfluxSetting, logger: Logger):
+    def setup(self, config: InfluxSetting):
         self.__config = config
-        self.logger = logger
         self.connect()
         if self.status():
-            self.logger.info("Registering InfluxDB for scheduler job")
+            logger.info("Registering InfluxDB for scheduler job")
             # schedule.every(5).seconds.do(self.sync)  # for testing
             schedule.every(self.config.timer).minutes.do(self.sync)
             while True:
                 schedule.run_pending()
                 time.sleep(1)
         else:
-            self.logger.error("InfluxDB can't be registered with not working client details")
+            logger.error("InfluxDB can't be registered with not working client details")
 
     def connect(self):
         if self.__client:
@@ -70,14 +71,14 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             self.__is_connected = True
         except Exception as e:
             self.__is_connected = False
-            self.logger.error(f'Connection Error: {str(e)}')
+            logger.error(f'Connection Error: {str(e)}')
 
     @exception_handling_decorator
     def sync(self):
-        self.logger.info('InfluxDB sync has is been called')
+        logger.info('InfluxDB sync has is been called')
         self.__wires_plat = WiresPlatModel.find_one()
         if not self.__wires_plat:
-            self.logger.error("Please add wires-plat")
+            logger.error("Please add wires-plat")
         else:
             self._sync()
 
@@ -112,11 +113,11 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             }
             store.append(row)
         if len(store):
-            self.logger.debug(f"Storing: {store}")
+            logger.debug(f"Storing: {store}")
             self.__client.write_points(store)
-            self.logger.info(f'Stored {len(store)} rows on {self.config.measurement} measurement')
+            logger.info(f'Stored {len(store)} rows on {self.config.measurement} measurement')
         else:
-            self.logger.debug("Nothing to store, no new records")
+            logger.debug("Nothing to store, no new records")
 
     def _get_last_sync_id(self):
         query = f'SELECT MAX(id) FROM {self.config.measurement}'

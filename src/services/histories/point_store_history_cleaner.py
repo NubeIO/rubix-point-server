@@ -1,23 +1,23 @@
 import time
-from logging import Logger
-
+import logging
 import schedule
 from sqlalchemy import func, and_, or_
 
 from src.utils import Singleton
 
 
+logger = logging.getLogger(__name__)
+
+
 class PointStoreHistoryCleaner(metaclass=Singleton):
     MAX_ROWS = 1000
 
     def __init__(self):
-        self.logger = None
         self.config = None
 
     # TODO: add config here e.g: trigger frequency
-    def setup(self, logger: Logger):
-        self.logger = logger
-        self.logger.info("Register PointStoreHistoryCleaner")
+    def setup(self):
+        logger.info("Register PointStoreHistoryCleaner")
         # schedule.every(5).seconds.do(PointStoreCleaner.clean)  # for testing
         schedule.every(5).minutes.do(self.clean)  # schedules job for every hours
         while True:
@@ -27,7 +27,7 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
     def clean(self):
         from src import db
         from src.models.point.model_point_store_history import PointStoreHistoryModel
-        self.logger.info("Started PointStoreHistoryCleaner cleaning process...")
+        logger.info("Started PointStoreHistoryCleaner cleaning process...")
         time.sleep(10)
         partition_table = db.session.query(PointStoreHistoryModel, func.rank()
                                            .over(order_by=PointStoreHistoryModel.ts.desc(),
@@ -44,4 +44,4 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
             db.session.query(PointStoreHistoryModel).filter(or_(*filter_param)).delete()
             db.session.commit()
 
-        self.logger.info("Finished PointStoreCleaner cleaning process!")
+        logger.info("Finished PointStoreCleaner cleaning process!")
