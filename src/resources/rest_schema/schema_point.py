@@ -9,7 +9,8 @@ point_store_fields = {
     'value_raw': fields.String,
     'fault': fields.Boolean,
     'fault_message': fields.String,
-    'ts': fields.String
+    'ts_value': fields.String,
+    'ts_fault': fields.String
 }
 
 point_all_attributes = {

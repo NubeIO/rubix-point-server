@@ -54,12 +54,19 @@ class MqttClient(MqttClientBase, EventServiceBase):
         topic = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, point.uuid, point.name,
                                  device_uuid, device_name, network_uuid, network_name, source_driver))
 
-        payload = {
-            'value': point_store.value,
-            'value_raw': point_store.value_raw,
-            'fault': point_store.fault,
-            'fault_message': point_store.fault_message,
-        }
+        if point_store.fault:
+            payload = {
+                'fault': point_store.fault,
+                'fault_message': point_store.fault_message,
+                'ts': point_store.ts_fault,
+            }
+        else:
+            payload = {
+                'fault': point_store.fault,
+                'value': point_store.value,
+                'value_raw': point_store.value_raw,
+                'ts': point_store.ts_value,
+            }
 
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
         self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)

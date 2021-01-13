@@ -2,6 +2,7 @@ from ast import literal_eval
 from sqlalchemy import and_, or_
 
 from src import db
+from src.utils.model_utils import get_datetime, datetime_to_str
 
 
 class PointStoreModelMixin(object):
@@ -10,7 +11,8 @@ class PointStoreModelMixin(object):
     value_raw = db.Column(db.String(), nullable=True)
     fault = db.Column(db.Boolean(), default=False, nullable=False)
     fault_message = db.Column(db.String())
-    ts = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+    ts_value = db.Column(db.DateTime())
+    ts_fault = db.Column(db.DateTime())
 
 
 class PointStoreModel(PointStoreModelMixin, db.Model):
@@ -37,6 +39,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
             return None
 
     def update(self, cov_threshold: float = None) -> bool:
+        ts = get_datetime()
         if not self.fault:
             self.fault = bool(self.fault)
             res = db.session.execute(
@@ -46,18 +49,25 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                             value_original=self.value_original,
                             value_raw=self.value_raw,
                             fault=False,
-                            fault_message=None)
+                            fault_message=None,
+                            ts_value=ts)
                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                 or_(self.__table__.c.value == None,
                                     db.func.abs(self.__table__.c.value - self.value) >= cov_threshold,
                                     self.__table__.c.fault != self.fault))))
+            if res.rowcount:
+                self.ts_value = datetime_to_str(ts)
         else:
             res = db.session.execute(
                 self.__table__
                     .update()
-                    .values(fault=self.fault, fault_message=self.fault_message)
+                    .values(fault=self.fault,
+                            fault_message=self.fault_message,
+                            ts_fault=ts)
                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                 or_(self.__table__.c.fault != self.fault,
                                     self.__table__.c.fault_message != self.fault_message))))
+            if res.rowcount:
+                self.ts_fault = datetime_to_str(ts)
         db.session.commit()
         return bool(res.rowcount)
