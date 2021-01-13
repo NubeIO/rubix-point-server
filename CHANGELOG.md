@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [v1.2.2](https://github.com/NubeIO/rubix-point-server/tree/v1.2.2) (2020-01-14)
+
+### Added
+
+- Fix to mqtt fault payloads
+
+## [v1.2.1](https://github.com/NubeIO/rubix-point-server/tree/v1.2.1) (2020-01-12)
+
+### Added
+
+- Fix to mqtt and threads
+
 ## [v1.2.0](https://github.com/NubeIO/rubix-point-server/tree/v1.2.0) (2020-12-29)
 
 ### Added
