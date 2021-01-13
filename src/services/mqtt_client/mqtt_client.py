@@ -64,7 +64,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
         self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)
         if self.config.publish_value and not point_store.fault:
-            topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
+            topic = topic.replace('/'+MQTT_TOPIC_COV_ALL+'/', '/'+MQTT_TOPIC_COV_VALUE+'/', 1)
             logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
             self._client.publish(topic, point_store.value, self.config.qos, self.config.retain)
 
