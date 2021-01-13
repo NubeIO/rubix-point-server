@@ -1,5 +1,5 @@
 import json
-from logging import Logger
+import logging
 
 from src import MqttSetting
 from src.models.model_base import ModelBase
@@ -8,6 +8,10 @@ from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
 from .mqtt_client_base import MqttClientBase
 from .mqtt_registry import MqttRegistry
+
+
+logger = logging.getLogger(__name__)
+
 
 SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
@@ -32,16 +36,16 @@ class MqttClient(MqttClientBase, EventServiceBase):
         self.supported_events[EventType.DEVICE_UPDATE] = True
         self.supported_events[EventType.NETWORK_UPDATE] = True
 
-    def start(self, config: MqttSetting, logger: Logger):
-        super(MqttClient, self).start(config, logger)
+    def start(self, config: MqttSetting):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_service(self)
         MqttRegistry().add(self)
+        super(MqttClient, self).start(config)
 
     def publish_cov(self, point: PointModel, point_store: PointStoreModel, device_uuid: str, device_name: str,
                     network_uuid: str, network_name: str, source_driver: str):
         if not self.status():
-            self._logger.error(f"MQTT client {self.to_string()} is not connected...")
+            logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
         if point is None or point_store is None or device_uuid is None or network_uuid is None or source_driver is \
             None or network_name is None or device_name is None:
@@ -57,23 +61,23 @@ class MqttClient(MqttClientBase, EventServiceBase):
             'fault_message': point_store.fault_message,
         }
 
-        self._logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
+        logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
         self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)
         if self.config.publish_value and not point_store.fault:
             topic.replace(MQTT_TOPIC_COV_ALL, MQTT_TOPIC_COV_VALUE, 1)
-            self._logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
+            logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
             self._client.publish(topic, point_store.value, self.config.qos, self.config.retain)
 
     def publish_update(self, model: ModelBase, updates: dict):
         if not self.status():
-            self._logger.error(f"MQTT client {self.to_string()} is not connected...")
+            logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
 
         topic = self.make_topic((self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), model.uuid))
 
-        self._logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {updates}')
+        logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {updates}')
         self._client.publish(topic, json.dumps(updates), self.config.qos, self.config.retain)
 
     def _on_connection_successful(self):

@@ -1,11 +1,14 @@
 import time
 from abc import ABC, abstractmethod
 from collections import Iterable
-from logging import Logger
+import logging
 
 import paho.mqtt.client as mqtt
 
 from src import MqttSetting
+
+
+logger = logging.getLogger(__name__)
 
 
 class MqttClientBase(ABC):
@@ -13,14 +16,12 @@ class MqttClientBase(ABC):
     def __init__(self):
         self._client = None
         self._config = None
-        self._logger = None
 
     @property
     def config(self) -> MqttSetting:
         return self._config
 
-    def start(self, config: MqttSetting, logger: Logger):
-        self._logger = logger
+    def start(self, config: MqttSetting):
         self._config = config
         logger.info(f'Starting MQTT client[{self.config.name}]...')
         self._client = mqtt.Client(self.config.name)
@@ -43,9 +44,9 @@ class MqttClientBase(ABC):
             except Exception as e:
                 # catching so can set _client to None so publish_cov doesn't stack messages forever
                 self._client = None
-                self._logger.error(str(e))
+                logger.error(str(e))
                 return
-        self._logger.info(f'MQTT client {self.config.name} connected {self.to_string()}')
+        logger.info(f'MQTT client {self.config.name} connected {self.to_string()}')
         self._client.loop_forever()
 
     def status(self) -> bool:
