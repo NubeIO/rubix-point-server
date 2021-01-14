@@ -8,6 +8,7 @@ from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
 from .mqtt_client_base import MqttClientBase
 from .mqtt_registry import MqttRegistry
+from src.utils.model_utils import datetime_to_str
 
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,8 @@ class MqttClient(MqttClientBase, EventServiceBase):
                 'value_raw': point_store.value_raw,
                 'ts': point_store.ts_value,
             }
-
+        if not isinstance(payload['ts'], str):
+            payload['ts'] = datetime_to_str(payload['ts'])
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
         self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)
         if self.config.publish_value and not point_store.fault:

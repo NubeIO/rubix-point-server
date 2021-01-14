@@ -55,8 +55,8 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                                 or_(self.__table__.c.value == None,
                                     db.func.abs(self.__table__.c.value - self.value) >= cov_threshold,
                                     self.__table__.c.fault != self.fault))))
-            if res.rowcount:
-                self.ts_value = datetime_to_str(ts)
+            if res.rowcount:  # WARNING: this could cause secondary write to db is store if fetched/linked from DB
+                self.ts_value = ts
         else:
             res = db.session.execute(
                 self.__table__
@@ -67,7 +67,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                 or_(self.__table__.c.fault != self.fault,
                                     self.__table__.c.fault_message != self.fault_message))))
-            if res.rowcount:
-                self.ts_fault = datetime_to_str(ts)
+            if res.rowcount:  # WARNING: this could cause secondary write to db is store if fetched/linked from DB
+                self.ts_fault = ts
         db.session.commit()
         return bool(res.rowcount)
