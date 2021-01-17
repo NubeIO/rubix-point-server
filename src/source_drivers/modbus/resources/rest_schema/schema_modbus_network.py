@@ -1,5 +1,6 @@
 from src.resources.rest_schema.schema_network import *
-from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_fields_with_children
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_fields_with_children, \
+    modbus_device_all_fields
 
 modbus_network_all_attributes = deepcopy(network_all_attributes)
 modbus_network_all_attributes['type'] = {
@@ -42,5 +43,7 @@ map_rest_schema(modbus_network_return_attributes, modbus_network_all_fields)
 map_rest_schema(modbus_network_all_attributes, modbus_network_all_fields)
 
 modbus_network_all_fields_with_children = deepcopy(modbus_network_all_fields)
-modbus_network_all_fields_with_children.update(network_all_fields_with_children_base)
 modbus_network_all_fields_with_children['devices'] = fields.List(fields.Nested(modbus_device_all_fields_with_children))
+
+modbus_network_all_fields_without_points_children = deepcopy(modbus_network_all_fields)
+modbus_network_all_fields_without_points_children['devices'] = fields.List(fields.Nested(modbus_device_all_fields))
