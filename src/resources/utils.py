@@ -4,6 +4,27 @@ from flask_restful import fields
 from flask_restful import abort, marshal
 
 
+def model_network_marshaller(data: any, args: dict, base_fields: dict, children_without_point_fields: dict,
+                             children_fields: dict):
+    with_children = False
+    points = False
+    try:
+        if 'with_children' in args:
+            with_children = bool(strtobool(args['with_children']))
+        if 'points' in args:
+            points = bool(strtobool(args['points']))
+    except:
+        abort(400, message='Invalid query string')
+
+    if with_children:
+        if points:
+            return marshal(data, children_fields)
+        else:
+            return marshal(data, children_without_point_fields)
+    else:
+        return marshal(data, base_fields)
+
+
 def model_marshaller_with_children(data: any, args: dict, base_fields: dict, children_fields: dict):
     with_children = False
     if 'with_children' in args:
