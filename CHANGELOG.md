@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1.2.5](https://github.com/NubeIO/rubix-point-server/tree/v1.2.5) (2020-01-19)
+### Added
+- Added mqtt debug logs
+
 ## [v1.2.4](https://github.com/NubeIO/rubix-point-server/tree/v1.2.4) (2020-01-18)
 ### Added
 - Added new endpoint for calling all devices without returning their points
