@@ -1,16 +1,16 @@
-from json import loads as json_loads, JSONDecodeError
 import logging
+from json import loads as json_loads, JSONDecodeError
 
 from sqlalchemy.orm.exc import ObjectDeletedError
 
-from src import db, GenericListenerSetting, MqttSetting
+from src import db, GenericListenerSetting
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase
 from src.services.mqtt_client.mqtt_client_base import MqttClientBase
+from src.setting import MqttSettingBase
 from src.source_drivers import GENERIC_SERVICE_NAME
 from src.utils import Singleton
-
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
     def config(self) -> GenericListenerSetting:
         return self._config
 
-    def start(self, config: MqttSetting):
+    def start(self, config: MqttSettingBase):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_source_driver(self)
         super().start(config)
@@ -58,7 +58,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
                 raise ValueError('No value or fault provided')
         except (JSONDecodeError, ValueError) as e:
             logger.warning(f'Invalid generic point COV payload. point={point_name}, device={device_name}, '
-                                 f'network={network_name}. error=({str(e)})')
+                           f'network={network_name}. error=({str(e)})')
             return
 
         point: PointModel = PointModel.find_by_name(point_name, device_name, network_name)

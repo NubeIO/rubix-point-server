@@ -1,15 +1,17 @@
 from logging import StreamHandler
 
+from src.event_dispatcher import EventDispatcher
+from src.services.event_service_base import Event, EventType
+
 
 class MqttStreamHandler(StreamHandler):
 
     def emit(self, record):
-        pass
-        # from src.mqtt import MqttClient
-        #
-        # if MqttClient().config and MqttClient().config.publish_debug:
-        #     try:
-        #         msg = self.format(record)
-        #         MqttClient().publish_debug(msg)
-        #     except Exception as e:
-        #         MqttClient().publish_debug(str(e))
+        try:
+            msg = self.format(record)
+            event = Event(EventType.MQTT_DEBUG, msg)
+            # TODO: better use of dispatching
+            EventDispatcher().dispatch_from_service(None, event, None)
+        except Exception as e:
+            event = Event(EventType.MQTT_DEBUG, str(e))
+            EventDispatcher().dispatch_from_service(None, event, None)

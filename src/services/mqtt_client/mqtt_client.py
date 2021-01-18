@@ -1,18 +1,16 @@
 import json
 import logging
 
-from src import MqttSetting
 from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
+from src.utils.model_utils import datetime_to_str
 from .mqtt_client_base import MqttClientBase
 from .mqtt_registry import MqttRegistry
-from src.utils.model_utils import datetime_to_str
-
+from ...setting import MqttSettingBase
 
 logger = logging.getLogger(__name__)
-
 
 SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
@@ -28,7 +26,6 @@ MQTT_TOPIC_COV_VALUE = 'value'
 
 
 class MqttClient(MqttClientBase, EventServiceBase):
-
     def __init__(self):
         MqttClientBase.__init__(self)
         EventServiceBase.__init__(self, SERVICE_NAME_MQTT_CLIENT, False)
@@ -36,8 +33,9 @@ class MqttClient(MqttClientBase, EventServiceBase):
         self.supported_events[EventType.POINT_UPDATE] = True
         self.supported_events[EventType.DEVICE_UPDATE] = True
         self.supported_events[EventType.NETWORK_UPDATE] = True
+        self.supported_events[EventType.MQTT_DEBUG] = True
 
-    def start(self, config: MqttSetting):
+    def start(self, config: MqttSettingBase):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_service(self)
         MqttRegistry().add(self)
@@ -73,7 +71,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
         self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)
         if self.config.publish_value and not point_store.fault:
-            topic = topic.replace('/'+MQTT_TOPIC_COV_ALL+'/', '/'+MQTT_TOPIC_COV_VALUE+'/', 1)
+            topic = topic.replace('/' + MQTT_TOPIC_COV_ALL + '/', '/' + MQTT_TOPIC_COV_VALUE + '/', 1)
             logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
             self._client.publish(topic, point_store.value, self.config.qos, self.config.retain)
 
@@ -88,6 +86,12 @@ class MqttClient(MqttClientBase, EventServiceBase):
 
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {updates}')
         self._client.publish(topic, json.dumps(updates), self.config.qos, self.config.retain)
+
+    def publish_debug_message(self, topic: str, message: str):
+        if not self.status():
+            logger.error(f"MQTT client {self.to_string()} is not connected...")
+            return
+        self._client.publish(topic, message)
 
     def _on_connection_successful(self):
         self._client.subscribe(f'{self.config.topic}/#')
@@ -117,7 +121,10 @@ class MqttClient(MqttClientBase, EventServiceBase):
         if event.data is None:
             return
 
-        if event.event_type == EventType.POINT_COV:
+        if event.event_type == EventType.MQTT_DEBUG:
+            self.publish_debug_message(self.config.debug_topic, event.data)
+
+        elif event.event_type == EventType.POINT_COV:
             self.publish_cov(event.data.get('point'), event.data.get('point_store'),
                              event.data.get('device').uuid, event.data.get('device').name,
                              event.data.get('network').uuid, event.data.get('network').name,

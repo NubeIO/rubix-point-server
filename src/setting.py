@@ -46,12 +46,10 @@ class DriverSetting(BaseSetting):
         self.modbus_tcp: bool = False
 
 
-class MqttSetting(BaseSetting):
-    KEY = 'mqtt'
-
+class MqttSettingBase(BaseSetting):
     def __init__(self):
-        self.enabled = False
-        self.name = 'rubix_points'
+        self.enabled = True
+        self.name = ''
         self.host = '0.0.0.0'
         self.port = 1883
         self.keepalive = 60
@@ -60,10 +58,21 @@ class MqttSetting(BaseSetting):
         self.attempt_reconnect_on_unavailable = True
         self.attempt_reconnect_secs = 5
         self.publish_value = True
-        self.topic = 'rubix/points'
+        self.topic = ''
 
 
-class GenericListenerSetting(MqttSetting):
+class MqttSetting(MqttSettingBase):
+    KEY = 'mqtt'
+
+    def __init__(self):
+        super(MqttSetting, self).__init__()
+        self.name = 'rubix_points'
+        self.topic = 'rubix/points/value'
+        self.publish_debug = True
+        self.debug_topic = 'rubix/points/debug'
+
+
+class GenericListenerSetting(MqttSettingBase):
     KEY = 'generic_point_listener'
 
     def __init__(self):
@@ -153,7 +162,9 @@ class AppSetting:
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
         self.__listener_setting = self.__listener_setting.reload(data.get(GenericListenerSetting.KEY))
-        self.__mqtt_settings = [MqttSetting().reload(s) for s in data.get(MqttSetting.KEY, [])]
+        mqtt_settings = data.get(MqttSetting.KEY, [])
+        if len(mqtt_settings) > 0:
+            self.__mqtt_settings = [MqttSetting().reload(s) for s in mqtt_settings]
         return self
 
     def init_app(self, app: Flask):
