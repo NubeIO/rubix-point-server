@@ -80,17 +80,17 @@ python run.py -s config/config.json
   
 #### Topic structure:
 ```
-rubix/points/{event}/...
+rubix/points/value/{event}/...
 ```
 ```
 COV:
-  rubix/points/cov/all/{point_uuid}/{point_name}/{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}/
+  rubix/points/value/cov/all/{point_uuid}/{point_name}/{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}/
 
   [optional] (value only)
-  rubix/points/cov/value/{point_uuid}/{point_name}/{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}/
+  rubix/points/value/cov/value/{point_uuid}/{point_name}/{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}/
 
 UPDATE:
-  rubix/points/update/{model}/{model.uuid}
+  rubix/points/value/update/{model}/{model.uuid}
 ```
 
 
@@ -99,27 +99,27 @@ UPDATE:
 **COV:**
 ```
 all points:
-  rubix/points/cov/all/#
+  rubix/points/value/cov/all/#
 
 all modbus rtu points:
-  rubix/points/cov/all/+/+/+/+/+/+/modbus_rtu
+  rubix/points/value/cov/all/+/+/+/+/+/+/modbus_rtu
 
 by point uuid:
-  rubix/points/cov/all/example_uuid/#
+  rubix/points/value/cov/all/example_uuid/#
 
 by point name:
-  rubix/points/cov/all/+/example_name/#
+  rubix/points/value/cov/all/+/example_name/#
 ```
 **UPDATE:**
 ```
 network:
-  rubix/points/update/network/example_network_uuid
+  rubix/points/value/update/network/example_network_uuid
 
 device:
-  rubix/points/update/device/example_device_uuid
+  rubix/points/value/update/device/example_device_uuid
 
 point:
-  rubix/points/update/point/example_point_uuid
+  rubix/points/value/update/point/example_point_uuid
 ```
 
 ### Generic Point MQTT client

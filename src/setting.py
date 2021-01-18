@@ -1,11 +1,8 @@
 import json
-import logging.config
 import os
 from typing import List
 
 from flask import Flask
-
-from src.pyinstaller import resource_path
 
 
 class BaseSetting:
@@ -49,12 +46,10 @@ class DriverSetting(BaseSetting):
         self.modbus_tcp: bool = False
 
 
-class MqttSetting(BaseSetting):
-    KEY = 'mqtt'
-
+class MqttSettingBase(BaseSetting):
     def __init__(self):
-        self.enabled = False
-        self.name = 'rubix_points'
+        self.enabled = True
+        self.name = ''
         self.host = '0.0.0.0'
         self.port = 1883
         self.keepalive = 60
@@ -63,10 +58,21 @@ class MqttSetting(BaseSetting):
         self.attempt_reconnect_on_unavailable = True
         self.attempt_reconnect_secs = 5
         self.publish_value = True
-        self.topic = 'rubix/points'
+        self.topic = ''
 
 
-class GenericListenerSetting(MqttSetting):
+class MqttSetting(MqttSettingBase):
+    KEY = 'mqtt'
+
+    def __init__(self):
+        super(MqttSetting, self).__init__()
+        self.name = 'rubix_points'
+        self.topic = 'rubix/points/value'
+        self.publish_debug = True
+        self.debug_topic = 'rubix/points/debug'
+
+
+class GenericListenerSetting(MqttSettingBase):
     KEY = 'generic_point_listener'
 
     def __init__(self):
@@ -150,23 +156,15 @@ class AppSetting:
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def reload(self, setting_file: str, logging_file: str):
-        self.reload_logging(logging_file)
-        return self.reload_settings(setting_file)
-
-    def reload_logging(self, logging_file: str):
-        logging_file = os.path.join(self.__data_dir, logging_file)
-        if not os.path.isfile(logging_file):
-            logging_file = AppSetting.fallback_prod_logging_conf if self.prod else AppSetting.fallback_logging_conf
-        logging.config.fileConfig(resource_path(logging_file))
-
-    def reload_settings(self, setting_file: str, is_json_str=False):
+    def reload(self, setting_file: str, is_json_str: bool = False):
         data = self.__read_file(setting_file, self.__data_dir, is_json_str)
         self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
         self.__listener_setting = self.__listener_setting.reload(data.get(GenericListenerSetting.KEY))
-        self.__mqtt_settings = [MqttSetting().reload(s) for s in data.get(MqttSetting.KEY, [])]
+        mqtt_settings = data.get(MqttSetting.KEY, [])
+        if len(mqtt_settings) > 0:
+            self.__mqtt_settings = [MqttSetting().reload(s) for s in mqtt_settings]
         return self
 
     def init_app(self, app: Flask):

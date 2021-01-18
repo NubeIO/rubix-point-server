@@ -1,7 +1,6 @@
 import logging
-
-from queue import Queue
 from enum import IntEnum, unique, auto
+from queue import Queue
 from threading import Timer, Event as ThreadingEvent
 from typing import Callable
 
@@ -17,6 +16,8 @@ class EventType(IntEnum):
     POINT_UPDATE = auto()
     DEVICE_UPDATE = auto()
     NETWORK_UPDATE = auto()
+    MQTT_DEBUG = auto()
+
 
 # TODO: implement event queue overload warning and clearing
 # TODO: potentially need to add thread lock to event

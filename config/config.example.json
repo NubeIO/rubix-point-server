@@ -1,11 +1,11 @@
 {
   "drivers": {
     "generic": false,
-    "modbus_rtu": false,
+    "modbus_rtu": true,
     "modbus_tcp": false
   },
   "services": {
-    "mqtt": false,
+    "mqtt": true,
     "histories": false,
     "cleaner": false,
     "history_sync": false
@@ -24,7 +24,7 @@
     "measurement": "history"
   },
   "generic_point_listener": {
-    "enabled": false,
+    "enabled": true,
     "name": "rubix_points_generic_point",
     "host": "0.0.0.0",
     "port": 1883,
@@ -38,7 +38,7 @@
   },
   "mqtt": [
     {
-      "enabled": false,
+      "enabled": true,
       "name": "rubix_points",
       "host": "0.0.0.0",
       "port": 1883,
@@ -48,7 +48,9 @@
       "attempt_reconnect_on_unavailable": true,
       "attempt_reconnect_secs": 5,
       "publish_value": false,
-      "topic": "rubix/points"
+      "topic": "rubix/points/value",
+      "publish_debug": true,
+      "debug_topic": "rubix/points/debug"
     }
   ]
 }

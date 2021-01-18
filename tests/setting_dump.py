@@ -57,7 +57,7 @@ if __name__ == '__main__':
       ]
     }
     '''
-    app_setting = AppSetting().reload_settings(setting, is_json_str=True)
+    app_setting = AppSetting().reload(setting, is_json_str=True)
     print(type(app_setting.mqtt_settings))
     print(type(app_setting.services))
     print(type(app_setting.services.mqtt))

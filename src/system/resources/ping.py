@@ -4,15 +4,10 @@ from datetime import datetime
 from flask import current_app
 from flask_restful import Resource
 
-from src.pyinstaller import resource_path
+from src.utils.project import get_version
 
 start_time = time.time()
 up_time_date = str(datetime.now())
-try:
-    with open(resource_path('VERSION')) as version_file:
-        version = version_file.read().strip()
-except FileNotFoundError:
-    version = 'Fake'
 
 
 def get_up_time():
@@ -36,7 +31,7 @@ class Ping(Resource):
         setting: AppSetting = current_app.config[AppSetting.KEY]
         deployment_mode = 'production' if setting.prod else 'development'
         return {
-            'version': version,
+            'version': get_version(),
             'up_time_date': up_time_date,
             'up_min': up_min,
             'up_hour': up_hour,

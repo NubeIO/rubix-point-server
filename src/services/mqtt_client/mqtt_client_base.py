@@ -1,12 +1,11 @@
+import logging
 import time
 from abc import ABC, abstractmethod
 from collections import Iterable
-import logging
 
 import paho.mqtt.client as mqtt
 
-from src import MqttSetting
-
+from src.setting import MqttSettingBase
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +17,10 @@ class MqttClientBase(ABC):
         self._config = None
 
     @property
-    def config(self) -> MqttSetting:
+    def config(self) -> MqttSettingBase:
         return self._config
 
-    def start(self, config: MqttSetting):
+    def start(self, config: MqttSettingBase):
         self._config = config
         logger.info(f'Starting MQTT client[{self.config.name}]...')
         self._client = mqtt.Client(self.config.name)
