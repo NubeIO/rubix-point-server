@@ -2,7 +2,7 @@ ARG BASE_IMAGE_VERSION
 FROM python:$BASE_IMAGE_VERSION-slim as build
 
 RUN apt update -qq \
-    && apt install git curl gcc make file musl-dev libffi6 libffi-dev zlib1g zlib1g-dev -y \
+    && apt install git curl gcc g++ make file musl-dev libffi6 libffi-dev zlib1g zlib1g-dev -y \
     && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 
 WORKDIR /usr/src/app/
