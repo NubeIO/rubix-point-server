@@ -1,11 +1,8 @@
 import json
-import logging.config
 import os
 from typing import List
 
 from flask import Flask
-
-from src.pyinstaller import resource_path
 
 
 class BaseSetting:
@@ -150,17 +147,7 @@ class AppSetting:
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
-    def reload(self, setting_file: str, logging_file: str):
-        self.reload_logging(logging_file)
-        return self.reload_settings(setting_file)
-
-    def reload_logging(self, logging_file: str):
-        logging_file = os.path.join(self.__data_dir, logging_file)
-        if not os.path.isfile(logging_file):
-            logging_file = AppSetting.fallback_prod_logging_conf if self.prod else AppSetting.fallback_logging_conf
-        logging.config.fileConfig(resource_path(logging_file))
-
-    def reload_settings(self, setting_file: str, is_json_str=False):
+    def reload(self, setting_file: str, is_json_str: bool = False):
         data = self.__read_file(setting_file, self.__data_dir, is_json_str)
         self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
