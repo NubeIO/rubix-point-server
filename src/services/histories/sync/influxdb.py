@@ -48,12 +48,10 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     def setup(self, config: InfluxSetting):
         self.__config = config
         self.connect()
-        print("Registering InfluxDB for scheduler job")
-
         if self.status():
             logger.info("Registering InfluxDB for scheduler job")
-            schedule.every(5).seconds.do(self.sync)  # for testing
-            # schedule.every(self.config.timer).minutes.do(self.sync)
+            # schedule.every(5).seconds.do(self.sync)  # for testing
+            schedule.every(self.config.timer).minutes.do(self.sync)
             while True:
                 schedule.run_pending()
                 time.sleep(1)

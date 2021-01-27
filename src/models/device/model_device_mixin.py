@@ -12,13 +12,13 @@ class DeviceMixinModel(DeviceModel):
         pass
 
     @declared_attr
-    def uuid(cls):
+    def uuid(self):
         return db.Column(db.String(80), db.ForeignKey('devices.uuid'), primary_key=True, nullable=False)
 
     @declared_attr
-    def __mapper_args__(cls):
+    def __mapper_args__(self):
         return {
-            'polymorphic_identity': cls.get_polymorphic_identity()
+            'polymorphic_identity': self.get_polymorphic_identity()
         }
 
     def __repr__(self):
