@@ -1,4 +1,3 @@
-from flask import current_app
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
@@ -10,7 +9,6 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.event_service_base import Event, EventType
-from src.utils.model_utils import ModelUtils
 
 
 class PointModel(ModelBase):
@@ -90,7 +88,7 @@ class PointModel(ModelBase):
         super().update(**kwargs)
 
         point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
-        updated = self.update_point_value(point_store, 0)
+        updated: bool = self.update_point_value(point_store, 0)
         self.point_store = point_store
         if updated:
             self.publish_cov(self.point_store)
@@ -138,7 +136,7 @@ class PointModel(ModelBase):
 
         if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
             device.history_enable:
-            self.create_history(point_store)
+            PointStoreHistoryModel.create_history(point_store)
 
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
@@ -148,11 +146,3 @@ class PointModel(ModelBase):
             'network': network,
             'source_driver': service_name
         }))
-
-    def create_history(self, point_store: PointStoreModel):
-        from src import AppSetting
-        setting: AppSetting = current_app.config[AppSetting.KEY]
-        if setting.services.histories:
-            data = ModelUtils.row2dict_default(point_store)
-            _point_store_history = PointStoreHistoryModel(**data)
-            _point_store_history.save_to_db_no_commit()

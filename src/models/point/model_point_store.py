@@ -1,8 +1,9 @@
 from ast import literal_eval
+
 from sqlalchemy import and_, or_
 
 from src import db
-from src.utils.model_utils import get_datetime, datetime_to_str
+from src.utils.model_utils import get_datetime
 
 
 class PointStoreModelMixin(object):
@@ -28,7 +29,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
 
     @classmethod
     def create_new_point_store_model(cls, point_uuid: str):
-        return PointStoreModel(point_uuid=point_uuid, value_original=None, value=None, value_raw="")
+        return PointStoreModel(point_uuid=point_uuid, value_raw="")
 
     def raw_value(self) -> any:
         """Parse value from value_raw"""
