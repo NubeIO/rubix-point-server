@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1.2.6](https://github.com/NubeIO/rubix-point-server/tree/v1.2.6) (2020-01-28)
+### Added
+- Fixes to influx-db connection
+
 ## [v1.2.5](https://github.com/NubeIO/rubix-point-server/tree/v1.2.5) (2020-01-19)
 ### Added
 - Added mqtt debug logs
