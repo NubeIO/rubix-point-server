@@ -1,5 +1,8 @@
+from flask import current_app
+
 from src import db
-from src.models.point.model_point_store import PointStoreModelMixin
+from src.models.point.model_point_store import PointStoreModelMixin, PointStoreModel
+from src.utils.model_utils import ModelUtils
 
 
 class PointStoreHistoryModel(PointStoreModelMixin, db.Model):
@@ -28,3 +31,12 @@ class PointStoreHistoryModel(PointStoreModelMixin, db.Model):
     @classmethod
     def get_latest(cls, point_uuid):
         return cls.query.filter_by(point_uuid=point_uuid).order_by(cls.__table__.c.ts_value.desc()).first()
+
+    @staticmethod
+    def create_history(point_store: PointStoreModel):
+        from src import AppSetting
+        setting: AppSetting = current_app.config[AppSetting.KEY]
+        if setting.services.histories:
+            data = ModelUtils.row2dict_default(point_store)
+            _point_store_history = PointStoreHistoryModel(**data)
+            _point_store_history.save_to_db_no_commit()

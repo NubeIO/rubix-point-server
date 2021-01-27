@@ -56,7 +56,7 @@ class HistoryLocal(EventServiceBase, metaclass=Singleton):
             # minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45
             minute: int = int(datetime.utcnow().minute / point.history_interval) * point.history_interval
             point_store.ts_value = point_store.ts_value.replace(minute=minute, second=0, microsecond=0)
-            point.create_history(point_store)
+            PointStoreHistoryModel.create_history(point_store)
         elif (datetime.utcnow() - latest_point_store_history.ts_value).total_seconds() >= point.history_interval * 60:
             point_store.ts_value = datetime.utcnow().replace(second=0, microsecond=0)
-            point.create_history(point_store)
+            PointStoreHistoryModel.create_history(point_store)
