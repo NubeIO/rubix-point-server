@@ -105,7 +105,9 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
         modbus_poll_debug(logger, f'READ/WRITE SUCCESS: val: {val}, array: {array}')
 
         if isinstance(val, numbers.Number):
-            point_store_new = PointStoreModel(value_original=val, value_raw=str(array), point_uuid=point.uuid)
+            point_store_new = PointStoreModel(value_original=float(str(val)),
+                                              value_raw=str(array),
+                                              point_uuid=point.uuid)
         else:
             modbus_poll_debug(logger, f"ERROR: non number received, NOTIFY DEVELOPER. type {type(val)}")
             fault = True

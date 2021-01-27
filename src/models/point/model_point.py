@@ -88,7 +88,7 @@ class PointModel(ModelBase):
         super().update(**kwargs)
 
         point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
-        updated = self.update_point_value(point_store, 0)
+        updated: bool = self.update_point_value(point_store, 0)
         self.point_store = point_store
         if updated:
             self.publish_cov(self.point_store)

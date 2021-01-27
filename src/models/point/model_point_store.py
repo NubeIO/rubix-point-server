@@ -29,7 +29,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
 
     @classmethod
     def create_new_point_store_model(cls, point_uuid: str):
-        return PointStoreModel(point_uuid=point_uuid, value_original=None, value=None, value_raw="")
+        return PointStoreModel(point_uuid=point_uuid, value_raw="")
 
     def raw_value(self) -> any:
         """Parse value from value_raw"""

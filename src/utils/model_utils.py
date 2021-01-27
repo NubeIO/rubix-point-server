@@ -1,4 +1,6 @@
 from datetime import datetime
+
+
 class ModelUtils:
     @staticmethod
     def row2dict(row):
@@ -21,7 +23,7 @@ class ModelUtils:
 
 
 def get_datetime() -> datetime:
-    return datetime.now()
+    return datetime.utcnow()
 
 
 def datetime_to_str(datetime_obj: datetime or None) -> str:

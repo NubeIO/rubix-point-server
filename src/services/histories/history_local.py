@@ -9,6 +9,7 @@ from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.event_service_base import EventServiceBase, EventType
 from src.utils import Singleton
+from src.utils.model_utils import get_datetime
 
 SERVICE_NAME_HISTORIES_LOCAL = 'histories_local'
 
@@ -52,11 +53,15 @@ class HistoryLocal(EventServiceBase, metaclass=Singleton):
     @staticmethod
     def __sync_on_interval(point: PointModel, point_store: PointStoreModel,
                            latest_point_store_history: PointStoreHistoryModel):
+        if not point_store.ts_value:
+            """This means we don't have real value till now"""
+            return
+        current_dt: datetime = get_datetime()
         if not latest_point_store_history:
-            # minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45
-            minute: int = int(datetime.utcnow().minute / point.history_interval) * point.history_interval
+            """Minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45"""
+            minute: int = int(current_dt.minute / point.history_interval) * point.history_interval
             point_store.ts_value = point_store.ts_value.replace(minute=minute, second=0, microsecond=0)
             PointStoreHistoryModel.create_history(point_store)
-        elif (datetime.utcnow() - latest_point_store_history.ts_value).total_seconds() >= point.history_interval * 60:
-            point_store.ts_value = datetime.utcnow().replace(second=0, microsecond=0)
+        elif (current_dt - latest_point_store_history.ts_value).total_seconds() >= point.history_interval * 60:
+            point_store.ts_value = current_dt.replace(second=0, microsecond=0)
             PointStoreHistoryModel.create_history(point_store)

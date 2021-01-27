@@ -6,6 +6,7 @@ import schedule
 from influxdb import InfluxDBClient
 
 from src import InfluxSetting
+from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.wires.model_wires_plat import WiresPlatModel
 from src.services.histories.history_binding import HistoryBinding
@@ -47,10 +48,12 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     def setup(self, config: InfluxSetting):
         self.__config = config
         self.connect()
+        print("Registering InfluxDB for scheduler job")
+
         if self.status():
             logger.info("Registering InfluxDB for scheduler job")
-            # schedule.every(5).seconds.do(self.sync)  # for testing
-            schedule.every(self.config.timer).minutes.do(self.sync)
+            schedule.every(5).seconds.do(self.sync)  # for testing
+            # schedule.every(self.config.timer).minutes.do(self.sync)
             while True:
                 schedule.run_pending()
                 time.sleep(1)
@@ -88,13 +91,14 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             'site_id': self.__wires_plat.site_id,
             'device_id': self.__wires_plat.device_id
         }
-        for point_store_history in PointStoreHistoryModel.get_all_after(self._get_last_sync_id()):
+        for psh in PointStoreHistoryModel.get_all_after(self._get_last_sync_id()):
             tags = plat.copy()
+            point_store_history: PointStoreHistoryModel = psh
+            point: PointModel = point_store_history.point
             tags.update({
-                'point_uuid': point_store_history.point.uuid,
-                'name': point_store_history.point.name,
-                'reg': point_store_history.point.reg,
-                'type': point_store_history.point.type,
+                'point_uuid': point.uuid,
+                'name': point.name,
+                'driver': point.driver,
             })
             fields = {
                 'id': point_store_history.id,
