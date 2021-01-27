@@ -1,6 +1,6 @@
+import logging
 import time
 from functools import wraps
-import logging
 
 import schedule
 from influxdb import InfluxDBClient
@@ -10,7 +10,6 @@ from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.wires.model_wires_plat import WiresPlatModel
 from src.services.histories.history_binding import HistoryBinding
 from src.utils import Singleton
-
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +107,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             row = {
                 'measurement': 'history',
                 'tags': tags,
-                'time': point_store_history.ts,
+                'time': point_store_history.ts_value,
                 'fields': fields
             }
             store.append(row)

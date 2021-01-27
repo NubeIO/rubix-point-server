@@ -1,8 +1,9 @@
 from ast import literal_eval
+
 from sqlalchemy import and_, or_
 
 from src import db
-from src.utils.model_utils import get_datetime, datetime_to_str
+from src.utils.model_utils import get_datetime
 
 
 class PointStoreModelMixin(object):

@@ -1,10 +1,10 @@
-import time
 import logging
+import time
+
 import schedule
 from sqlalchemy import func, and_, or_
 
 from src.utils import Singleton
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
         logger.info("Started PointStoreHistoryCleaner cleaning process...")
         time.sleep(10)
         partition_table = db.session.query(PointStoreHistoryModel, func.rank()
-                                           .over(order_by=PointStoreHistoryModel.ts.desc(),
+                                           .over(order_by=PointStoreHistoryModel.ts_value.desc(),
                                                  partition_by=PointStoreHistoryModel.point_uuid)
                                            .label('rank')).subquery()
 
@@ -38,7 +38,7 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
         filter_param = []
         for threshold_row in threshold_rows:
             filter_param.append(and_(PointStoreHistoryModel.point_uuid == threshold_row.point_uuid,
-                                     PointStoreHistoryModel.ts < threshold_row.ts))
+                                     PointStoreHistoryModel.ts_value < threshold_row.ts_value))
 
         if len(filter_param) > 0:
             db.session.query(PointStoreHistoryModel).filter(or_(*filter_param)).delete()

@@ -27,4 +27,4 @@ class PointStoreHistoryModel(PointStoreModelMixin, db.Model):
 
     @classmethod
     def get_latest(cls, point_uuid):
-        return cls.query.filter_by(point_uuid=point_uuid).order_by(cls.__table__.c.ts.desc()).first()
+        return cls.query.filter_by(point_uuid=point_uuid).order_by(cls.__table__.c.ts_value.desc()).first()
