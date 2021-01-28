@@ -58,7 +58,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
                            f'network={network_name}. error=({str(e)})')
             return
 
-        point: PointModel = PointModel.find_by_name(point_name, device_name, network_name)
+        point: PointModel = PointModel.find_by_name(network_name, device_name, point_name)
         if point is None or point.driver != GENERIC_SERVICE_NAME:
             logger.warning(f'Unknown generic point COV received with point name={point_name}, device name={device_name}'
                            f', network name={network_name}')

@@ -51,7 +51,7 @@ class PointModel(ModelBase):
         return f"Point(uuid = {self.uuid})"
 
     @classmethod
-    def find_by_name(cls, point_name: str, device_name: str, network_name: str):
+    def find_by_name(cls, network_name: str, device_name: str, point_name: str):
         results = cls.query.filter_by(name=point_name) \
             .join(DeviceModel).filter_by(name=device_name) \
             .join(NetworkModel).filter_by(name=network_name) \

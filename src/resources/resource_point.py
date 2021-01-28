@@ -35,7 +35,7 @@ class PointResourceByName(Resource):
     @classmethod
     @marshal_with(point_all_fields)
     def get(cls, network_name: str, device_name: str, point_name: str):
-        point = PointModel.find_by_name(point_name, device_name, network_name)
+        point = PointModel.find_by_name(network_name, device_name, point_name)
         if not point:
             abort(404, message='Point not found')
         return point
