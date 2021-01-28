@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.2.7](https://github.com/NubeIO/rubix-point-server/tree/v1.2.7) (2020-01-28)
+### Added
+- Add HTTP PATCH to generic point
 
 ## [v1.2.6](https://github.com/NubeIO/rubix-point-server/tree/v1.2.6) (2020-01-28)
 ### Added
