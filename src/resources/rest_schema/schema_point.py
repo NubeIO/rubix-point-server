@@ -37,10 +37,13 @@ point_all_attributes = {
     'history_interval': {
         'type': int,
     },
-    'cov_threshold': {
-        'type': float,
+    'writable': {
+        'type': bool,
     },
     'write_value': {
+        'type': float,
+    },
+    'cov_threshold': {
         'type': float,
     },
     'value_round': {

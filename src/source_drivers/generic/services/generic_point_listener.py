@@ -1,11 +1,8 @@
 import logging
 from json import loads as json_loads, JSONDecodeError
 
-from sqlalchemy.orm.exc import ObjectDeletedError
-
-from src import db, GenericListenerSetting
+from src import GenericListenerSetting
 from src.models.point.model_point import PointModel
-from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase
 from src.services.mqtt_client.mqtt_client_base import MqttClientBase
 from src.setting import MqttSettingBase
@@ -70,12 +67,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
         value_raw = payload.get('value_raw', value)
         fault = payload.get('fault', None)
         fault_message = payload.get('fault_message', '')
-        point_store = PointStoreModel(point_uuid=point.uuid, value_original=value, value_raw=value_raw, fault=fault,
-                                      fault_message=fault_message)
         try:
-            updated = point.update_point_value(point_store)
-            if updated:
-                point.publish_cov(point_store)
-                db.session.commit()
-        except ObjectDeletedError:
-            logger.debug(f'Generic point removed when attempting to update point_store')
+            point.update_point_store(value, value_raw, fault, fault_message)
+        except Exception as e:
+            logger.error(str(e))
