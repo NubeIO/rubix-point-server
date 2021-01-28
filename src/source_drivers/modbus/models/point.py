@@ -1,9 +1,9 @@
-from sqlalchemy.orm import validates
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import validates
 
 from src import db
-from src.source_drivers import MODBUS_SERVICE_NAME
 from src.models.point.model_point_mixin import PointMixinModel
+from src.source_drivers import MODBUS_SERVICE_NAME
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 
 
@@ -45,12 +45,15 @@ class ModbusPointModel(PointMixinModel):
 
     @validates('function_code')
     def validate_function_code(self, _, value):
+        if not self.write_value and value in [ModbusFunctionCode.WRITE_COIL, ModbusFunctionCode.WRITE_COILS,
+                                              ModbusFunctionCode.WRITE_REGISTER, ModbusFunctionCode.WRITE_REGISTERS]:
+            raise ValueError(f"write_value shouldn't be null for {self.function_code}")
         if isinstance(value, ModbusFunctionCode):
             return value
         elif isinstance(value, int):
             try:
                 return ModbusFunctionCode(value)
-            except:
+            except Exception:
                 raise ValueError("Invalid function code")
         elif not value or value not in ModbusFunctionCode.__members__:
             raise ValueError("Invalid function code")
