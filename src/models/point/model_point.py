@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
@@ -9,6 +11,8 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.event_service_base import Event, EventType
+
+logger = logging.getLogger(__name__)
 
 
 class PointModel(ModelBase):
@@ -94,6 +98,17 @@ class PointModel(ModelBase):
             self.publish_cov(self.point_store)
 
         return self
+
+    def update_point_store(self, value: float, value_raw: str, fault: bool, fault_message: str):
+        point_store = PointStoreModel(point_uuid=self.uuid,
+                                      value_original=value,
+                                      value_raw=value_raw,
+                                      fault=fault,
+                                      fault_message=fault_message)
+        updated = self.update_point_value(point_store)
+        if updated:
+            self.publish_cov(point_store)
+            db.session.commit()
 
     @classmethod
     def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:
