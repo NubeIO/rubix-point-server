@@ -36,7 +36,7 @@ def poll_point(service: EventServiceBase, connection, network: ModbusNetworkMode
     point_fc: ModbusFunctionCode = point.function_code
     point_data_type: ModbusDataType = point.data_type
     point_data_endian: ModbusDataEndian = point.data_endian
-    write_value: float = point.write_value
+    write_value: float = point.write_value if point.write_value else 0
 
     logger.debug('--------------- START MODBUS POLL POINT ---------------')
     logger.debug({'network': network,
