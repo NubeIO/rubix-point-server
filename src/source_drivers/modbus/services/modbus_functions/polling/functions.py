@@ -25,7 +25,7 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
     :return: tuple (val: any, array: list)
     """
     debug_log('read_analogue', _unit, func, reg_length, reg_start)
-    reg_length = _set_data_length(data_type, reg_length)
+    reg_length: int = _set_data_length(data_type, reg_length)
     if func == ModbusFunctionCode.READ_HOLDING_REGISTERS:
         read = client.read_holding_registers(reg_start, reg_length, unit=_unit)
     elif func == ModbusFunctionCode.READ_INPUT_REGISTERS:
@@ -58,7 +58,7 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
     :return: tuple (val: any, array: list)
     """
     debug_log('read_digital', _unit, func, reg_length, reg_start)
-    reg_length = _set_data_length(ModbusDataType.DIGITAL, reg_length)
+    reg_length: int = _set_data_length(ModbusDataType.DIGITAL, reg_length)
     if func == ModbusFunctionCode.READ_COILS:
         read = client.read_coils(reg_start, reg_length, unit=_unit)
     elif func == ModbusFunctionCode.READ_DISCRETE_INPUTS:
@@ -91,8 +91,8 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int,
     :return: tuple (val: any, array: list)
     """
     debug_log('write_digital', _unit, func, reg_length, reg_start)
-    data_type = 'digital'
-    reg_length = _set_data_length(data_type, reg_length)
+    data_type: ModbusDataType = ModbusDataType.DIGITAL
+    reg_length: int = _set_data_length(data_type, reg_length)
     if func == ModbusFunctionCode.WRITE_COIL:
         write = client.write_coil(reg_start, write_value, unit=_unit)
     elif func == ModbusFunctionCode.WRITE_COILS:
@@ -127,7 +127,6 @@ def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_typ
     :return: tuple (val: any, array: list)
     """
     debug_log('write_analogue', _unit, func, reg_length, reg_start)
-    reg_length = _set_data_length(data_type, reg_length)
     byteorder, word_order = _mod_point_data_endian(endian)
     if func == ModbusFunctionCode.WRITE_REGISTER:
         payload = [int(write_value)]
