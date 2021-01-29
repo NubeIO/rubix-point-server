@@ -1,11 +1,12 @@
 import logging
-
 import time
+
 from pymodbus.exceptions import ConnectionException, ModbusIOException
 from sqlalchemy.orm.exc import ObjectDeletedError
 
 from src import db
 from src.event_dispatcher import EventDispatcher
+from src.handlers.exception import exception_handler
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException
 from src.source_drivers import MODBUS_SERVICE_NAME
@@ -43,6 +44,7 @@ class ModbusPolling(EventServiceBase):
             else:
                 self._handle_internal_callable(event)
 
+    @exception_handler
     def __poll(self):
         self._count += 1
         self.__log_debug(f'Poll loop {self._count}...')

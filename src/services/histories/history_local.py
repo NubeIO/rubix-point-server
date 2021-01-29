@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from src import db
+from src.handlers.exception import exception_handler
 from src.interfaces.point import HistoryType
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
@@ -51,6 +52,7 @@ class HistoryLocal(EventServiceBase, metaclass=Singleton):
             .all()
 
     @staticmethod
+    @exception_handler
     def __sync_on_interval(point: PointModel, point_store: PointStoreModel,
                            latest_point_store_history: PointStoreHistoryModel):
         if not point_store.ts_value:

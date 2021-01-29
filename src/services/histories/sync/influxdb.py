@@ -1,11 +1,11 @@
 import logging
 import time
-from functools import wraps
 
 import schedule
 from influxdb import InfluxDBClient
 
 from src import InfluxSetting
+from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.wires.model_wires_plat import WiresPlatModel
@@ -13,18 +13,6 @@ from src.services.histories.history_binding import HistoryBinding
 from src.utils import Singleton
 
 logger = logging.getLogger(__name__)
-
-
-def exception_handling_decorator(func):
-    @wraps(func)
-    def inner(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except Exception as e:
-            self.disconnect()
-            logger.error(f'Syncing Error: {str(e)}')
-
-    return inner
 
 
 class InfluxDB(HistoryBinding, metaclass=Singleton):
@@ -47,7 +35,10 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
 
     def setup(self, config: InfluxSetting):
         self.__config = config
-        self.connect()
+        while not self.status():
+            self.connect()
+            time.sleep(self.config.attempt_reconnect_secs)
+
         if self.status():
             logger.info("Registering InfluxDB for scheduler job")
             # schedule.every(5).seconds.do(self.sync)  # for testing
@@ -73,7 +64,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             self.__is_connected = False
             logger.error(f'Connection Error: {str(e)}')
 
-    @exception_handling_decorator
+    @exception_handler
     def sync(self):
         logger.info('InfluxDB sync has is been called')
         self.__wires_plat = WiresPlatModel.find_one()

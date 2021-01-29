@@ -4,6 +4,7 @@ import time
 import schedule
 from sqlalchemy import func, and_, or_
 
+from src.handlers.exception import exception_handler
 from src.utils import Singleton
 
 logger = logging.getLogger(__name__)
@@ -18,12 +19,13 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
     # TODO: add config here e.g: trigger frequency
     def setup(self):
         logger.info("Register PointStoreHistoryCleaner")
-        # schedule.every(5).seconds.do(PointStoreCleaner.clean)  # for testing
+        # schedule.every(5).seconds.do(self.clean)  # for testing
         schedule.every(5).minutes.do(self.clean)  # schedules job for every hours
         while True:
             schedule.run_pending()
             time.sleep(10)
 
+    @exception_handler
     def clean(self):
         from src import db
         from src.models.point.model_point_store_history import PointStoreHistoryModel
