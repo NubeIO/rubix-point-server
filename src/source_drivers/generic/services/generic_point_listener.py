@@ -2,6 +2,7 @@ import logging
 from json import loads as json_loads, JSONDecodeError
 
 from src import GenericListenerSetting
+from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.services.event_service_base import EventServiceBase
 from src.services.mqtt_client.mqtt_client_base import MqttClientBase
@@ -35,6 +36,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
         logger.debug(f'MQTT sub to {self.config.topic}/#')
         self._client.subscribe(f'{self.config.topic}/#')
 
+    @exception_handler
     def _on_message(self, client, userdata, message):
         if self.config.topic in message.topic:
             self.__update_point(message)

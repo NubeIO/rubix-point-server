@@ -96,6 +96,7 @@ class InfluxSetting(BaseSetting):
         self.timer = 1
         self.path = ''
         self.measurement = 'history'
+        self.attempt_reconnect_secs = 5
 
 
 class AppSetting:
