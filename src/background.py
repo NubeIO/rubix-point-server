@@ -45,7 +45,8 @@ class Background:
 
         if setting.services.cleaner:
             from src.services.histories.point_store_history_cleaner import PointStoreHistoryCleaner
-            FlaskThread(target=PointStoreHistoryCleaner().setup, daemon=True).start()
+            FlaskThread(target=PointStoreHistoryCleaner().setup, daemon=True,
+                        kwargs={'config': setting.cleaner}).start()
 
         if setting.services.history_sync:
             from src.services.histories.sync.influxdb import InfluxDB
