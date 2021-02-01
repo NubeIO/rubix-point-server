@@ -36,7 +36,7 @@ class PointModel(ModelBase):
     input_max = db.Column(db.Float())
     scale_min = db.Column(db.Float())
     scale_max = db.Column(db.Float())
-    tags = db.Column(db.String(320), nullable=False)
+    tags = db.Column(db.String(320), nullable=True)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=False, cascade="all,delete")
     driver = db.Column(db.String(80))
@@ -87,7 +87,7 @@ class PointModel(ModelBase):
         - if there is a gap add an underscore
         - no special characters
         """
-        if value:
+        if value is not None:
             try:
                 tags = json.loads(value)
                 return_tags: dict = {}
@@ -99,7 +99,7 @@ class PointModel(ModelBase):
                 return json.dumps(return_tags)
             except ValueError:
                 raise ValueError('tags needs to be a valid JSON')
-        return "{}"
+        return value
 
     @validates('history_interval')
     def validate_history_interval(self, _, value):

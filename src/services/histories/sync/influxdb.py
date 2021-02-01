@@ -87,10 +87,11 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                 tags = plat.copy()
                 point_store_history: PointStoreHistoryModel = psh
                 point: PointModel = point_store_history.point
-                point_tags = json.loads(point.tags)
-                # insert tags from point object
-                for point_tag in point_tags:
-                    tags[point_tag] = point_tags[point_tag]
+                if point.tags:
+                    point_tags = json.loads(point.tags)
+                    # insert tags from point object
+                    for point_tag in point_tags:
+                        tags[point_tag] = point_tags[point_tag]
                 tags.update({
                     'point_uuid': point.uuid,
                     'point_name': point.name,
