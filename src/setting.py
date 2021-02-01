@@ -99,6 +99,14 @@ class InfluxSetting(BaseSetting):
         self.attempt_reconnect_secs = 5
 
 
+class CleanerSetting(BaseSetting):
+    KEY = 'cleaner'
+
+    def __init__(self):
+        self.frequency = 5
+        self.sleep = 10
+
+
 class AppSetting:
     DATA_DIR_ENV = 'RUBIX_POINT_DATA'
     KEY: str = 'APP_SETTING'
@@ -116,6 +124,7 @@ class AppSetting:
         self.__influx_setting = InfluxSetting()
         self.__listener_setting = GenericListenerSetting()
         self.__mqtt_settings: List[MqttSetting] = [MqttSetting()]
+        self.__cleaner_setting = CleanerSetting()
 
     @property
     def data_dir(self):
@@ -145,6 +154,10 @@ class AppSetting:
     def listener(self) -> GenericListenerSetting:
         return self.__listener_setting
 
+    @property
+    def cleaner(self) -> CleanerSetting:
+        return self.__cleaner_setting
+
     def serialize(self, pretty=True) -> str:
         m = {
             DriverSetting.KEY: self.drivers,
@@ -152,6 +165,7 @@ class AppSetting:
             InfluxSetting.KEY: self.influx,
             GenericListenerSetting.KEY: self.listener,
             MqttSetting.KEY: [s.to_dict() for s in self.mqtt_settings],
+            CleanerSetting.KEY: self.cleaner,
             'prod': self.prod, 'data_dir': self.data_dir
         }
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
@@ -163,6 +177,8 @@ class AppSetting:
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
         self.__listener_setting = self.__listener_setting.reload(data.get(GenericListenerSetting.KEY))
+        self.__cleaner_setting = self.__cleaner_setting.reload(data.get(CleanerSetting.KEY))
+
         mqtt_settings = data.get(MqttSetting.KEY, [])
         if len(mqtt_settings) > 0:
             self.__mqtt_settings = [MqttSetting().reload(s) for s in mqtt_settings]
