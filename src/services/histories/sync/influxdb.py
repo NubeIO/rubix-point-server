@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -84,9 +85,14 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             tags = plat.copy()
             point_store_history: PointStoreHistoryModel = psh
             point: PointModel = point_store_history.point
+            point_tags = json.loads(point.tags)
+            for point_tag in point_tags:
+                tags[point_tag] = point_tags[point_tag]
             tags.update({
                 'point_uuid': point.uuid,
-                'name': point.name,
+                'point_name': point.name,
+                'device_name': point.device.name,
+                'network_name': point.device.network.name,
                 'driver': point.driver,
             })
             fields = {

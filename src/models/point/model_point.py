@@ -1,4 +1,6 @@
+import json
 import logging
+import re
 
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
@@ -34,6 +36,7 @@ class PointModel(ModelBase):
     input_max = db.Column(db.Float())
     scale_min = db.Column(db.Float())
     scale_max = db.Column(db.Float())
+    tags = db.Column(db.String(320), nullable=False)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=False, cascade="all,delete")
     driver = db.Column(db.String(80))
@@ -75,6 +78,28 @@ class PointModel(ModelBase):
                 value = round(value, self.value_round)
             point_store.value = value
         return point_store.update(cov_threshold)
+
+    @validates('tags')
+    def validate_tags(self, _, value):
+        """
+        Rules for tags:
+        - force all tags to be lower case
+        - if there is a gap add an underscore
+        - no special characters
+        """
+        if value:
+            try:
+                tags = json.loads(value)
+                return_tags: dict = {}
+                for tag in tags:
+                    clean_tag: str = tag.lower()
+                    clean_tag = clean_tag.replace(" ", "_")
+                    clean_tag = re.sub('[^A-Za-z0-9_]+', '', clean_tag)
+                    return_tags[clean_tag] = tags[tag]
+                return json.dumps(return_tags)
+            except ValueError:
+                raise ValueError('tags needs to be a valid JSON')
+        return "{}"
 
     @validates('history_interval')
     def validate_history_interval(self, _, value):
