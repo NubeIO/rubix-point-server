@@ -35,7 +35,7 @@ class PointModel(ModelBase):
     scale_min = db.Column(db.Float())
     scale_max = db.Column(db.Float())
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
-    point_store_history = db.relationship('PointStoreHistoryModel', backref='point')
+    point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=False, cascade="all,delete")
     driver = db.Column(db.String(80))
 
     __mapper_args__ = {
