@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.2.9](https://github.com/NubeIO/rubix-point-server/tree/v1.2.9) (2020-02-01)
+### Added
+- Add tags for influxdb on generic points
 
 ## [v1.2.8](https://github.com/NubeIO/rubix-point-server/tree/v1.2.8) (2020-01-29)
 ### Added
