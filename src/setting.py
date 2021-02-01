@@ -165,8 +165,8 @@ class AppSetting:
             InfluxSetting.KEY: self.influx,
             GenericListenerSetting.KEY: self.listener,
             MqttSetting.KEY: [s.to_dict() for s in self.mqtt_settings],
-            'prod': self.prod, 'data_dir': self.data_dir,
-            CleanerSetting.KEY: self.cleaner
+            CleanerSetting.KEY: self.cleaner,
+            'prod': self.prod, 'data_dir': self.data_dir
         }
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)

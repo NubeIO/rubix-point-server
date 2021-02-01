@@ -21,12 +21,11 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
     def config(self) -> CleanerSetting:
         return self.__config
 
-    # TODO: add config here e.g: trigger frequency
     def setup(self, config: CleanerSetting):
         logger.info("Register PointStoreHistoryCleaner")
         self.__config = config
         # schedule.every(5).seconds.do(self.clean)  # for testing
-        schedule.every(self.config.frequency).minutes.do(self.clean)  # schedules job for every hours
+        schedule.every(self.config.frequency).minutes.do(self.clean)
         while True:
             schedule.run_pending()
             time.sleep(self.config.sleep)
