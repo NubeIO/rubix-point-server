@@ -12,6 +12,10 @@ class ModelBase(db.Model):
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
+    @classmethod
     def find_by_uuid(cls, device_uuid):
         return cls.query.filter_by(uuid=device_uuid).first()
 
