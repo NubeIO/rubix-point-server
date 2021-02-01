@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -80,30 +81,39 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             'site_id': self.__wires_plat.site_id,
             'device_id': self.__wires_plat.device_id
         }
-        for psh in PointStoreHistoryModel.get_all_after(self._get_last_sync_id()):
-            tags = plat.copy()
-            point_store_history: PointStoreHistoryModel = psh
-            point: PointModel = point_store_history.point
-            tags.update({
-                'point_uuid': point.uuid,
-                'name': point.name,
-                'driver': point.driver,
-            })
-            fields = {
-                'id': point_store_history.id,
-                'value': point_store_history.value,
-                'value_original': point_store_history.value_original,
-                'value_raw': point_store_history.value_raw,
-                'fault': point_store_history.fault,
-                'fault_message': point_store_history.fault_message,
-            }
-            row = {
-                'measurement': 'history',
-                'tags': tags,
-                'time': point_store_history.ts_value,
-                'fields': fields
-            }
-            store.append(row)
+        for point in PointModel.find_all():
+            point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
+            for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id):
+                tags = plat.copy()
+                point_store_history: PointStoreHistoryModel = psh
+                point: PointModel = point_store_history.point
+                if point.tags:
+                    point_tags = json.loads(point.tags)
+                    # insert tags from point object
+                    for point_tag in point_tags:
+                        tags[point_tag] = point_tags[point_tag]
+                tags.update({
+                    'point_uuid': point.uuid,
+                    'point_name': point.name,
+                    'device_name': point.device.name,
+                    'network_name': point.device.network.name,
+                    'driver': point.driver,
+                })
+                fields = {
+                    'id': point_store_history.id,
+                    'value': point_store_history.value,
+                    'value_original': point_store_history.value_original,
+                    'value_raw': point_store_history.value_raw,
+                    'fault': point_store_history.fault,
+                    'fault_message': point_store_history.fault_message,
+                }
+                row = {
+                    'measurement': 'history',
+                    'tags': tags,
+                    'time': point_store_history.ts_value,
+                    'fields': fields
+                }
+                store.append(row)
         if len(store):
             logger.debug(f"Storing: {store}")
             self.__client.write_points(store)
@@ -111,8 +121,8 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         else:
             logger.debug("Nothing to store, no new records")
 
-    def _get_last_sync_id(self):
-        query = f'SELECT MAX(id) FROM {self.config.measurement}'
+    def _get_point_last_sync_id(self, point_uuid):
+        query = f"SELECT MAX(id), point_uuid FROM {self.config.measurement} WHERE point_uuid='{point_uuid}'"
         result_set = self.__client.query(query)
         points = list(result_set.get_points())
         if len(points) == 0:

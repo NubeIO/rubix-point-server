@@ -69,6 +69,9 @@ point_all_attributes = {
     'scale_max': {
         'type': float,
     },
+    'tags': {
+        'type': str
+    }
 }
 
 point_return_attributes = {
@@ -83,9 +86,6 @@ point_return_attributes = {
     },
     'updated_on': {
         'type': str,
-    },
-    'writable': {
-        'type': bool,
     },
     'point_store': {
         'type': fields.Nested(point_store_fields),
