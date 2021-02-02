@@ -57,8 +57,9 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         try:
             self.__client = InfluxDBClient(host=self.config.host, port=self.config.port, username=self.config.username,
                                            password=self.config.password, database=self.config.database,
-                                           verify_ssl=self.config.verify_ssl, timeout=self.config.timeout,
-                                           retries=self.config.retries, path=self.config.path)
+                                           ssl=self.config.ssl, verify_ssl=self.config.verify_ssl,
+                                           timeout=self.config.timeout, retries=self.config.retries,
+                                           path=self.config.path)
             self.__client.ping()
             self.__is_connected = True
         except Exception as e:
@@ -83,7 +84,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         }
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
-            for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id):
+            for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid):
                 tags = plat.copy()
                 point_store_history: PointStoreHistoryModel = psh
                 point: PointModel = point_store_history.point
