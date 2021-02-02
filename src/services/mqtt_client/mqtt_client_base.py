@@ -24,6 +24,8 @@ class MqttClientBase(ABC):
         self._config = config
         logger.info(f'Starting MQTT client[{self.config.name}]...')
         self._client = mqtt.Client(self.config.name)
+        if self.config.authentication:
+            self._client.username_pw_set(self.config.username, self.config.password)
         self._client.on_connect = self._on_connect
         self._client.on_message = self._on_message
         if self.config.attempt_reconnect_on_unavailable:

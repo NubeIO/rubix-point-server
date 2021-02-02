@@ -49,9 +49,12 @@ class DriverSetting(BaseSetting):
 class MqttSettingBase(BaseSetting):
     def __init__(self):
         self.enabled = True
-        self.name = ''
+        self.name = 'rubix_points'
         self.host = '0.0.0.0'
         self.port = 1883
+        self.authentication = False
+        self.username = 'username'
+        self.password = 'password'
         self.keepalive = 60
         self.qos = 1
         self.retain = False
