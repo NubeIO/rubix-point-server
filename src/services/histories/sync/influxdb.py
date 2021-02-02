@@ -57,8 +57,9 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         try:
             self.__client = InfluxDBClient(host=self.config.host, port=self.config.port, username=self.config.username,
                                            password=self.config.password, database=self.config.database,
-                                           verify_ssl=self.config.verify_ssl, timeout=self.config.timeout,
-                                           retries=self.config.retries, path=self.config.path)
+                                           ssl=self.config.ssl, verify_ssl=self.config.verify_ssl,
+                                           timeout=self.config.timeout, retries=self.config.retries,
+                                           path=self.config.path)
             self.__client.ping()
             self.__is_connected = True
         except Exception as e:

@@ -16,6 +16,7 @@
     "database": "db",
     "username": "username",
     "password": "password",
+    "ssl": false,
     "verify_ssl": false,
     "timeout": 5,
     "retries": 3,

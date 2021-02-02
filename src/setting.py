@@ -93,6 +93,7 @@ class InfluxSetting(BaseSetting):
         self.database = 'db'
         self.username = 'username'
         self.password = 'password'
+        self.ssl = False
         self.verify_ssl = False
         self.timeout = 5
         self.retries = 3
