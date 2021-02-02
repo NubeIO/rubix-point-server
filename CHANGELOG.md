@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.3.0](https://github.com/NubeIO/rubix-point-server/tree/v1.3.0) (2020-02-03)
+### Added
+- Add auth for mqtt and ssl for influx
+- Add Priority Array on Points
+
 ## [v1.2.9](https://github.com/NubeIO/rubix-point-server/tree/v1.2.9) (2020-02-01)
 ### Added
 - Add tags for influxdb on generic points
