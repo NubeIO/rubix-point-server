@@ -83,7 +83,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         }
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
-            for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id):
+            for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid):
                 tags = plat.copy()
                 point_store_history: PointStoreHistoryModel = psh
                 point: PointModel = point_store_history.point

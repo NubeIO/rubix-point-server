@@ -1,4 +1,5 @@
 from flask import current_app
+from sqlalchemy import and_
 
 from src import db
 from src.models.point.model_point_store import PointStoreModelMixin, PointStoreModel
@@ -25,8 +26,8 @@ class PointStoreHistoryModel(PointStoreModelMixin, db.Model):
         db.session.commit()
 
     @classmethod
-    def get_all_after(cls, _id):
-        return cls.query.filter(cls.id > _id).all()
+    def get_all_after(cls, _id: int, point_uuid: str):
+        return cls.query.filter(and_(cls.id > _id, cls.point_uuid == point_uuid)).all()
 
     @classmethod
     def get_latest(cls, point_uuid):
