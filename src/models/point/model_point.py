@@ -11,6 +11,7 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.event_service_base import Event, EventType
+from src.source_drivers.generic.models.priority_array import PriorityArrayModel
 
 logger = logging.getLogger(__name__)
 
@@ -94,21 +95,26 @@ class PointModel(ModelBase):
         point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
         updated: bool = self.update_point_value(point_store, 0)
         self.point_store = point_store
+
         if updated:
             self.publish_cov(self.point_store)
 
         return self
 
-    def update_point_store(self, value: float, value_raw: str, fault: bool, fault_message: str):
+    def update_point_store(self, fault: bool, fault_message: str, priority_array: dict):
+        if priority_array:
+            PriorityArrayModel.filter_by_point_uuid(self.uuid).update(priority_array)
+            db.session.commit()
+        highest_priority_value = PriorityArrayModel.get_highest_priority_value(self.uuid)
         point_store = PointStoreModel(point_uuid=self.uuid,
-                                      value_original=value,
-                                      value_raw=value_raw,
+                                      value_original=highest_priority_value,
+                                      value_raw=highest_priority_value,
                                       fault=fault,
                                       fault_message=fault_message)
         updated = self.update_point_value(point_store)
         if updated:
             self.publish_cov(point_store)
-            db.session.commit()
+        db.session.commit()
 
     @classmethod
     def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:

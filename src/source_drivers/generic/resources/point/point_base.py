@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
 from src.source_drivers.generic.models.point import GenericPointModel
+from src.source_drivers.generic.models.priority_array import PriorityArrayModel
 from src.source_drivers.generic.resources.rest_schema.schema_generic_point import generic_point_all_attributes
 
 
@@ -18,6 +19,7 @@ class GenericPointBase(Resource):
     def add_point(cls, data, uuid):
         try:
             point = GenericPointModel(uuid=uuid, **data)
+            point.priority_array = PriorityArrayModel.create_new_priority_array_model(uuid)
             point.save_to_db()
             return point
         except IntegrityError as e:
