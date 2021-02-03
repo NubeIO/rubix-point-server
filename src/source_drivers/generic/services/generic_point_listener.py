@@ -65,10 +65,11 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
             logger.warning(f'Unknown generic point COV received with point name={point_name}, device name={device_name}'
                            f', network name={network_name}')
             return
+        value_raw = payload.get('value_raw', None)
         fault = payload.get('fault', None)
         fault_message = payload.get('fault_message', '')
         priority_array = payload.get('priority_array', {})
         try:
-            point.update_point_store(fault, fault_message, priority_array)
+            point.update_point_store(value_raw, fault, fault_message, priority_array)
         except Exception as e:
             logger.error(str(e))

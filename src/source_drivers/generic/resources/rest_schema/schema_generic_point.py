@@ -23,6 +23,14 @@ priority_array_fields = OrderedDict({
 })
 
 generic_point_all_attributes = deepcopy(point_all_attributes)
+generic_point_all_attributes['type'] = {
+    'type': str,
+    'nested': True,
+    'dict': 'type.name'
+}
+generic_point_all_attributes['unit'] = {
+    'type': str,
+}
 
 generic_point_return_attributes = deepcopy(point_return_attributes)
 generic_point_return_attributes['priority_array'] = {

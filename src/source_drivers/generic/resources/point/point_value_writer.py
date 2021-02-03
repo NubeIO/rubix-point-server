@@ -7,6 +7,7 @@ from src.models.point.model_point import PointModel
 
 class GenericPointValueWriterBase(Resource):
     patch_parser = reqparse.RequestParser()
+    patch_parser.add_argument('value_raw', type=str, required=False)
     patch_parser.add_argument('fault', type=bool, required=False)
     patch_parser.add_argument('fault_message', type=str, required=False)
     patch_parser.add_argument('priority_array', type=dict, required=False)
@@ -43,7 +44,8 @@ class GenericPointValueWriterBase(Resource):
         if not point.writable:
             abort(400, message=f'Point is not writable')
         try:
-            point.update_point_store(fault=data.get('fault'),
+            point.update_point_store(value_raw=data.get('value_raw'),
+                                     fault=data.get('fault'),
                                      fault_message=data.get('fault_message'),
                                      priority_array=data.get('priority_array'))
             return {}
