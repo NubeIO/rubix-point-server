@@ -13,6 +13,7 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.event_service_base import Event, EventType
+from src.source_drivers.generic.interfaces.point.points import GenericPointType
 from src.source_drivers.generic.models.priority_array import PriorityArrayModel
 
 logger = logging.getLogger(__name__)
@@ -77,7 +78,7 @@ class PointModel(ModelBase):
                                          self.scale_max)
                 value = self.apply_offset(value, self.value_offset, self.value_operation)
                 value = round(value, self.value_round)
-            point_store.value = value
+            point_store.value = self.apply_point_type(value)
         return point_store.update(cov_threshold)
 
     @validates('tags')
@@ -126,14 +127,16 @@ class PointModel(ModelBase):
 
         return self
 
-    def update_point_store(self, fault: bool, fault_message: str, priority_array: dict):
+    def update_point_store(self, value_raw: str, fault: bool, fault_message: str, priority_array: dict):
+        if value_raw is not None and priority_array is not None:
+            raise Exception(f'Invalid cannot pass both value_raw and priority_array')
         if priority_array:
             PriorityArrayModel.filter_by_point_uuid(self.uuid).update(priority_array)
             db.session.commit()
         highest_priority_value = PriorityArrayModel.get_highest_priority_value(self.uuid)
         point_store = PointStoreModel(point_uuid=self.uuid,
                                       value_original=highest_priority_value,
-                                      value_raw=highest_priority_value,
+                                      value_raw=value_raw if value_raw is not None else highest_priority_value,
                                       fault=fault,
                                       fault_message=fault_message)
         updated = self.update_point_value(point_store)
@@ -165,6 +168,19 @@ class PointModel(ModelBase):
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
         value = ((value - input_min) * (output_max - output_min)) / (input_max - input_min) + output_min
+        return value
+
+    @classmethod
+    def apply_point_type(cls, value: float):
+        from src.source_drivers.generic.models.point import GenericPointModel
+        generic_point = GenericPointModel.find_by_uuid(cls.uuid)
+        if generic_point is not None and value is not None:
+            if generic_point.type == GenericPointType.STRING:
+                value = None
+            elif generic_point.type == GenericPointType.INT:
+                value = round(value, 0)
+            elif generic_point.type == GenericPointType.BOOL:
+                value = float(bool(value))
         return value
 
     def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,
