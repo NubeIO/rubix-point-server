@@ -57,9 +57,10 @@ class Background:
         logger.info("Starting Drivers...")
 
         if setting.drivers.generic:
-            from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
-            FlaskThread(target=GenericPointListener().start, daemon=True,
-                        kwargs={'config': setting.listener}).start()
+            if setting.listener.enabled:
+                from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
+                FlaskThread(target=GenericPointListener().start, daemon=True,
+                            kwargs={'config': setting.listener}).start()
 
         if setting.drivers.modbus_tcp:
             from src.source_drivers.modbus.services import TcpPolling, TcpRegistry
