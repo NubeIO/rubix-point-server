@@ -16,6 +16,7 @@ class EventType(IntEnum):
     POINT_UPDATE = auto()
     DEVICE_UPDATE = auto()
     NETWORK_UPDATE = auto()
+    MAPPING_UPDATE = auto()
     MQTT_DEBUG = auto()
 
 
