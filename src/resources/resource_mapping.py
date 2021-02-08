@@ -38,16 +38,16 @@ class GBPMappingResourceList(Resource):
 
 
 class GBPMappingResourceBase(Resource):
-
     @classmethod
-    def get_point(cls, point_uuid):
+    @marshal_with(bacnet_point_mapping_fields)
+    def get(cls, point_uuid):
         mapping = cls.get_mapping(point_uuid)
         if not mapping:
             abort(404, message=f'Does not exist {point_uuid}')
         return mapping
 
     @classmethod
-    def delete_point(cls, point_uuid):
+    def delete(cls, point_uuid):
         mapping = cls.get_mapping(point_uuid)
         if mapping is None:
             abort(404, message=f'Does not exist {point_uuid}')
@@ -61,26 +61,8 @@ class GBPMappingResourceByGenericPointUUID(GBPMappingResourceBase):
     def get_mapping(cls, point_uuid):
         return GBPointMapping.find_by_generic_point_uuid(point_uuid)
 
-    @classmethod
-    @marshal_with(bacnet_point_mapping_fields)
-    def get(cls, generic_point_uuid):
-        return cls.get_point(generic_point_uuid)
-
-    @classmethod
-    def delete(cls, generic_point_uuid):
-        return cls.delete_point(generic_point_uuid)
-
 
 class GBPMappingResourceByBACnetPointUUID(GBPMappingResourceBase):
     @classmethod
     def get_mapping(cls, point_uuid):
         return GBPointMapping.find_by_bacnet_point_uuid(point_uuid)
-
-    @classmethod
-    @marshal_with(bacnet_point_mapping_fields)
-    def get(cls, bacnet_point_uuid):
-        return cls.get_point(bacnet_point_uuid)
-
-    @classmethod
-    def delete(cls, bacnet_point_uuid):
-        return cls.delete_point(bacnet_point_uuid)

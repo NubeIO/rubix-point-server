@@ -60,8 +60,8 @@ api_generic.add_resource(GenericNamePointValueWriter,
 bp_gbp_mapping = Blueprint('gbp_mapping', __name__, url_prefix='/api/gbp/mapping')
 api_gbp_mapping = Api(bp_gbp_mapping)
 api_gbp_mapping.add_resource(GBPMappingResourceList, '')
-api_gbp_mapping.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<string:generic_point_uuid>')
-api_gbp_mapping.add_resource(GBPMappingResourceByBACnetPointUUID, '/bacnet/<string:bacnet_point_uuid>')
+api_gbp_mapping.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
+api_gbp_mapping.add_resource(GBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
 
 bp_modbus = Blueprint('modbus', __name__, url_prefix='/api/modbus')
 api_modbus = Api(bp_modbus)
