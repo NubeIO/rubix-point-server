@@ -18,7 +18,7 @@ class GBPointMapping(ModelBase):
 
     @validates('bacnet_point_uuid')
     def validate_bacnet_point_uuid(self, _, value):
-        response: Response = api_to_topic_mapper(api=f'api/bacnet/points/uuid/{value}',
+        response: Response = api_to_topic_mapper(api=f'/api/bacnet/points/uuid/{value}',
                                                  destination_identifier=f'bacnet', http_method=HttpMethod.GET)
         if not is_valid(response):
             raise ValueError(response.message)
