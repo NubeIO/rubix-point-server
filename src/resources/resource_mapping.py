@@ -2,6 +2,7 @@ from flask_restful import Resource, abort, marshal_with, reqparse
 from sqlalchemy.exc import IntegrityError
 
 from src.models.mapping.model_mapping import GBPointMapping
+from src.models.point.model_point import PointModel
 from src.resources.rest_schema.schema_mapping import bacnet_point_mapping_fields, bacnet_point_mapping_attributes
 
 
@@ -26,11 +27,14 @@ class GBPMappingResourceList(Resource):
             mapping = GBPointMapping.find_by_generic_point_uuid(data.get('generic_point_uuid'))
             if mapping:
                 mapping.update(**data)
-                return GBPointMapping.find_by_generic_point_uuid(data.get('generic_point_uuid'))
+                output: GBPointMapping = GBPointMapping.find_by_generic_point_uuid(data.get('generic_point_uuid'))
             else:
                 mapping = GBPointMapping(**data)
                 mapping.save_to_db()
-                return mapping
+                output: GBPointMapping = mapping
+            point = PointModel.find_by_uuid(mapping.generic_point_uuid)
+            point.sync_from_bacnet()
+            return output
         except IntegrityError as e:
             abort(400, message=str(e.orig))
         except Exception as e:
