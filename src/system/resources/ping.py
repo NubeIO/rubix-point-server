@@ -28,6 +28,7 @@ class Ping(Resource):
         from src import AppSetting
         from src.services.histories.sync.influxdb import InfluxDB
         from src.services.mqtt_client import MqttRegistry
+        from src.source_drivers.modbus.services.polling_registry import PoolingRegistry
         setting: AppSetting = current_app.config[AppSetting.KEY]
         deployment_mode = 'production' if setting.prod else 'development'
         return {
@@ -41,5 +42,6 @@ class Ping(Resource):
             'settings': {
                 setting.services.KEY: setting.services.to_dict(),
                 setting.drivers.KEY: setting.drivers.to_dict()
-            }
+            },
+            'polling_stats': PoolingRegistry().polling_stats()
         }
