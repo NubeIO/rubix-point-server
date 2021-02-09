@@ -1,6 +1,7 @@
 import logging
 import time
 from datetime import datetime
+from typing import List, Dict
 
 from pymodbus.exceptions import ConnectionException, ModbusIOException
 from sqlalchemy.orm.exc import ObjectDeletedError
@@ -56,10 +57,10 @@ class ModbusPolling(EventServiceBase):
         unavailable_networks = []
         current_network = None
         current_connection = None
-        point_stats = []
+        point_stats: List[Dict[str, str]] = []
         for row in results:
             network, device = row
-            point_stats = []
+            point_stats: List[Dict[str, str]] = []
             """
             Create and test network connection
             """
@@ -96,16 +97,21 @@ class ModbusPolling(EventServiceBase):
                 except ModbusIOException:
                     point_stats.append({'uuid': point.uuid, "status": 'Fail'})
                     continue
-
             db.session.commit()
         poll_time = time.perf_counter() - poll_time
         poll_end_time = datetime.now()
         if self._count == 1:
-            PoolingRegistry().update({'first_start_time': f'{poll_start_time}'})
-        PoolingRegistry().update({'current_start_time': f'{poll_start_time}', 'current_end_time': f'{poll_end_time}',
-                                  'current_complete_time': f'{round(poll_time, 3)}secs', 'loop_count': self._count,
-                                  'point_stats': point_stats})
-        self.__log_debug(f'Poll loop {self._count} time: {round(poll_time, 3)}secs')
+            PoolingRegistry().update({'start_time': f'{poll_start_time}'})
+
+        PoolingRegistry().update({
+            'poll_start_time': str(poll_start_time),
+            'poll_end_time': str(poll_end_time),
+            'poll_complete_time': f'{round(poll_time, 3)} secs',
+            'loop_count': self._count,
+            'point_stats': point_stats
+        })
+
+        self.__log_debug(f'Poll loop {self._count} time: {round(poll_time, 3)} secs')
 
     def __get_all_networks_and_devices(self):
         results = db.session.query(ModbusNetworkModel, ModbusDeviceModel). \

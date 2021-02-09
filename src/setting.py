@@ -133,6 +133,7 @@ class AppSetting:
         self.__influx_setting = InfluxSetting()
         self.__listener_setting = GenericListenerSetting()
         self.__mqtt_rest_bridge_setting = MqttRestBridgeSetting()
+        self.__mqtt_rest_bridge_setting.name = 'ps_mqtt_rest_bridge_listener'
         self.__mqtt_settings: List[MqttSetting] = [MqttSetting()]
         self.__cleaner_setting = CleanerSetting()
 

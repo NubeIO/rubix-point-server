@@ -74,7 +74,5 @@ class Background:
             FlaskThread(target=RtuPolling().polling, daemon=True).start()
 
         if setting.mqtt_rest_bridge_setting.enabled:
-            FlaskThread(
-                target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
-                                      mqtt_setting=setting.mqtt_rest_bridge_setting).start,
-                daemon=True).start()
+            FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
+                                              mqtt_setting=setting.mqtt_rest_bridge_setting).start, daemon=True).start()
