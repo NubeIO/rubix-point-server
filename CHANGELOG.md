@@ -1,4 +1,9 @@
 # CHANGELOG
+
+## [v1.3.1](https://github.com/NubeIO/rubix-point-server/tree/v1.3.1) (2020-02-09)
+### Added
+- MQTT REST bridge integration & Generic Point <> BACnet Point sync service
+
 ## [v1.3.0](https://github.com/NubeIO/rubix-point-server/tree/v1.3.0) (2020-02-03)
 ### Added
 - Add auth for mqtt and ssl for influx
