@@ -248,6 +248,25 @@ optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
 [[package]]
+name = "mqtt-rest-bridge"
+version = "1.0.0"
+description = "MQTT-REST-Bridge"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+develop = false
+
+[package.dependencies]
+paho-mqtt = "1.5.1"
+requests = "2.25.1"
+
+[package.source]
+type = "git"
+url = "https://github.com/NubeIO/mqtt-rest-bridge"
+reference = "v1.0.0"
+resolved_reference = "8699a5b719026183eb6c2fff3266ce37ecf720c7"
+
+[[package]]
 name = "msgpack"
 version = "1.0.2"
 description = "MessagePack (de)serializer."
@@ -484,7 +503,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "1d7690cead609e5d86dc29c38f4be05c3fef04771a67a41cb09ccc7cd22ee352"
+content-hash = "68e3d1d13e55d32e8c5be3fc66635e1eeb4ae586d6337d91469a09a19275e185"
 
 [metadata.files]
 altgraph = [
@@ -673,6 +692,7 @@ markupsafe = [
     {file = "MarkupSafe-1.1.1-cp38-cp38-win_amd64.whl", hash = "sha256:e8313f01ba26fbbe36c7be1966a7b7424942f670f38e666995b88d012765b9be"},
     {file = "MarkupSafe-1.1.1.tar.gz", hash = "sha256:29872e92839765e546828bb7754a68c418d927cd064fd4708fab9fe9c8bb116b"},
 ]
+mqtt-rest-bridge = []
 msgpack = [
     {file = "msgpack-1.0.2-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:b6d9e2dae081aa35c44af9c4298de4ee72991305503442a5c74656d82b581fe9"},
     {file = "msgpack-1.0.2-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:a99b144475230982aee16b3d249170f1cccebf27fb0a08e9f603b69637a62192"},

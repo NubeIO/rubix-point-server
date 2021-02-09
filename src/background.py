@@ -2,6 +2,7 @@ import logging
 from threading import Thread
 
 from flask import current_app
+from mrb.brige import MqttRestBridge
 
 from .setting import AppSetting
 
@@ -57,9 +58,10 @@ class Background:
         logger.info("Starting Drivers...")
 
         if setting.drivers.generic:
-            from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
-            FlaskThread(target=GenericPointListener().start, daemon=True,
-                        kwargs={'config': setting.listener}).start()
+            if setting.listener.enabled:
+                from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
+                FlaskThread(target=GenericPointListener().start, daemon=True,
+                            kwargs={'config': setting.listener}).start()
 
         if setting.drivers.modbus_tcp:
             from src.source_drivers.modbus.services import TcpPolling, TcpRegistry
@@ -70,3 +72,9 @@ class Background:
             from src.source_drivers.modbus.services import RtuPolling, RtuRegistry
             RtuRegistry().register()
             FlaskThread(target=RtuPolling().polling, daemon=True).start()
+
+        if setting.mqtt_rest_bridge_setting.enabled:
+            FlaskThread(
+                target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
+                                      mqtt_setting=setting.mqtt_rest_bridge_setting).start,
+                daemon=True).start()

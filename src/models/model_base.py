@@ -16,8 +16,8 @@ class ModelBase(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find_by_uuid(cls, device_uuid):
-        return cls.query.filter_by(uuid=device_uuid).first()
+    def find_by_uuid(cls, uuid):
+        return cls.query.filter_by(uuid=uuid).first()
 
     def save_to_db(self):
         self.check_self()

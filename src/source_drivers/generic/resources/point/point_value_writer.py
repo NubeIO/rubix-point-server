@@ -1,6 +1,8 @@
 from abc import abstractmethod
 
 from flask_restful import Resource, reqparse, abort
+from flask_restful.reqparse import request
+from mrb.validator import is_bridge
 
 from src.models.point.model_point import PointModel
 
@@ -47,7 +49,8 @@ class GenericPointValueWriterBase(Resource):
             point.update_point_store(value_raw=data.get('value_raw'),
                                      fault=data.get('fault'),
                                      fault_message=data.get('fault_message'),
-                                     priority_array=data.get('priority_array'))
+                                     priority_array=data.get('priority_array'),
+                                     sync_to_bacnet=not is_bridge(request.args))
             return {}
         except Exception as e:
             abort(501, message=str(e))

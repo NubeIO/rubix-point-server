@@ -3,6 +3,7 @@ import os
 from typing import List
 
 from flask import Flask
+from mrb.setting import MqttSetting as MqttRestBridgeSetting
 
 
 class BaseSetting:
@@ -112,27 +113,40 @@ class CleanerSetting(BaseSetting):
 
 
 class AppSetting:
+    PORT: int = 1515
     DATA_DIR_ENV = 'RUBIX_POINT_DATA'
     KEY: str = 'APP_SETTING'
     default_data_dir: str = 'out'
+    default_identifier: str = 'ps'
     default_setting_file: str = 'config.json'
     default_logging_conf: str = 'logging.conf'
     fallback_logging_conf: str = 'config/logging.example.conf'
     fallback_prod_logging_conf: str = 'config/logging.prod.example.conf'
 
     def __init__(self, **kwargs):
+        self.__port = kwargs.get('port') or AppSetting.PORT
         self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
+        self.__identifier = kwargs.get('identifier') or AppSetting.default_identifier
         self.__prod = kwargs.get('prod') or False
         self.__service_setting = ServiceSetting()
         self.__driver_setting = DriverSetting()
         self.__influx_setting = InfluxSetting()
         self.__listener_setting = GenericListenerSetting()
+        self.__mqtt_rest_bridge_setting = MqttRestBridgeSetting()
         self.__mqtt_settings: List[MqttSetting] = [MqttSetting()]
         self.__cleaner_setting = CleanerSetting()
 
     @property
+    def port(self):
+        return self.__port
+
+    @property
     def data_dir(self):
         return self.__data_dir
+
+    @property
+    def identifier(self):
+        return self.__identifier
 
     @property
     def prod(self) -> bool:
@@ -153,6 +167,10 @@ class AppSetting:
     @property
     def mqtt_settings(self) -> List[MqttSetting]:
         return self.__mqtt_settings
+
+    @property
+    def mqtt_rest_bridge_setting(self) -> MqttRestBridgeSetting:
+        return self.__mqtt_rest_bridge_setting
 
     @property
     def listener(self) -> GenericListenerSetting:
@@ -180,6 +198,7 @@ class AppSetting:
         self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
+        self.__mqtt_rest_bridge_setting = self.__mqtt_rest_bridge_setting.reload(data.get('mqtt_rest_bridge_listener'))
         self.__listener_setting = self.__listener_setting.reload(data.get(GenericListenerSetting.KEY))
         self.__cleaner_setting = self.__cleaner_setting.reload(data.get(CleanerSetting.KEY))
 

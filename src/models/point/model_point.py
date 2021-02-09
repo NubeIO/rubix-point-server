@@ -2,12 +2,15 @@ import json
 import logging
 import re
 
+from mrb.mapper import api_to_topic_mapper
+from mrb.message import HttpMethod
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
-from src import db
+from src import db, FlaskThread
 from src.interfaces.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
+from src.models.mapping.model_mapping import GBPointMapping
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
@@ -127,7 +130,8 @@ class PointModel(ModelBase):
 
         return self
 
-    def update_point_store(self, value_raw: str, fault: bool, fault_message: str, priority_array: dict):
+    def update_point_store(self, value_raw: str, fault: bool, fault_message: str, priority_array: dict,
+                           sync_to_bacnet: bool = True):
         if value_raw is not None and priority_array is not None:
             raise Exception(f'Invalid cannot pass both value_raw and priority_array')
         if priority_array:
@@ -143,6 +147,26 @@ class PointModel(ModelBase):
         if updated:
             self.publish_cov(point_store)
         db.session.commit()
+        FlaskThread(target=self.sync_to_bacnet, daemon=True,
+                    kwargs={'sync_to_bacnet': sync_to_bacnet, 'value': point_store.value}).start()
+
+    def sync_to_bacnet(self, sync_to_bacnet: bool, value: float):
+        if sync_to_bacnet:
+            mapping: GBPointMapping = GBPointMapping.find_by_generic_point_uuid(self.uuid)
+            if mapping:
+                api_to_topic_mapper(
+                    api=f"/api/bacnet/points/uuid/{mapping.bacnet_point_uuid}",
+                    destination_identifier=f'bacnet',
+                    body={"priority_array_write": {"_16": value}},
+                    http_method=HttpMethod.PATCH)
+
+    def sync_from_bacnet(self):
+        mapping: GBPointMapping = GBPointMapping.find_by_generic_point_uuid(self.uuid)
+        if mapping:
+            api_to_topic_mapper(
+                api=f"/api/bacnet/sync/points/uuid/{mapping.bacnet_point_uuid}",
+                destination_identifier=f'bacnet',
+                http_method=HttpMethod.GET)
 
     @classmethod
     def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:
