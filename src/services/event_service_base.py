@@ -58,9 +58,6 @@ class EventServiceBase:
         self.supported_events = [False] * len(EventType)
         self._internal_timeout_thread = None
 
-    def status(self) -> bool:
-        return False
-
     def event_count(self):
         return self._event_queue.qsize()
 

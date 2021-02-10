@@ -1,7 +1,5 @@
 import logging
 import time
-from datetime import datetime
-from typing import List, Dict
 
 from pymodbus.exceptions import ConnectionException, ModbusIOException
 from sqlalchemy.orm.exc import ObjectDeletedError
@@ -16,7 +14,6 @@ from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from .modbus_functions.polling.poll import poll_point
-from .polling_registry import PoolingRegistry
 from .rtu_registry import RtuRegistry
 from .tcp_registry import TcpRegistry
 
@@ -52,15 +49,13 @@ class ModbusPolling(EventServiceBase):
         self._count += 1
         self.__log_debug(f'Poll loop {self._count}...')
         poll_time = time.perf_counter()
-        poll_start_time = datetime.now()
+
         results = self.__get_all_networks_and_devices()
         unavailable_networks = []
         current_network = None
         current_connection = None
-        point_stats: List[Dict[str, str]] = []
         for row in results:
             network, device = row
-            point_stats: List[Dict[str, str]] = []
             """
             Create and test network connection
             """
@@ -92,26 +87,13 @@ class ModbusPolling(EventServiceBase):
                     self.__poll_point(current_connection, point, device, network, True)
                 except ConnectionException:
                     unavailable_networks.append(network.uuid)
-                    point_stats.append({'uuid': point.uuid, "status": 'Fail'})
                     break
                 except ModbusIOException:
-                    point_stats.append({'uuid': point.uuid, "status": 'Fail'})
                     continue
+
             db.session.commit()
         poll_time = time.perf_counter() - poll_time
-        poll_end_time = datetime.now()
-        if self._count == 1:
-            PoolingRegistry().update({'start_time': f'{poll_start_time}'})
-
-        PoolingRegistry().update({
-            'poll_start_time': str(poll_start_time),
-            'poll_end_time': str(poll_end_time),
-            'poll_complete_time': f'{round(poll_time, 3)} secs',
-            'loop_count': self._count,
-            'point_stats': point_stats
-        })
-
-        self.__log_debug(f'Poll loop {self._count} time: {round(poll_time, 3)} secs')
+        self.__log_debug(f'Poll loop {self._count} time: {round(poll_time, 3)}secs')
 
     def __get_all_networks_and_devices(self):
         results = db.session.query(ModbusNetworkModel, ModbusDeviceModel). \
