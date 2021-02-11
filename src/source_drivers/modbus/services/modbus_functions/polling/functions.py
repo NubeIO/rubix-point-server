@@ -1,6 +1,7 @@
 import logging
 
 from pymodbus.bit_write_message import WriteSingleCoilResponse
+from pymodbus.client.sync import BaseModbusClient
 from pymodbus.exceptions import ModbusIOException
 
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
@@ -11,7 +12,7 @@ from src.source_drivers.modbus.services.modbus_functions.polling import modbus_p
 logger = logging.getLogger(modbus_poll_debug_log)
 
 
-def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
+def read_analogue(client: BaseModbusClient, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
                   endian: ModbusDataEndian, func: ModbusFunctionCode) -> (any, list):
     """
     Read holding or input register
@@ -47,7 +48,8 @@ def read_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type
         raise read
 
 
-def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: ModbusFunctionCode) -> (any, list):
+def read_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _unit: int, func: ModbusFunctionCode) -> (
+        any, list):
     """
     Read coil or digital input register
     :param client: modbus client
@@ -78,8 +80,8 @@ def read_digital(client, reg_start: int, reg_length: int, _unit: int, func: Modb
         raise read
 
 
-def write_digital(client, reg_start: int, reg_length: int, _unit: int,
-                  write_value: int, func: ModbusFunctionCode) -> (any, list):
+def write_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _unit: int, write_value: int,
+                  func: ModbusFunctionCode) -> (any, list):
     """
     Write coil
     :param client: modbus client
@@ -112,7 +114,7 @@ def write_digital(client, reg_start: int, reg_length: int, _unit: int,
         raise write
 
 
-def write_analogue(client, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
+def write_analogue(client: BaseModbusClient, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
                    endian: ModbusDataEndian, write_value: float, func: ModbusFunctionCode) -> (any, list):
     """
     Write holding reg

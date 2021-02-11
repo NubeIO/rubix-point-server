@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from pymodbus.client.sync import ModbusSerialClient as SerialClient
 
@@ -11,18 +12,18 @@ logger = logging.getLogger(__name__)
 class RtuRegistry(metaclass=Singleton):
 
     def __init__(self):
-        self.__rtu_connections = {}
+        self.__rtu_connections: Dict[str, SerialClient] = {}
 
-    def get_rtu_connections(self):
+    def get_rtu_connections(self) -> Dict[str, SerialClient]:
         return self.__rtu_connections
 
     def register(self):
         logger.info("Called RTU Poll registration")
         for network in ModbusNetworkModel.query.filter_by(type=ModbusType.RTU):
-            self.add_network(network)
+            self.add_connection(network)
         logger.info("Finished registration")
 
-    def add_network(self, network) -> SerialClient:
+    def add_connection(self, network) -> SerialClient:
         port = network.rtu_port
         baudrate = network.rtu_speed
         stopbits = network.rtu_stop_bits
@@ -31,11 +32,11 @@ class RtuRegistry(metaclass=Singleton):
         timeout = network.timeout
 
         self.remove_connection_if_exist(port, baudrate, stopbits, parity, bytesize, timeout)
-        connection = self.add_connection(port, baudrate, stopbits, parity, bytesize, timeout)
+        connection = self._add_connection(port, baudrate, stopbits, parity, bytesize, timeout)
         return connection
 
     # TODO retries=0, retry_on_empty=False fix these up
-    def add_connection(self, port, baudrate, stopbits, parity, bytesize, timeout) -> SerialClient:
+    def _add_connection(self, port, baudrate, stopbits, parity, bytesize, timeout) -> SerialClient:
         method = 'rtu'
         key = RtuRegistry.create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout)
         logger.debug(f'Adding rtu_connection {key}')
@@ -53,11 +54,11 @@ class RtuRegistry(metaclass=Singleton):
             rtu_connection.close()
 
     @staticmethod
-    def create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout):
+    def create_connection_key(port, baudrate, stopbits, parity, bytesize, timeout) -> str:
         return f'{port}:{baudrate}:{stopbits}:{parity}:{bytesize}:{timeout}'
 
     @staticmethod
-    def create_connection_key_by_network(network):
+    def create_connection_key_by_network(network) -> str:
         port = network.rtu_port
         baudrate = network.rtu_speed
         stopbits = network.rtu_stop_bits

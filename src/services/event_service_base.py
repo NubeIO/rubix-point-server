@@ -2,7 +2,7 @@ import logging
 from enum import IntEnum, unique, auto
 from queue import Queue
 from threading import Timer, Event as ThreadingEvent
-from typing import Callable
+from typing import Callable, List
 
 logger = logging.getLogger(__name__)
 
@@ -47,15 +47,11 @@ class EventCallableBlocking(Event):
 
 class EventServiceBase:
 
-    def __init__(self, service_name, threaded):
-        self.service_name = service_name
-        self.threaded = threaded
-        if self.service_name is None:
-            raise Exception('service name was not created')
-        if self.threaded is None:
-            raise Exception('service threaded attribute was not defined')
-        self._event_queue = Queue()
-        self.supported_events = [False] * len(EventType)
+    def __init__(self, service_name: str, threaded: bool):
+        self.service_name: str = service_name
+        self.threaded: bool = threaded
+        self._event_queue: Queue[Event] = Queue()
+        self.supported_events: List[bool] = [False] * len(EventType)
         self._internal_timeout_thread = None
 
     def event_count(self):

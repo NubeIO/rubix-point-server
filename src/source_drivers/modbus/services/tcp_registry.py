@@ -1,4 +1,5 @@
 import logging
+from typing import List, Dict
 
 from pymodbus.client.sync import ModbusTcpClient
 
@@ -11,9 +12,10 @@ logger = logging.getLogger(__name__)
 class TcpRegistry(metaclass=Singleton):
 
     def __init__(self):
-        self.__tcp_connections = {}
+        self.__tcp_connections: Dict[str, ModbusTcpClient] = {}
+        self.__unavailable_connections: List[str] = []
 
-    def get_tcp_connections(self):
+    def get_tcp_connections(self) -> Dict[str, ModbusTcpClient]:
         return self.__tcp_connections
 
     def register(self):
@@ -25,16 +27,16 @@ class TcpRegistry(metaclass=Singleton):
     def initialize_network_connections(self, network):
         for device in network.devices:
             if device.type is ModbusType.TCP:
-                self.add_device(device)
+                self.add_connection(device)
 
-    def add_device(self, device) -> ModbusTcpClient:
+    def add_connection(self, device) -> ModbusTcpClient:
         host = device.tcp_ip
         port = device.tcp_port
         self.remove_connection_if_exist(host, port)
-        connection = self.add_connection(host, port)
+        connection = self._add_connection(host, port)
         return connection
 
-    def add_connection(self, host, port) -> ModbusTcpClient:
+    def _add_connection(self, host, port) -> ModbusTcpClient:
         key = TcpRegistry.create_connection_key(host, port)
         logger.debug(f'Adding tcp_connection {key}')
         self.__tcp_connections[key] = ModbusTcpClient(host, port)
@@ -48,5 +50,5 @@ class TcpRegistry(metaclass=Singleton):
             tcp_connection.close()
 
     @staticmethod
-    def create_connection_key(host, port):
+    def create_connection_key(host, port) -> str:
         return f'{host}:{port}'

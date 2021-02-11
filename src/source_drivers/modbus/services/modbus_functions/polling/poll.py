@@ -1,6 +1,7 @@
 import logging
 import numbers
 
+from pymodbus.client.sync import BaseModbusClient
 from pymodbus.exceptions import ModbusIOException
 
 from src.models.point.model_point_store import PointStoreModel
@@ -15,8 +16,8 @@ from src.source_drivers.modbus.services.modbus_functions.polling.functions impor
 logger = logging.getLogger(__name__)
 
 
-def poll_point(service: EventServiceBase, connection, network: ModbusNetworkModel, device: ModbusDeviceModel,
-               point: ModbusPointModel, update: bool) -> PointStoreModel:
+def poll_point(service: EventServiceBase, connection: BaseModbusClient, network: ModbusNetworkModel,
+               device: ModbusDeviceModel, point: ModbusPointModel, update: bool) -> PointStoreModel:
     """
     Main modbus polling loop
     :param service: EventServiceBase object that's calling this (for point COV events)
