@@ -2,15 +2,12 @@ import json
 import logging
 import re
 
-from mrb.mapper import api_to_topic_mapper
-from mrb.message import HttpMethod
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
-from src import db, FlaskThread
+from src import db
 from src.interfaces.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
-from src.models.mapping.model_mapping import GBPointMapping
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
@@ -70,7 +67,7 @@ class PointModel(ModelBase):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         super().save_to_db()
 
-    def update_point_value(self, point_store: PointStoreModel, cov_threshold: float = None) -> bool:
+    def update_point_value(self, point_store: PointStoreModel, cov_threshold: float = None, sync: bool = True) -> bool:
         if not point_store.fault:
             if cov_threshold is None:
                 cov_threshold = self.cov_threshold
@@ -82,7 +79,7 @@ class PointModel(ModelBase):
                 value = self.apply_offset(value, self.value_offset, self.value_operation)
                 value = round(value, self.value_round)
             point_store.value = self.apply_point_type(value)
-        return point_store.update(cov_threshold)
+        return point_store.update(cov_threshold, sync)
 
     @validates('tags')
     def validate_tags(self, _, value):
@@ -131,7 +128,7 @@ class PointModel(ModelBase):
         return self
 
     def update_point_store(self, value_raw: str, fault: bool, fault_message: str, priority_array: dict,
-                           sync_to_bacnet: bool = True):
+                           sync: bool = True):
         if value_raw is not None and priority_array is not None:
             raise Exception(f'Invalid cannot pass both value_raw and priority_array')
         if priority_array:
@@ -143,30 +140,10 @@ class PointModel(ModelBase):
                                       value_raw=value_raw if value_raw is not None else highest_priority_value,
                                       fault=fault,
                                       fault_message=fault_message)
-        updated = self.update_point_value(point_store)
+        updated = self.update_point_value(point_store, sync=sync)
         if updated:
             self.publish_cov(point_store)
         db.session.commit()
-        FlaskThread(target=self.sync_to_bacnet, daemon=True,
-                    kwargs={'sync_to_bacnet': sync_to_bacnet, 'value': point_store.value}).start()
-
-    def sync_to_bacnet(self, sync_to_bacnet: bool, value: float):
-        if sync_to_bacnet:
-            mapping: GBPointMapping = GBPointMapping.find_by_generic_point_uuid(self.uuid)
-            if mapping:
-                api_to_topic_mapper(
-                    api=f"/api/bacnet/points/uuid/{mapping.bacnet_point_uuid}",
-                    destination_identifier=f'bacnet',
-                    body={"priority_array_write": {"_16": value}},
-                    http_method=HttpMethod.PATCH)
-
-    def sync_from_bacnet(self):
-        mapping: GBPointMapping = GBPointMapping.find_by_generic_point_uuid(self.uuid)
-        if mapping:
-            api_to_topic_mapper(
-                api=f"/api/bacnet/sync/points/uuid/{mapping.bacnet_point_uuid}",
-                destination_identifier=f'bacnet',
-                http_method=HttpMethod.GET)
 
     @classmethod
     def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:
@@ -188,7 +165,7 @@ class PointModel(ModelBase):
 
     @classmethod
     def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
-        -> float or None:
+            -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
         value = ((value - input_min) * (output_max - output_min)) / (input_max - input_min) + output_min
@@ -221,7 +198,7 @@ class PointModel(ModelBase):
             service_name = network.driver
 
         if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
-            device.history_enable:
+                device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
 
         from src.event_dispatcher import EventDispatcher

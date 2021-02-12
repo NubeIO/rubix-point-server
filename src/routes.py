@@ -2,8 +2,6 @@ from flask import Blueprint
 from flask_restful import Api
 
 from src.resources.resource_device import DeviceResource, DeviceResourceByName, DeviceResourceList
-from src.resources.resource_mapping import GBPMappingResourceList, GBPMappingResourceByGenericPointUUID, \
-    GBPMappingResourceByBACnetPointUUID
 from src.resources.resource_network import NetworkResource, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResource, PointResourceByName, PointResourceList
 from src.resources.resource_wires_plat import WiresPlatResource
@@ -56,12 +54,6 @@ api_generic.add_resource(GenericPointSingular, '/points/<string:uuid>')
 api_generic.add_resource(GenericUUIDPointValueWriter, '/points_value/uuid/<string:uuid>')
 api_generic.add_resource(GenericNamePointValueWriter,
                          '/points_value/name/<string:network_name>/<string:device_name>/<string:point_name>')
-
-bp_gbp_mapping = Blueprint('gbp_mapping', __name__, url_prefix='/api/gbp/mapping')
-api_gbp_mapping = Api(bp_gbp_mapping)
-api_gbp_mapping.add_resource(GBPMappingResourceList, '')
-api_gbp_mapping.add_resource(GBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
-api_gbp_mapping.add_resource(GBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
 
 bp_modbus = Blueprint('modbus', __name__, url_prefix='/api/modbus')
 api_modbus = Api(bp_modbus)

@@ -50,7 +50,7 @@ class GenericPointValueWriterBase(Resource):
                                      fault=data.get('fault'),
                                      fault_message=data.get('fault_message'),
                                      priority_array=data.get('priority_array'),
-                                     sync_to_bacnet=not is_bridge(request.args))
+                                     sync=not is_bridge(request.args))
             return {}
         except Exception as e:
             abort(501, message=str(e))

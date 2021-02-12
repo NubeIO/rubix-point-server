@@ -75,4 +75,13 @@ class Background:
 
         if setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
-                                              mqtt_setting=setting.mqtt_rest_bridge_setting).start, daemon=True).start()
+                                              mqtt_setting=setting.mqtt_rest_bridge_setting,
+                                              callback=Background.sync_points_values).start, daemon=True).start()
+
+    @staticmethod
+    def sync_points_values():
+        from mrb.mapper import api_to_topic_mapper
+        from mrb.message import HttpMethod
+        """It will sync all mapped points from BACnet > Generic points"""
+        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/bp_gp/sync", 'destination_identifier': 'bacnet',
+                                                        'http_method': HttpMethod.GET}).start()

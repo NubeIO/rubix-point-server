@@ -263,8 +263,8 @@ requests = "2.25.1"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
-reference = "v1.0.0"
-resolved_reference = "8699a5b719026183eb6c2fff3266ce37ecf720c7"
+reference = "v1.1.0"
+resolved_reference = "e848e96f4ec5d85a37bb4dd18f83f06e99d0a3dc"
 
 [[package]]
 name = "msgpack"
@@ -503,7 +503,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "68e3d1d13e55d32e8c5be3fc66635e1eeb4ae586d6337d91469a09a19275e185"
+content-hash = "093e5727406e3241a1af7cd8f4036453ed8ee37f405c7c780714bf5502bf6c40"
 
 [metadata.files]
 altgraph = [

@@ -1,8 +1,10 @@
 from ast import literal_eval
 
+from mrb.mapper import api_to_topic_mapper
+from mrb.message import HttpMethod, Response
 from sqlalchemy import and_, or_
 
-from src import db
+from src import db, FlaskThread
 from src.utils.model_utils import get_datetime
 
 
@@ -39,7 +41,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         else:
             return None
 
-    def update(self, cov_threshold: float = None) -> bool:
+    def update(self, cov_threshold: float = None, sync: bool = True) -> bool:
         ts = get_datetime()
         if not self.fault:
             self.fault = bool(self.fault)
@@ -72,4 +74,17 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
             if res.rowcount:  # WARNING: this could cause secondary write to db is store if fetched/linked from DB
                 self.ts_fault = ts
         db.session.commit()
-        return bool(res.rowcount)
+        updated: bool = bool(res.rowcount)
+        if updated and sync:
+            FlaskThread(target=self.__sync_point_value, daemon=True).start()
+        return updated
+
+    def __sync_point_value(self):
+        response: Response = api_to_topic_mapper(api=f"api/bp_gp/mappings/generic/{self.point_uuid}",
+                                                 destination_identifier='bacnet',
+                                                 http_method=HttpMethod.GET)
+        if not response.error:
+            api_to_topic_mapper(api=f"/api/bacnet/points/uuid/{response.content.get('bacnet_point_uuid')}",
+                                destination_identifier='bacnet',
+                                body={"priority_array_write": {"_16": self.value}},
+                                http_method=HttpMethod.PATCH)
