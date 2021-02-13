@@ -23,7 +23,7 @@ class ModbusDeviceModel(DeviceMixinModel):
     modbus_network_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('address', 'type', 'modbus_network_uuid_constraint'),
+        # UniqueConstraint('address', 'type', 'modbus_network_uuid_constraint'),
         # UniqueConstraint('tcp_ip', 'type', 'modbus_network_uuid_constraint'), //removed as TCP devices when a
         # gateway is used have the same IP
     )
