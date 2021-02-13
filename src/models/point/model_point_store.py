@@ -80,7 +80,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         return updated
 
     def __sync_point_value(self):
-        response: Response = api_to_topic_mapper(api=f"api/bp_gp/mappings/generic/{self.point_uuid}",
+        response: Response = api_to_topic_mapper(api=f"api/mappings/bp_gp/generic/{self.point_uuid}",
                                                  destination_identifier='bacnet',
                                                  http_method=HttpMethod.GET)
         if not response.error:

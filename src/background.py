@@ -82,6 +82,10 @@ class Background:
     def sync_points_values():
         from mrb.mapper import api_to_topic_mapper
         from mrb.message import HttpMethod
+        """It will sync all mapped points from LoRa > Generic points"""
+        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_gp", 'destination_identifier': 'lora',
+                                                        'http_method': HttpMethod.GET}).start()
+
         """It will sync all mapped points from BACnet > Generic points"""
         FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/bp_gp/sync", 'destination_identifier': 'bacnet',
                                                         'http_method': HttpMethod.GET}).start()
