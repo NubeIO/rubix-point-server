@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.3](https://github.com/NubeIO/rubix-point-server/tree/v1.3.3) (2020-02-15)
+### Added
+- Updates to protocal-brige
+
 ## [v1.3.2](https://github.com/NubeIO/rubix-point-server/tree/v1.3.2) (2020-02-09)
 ### Added
 - MQTT REST bridge listener name change (issue fix on conflict)
