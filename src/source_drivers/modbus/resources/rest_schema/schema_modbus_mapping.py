@@ -1,6 +1,6 @@
 from src.resources.rest_schema.schema_device import *
 
-mp_gbp_mapping_attributes = {
+mapping_mp_gbp_attributes = {
     'modbus_point_uuid': {
         'type': str,
         'required': True,
@@ -22,5 +22,12 @@ mp_gbp_mapping_attributes = {
     },
 }
 
-mp_gbp_mapping_fields = {}
-map_rest_schema(mp_gbp_mapping_attributes, mp_gbp_mapping_fields)
+mapping_mp_gbp_return_attributes = {
+    'uuid': {
+        'type': str,
+    },
+}
+
+mapping_mp_gbp_all_fields = {}
+map_rest_schema(mapping_mp_gbp_return_attributes, mapping_mp_gbp_all_fields)
+map_rest_schema(mapping_mp_gbp_attributes, mapping_mp_gbp_all_fields)

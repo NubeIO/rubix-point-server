@@ -13,7 +13,8 @@ class MPGBPMapping(ModelBase):
     """
     __tablename__ = 'mappings_mp_gbp'
 
-    modbus_point_uuid = db.Column(db.String, db.ForeignKey('modbus_points.uuid'), primary_key=True, nullable=False)
+    uuid = db.Column(db.String, primary_key=True)
+    modbus_point_uuid = db.Column(db.String, db.ForeignKey('modbus_points.uuid'), nullable=False)
     generic_point_uuid = db.Column(db.String(80), nullable=True, unique=True)
     bacnet_point_uuid = db.Column(db.String(80), nullable=True, unique=True)
     modbus_point_name = db.Column(db.String(80), nullable=False)

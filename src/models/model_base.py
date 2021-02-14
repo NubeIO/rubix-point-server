@@ -16,6 +16,10 @@ class ModelBase(db.Model):
         return cls.query.all()
 
     @classmethod
+    def filter_by_uuid(cls, uuid: str):
+        return cls.query.filter_by(uuid=uuid)
+
+    @classmethod
     def find_by_uuid(cls, uuid):
         return cls.query.filter_by(uuid=uuid).first()
 
@@ -27,6 +31,10 @@ class ModelBase(db.Model):
     def save_to_db_no_commit(self):
         self.check_self()
         db.session.add(self)
+
+    @classmethod
+    def commit(cls):
+        db.session.commit()
 
     def delete_from_db(self):
         db.session.delete(self)

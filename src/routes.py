@@ -16,7 +16,8 @@ from src.source_drivers.generic.resources.point.point_value_writer import Generi
 from src.source_drivers.modbus.resources.device.device_plural import ModbusDevicePlural
 from src.source_drivers.modbus.resources.device.device_singular import ModbusDeviceSingular
 from src.source_drivers.modbus.resources.mapping.mapping import MPGBPMappingResourceList, \
-    MPGBPMappingResourceByGenericPointUUID, MPGBPMappingResourceByBACnetPointUUID, MPGBPMappingResourceByModbusPointUUID
+    MPGBPMappingResourceByGenericPointUUID, MPGBPMappingResourceByBACnetPointUUID, \
+    MPGBPMappingResourceByModbusPointUUID, MPGBPMappingResourceByUUID
 from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
 from src.source_drivers.modbus.resources.network.network_singular import ModbusNetworkSingular
 from src.source_drivers.modbus.resources.point.point_plural import ModbusPointPlural
@@ -72,12 +73,13 @@ api_modbus.add_resource(ModbusPointStore, '/point_stores/<string:uuid>')
 api_modbus.add_resource(ModbusDevicePointPluralPointStore, '/<string:device_uuid>/point_stores')
 
 # modbus to generic/bacnet points mappings
-bp_mp_gbp_mapping = Blueprint('mp_gbp_mappings', __name__, url_prefix='/api/mp_gbp/mappings')
-api_mp_gbp_mapping = Api(bp_mp_gbp_mapping)
-api_mp_gbp_mapping.add_resource(MPGBPMappingResourceList, '')
-api_mp_gbp_mapping.add_resource(MPGBPMappingResourceByModbusPointUUID, '/modbus/<string:point_uuid>')
-api_mp_gbp_mapping.add_resource(MPGBPMappingResourceByGenericPointUUID, '/generic/<string:point_uuid>')
-api_mp_gbp_mapping.add_resource(MPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:point_uuid>')
+bp_mapping_mp_gbp = Blueprint('mappings_mp_gbp', __name__, url_prefix='/api/mp_gbp/mappings')
+api_mapping_mp_gbp = Api(bp_mapping_mp_gbp)
+api_mapping_mp_gbp.add_resource(MPGBPMappingResourceList, '')
+api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByUUID, '/uuid/<string:uuid>')
+api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByModbusPointUUID, '/modbus/<string:uuid>')
+api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByGenericPointUUID, '/generic/<string:uuid>')
+api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:uuid>')
 
 bp_wires = Blueprint('wires', __name__, url_prefix='/api/wires')
 Api(bp_wires).add_resource(WiresPlatResource, '/plat')
