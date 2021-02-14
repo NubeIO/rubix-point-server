@@ -1,11 +1,19 @@
 import uuid as uuid_
+from abc import abstractmethod
 
 from flask_restful import Resource, marshal_with, abort, reqparse
 from sqlalchemy.exc import IntegrityError
 
+from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.models.mapping import MPGBPMapping
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_mapping import mapping_mp_gbp_attributes, \
     mapping_mp_gbp_all_fields
+
+
+def sync_point_value(mapping: MPGBPMapping):
+    point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.modbus_point_uuid)
+    point_store.sync_point_value_with_mapping_mp_gbp(mapping)
+    return mapping
 
 
 class MPGBPMappingResourceList(Resource):
@@ -26,9 +34,9 @@ class MPGBPMappingResourceList(Resource):
         try:
             data = parser.parse_args()
             data.uuid = str(uuid_.uuid4())
-            mapping = MPGBPMapping(**data)
+            mapping: MPGBPMapping = MPGBPMapping(**data)
             mapping.save_to_db()
-            # TODO: sync
+            sync_point_value(mapping)
             return mapping
         except IntegrityError as e:
             abort(400, message=str(e.orig))
@@ -56,6 +64,11 @@ class MPGBPMappingResourceBase(Resource):
             mapping.delete_from_db()
         return '', 204
 
+    @classmethod
+    @abstractmethod
+    def get_mapping(cls, uuid) -> MPGBPMapping:
+        raise NotImplementedError
+
 
 class MPGBPMappingResourceByUUID(MPGBPMappingResourceBase):
     parser = reqparse.RequestParser()
@@ -68,35 +81,36 @@ class MPGBPMappingResourceByUUID(MPGBPMappingResourceBase):
     @marshal_with(mapping_mp_gbp_all_fields)
     def patch(cls, uuid):
         data = MPGBPMappingResourceByUUID.parser.parse_args()
-        mapping = cls.get_mapping(uuid)
+        mapping: MPGBPMapping = cls.get_mapping(uuid)
         if not mapping:
             abort(404, message='Does not exist {}'.format(uuid))
         try:
             MPGBPMapping.filter_by_uuid(uuid).update(data)
             MPGBPMapping.commit()
-            # TODO: sync
-            return cls.get_mapping(uuid)
+            output_mapping: MPGBPMapping = cls.get_mapping(uuid)
+            sync_point_value(mapping)
+            return output_mapping
         except Exception as e:
             abort(500, message=str(e))
 
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> MPGBPMapping:
         return MPGBPMapping.find_by_uuid(uuid)
 
 
 class MPGBPMappingResourceByModbusPointUUID(MPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> MPGBPMapping:
         return MPGBPMapping.find_by_modbus_point_uuid(uuid)
 
 
 class MPGBPMappingResourceByGenericPointUUID(MPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> MPGBPMapping:
         return MPGBPMapping.find_by_generic_point_uuid(uuid)
 
 
 class MPGBPMappingResourceByBACnetPointUUID(MPGBPMappingResourceBase):
     @classmethod
-    def get_mapping(cls, uuid):
+    def get_mapping(cls, uuid) -> MPGBPMapping:
         return MPGBPMapping.find_by_bacnet_point_uuid(uuid)

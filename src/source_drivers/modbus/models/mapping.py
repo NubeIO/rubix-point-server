@@ -4,7 +4,6 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.models.model_base import ModelBase
-from src.source_drivers.generic.models.point import GenericPointModel
 
 
 class MPGBPMapping(ModelBase):
@@ -23,6 +22,7 @@ class MPGBPMapping(ModelBase):
 
     @validates('generic_point_uuid')
     def validate_generic_point_uuid(self, _, value):
+        from src.source_drivers.generic.models.point import GenericPointModel
         if value:
             generic_point: GenericPointModel = GenericPointModel.find_by_uuid(value)
             if not generic_point:
