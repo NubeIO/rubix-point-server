@@ -1,8 +1,12 @@
 from ast import literal_eval
+from typing import List
 
+from mrb.mapper import api_to_topic_mapper
+from mrb.message import HttpMethod, Response
 from sqlalchemy import and_, or_
 
-from src import db
+from src import db, FlaskThread
+from src.source_drivers.modbus.models.mapping import MPGBPMapping
 from src.utils.model_utils import get_datetime
 
 
@@ -39,7 +43,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         else:
             return None
 
-    def update(self, cov_threshold: float = None) -> bool:
+    def update(self, cov_threshold: float = None, sync: bool = True) -> bool:
         ts = get_datetime()
         if not self.fault:
             self.fault = bool(self.fault)
@@ -72,4 +76,48 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
             if res.rowcount:  # WARNING: this could cause secondary write to db is store if fetched/linked from DB
                 self.ts_fault = ts
         db.session.commit()
-        return bool(res.rowcount)
+        updated: bool = bool(res.rowcount)
+        if updated and sync:
+            """Generic Point value is updated, need to sync BACnet Point value"""
+            FlaskThread(target=self.__sync_point_value_bp_gp, daemon=True).start()
+            """Modbus Point value is updated, need to sync Generic & BACnet Point"""
+            FlaskThread(target=self.sync_point_value_mp_gbp, daemon=True).start()
+        return updated
+
+    def __sync_point_value_bp_gp(self):
+        response: Response = api_to_topic_mapper(api=f"api/mappings/bp_gp/generic/{self.point_uuid}",
+                                                 destination_identifier='bacnet',
+                                                 http_method=HttpMethod.GET)
+        if not response.error:
+            api_to_topic_mapper(api=f"/api/bacnet/points/uuid/{response.content.get('bacnet_point_uuid')}",
+                                destination_identifier='bacnet',
+                                body={"priority_array_write": {"_16": self.value}},
+                                http_method=HttpMethod.PATCH)
+
+    def sync_point_value_with_mapping_mp_gbp(self, mapping: MPGBPMapping, gp: bool = True, bp=True):
+        if mapping.generic_point_uuid and gp:
+            api_to_topic_mapper(
+                api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
+                destination_identifier='ps',
+                body={"priority_array": {"_16": self.value}},
+                http_method=HttpMethod.PATCH)
+        elif mapping.bacnet_point_uuid and bp:
+            api_to_topic_mapper(
+                api=f"/api/bacnet/points/uuid/{mapping.bacnet_point_uuid}",
+                destination_identifier='bacnet',
+                body={"priority_array_write": {"_16": self.value}},
+                http_method=HttpMethod.PATCH)
+
+    def sync_point_value_mp_gbp(self, gp: bool = True, bp=True):
+        mapping: MPGBPMapping = MPGBPMapping.find_by_modbus_point_uuid(self.point_uuid)
+        if mapping:
+            self.sync_point_value_with_mapping_mp_gbp(mapping, gp, bp)
+
+    @classmethod
+    def sync_points_values_mp_gbp(cls, gp: bool = True, bp=True):
+        mappings: List[MPGBPMapping] = MPGBPMapping.find_all()
+        for mapping in mappings:
+            point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.modbus_point_uuid)
+            if point_store:
+                FlaskThread(target=point_store.sync_point_value_mp_gbp, daemon=True,
+                            kwargs={'gp': gp, 'bp': bp}).start()

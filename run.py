@@ -7,7 +7,8 @@ import click
 
 from src import AppSetting, GunicornFlaskApplication
 
-CLI_CTX_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=120)
+CLI_CTX_SETTINGS = dict(help_option_names=["-h", "--help"], max_content_width=120, ignore_unknown_options=True,
+                        allow_extra_args=True)
 
 
 def number_of_workers():
