@@ -117,5 +117,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
     def sync_points_values_mp_gbp(cls, gp: bool = True, bp=True):
         mappings: List[MPGBPMapping] = MPGBPMapping.find_all()
         for mapping in mappings:
-            point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.bacnet_point_uuid)
-            FlaskThread(target=point_store.sync_point_value_mp_gbp, daemon=True, kwargs={'gp': gp, 'bp': bp}).start()
+            point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.modbus_point_uuid)
+            if point_store:
+                FlaskThread(target=point_store.sync_point_value_mp_gbp, daemon=True,
+                            kwargs={'gp': gp, 'bp': bp}).start()

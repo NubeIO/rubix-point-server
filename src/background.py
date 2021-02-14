@@ -76,16 +76,20 @@ class Background:
         if setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
                                               mqtt_setting=setting.mqtt_rest_bridge_setting,
-                                              callback=Background.sync_points_values).start, daemon=True).start()
+                                              callback=Background.sync_on_start).start, daemon=True).start()
 
     @staticmethod
-    def sync_points_values():
+    def sync_on_start():
         from mrb.mapper import api_to_topic_mapper
         from mrb.message import HttpMethod
-        """It will sync all mapped points from LoRa > Generic points"""
+        from .models.point.model_point_store import PointStoreModel
+
+        """Sync mapped points values from LoRa > Generic points values"""
         FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_gp", 'destination_identifier': 'lora',
                                                         'http_method': HttpMethod.GET}).start()
 
-        """It will sync all mapped points from BACnet > Generic points"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/bp_gp/sync", 'destination_identifier': 'bacnet',
+        """Sync mapped points values from BACnet > Generic points values"""
+        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/bp_gp", 'destination_identifier': 'bacnet',
                                                         'http_method': HttpMethod.GET}).start()
+        """Sync mapped points values from Modbus > Generic | BACnet points values """
+        FlaskThread(target=PointStoreModel.sync_points_values_mp_gbp).start()

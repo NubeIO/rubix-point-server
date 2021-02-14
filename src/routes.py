@@ -72,7 +72,7 @@ api_modbus.add_resource(ModbusPointPluralPointStore, '/point_stores')
 api_modbus.add_resource(ModbusPointStore, '/point_stores/<string:uuid>')
 api_modbus.add_resource(ModbusDevicePointPluralPointStore, '/<string:device_uuid>/point_stores')
 
-# modbus to generic/bacnet points mappings
+# Modbus <> Generic|BACnet points mappings
 bp_mapping_mp_gbp = Blueprint('mappings_mp_gbp', __name__, url_prefix='/api/mp_gbp/mappings')
 api_mapping_mp_gbp = Api(bp_mapping_mp_gbp)
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceList, '')
