@@ -12,7 +12,8 @@ if __name__ == '__main__':
         "mqtt": true,
         "histories": true,
         "cleaner": true,
-        "history_sync": true
+        "history_sync": true,
+        "history_sync_postgres": true
       },
       "influx": {
         "host": "0.0.0.0",

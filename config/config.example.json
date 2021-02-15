@@ -9,7 +9,8 @@
     "mqtt": true,
     "histories": false,
     "cleaner": false,
-    "history_sync": false
+    "history_sync": false,
+    "history_sync_postgres": false
   },
   "influx": {
     "host": "0.0.0.0",
