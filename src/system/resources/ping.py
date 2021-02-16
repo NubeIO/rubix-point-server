@@ -3,7 +3,9 @@ from datetime import datetime
 
 from flask import current_app
 from flask_restful import Resource
+from mrb.brige import MqttRestBridge
 
+from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
 from src.utils.project import get_version
 
 start_time = time.time()
@@ -28,7 +30,6 @@ class Ping(Resource):
         from src import AppSetting
         from src.services.histories.sync.influxdb import InfluxDB
         from src.services.mqtt_client import MqttRegistry
-        from src.source_drivers.modbus.services.polling_registry import PoolingRegistry
         setting: AppSetting = current_app.config[AppSetting.KEY]
         deployment_mode = 'production' if setting.prod else 'development'
         return {
@@ -43,5 +44,12 @@ class Ping(Resource):
                 setting.services.KEY: setting.services.to_dict(),
                 setting.drivers.KEY: setting.drivers.to_dict()
             },
-            'polling_stats': PoolingRegistry().polling_stats()
+            'generic_point_listener': {
+                'enabled': setting.listener.enabled,
+                'status': GenericPointListener().status()
+            },
+            'mqtt_rest_bridge_listener': {
+                'enabled': setting.mqtt_rest_bridge_setting.enabled,
+                'status': MqttRestBridge.status()
+            }
         }

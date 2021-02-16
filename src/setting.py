@@ -45,6 +45,7 @@ class DriverSetting(BaseSetting):
         self.generic: bool = False
         self.modbus_rtu: bool = True
         self.modbus_tcp: bool = False
+        self.bridge: bool = True
 
 
 class MqttSettingBase(BaseSetting):

@@ -29,9 +29,9 @@ class Background:
     @staticmethod
     def run():
         setting: AppSetting = current_app.config[AppSetting.KEY]
-        logger.info("Starting Services...")
 
         # Services
+        logger.info("Starting Services...")
         if setting.services.mqtt:
             from src.services.mqtt_client import MqttClient
             for config in setting.mqtt_settings:
@@ -56,12 +56,10 @@ class Background:
 
         # Drivers
         logger.info("Starting Drivers...")
-
-        if setting.drivers.generic:
-            if setting.listener.enabled:
-                from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
-                FlaskThread(target=GenericPointListener().start, daemon=True,
-                            kwargs={'config': setting.listener}).start()
+        if setting.drivers.generic and setting.listener.enabled:
+            from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
+            FlaskThread(target=GenericPointListener().start, daemon=True,
+                        kwargs={'config': setting.listener}).start()
 
         if setting.drivers.modbus_tcp:
             from src.source_drivers.modbus.services import TcpPolling, TcpRegistry
@@ -73,7 +71,7 @@ class Background:
             RtuRegistry().register()
             FlaskThread(target=RtuPolling().polling, daemon=True).start()
 
-        if setting.mqtt_rest_bridge_setting.enabled:
+        if setting.drivers.bridge and setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
                                               mqtt_setting=setting.mqtt_rest_bridge_setting,
                                               callback=Background.sync_on_start).start, daemon=True).start()

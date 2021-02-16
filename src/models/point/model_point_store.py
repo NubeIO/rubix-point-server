@@ -1,6 +1,7 @@
 from ast import literal_eval
 from typing import List
 
+from mrb.brige import MqttRestBridge
 from mrb.mapper import api_to_topic_mapper
 from mrb.message import HttpMethod, Response
 from sqlalchemy import and_, or_
@@ -77,11 +78,11 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                 self.ts_fault = ts
         db.session.commit()
         updated: bool = bool(res.rowcount)
-        if updated and sync:
+        if MqttRestBridge.status() and updated and sync:
             """Generic Point value is updated, need to sync BACnet Point value"""
             FlaskThread(target=self.__sync_point_value_bp_gp, daemon=True).start()
             """Modbus Point value is updated, need to sync Generic & BACnet Point"""
-            FlaskThread(target=self.sync_point_value_mp_gbp, daemon=True).start()
+            FlaskThread(target=self.__sync_point_value_mp_gbp, daemon=True).start()
         return updated
 
     def __sync_point_value_bp_gp(self):
@@ -95,6 +96,8 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                                 http_method=HttpMethod.PATCH)
 
     def sync_point_value_with_mapping_mp_gbp(self, mapping: MPGBPMapping, gp: bool = True, bp=True):
+        if not MqttRestBridge.status():
+            return
         if mapping.generic_point_uuid and gp:
             api_to_topic_mapper(
                 api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
@@ -108,16 +111,18 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                 body={"priority_array_write": {"_16": self.value}},
                 http_method=HttpMethod.PATCH)
 
-    def sync_point_value_mp_gbp(self, gp: bool = True, bp=True):
+    def __sync_point_value_mp_gbp(self, gp: bool = True, bp=True):
         mapping: MPGBPMapping = MPGBPMapping.find_by_modbus_point_uuid(self.point_uuid)
         if mapping:
             self.sync_point_value_with_mapping_mp_gbp(mapping, gp, bp)
 
     @classmethod
     def sync_points_values_mp_gbp(cls, gp: bool = True, bp=True):
+        if not MqttRestBridge.status():
+            return
         mappings: List[MPGBPMapping] = MPGBPMapping.find_all()
         for mapping in mappings:
             point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.modbus_point_uuid)
             if point_store:
-                FlaskThread(target=point_store.sync_point_value_mp_gbp, daemon=True,
+                FlaskThread(target=point_store.__sync_point_value_mp_gbp, daemon=True,
                             kwargs={'gp': gp, 'bp': bp}).start()

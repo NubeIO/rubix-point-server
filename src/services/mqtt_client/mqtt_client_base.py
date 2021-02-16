@@ -51,7 +51,7 @@ class MqttClientBase(ABC):
         self._client.loop_forever()
 
     def status(self) -> bool:
-        return self.config and self.config.enabled and self._client and self._client.is_connected()
+        return bool(self.config and self.config.enabled and self._client and self._client.is_connected())
 
     def to_string(self) -> str:
         return f'{self.config.host}:{self.config.port}'
