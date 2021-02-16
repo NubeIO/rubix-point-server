@@ -109,7 +109,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                     'fault_message': point_store_history.fault_message,
                 }
                 row = {
-                    'measurement': 'history',
+                    'measurement': self.__config.measurement,
                     'tags': tags,
                     'time': point_store_history.ts_value,
                     'fields': fields
