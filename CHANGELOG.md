@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.4](https://github.com/NubeIO/rubix-point-server/tree/v1.3.4) (2020-02-16)
+### Added
+- Updates to protocal-brige
+
 ## [v1.3.3](https://github.com/NubeIO/rubix-point-server/tree/v1.3.3) (2020-02-15)
 ### Added
 - Updates to protocal-brige
