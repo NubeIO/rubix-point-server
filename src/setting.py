@@ -31,7 +31,7 @@ class ServiceSetting(BaseSetting):
         self.mqtt = True
         self.histories = False
         self.cleaner = False
-        self.history_sync = False
+        self.history_sync_influxdb = False
         self.history_sync_postgres = False
 
 
@@ -209,6 +209,7 @@ class AppSetting:
             DriverSetting.KEY: self.drivers,
             ServiceSetting.KEY: self.services,
             InfluxSetting.KEY: self.influx,
+            PostgresSetting.KEY: self.postgres,
             GenericListenerSetting.KEY: self.listener,
             MqttSetting.KEY: [s.to_dict() for s in self.mqtt_settings],
             CleanerSetting.KEY: self.cleaner,

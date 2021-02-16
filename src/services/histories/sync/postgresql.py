@@ -54,8 +54,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         try:
             self.__client = psycopg2.connect(host=self.config.host, port=self.config.port, dbname=self.config.dbname,
                                              user=self.config.user, password=self.config.password,
-                                             sslmode=self.config.ssl_mode, onnect_timeout=self.config.connect_timeout)
+                                             sslmode=self.config.ssl_mode, connect_timeout=self.config.connect_timeout)
             self.__is_connected = True
+            self._create_table_if_not_exists()
         except Exception as e:
             self.__is_connected = False
             logger.error(f'Connection Error: {str(e)}')
@@ -75,6 +76,13 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
             for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid):
                 point_store_history: PointStoreHistoryModel = psh
+                point: PointModel = point_store_history.point
+                query_details = f'INSERT INTO {self.config.table_name}_details (point_uuid,client_id,site_id,' \
+                                f'device_id,point_name,device_name,network_name,driver) VALUES (%s, %s, %s,' \
+                                f'%s, %s ,%s, %s, %s) ON CONFLICT (point_uuid) DO NOTHING'
+                data_details = (point_store_history.point_uuid, self.__wires_plat.client_id, self.__wires_plat.site_id,
+                                self.__wires_plat.device_id, point.name, point.device.name, point.device.network.name,
+                                point.driver)
                 query = f'INSERT INTO {self.config.table_name} (id,point_uuid,value,value_original,value_raw,fault,' \
                         f'fault_message,ts_value,ts_fault) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
                 data = (point_store_history.id, point_store_history.point_uuid, point_store_history.value,
@@ -82,10 +90,15 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                         point_store_history.fault_message, point_store_history.ts_value, point_store_history.ts_fault)
                 with self.__client:
                     with self.__client.cursor() as curs:
-                        curs.execute(query, data)
+                        try:
+                            curs.execute(query_details, data_details)
+                            curs.execute(query, data)
+                        except psycopg2.Error as e:
+                            logger.error(str(e))
                 row = {
-                    'table': 'history',
+                    'table': self.config.table_name,
                     'time': point_store_history.ts_value,
+                    'details': data_details,
                     'fields': point_store_history
                 }
                 store.append(row)
@@ -95,6 +108,25 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             logger.info(f'Stored {len(store)} rows on {self.config.table_name} table')
         else:
             logger.debug("Nothing to store, no new records")
+
+    def _create_table_if_not_exists(self):
+        query_details = f'CREATE TABLE IF NOT EXISTS {self.config.table_name}_details (point_uuid VARCHAR' \
+                        f' PRIMARY KEY,client_id VARCHAR(80),site_id VARCHAR(80),device_id VARCHAR(80),' \
+                        f'point_name VARCHAR(80), device_name VARCHAR(80),network_name VARCHAR(80),' \
+                        f'driver VARCHAR(80));'
+        query = f'CREATE TABLE IF NOT EXISTS {self.config.table_name} (id INTEGER PRIMARY KEY,point_uuid VARCHAR,' \
+                f'value NUMERIC,value_original NUMERIC,value_raw VARCHAR,fault BOOLEAN,fault_message VARCHAR,' \
+                f'ts_value TIMESTAMP,ts_fault TIMESTAMP,CONSTRAINT fk_{self.config.table_name}_details' \
+                f' FOREIGN KEY(point_uuid) REFERENCES' \
+                f' {self.config.table_name}_details(point_uuid));'
+
+        with self.__client:
+            with self.__client.cursor() as curs:
+                try:
+                    curs.execute(query_details)
+                    curs.execute(query)
+                except psycopg2.Error as e:
+                    logger.error(str(e))
 
     def _get_point_last_sync_id(self, point_uuid):
         query = f"SELECT MAX(id) FROM {self.config.table_name} WHERE point_id=%s;"
