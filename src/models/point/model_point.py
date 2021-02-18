@@ -127,12 +127,14 @@ class PointModel(ModelBase):
 
         return self
 
-    def update_point_store(self, value_raw: str, fault: bool, fault_message: str, priority_array: dict,
+    def update_point_store(self, value: float, value_raw: str, fault: bool, fault_message: str, priority: int = 16,
                            sync: bool = True):
-        if value_raw is not None and priority_array is not None:
-            raise Exception(f'Invalid cannot pass both value_raw and priority_array')
-        if priority_array:
-            PriorityArrayModel.filter_by_point_uuid(self.uuid).update(priority_array)
+        if priority not in range(1, 17):
+            raise ValueError('priority should be in range(1, 17)')
+        if value_raw is not None and value is not None:
+            raise ValueError('Invalid, cannot pass both value_raw and value')
+        if priority:
+            PriorityArrayModel.filter_by_point_uuid(self.uuid).update({f"_{priority}": value})
             db.session.commit()
         highest_priority_value = PriorityArrayModel.get_highest_priority_value(self.uuid)
         point_store = PointStoreModel(point_uuid=self.uuid,
