@@ -49,10 +49,15 @@ class Background:
             FlaskThread(target=PointStoreHistoryCleaner().setup, daemon=True,
                         kwargs={'config': setting.cleaner}).start()
 
-        if setting.services.history_sync:
+        if setting.services.history_sync_influxdb:
             from src.services.histories.sync.influxdb import InfluxDB
             FlaskThread(target=InfluxDB().setup, daemon=True,
                         kwargs={'config': setting.influx}).start()
+
+        if setting.services.history_sync_postgres:
+            from src.services.histories.sync.postgresql import PostgreSQL
+            FlaskThread(target=PostgreSQL().setup, daemon=True,
+                        kwargs={'config': setting.postgres}).start()
 
         # Drivers
         logger.info("Starting Drivers...")

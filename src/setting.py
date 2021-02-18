@@ -31,7 +31,8 @@ class ServiceSetting(BaseSetting):
         self.mqtt = True
         self.histories = False
         self.cleaner = False
-        self.history_sync = False
+        self.history_sync_influxdb = False
+        self.history_sync_postgres = False
 
 
 class DriverSetting(BaseSetting):
@@ -105,6 +106,22 @@ class InfluxSetting(BaseSetting):
         self.attempt_reconnect_secs = 5
 
 
+class PostgresSetting(BaseSetting):
+    KEY = 'postgres'
+
+    def __init__(self):
+        self.host = '0.0.0.0'
+        self.port = 5432
+        self.dbname = 'db'
+        self.user = 'user'
+        self.password = 'password'
+        self.ssl_mode = 'allow'
+        self.connect_timeout = 5
+        self.timer = 1
+        self.table_name = 'history'
+        self.attempt_reconnect_secs = 5
+
+
 class CleanerSetting(BaseSetting):
     KEY = 'cleaner'
 
@@ -132,6 +149,7 @@ class AppSetting:
         self.__service_setting = ServiceSetting()
         self.__driver_setting = DriverSetting()
         self.__influx_setting = InfluxSetting()
+        self.__postgres_setting = PostgresSetting()
         self.__listener_setting = GenericListenerSetting()
         self.__mqtt_rest_bridge_setting = MqttRestBridgeSetting()
         self.__mqtt_rest_bridge_setting.name = 'ps_mqtt_rest_bridge_listener'
@@ -167,6 +185,10 @@ class AppSetting:
         return self.__influx_setting
 
     @property
+    def postgres(self) -> PostgresSetting:
+        return self.__postgres_setting
+
+    @property
     def mqtt_settings(self) -> List[MqttSetting]:
         return self.__mqtt_settings
 
@@ -187,6 +209,7 @@ class AppSetting:
             DriverSetting.KEY: self.drivers,
             ServiceSetting.KEY: self.services,
             InfluxSetting.KEY: self.influx,
+            PostgresSetting.KEY: self.postgres,
             GenericListenerSetting.KEY: self.listener,
             MqttSetting.KEY: [s.to_dict() for s in self.mqtt_settings],
             CleanerSetting.KEY: self.cleaner,
@@ -200,6 +223,7 @@ class AppSetting:
         self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
+        self.__postgres_setting = self.__postgres_setting.reload(data.get(PostgresSetting.KEY))
         self.__mqtt_rest_bridge_setting = self.__mqtt_rest_bridge_setting.reload(data.get('mqtt_rest_bridge_listener'))
         self.__listener_setting = self.__listener_setting.reload(data.get(GenericListenerSetting.KEY))
         self.__cleaner_setting = self.__cleaner_setting.reload(data.get(CleanerSetting.KEY))

@@ -9,7 +9,8 @@
     "mqtt": true,
     "histories": false,
     "cleaner": false,
-    "history_sync": false
+    "history_sync_influxdb": false,
+    "history_sync_postgres": false
   },
   "influx": {
     "host": "0.0.0.0",
@@ -23,7 +24,20 @@
     "retries": 3,
     "timer": 1,
     "path": "",
-    "measurement": "history"
+    "measurement": "history",
+    "attempt_reconnect_secs": 5
+  },
+  "postgres": {
+    "host": "0.0.0.0",
+    "port": 5432,
+    "dbname": "db",
+    "user": "user",
+    "password": "password",
+    "ssl_mode": "allow",
+    "connect_timeout": 5,
+    "timer": 1,
+    "table_name": "history",
+    "attempt_reconnect_secs": 5
   },
   "mqtt_rest_bridge_listener": {
     "enabled": true,

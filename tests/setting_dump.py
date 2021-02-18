@@ -12,7 +12,8 @@ if __name__ == '__main__':
         "mqtt": true,
         "histories": true,
         "cleaner": true,
-        "history_sync": true
+        "history_sync_influxdb": true,
+        "history_sync_postgres": true
       },
       "influx": {
         "host": "0.0.0.0",
@@ -25,7 +26,20 @@ if __name__ == '__main__':
         "retries": 3,
         "timer": 1,
         "path": "",
-        "measurement": "history"
+        "measurement": "history",
+        "attempt_reconnect_secs": 5
+      },
+      "postgres": {
+        "host": "0.0.0.0",
+        "port": 5432,
+        "dbname": "db",
+        "user": "user",
+        "password": "password",
+        "ssl_mode": "allow",
+        "connect_timeout": 5,
+        "timer": 1,
+        "table_name": "history",
+        "attempt_reconnect_secs": 5
       },
       "generic_point_listener": {
         "enabled": true,

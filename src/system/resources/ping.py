@@ -29,6 +29,7 @@ class Ping(Resource):
         up_hour = "{:.2f}".format(up_hour)
         from src import AppSetting
         from src.services.histories.sync.influxdb import InfluxDB
+        from src.services.histories.sync.postgresql import PostgreSQL
         from src.services.mqtt_client import MqttRegistry
         setting: AppSetting = current_app.config[AppSetting.KEY]
         deployment_mode = 'production' if setting.prod else 'development'
@@ -40,6 +41,7 @@ class Ping(Resource):
             'deployment_mode': deployment_mode,
             'mqtt_client_statuses': [{mqttc.to_string(): mqttc.status()} for mqttc in MqttRegistry().clients()],
             'influx_db_status': InfluxDB().status(),
+            'postgre_sql_status': PostgreSQL().status(),
             'settings': {
                 setting.services.KEY: setting.services.to_dict(),
                 setting.drivers.KEY: setting.drivers.to_dict()
