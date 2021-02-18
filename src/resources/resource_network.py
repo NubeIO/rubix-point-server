@@ -13,7 +13,7 @@ def network_marshaller(data: any, args: dict):
                                     network_all_fields_with_children)
 
 
-class NetworkResource(Resource):
+class NetworkResourceByUUID(Resource):
     @classmethod
     def get(cls, uuid):
         network = NetworkModel.find_by_uuid(uuid)
@@ -34,4 +34,4 @@ class NetworkResourceByName(Resource):
 class NetworkResourceList(Resource):
     @classmethod
     def get(cls):
-        return network_marshaller(NetworkModel.query.all(), request.args)
+        return network_marshaller(NetworkModel.find_all(), request.args)

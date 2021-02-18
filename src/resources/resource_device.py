@@ -10,7 +10,7 @@ def device_marshaller(data: any, args: dict):
     return model_marshaller_with_children(data, args, device_all_fields, device_all_fields_with_children)
 
 
-class DeviceResource(Resource):
+class DeviceResourceByUUID(Resource):
     @classmethod
     def get(cls, uuid):
         device: DeviceModel = DeviceModel.find_by_uuid(uuid)
@@ -31,4 +31,4 @@ class DeviceResourceByName(Resource):
 class DeviceResourceList(Resource):
     @classmethod
     def get(cls):
-        return device_marshaller(DeviceModel.query.all(), request.args)
+        return device_marshaller(DeviceModel.find_all(), request.args)

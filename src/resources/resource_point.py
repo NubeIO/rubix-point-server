@@ -1,72 +1,51 @@
-from flask_restful import Resource, reqparse, abort, marshal_with
+from abc import abstractmethod
+
+from flask_restful import Resource, abort, marshal_with
 
 from src.models.point.model_point import PointModel
-# from src.models.point.writable.model_point_writeable import PointModelWritable
-# from src.models.point.readOnly.model_point_readonly import PointModelReadOnly
-from src.resources.rest_schema.schema_point import point_all_attributes, point_all_fields
+from src.resources.rest_schema.schema_point import point_all_fields
 
 
 class PointResource(Resource):
-    parser = reqparse.RequestParser()
-    for attr in point_all_attributes:
-        parser.add_argument(attr,
-                            type=point_all_attributes[attr]['type'],
-                            required=point_all_attributes[attr].get('required', False),
-                            help=point_all_attributes[attr].get('help', None),
-                            store_missing=False)
-
     @classmethod
     @marshal_with(point_all_fields)
-    def get(cls, uuid):
-        point = PointModel.find_by_uuid(uuid)
+    def get(cls, **kwargs):
+        point: PointModel = cls.get_point(**kwargs)
         if not point:
             abort(404, message='Point not found')
         return point
 
     @classmethod
-    def delete(cls, uuid):
-        point = PointModel.find_by_uuid(uuid)
-        if point:
-            point.delete_from_db()
+    def delete(cls, **kwargs):
+        point: PointModel = cls.get_point(**kwargs)
+        if not point:
+            abort(404, message='Point not found')
+        point.delete_from_db()
         return '', 204
 
-
-class PointResourceByName(Resource):
     @classmethod
-    @marshal_with(point_all_fields)
-    def get(cls, network_name: str, device_name: str, point_name: str):
-        point = PointModel.find_by_name(network_name, device_name, point_name)
-        if not point:
-            abort(404, message='Point not found')
-        return point
+    @abstractmethod
+    def get_point(cls, **kwargs) -> PointModel:
+        raise NotImplementedError
+
+
+class PointResourceByUUID(PointResource):
+    @classmethod
+    @abstractmethod
+    def get_point(cls, **kwargs) -> PointModel:
+        return PointModel.find_by_uuid(kwargs.get('uuid'))
+
+
+class PointResourceByName(PointResource):
+    @classmethod
+    @abstractmethod
+    def get_point(cls, **kwargs) -> PointModel:
+        return PointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'), kwargs.get('point_name'))
 
 
 class PointResourceList(Resource):
     @classmethod
     @marshal_with(point_all_fields)
     def get(cls):
-        result = PointModel.query.all()
+        result = PointModel.find_all()
         return result
-
-    @classmethod
-    def delete(cls):
-        points = PointModel.query.all()
-        for point in points:
-            point.delete_from_db()
-        return '', 204
-
-
-# class PointWriteableResourceList(Resource):
-#     @classmethod
-#     @marshal_with(point_all_fields)
-#     def get(cls):
-#         result = PointModelWritable.query.all()
-#         return result
-#
-#
-# class PointReadOnlyResourceList(Resource):
-#     @classmethod
-#     @marshal_with(point_all_fields, envelope="points_readOnly")
-#     def get(cls):
-#         result = PointModelReadOnly.query.all()
-#         return result
