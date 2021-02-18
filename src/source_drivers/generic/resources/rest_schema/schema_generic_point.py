@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from src.resources.rest_schema.schema_point import *
 
-priority_array_fields = OrderedDict({
+priority_array_write_fields = OrderedDict({
     '_1': fields.Float,
     '_2': fields.Float,
     '_3': fields.Float,
@@ -33,8 +33,8 @@ generic_point_all_attributes['unit'] = {
 }
 
 generic_point_return_attributes = deepcopy(point_return_attributes)
-generic_point_return_attributes['priority_array'] = {
-    'type': fields.Nested(priority_array_fields),
+generic_point_return_attributes['priority_array_write'] = {
+    'type': fields.Nested(priority_array_write_fields),
 }
 generic_point_all_fields = {}
 map_rest_schema(generic_point_return_attributes, generic_point_all_fields)
