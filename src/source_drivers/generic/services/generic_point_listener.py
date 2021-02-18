@@ -71,6 +71,6 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
         fault_message = payload.get('fault_message', '')
         priority = payload.get('priority', None)
         try:
-            point.update_point_store(value, value_raw, fault, fault_message, priority)
+            point.update_point_store(value, priority, value_raw, fault, fault_message)
         except Exception as e:
             logger.error(str(e))

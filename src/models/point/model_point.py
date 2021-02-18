@@ -127,8 +127,10 @@ class PointModel(ModelBase):
 
         return self
 
-    def update_point_store(self, value: float, value_raw: str, fault: bool, fault_message: str, priority: int = 16,
+    def update_point_store(self, value: float, priority: int, value_raw: str, fault: bool, fault_message: str,
                            sync: bool = True):
+        if not priority:
+            priority = 16
         if priority not in range(1, 17):
             raise ValueError('priority should be in range(1, 17)')
         if value_raw is not None and value is not None:
