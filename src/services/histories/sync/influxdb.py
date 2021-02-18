@@ -79,8 +79,11 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         store = []
         plat = {
             'client_id': self.__wires_plat.client_id,
+            'client_name': self.__wires_plat.client_name,
             'site_id': self.__wires_plat.site_id,
-            'device_id': self.__wires_plat.device_id
+            'site_name': self.__wires_plat.site_name,
+            'device_id': self.__wires_plat.device_id,
+            'device_name': self.__wires_plat.device_name
         }
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
@@ -96,7 +99,9 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                 tags.update({
                     'point_uuid': point.uuid,
                     'point_name': point.name,
-                    'device_name': point.device.name,
+                    'edge_device_uuid': point.device.uuid,
+                    'edge_device_name': point.device.name,
+                    'network_uuid': point.device.network.uuid,
                     'network_name': point.device.network.name,
                     'driver': point.driver,
                 })

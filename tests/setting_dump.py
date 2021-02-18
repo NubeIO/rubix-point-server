@@ -26,7 +26,8 @@ if __name__ == '__main__':
         "retries": 3,
         "timer": 1,
         "path": "",
-        "measurement": "history"
+        "measurement": "history",
+        "attempt_reconnect_secs": 5
       },
       "postgres": {
         "host": "0.0.0.0",
