@@ -1,10 +1,12 @@
+import uuid
+
 from flask_restful import Resource, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
+from src.resources.utils import model_marshaller_with_children
 from src.source_drivers.generic.models.device import GenericDeviceModel
 from src.source_drivers.generic.resources.rest_schema.schema_generic_device import generic_device_all_attributes, \
     generic_device_all_fields, generic_device_all_fields_with_children
-from src.resources.utils import model_marshaller_with_children
 
 
 def generic_device_marshaller(data: any, args: dict):
@@ -21,14 +23,11 @@ class GenericDeviceBase(Resource):
                             help=generic_device_all_attributes[attr].get('help', None),
                             store_missing=False)
 
-    @staticmethod
-    def create_device_model_obj(uuid, data):
-        return GenericDeviceModel(uuid=uuid, **data)
-
     @classmethod
-    def add_device(cls, uuid, data):
+    def add_device(cls, data):
+        _uuid = str(uuid.uuid4())
         try:
-            device = GenericDeviceBase.create_device_model_obj(uuid, data)
+            device = GenericDeviceModel(uuid=_uuid, **data)
             device.save_to_db()
             return device
         except IntegrityError as e:

@@ -27,12 +27,11 @@ class ModbusDeviceSingularBase(ModbusDeviceBase):
         device: ModbusDeviceModel = cls.get_device(**kwargs)
         if device is None:
             return modbus_device_marshaller(cls.add_device(data), request.args)
-        else:
-            try:
-                device.update(**data)
-                return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
-            except Exception as e:
-                abort(500, message=str(e))
+        try:
+            device.update(**data)
+            return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
+        except Exception as e:
+            abort(500, message=str(e))
 
     @classmethod
     def patch(cls, **kwargs):
@@ -40,12 +39,11 @@ class ModbusDeviceSingularBase(ModbusDeviceBase):
         device: ModbusDeviceModel = cls.get_device(**kwargs)
         if device is None:
             abort(404, message=f"Does not exist {kwargs}")
-        else:
-            try:
-                device.update(**data)
-                return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
-            except Exception as e:
-                abort(500, message=str(e))
+        try:
+            device.update(**data)
+            return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
+        except Exception as e:
+            abort(500, message=str(e))
 
     @classmethod
     def delete(cls, **kwargs):

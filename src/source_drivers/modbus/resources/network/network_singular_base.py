@@ -28,12 +28,11 @@ class ModbusNetworkSingularBase(ModbusNetworkBase):
         network: ModbusNetworkModel = cls.find_network(**kwargs)
         if network is None:
             return modbus_network_marshaller(cls.add_network(data), request.args)
-        else:
-            try:
-                network.update(**data)
-                return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
-            except Exception as e:
-                abort(500, message=str(e))
+        try:
+            network.update(**data)
+            return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
+        except Exception as e:
+            abort(500, message=str(e))
 
     @classmethod
     def patch(cls, **kwargs):
@@ -41,12 +40,11 @@ class ModbusNetworkSingularBase(ModbusNetworkBase):
         network: ModbusNetworkModel = cls.find_network(**kwargs)
         if network is None:
             abort(404, message=f"Does not exist {kwargs}")
-        else:
-            try:
-                network.update(**data)
-                return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
-            except Exception as e:
-                abort(500, message=str(e))
+        try:
+            network.update(**data)
+            return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
+        except Exception as e:
+            abort(500, message=str(e))
 
     @classmethod
     def delete(cls, **kwargs):

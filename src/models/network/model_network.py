@@ -23,8 +23,7 @@ class NetworkModel(ModelBase):
 
     @classmethod
     def find_by_name(cls, network_name: str):
-        results = cls.query.filter_by(name=network_name) \
-            .first()
+        results = cls.query.filter_by(name=network_name).first()
         return results
 
     def get_model_event_name(self) -> str:

@@ -4,8 +4,9 @@ from src.source_drivers.generic.models.point import GenericPointModel
 from src.source_drivers.generic.resources.point.point_singular_base import GenericPointSingularBase
 
 
-class GenericPointSingular(GenericPointSingularBase):
+class GenericPointSingularByName(GenericPointSingularBase):
     @classmethod
     @abstractmethod
     def get_point(cls, **kwargs) -> GenericPointModel:
-        return GenericPointModel.find_by_uuid(kwargs.get('uuid'))
+        return GenericPointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'),
+                                              kwargs.get('point_name'))

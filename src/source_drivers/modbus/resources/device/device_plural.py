@@ -7,7 +7,7 @@ from src.source_drivers.modbus.resources.device.device_base import ModbusDeviceB
 class ModbusDevicePlural(ModbusDeviceBase):
     @classmethod
     def get(cls):
-        return modbus_device_marshaller(ModbusDeviceModel.query.all(), request.args)
+        return modbus_device_marshaller(ModbusDeviceModel.find_all(), request.args)
 
     @classmethod
     def post(cls):

@@ -1,5 +1,3 @@
-import uuid
-
 from flask_restful.reqparse import request
 
 from src.source_drivers.generic.models.device import GenericDeviceModel
@@ -10,10 +8,9 @@ class GenericDevicePlural(GenericDeviceBase):
 
     @classmethod
     def get(cls):
-        return generic_device_marshaller(GenericDeviceModel.query.all(), request.args)
+        return generic_device_marshaller(GenericDeviceModel.find_all(), request.args)
 
     @classmethod
     def post(cls):
-        _uuid = str(uuid.uuid4())
         data = GenericDevicePlural.parser.parse_args()
-        return generic_device_marshaller(cls.add_device(_uuid, data), request.args)
+        return generic_device_marshaller(cls.add_device(data), request.args)

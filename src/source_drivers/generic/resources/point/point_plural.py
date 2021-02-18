@@ -1,4 +1,3 @@
-import uuid
 from flask_restful import marshal_with
 
 from src.source_drivers.generic.models.point import GenericPointModel
@@ -10,12 +9,11 @@ class GenericPointPlural(GenericPointBase):
     @classmethod
     @marshal_with(generic_point_all_fields)
     def get(cls):
-        points = GenericPointModel.query.all()
+        points = GenericPointModel.find_all()
         return points
 
     @classmethod
     @marshal_with(generic_point_all_fields)
     def post(cls):
-        _uuid = str(uuid.uuid4())
         data = GenericPointPlural.parser.parse_args()
-        return cls.add_point(data, _uuid)
+        return cls.add_point(data)

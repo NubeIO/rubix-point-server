@@ -1,3 +1,5 @@
+import uuid
+
 from flask_restful import Resource, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
@@ -16,9 +18,10 @@ class GenericPointBase(Resource):
                             store_missing=False)
 
     @classmethod
-    def add_point(cls, data, uuid):
+    def add_point(cls, data):
+        _uuid = str(uuid.uuid4())
         try:
-            point = GenericPointModel(uuid=uuid, **data)
+            point = GenericPointModel(uuid=_uuid, **data)
             point.priority_array = PriorityArrayModel.create_new_priority_array_model(uuid)
             point.save_to_db()
             return point

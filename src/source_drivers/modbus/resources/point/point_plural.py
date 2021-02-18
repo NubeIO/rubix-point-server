@@ -9,7 +9,7 @@ class ModbusPointPlural(ModbusPointBase):
     @classmethod
     @marshal_with(modbus_point_all_fields)
     def get(cls):
-        points = ModbusPointModel.query.all()
+        points = ModbusPointModel.find_all()
         return points
 
     @classmethod

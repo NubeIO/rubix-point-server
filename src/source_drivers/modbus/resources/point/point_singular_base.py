@@ -33,11 +33,10 @@ class ModbusPointSingularBase(ModbusPointBase):
         point: ModbusPointModel = cls.get_point(**kwargs)
         if point is None:
             return cls.add_point(data)
-        else:
-            try:
-                return point.update(**data)
-            except Exception as e:
-                abort(500, message=str(e))
+        try:
+            return point.update(**data)
+        except Exception as e:
+            abort(500, message=str(e))
 
     @classmethod
     @marshal_with(modbus_point_all_fields)
@@ -46,11 +45,10 @@ class ModbusPointSingularBase(ModbusPointBase):
         point: ModbusPointModel = cls.get_point(**kwargs)
         if point is None:
             abort(404, message=f'Modbus Point not found')
-        else:
-            try:
-                return point.update(**data)
-            except Exception as e:
-                abort(500, message=str(e))
+        try:
+            return point.update(**data)
+        except Exception as e:
+            abort(500, message=str(e))
 
     @classmethod
     def delete(cls, **kwargs):

@@ -7,10 +7,13 @@ from src.resources.resource_point import PointResource, PointResourceByName, Poi
 from src.resources.resource_wires_plat import WiresPlatResource
 from src.source_drivers.generic.resources.device.device_plural import GenericDevicePlural
 from src.source_drivers.generic.resources.device.device_singular import GenericDeviceSingular
+from src.source_drivers.generic.resources.device.device_singular_by_name import GenericDeviceSingularByName
 from src.source_drivers.generic.resources.network.network_plural import GenericNetworkPlural
 from src.source_drivers.generic.resources.network.network_singular import GenericNetworkSingular
+from src.source_drivers.generic.resources.network.network_singular_by_name import GenericNetworkSingularByName
 from src.source_drivers.generic.resources.point.point_plural import GenericPointPlural
 from src.source_drivers.generic.resources.point.point_singular import GenericPointSingular
+from src.source_drivers.generic.resources.point.point_singular_by_name import GenericPointSingularByName
 from src.source_drivers.generic.resources.point.point_value_writer import GenericUUIDPointValueWriter, \
     GenericNamePointValueWriter
 from src.source_drivers.modbus.resources.device.device_plural import ModbusDevicePlural
@@ -52,11 +55,15 @@ api_point.add_resource(PointResourceList, '')
 bp_generic = Blueprint('generic', __name__, url_prefix='/api/generic')
 api_generic = Api(bp_generic)
 api_generic.add_resource(GenericNetworkPlural, '/networks')
-api_generic.add_resource(GenericNetworkSingular, '/networks/<string:uuid>')
+api_generic.add_resource(GenericNetworkSingular, '/networks/uuid/<string:uuid>')
+api_generic.add_resource(GenericNetworkSingularByName, '/networks/name/<string:name>')
 api_generic.add_resource(GenericDevicePlural, '/devices')
-api_generic.add_resource(GenericDeviceSingular, '/devices/<string:uuid>')
+api_generic.add_resource(GenericDeviceSingular, '/devices/uuid/<string:uuid>')
+api_generic.add_resource(GenericDeviceSingularByName, '/devices/name/<string:network_name>/<string:device_name>')
 api_generic.add_resource(GenericPointPlural, '/points')
-api_generic.add_resource(GenericPointSingular, '/points/<string:uuid>')
+api_generic.add_resource(GenericPointSingular, '/points/uuid/<string:uuid>')
+api_generic.add_resource(GenericPointSingularByName,
+                         '/points/name/<string:network_name>/<string:device_name>/<string:point_name>')
 api_generic.add_resource(GenericUUIDPointValueWriter, '/points_value/uuid/<string:uuid>')
 api_generic.add_resource(GenericNamePointValueWriter,
                          '/points_value/name/<string:network_name>/<string:device_name>/<string:point_name>')
