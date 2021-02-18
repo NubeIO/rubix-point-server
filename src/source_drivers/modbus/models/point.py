@@ -24,6 +24,10 @@ class ModbusPointModel(PointMixinModel):
     )
 
     @classmethod
+    def filter_by_device_uuid(cls, device_uuid: str):
+        return cls.query.filter_by(device_uuid=device_uuid)
+
+    @classmethod
     def get_polymorphic_identity(cls):
         return MODBUS_SERVICE_NAME
 

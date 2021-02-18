@@ -73,7 +73,6 @@ api_modbus.add_resource(ModbusPointPlural, '/points')
 api_modbus.add_resource(ModbusPointSingular, '/points/uuid/<string:uuid>')
 api_modbus.add_resource(ModbusPointSingularByName,
                         '/points/name/<string:network_name>/<string:device_name>/<string:point_name>')
-
 api_modbus.add_resource(ModbusPointPoll, '/poll/point/<string:uuid>')
 api_modbus.add_resource(ModbusPointPollNonExisting, '/poll/point')
 api_modbus.add_resource(ModbusPointPluralPointStore, '/point_stores')
