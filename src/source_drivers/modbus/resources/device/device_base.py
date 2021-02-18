@@ -1,10 +1,12 @@
+import uuid
+
 from flask_restful import Resource, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
+from src.resources.utils import model_marshaller_with_children
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.resources.rest_schema.schema_modbus_device import modbus_device_all_attributes, \
     modbus_device_all_fields, modbus_device_all_fields_with_children
-from src.resources.utils import model_marshaller_with_children
 
 
 def modbus_device_marshaller(data: any, args: dict):
@@ -21,14 +23,11 @@ class ModbusDeviceBase(Resource):
                             help=modbus_device_all_attributes[attr].get('help', None),
                             store_missing=False)
 
-    @staticmethod
-    def create_device_model_obj(uuid, data):
-        return ModbusDeviceModel(uuid=uuid, **data)
-
     @classmethod
-    def add_device(cls, uuid, data):
+    def add_device(cls, data):
+        _uuid = str(uuid.uuid4())
         try:
-            device = ModbusDeviceBase.create_device_model_obj(uuid, data)
+            device = ModbusDeviceModel(uuid=_uuid, **data)
             device.save_to_db()
             return device
         except IntegrityError as e:

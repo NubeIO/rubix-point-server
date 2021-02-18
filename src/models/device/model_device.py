@@ -30,7 +30,7 @@ class DeviceModel(ModelBase):
         return f"Device(device_uuid = {self.device_uuid})"
 
     @classmethod
-    def find_by_name(cls, device_name: str, network_name: str):
+    def find_by_name(cls, network_name: str, device_name: str):
         results = cls.query.filter_by(name=device_name) \
             .join(NetworkModel).filter_by(name=network_name) \
             .first()

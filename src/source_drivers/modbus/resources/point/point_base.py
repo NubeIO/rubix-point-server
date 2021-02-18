@@ -1,3 +1,5 @@
+import uuid
+
 from flask_restful import Resource, reqparse, abort
 from sqlalchemy.exc import IntegrityError
 
@@ -15,9 +17,10 @@ class ModbusPointBase(Resource):
                             store_missing=False)
 
     @classmethod
-    def add_point(cls, data, uuid):
+    def add_point(cls, data):
+        _uuid = str(uuid.uuid4())
         try:
-            point = ModbusPointModel(uuid=uuid, **data)
+            point = ModbusPointModel(uuid=_uuid, **data)
             point.save_to_db()
             return point
         except IntegrityError as e:

@@ -1,5 +1,3 @@
-import uuid
-
 from flask_restful.reqparse import request
 
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
@@ -13,6 +11,5 @@ class ModbusNetworkPlural(ModbusNetworkBase):
 
     @classmethod
     def post(cls):
-        _uuid = str(uuid.uuid4())
         data = ModbusNetworkPlural.parser.parse_args()
-        return modbus_network_marshaller(cls.add_network(_uuid, data), request.args)
+        return modbus_network_marshaller(cls.add_network(data), request.args)

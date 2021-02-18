@@ -13,7 +13,7 @@ def device_marshaller(data: any, args: dict):
 class DeviceResource(Resource):
     @classmethod
     def get(cls, uuid):
-        device = DeviceModel.find_by_uuid(uuid)
+        device: DeviceModel = DeviceModel.find_by_uuid(uuid)
         if not device:
             abort(404, message='Device not found')
         return device_marshaller(device, request.args)
@@ -22,7 +22,7 @@ class DeviceResource(Resource):
 class DeviceResourceByName(Resource):
     @classmethod
     def get(cls, network_name: str, device_name: str):
-        device = DeviceModel.find_by_name(device_name, network_name)
+        device: DeviceModel = DeviceModel.find_by_name(network_name, device_name)
         if not device:
             abort(404, message='Device not found')
         return device_marshaller(device, request.args)

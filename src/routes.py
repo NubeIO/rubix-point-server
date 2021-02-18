@@ -15,14 +15,17 @@ from src.source_drivers.generic.resources.point.point_value_writer import Generi
     GenericNamePointValueWriter
 from src.source_drivers.modbus.resources.device.device_plural import ModbusDevicePlural
 from src.source_drivers.modbus.resources.device.device_singular import ModbusDeviceSingular
+from src.source_drivers.modbus.resources.device.device_singular_by_name import ModbusDeviceSingularByName
 from src.source_drivers.modbus.resources.mapping.mapping import MPGBPMappingResourceList, \
     MPGBPMappingResourceByGenericPointUUID, MPGBPMappingResourceByBACnetPointUUID, \
     MPGBPMappingResourceByModbusPointUUID, MPGBPMappingResourceByUUID
 from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
 from src.source_drivers.modbus.resources.network.network_singular import ModbusNetworkSingular
+from src.source_drivers.modbus.resources.network.network_singular_by_name import ModbusNetworkSingularByName
 from src.source_drivers.modbus.resources.point.point_plural import ModbusPointPlural
-from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingular, ModbusPointPoll, \
-    ModbusPointPollNonExisting
+from src.source_drivers.modbus.resources.point.point_poll import ModbusPointPollNonExisting, ModbusPointPoll
+from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingular
+from src.source_drivers.modbus.resources.point.point_singular_by_name import ModbusPointSingularByName
 from src.source_drivers.modbus.resources.point.point_stores import ModbusPointPluralPointStore, ModbusPointStore, \
     ModbusDevicePointPluralPointStore
 from src.system.resources.memory import GetSystemMem
@@ -61,11 +64,16 @@ api_generic.add_resource(GenericNamePointValueWriter,
 bp_modbus = Blueprint('modbus', __name__, url_prefix='/api/modbus')
 api_modbus = Api(bp_modbus)
 api_modbus.add_resource(ModbusNetworkPlural, '/networks')
-api_modbus.add_resource(ModbusNetworkSingular, '/networks/<string:uuid>')
+api_modbus.add_resource(ModbusNetworkSingular, '/networks/uuid/<string:uuid>')
+api_modbus.add_resource(ModbusNetworkSingularByName, '/networks/name/<string:name>')
 api_modbus.add_resource(ModbusDevicePlural, '/devices')
-api_modbus.add_resource(ModbusDeviceSingular, '/devices/<string:uuid>')
+api_modbus.add_resource(ModbusDeviceSingular, '/devices/uuid/<string:uuid>')
+api_modbus.add_resource(ModbusDeviceSingularByName, '/devices/name/<string:network_name>/<string:device_name>')
 api_modbus.add_resource(ModbusPointPlural, '/points')
-api_modbus.add_resource(ModbusPointSingular, '/points/<string:uuid>')
+api_modbus.add_resource(ModbusPointSingular, '/points/uuid/<string:uuid>')
+api_modbus.add_resource(ModbusPointSingularByName,
+                        '/points/name/<string:network_name>/<string:device_name>/<string:point_name>')
+
 api_modbus.add_resource(ModbusPointPoll, '/poll/point/<string:uuid>')
 api_modbus.add_resource(ModbusPointPollNonExisting, '/poll/point')
 api_modbus.add_resource(ModbusPointPluralPointStore, '/point_stores')

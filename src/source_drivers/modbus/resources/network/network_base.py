@@ -1,3 +1,5 @@
+import uuid
+
 from flask_restful import Resource, abort, reqparse
 from sqlalchemy.exc import IntegrityError
 
@@ -24,13 +26,10 @@ class ModbusNetworkBase(Resource):
                             store_missing=False)
 
     @staticmethod
-    def create_network_model_obj(uuid, data):
-        return ModbusNetworkModel(uuid=uuid, **data)
-
-    @staticmethod
-    def add_network(uuid, data):
+    def add_network(data):
+        _uuid = str(uuid.uuid4())
         try:
-            network = ModbusNetworkBase.create_network_model_obj(uuid, data)
+            network = ModbusNetworkModel(uuid=_uuid, **data)
             network.save_to_db()
             return network
         except IntegrityError as e:

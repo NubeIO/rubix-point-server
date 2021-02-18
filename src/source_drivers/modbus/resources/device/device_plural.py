@@ -1,5 +1,3 @@
-import uuid
-
 from flask_restful.reqparse import request
 
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
@@ -13,6 +11,5 @@ class ModbusDevicePlural(ModbusDeviceBase):
 
     @classmethod
     def post(cls):
-        _uuid = str(uuid.uuid4())
         data = ModbusDevicePlural.parser.parse_args()
-        return modbus_device_marshaller(cls.add_device(_uuid, data), request.args)
+        return modbus_device_marshaller(cls.add_device(data), request.args)

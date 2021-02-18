@@ -1,4 +1,3 @@
-import uuid
 from flask_restful import marshal_with
 
 from src.source_drivers.modbus.models.point import ModbusPointModel
@@ -16,6 +15,5 @@ class ModbusPointPlural(ModbusPointBase):
     @classmethod
     @marshal_with(modbus_point_all_fields)
     def post(cls):
-        _uuid = str(uuid.uuid4())
         data = ModbusPointPlural.parser.parse_args()
-        return cls.add_point(data, _uuid)
+        return cls.add_point(data)
