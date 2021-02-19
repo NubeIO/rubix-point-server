@@ -1,5 +1,6 @@
 import logging
 import time
+import uuid
 from abc import ABC, abstractmethod
 from collections import Iterable
 
@@ -23,7 +24,7 @@ class MqttClientBase(ABC):
     def start(self, config: MqttSettingBase):
         self._config = config
         logger.info(f'Starting MQTT client[{self.config.name}]...')
-        self._client = mqtt.Client(self.config.name)
+        self._client = mqtt.Client(f'{self.config.name}-{str(uuid.uuid4())}')
         if self.config.authentication:
             self._client.username_pw_set(self.config.username, self.config.password)
         self._client.on_connect = self._on_connect
@@ -82,6 +83,5 @@ class MqttClientBase(ABC):
     def _mqtt_topic_min(self):
         pass
 
-    @staticmethod
-    def make_topic(part: Iterable, sep: str = '/'):
+    def make_topic(self, part: Iterable, sep: str = '/'):
         return sep.join(part)

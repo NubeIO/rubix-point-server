@@ -1,6 +1,8 @@
 import json
 import logging
 
+from registry.registry import RubixRegistry
+
 from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
@@ -54,10 +56,6 @@ class MqttClient(MqttClientBase, EventServiceBase):
                 None or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
 
-        topic: str = self.make_topic(
-            (self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver, network_uuid, network_name,
-             device_uuid, device_name, point.uuid, point.name))
-
         if point_store.fault:
             payload: dict = {
                 'fault': point_store.fault,
@@ -74,10 +72,19 @@ class MqttClient(MqttClientBase, EventServiceBase):
         if not isinstance(payload['ts'], str):
             payload['ts'] = datetime_to_str(payload['ts'])
 
+        topic: str = self.make_topic(
+            (self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver, network_uuid, network_name,
+             device_uuid, device_name, point.uuid, point.name))
+        if not topic:
+            logger.error('Please add wires-plat on Rubix Service')
+            return
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
         self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)
+
         if self.config.publish_value and not point_store.fault:
-            topic: str = topic.replace('/' + MQTT_TOPIC_COV_ALL + '/', '/' + MQTT_TOPIC_COV_VALUE + '/', 1)
+            topic: str = self.make_topic(
+                (self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, source_driver, network_uuid, network_name,
+                 device_uuid, device_name, point.uuid, point.name))
             logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
             self._client.publish(topic, point_store.value, self.config.qos, self.config.retain)
 
@@ -88,8 +95,10 @@ class MqttClient(MqttClientBase, EventServiceBase):
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
 
-        topic = self.make_topic((self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), model.uuid))
-
+        topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), model.uuid))
+        if not topic:
+            logger.error('Please add wires-plat on Rubix Service')
+            return
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {updates}')
         self._client.publish(topic, json.dumps(updates), self.config.qos, self.config.retain)
 
@@ -131,3 +140,11 @@ class MqttClient(MqttClientBase, EventServiceBase):
         elif event.event_type == EventType.POINT_UPDATE or event.event_type == EventType.DEVICE_UPDATE or \
                 event.event_type == EventType.NETWORK_UPDATE:
             self.publish_update(event.data.get('model'), event.data.get('updates'))
+
+    def make_topic(self, part: tuple, sep: str = '/') -> str:
+        wires_plat: dict = RubixRegistry().read_wires_plat()
+        if not wires_plat:
+            return ''
+        return sep.join((wires_plat.get('client_id'), wires_plat.get('client_name'),
+                         wires_plat.get('site_id'), wires_plat.get('site_name'),
+                         wires_plat.get('device_id'), wires_plat.get('device_name')) + part)

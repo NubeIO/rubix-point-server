@@ -80,17 +80,17 @@ python run.py -s config/config.json
   
 #### Topic structure:
 ```
-rubix/points/value/{event}/...
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/{event}/...
 ```
 ```
 COV:
-  rubix/points/value/cov/all/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point_uuid}/{point_name}
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/{source_driver}/{network_uuid}/<network_name>/{device_uuid}/<device_name>/{point_uuid}/<point_name>
 
   [optional] (value only)
-  rubix/points/value/cov/value/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point_uuid}/{point_name}
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/value/{source_driver}/{network_uuid}/<network_name>/{device_uuid}/<device_name>/{point_uuid}/<point_name>
 
 UPDATE:
-  rubix/points/value/update/{model}/{model.uuid}
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/{model}/{model.uuid}
 ```
 
 
@@ -99,27 +99,27 @@ UPDATE:
 **COV:**
 ```
 all points:
-  rubix/points/value/cov/all/#
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/#
 
 all modbus rtu points:
-  rubix/points/value/cov/all/+/+/+/+/+/+/modbus_rtu
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/+/+/+/+/modbus_rtu
 
 by point uuid:
-  rubix/points/value/cov/all/+/+/+/+/+/example_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/+/+/+/example_uuid
 
 by point name:
-  rubix/points/value/cov/all/+/+/{network_name}/+/{device_name}/+/{point_name}
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/<network_name>/+/<device_name>/+/<point_name>
 ```
 **UPDATE:**
 ```
 network:
-  rubix/points/value/update/network/example_network_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/network/example_network_uuid
 
 device:
-  rubix/points/value/update/device/example_device_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/device/example_device_uuid
 
 point:
-  rubix/points/value/update/point/example_point_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/point/example_point_uuid
 ```
 
 ### Generic Point MQTT client
@@ -127,6 +127,7 @@ point:
 All generic point values are updated over MQTT.  
 These COVs are then broadcast again over the normal MQTT clients as above
 #### Topic structure:
+
 ```
-rubix/points/generic/cov/<point_name>/<device_name>/<network_name>
+<client_id>/<site_id>/<device_id>/rubix/points/generic/cov/<network_name>/<device_name>/<point_name>
 ```

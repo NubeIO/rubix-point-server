@@ -1,6 +1,8 @@
 import logging
 from json import loads as json_loads, JSONDecodeError
 
+from registry.registry import RubixRegistry
+
 from src import GenericListenerSetting
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
@@ -33,8 +35,13 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
         super().start(config)
 
     def _on_connection_successful(self):
-        logger.debug(f'MQTT sub to {self.config.topic}/#')
-        self._client.subscribe(f'{self.config.topic}/#')
+        wires_plat: dict = RubixRegistry().read_wires_plat()
+        if not wires_plat:
+            logger.error('Please add wires-plat on Rubix Service')
+        topic: str = self.make_topic(
+            (wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'), self.config.topic))
+        logger.info(f'MQTT sub to {topic}/#')
+        self._client.subscribe(f'{topic}/#')
 
     @exception_handler
     def _on_message(self, client, userdata, message):
@@ -42,15 +49,16 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
             self.__update_point(message)
 
     def _mqtt_topic_min(self):
-        return len(self.make_topic((self.config.topic, '<point_name>', '<device_name>', '<network_name>')).split('/'))
+        return len(self.make_topic(('<client_id>', '<site_id>', '<device_id>', self.config.topic, '<point_name>',
+                                    '<device_name>', '<network_name>')).split('/'))
 
     def __update_point(self, message):
         topic = message.topic.split('/')
         if len(topic) != self._mqtt_topic_min():
             return
-        point_name = topic[-3]
+        network_name = topic[-3]
         device_name = topic[-2]
-        network_name = topic[-1]
+        point_name = topic[-1]
         try:
             payload = json_loads(message.payload)
             if not payload and ('value' not in payload.keys() or 'fault' not in payload.keys()):
