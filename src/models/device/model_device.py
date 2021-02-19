@@ -1,4 +1,7 @@
+import re
+
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import validates
 
 from src import db
 from src.models.model_base import ModelBase
@@ -28,6 +31,12 @@ class DeviceModel(ModelBase):
 
     def __repr__(self):
         return f"Device(device_uuid = {self.device_uuid})"
+
+    @validates('name')
+    def validate_name(self, _, value):
+        if not re.match("^([A-Za-z0-9_-])+$", value):
+            raise ValueError("name should be alphanumeric and can contain '_', '-'")
+        return value
 
     @classmethod
     def find_by_name(cls, network_name: str, device_name: str):

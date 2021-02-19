@@ -55,6 +55,12 @@ class PointModel(ModelBase):
     def __repr__(self):
         return f"Point(uuid = {self.uuid})"
 
+    @validates('name')
+    def validate_name(self, _, value):
+        if not re.match("^([A-Za-z0-9_-])+$", value):
+            raise ValueError("name should be alphanumeric and can contain '_', '-'")
+        return value
+
     @classmethod
     def find_by_name(cls, network_name: str, device_name: str, point_name: str):
         results = cls.query.filter_by(name=point_name) \

@@ -1,3 +1,7 @@
+import re
+
+from sqlalchemy.orm import validates
+
 from src import db
 from src.models.model_base import ModelBase
 from src.services.event_service_base import EventType
@@ -17,6 +21,12 @@ class NetworkModel(ModelBase):
         'polymorphic_identity': 'network',
         'polymorphic_on': driver
     }
+
+    @validates('name')
+    def validate_name(self, _, value):
+        if not re.match("^([A-Za-z0-9_-])+$", value):
+            raise ValueError("name should be alphanumeric and can contain '_', '-'")
+        return value
 
     def __repr__(self):
         return f"Network(uuid = {self.uuid})"
