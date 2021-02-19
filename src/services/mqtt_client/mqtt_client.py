@@ -8,7 +8,7 @@ from src.services.event_service_base import EventServiceBase, Event, EventType
 from src.utils.model_utils import datetime_to_str
 from .mqtt_client_base import MqttClientBase
 from .mqtt_registry import MqttRegistry
-from ...setting import MqttSettingBase
+from ...setting import MqttSettingBase, MqttSetting
 
 logger = logging.getLogger(__name__)
 
@@ -35,32 +35,37 @@ class MqttClient(MqttClientBase, EventServiceBase):
         self.supported_events[EventType.NETWORK_UPDATE] = True
         self.supported_events[EventType.MQTT_DEBUG] = True
 
+    @property
+    def config(self) -> MqttSetting:
+        return self._config
+
     def start(self, config: MqttSettingBase):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_service(self)
         MqttRegistry().add(self)
         super(MqttClient, self).start(config)
 
-    def publish_cov(self, point: PointModel, point_store: PointStoreModel, device_uuid: str, device_name: str,
-                    network_uuid: str, network_name: str, source_driver: str):
+    def publish_cov(self, source_driver: str, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
+                    point: PointModel, point_store: PointStoreModel):
         if not self.status():
             logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
         if point is None or point_store is None or device_uuid is None or network_uuid is None or source_driver is \
-            None or network_name is None or device_name is None:
+                None or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
 
-        topic = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, point.uuid, point.name,
-                                 device_uuid, device_name, network_uuid, network_name, source_driver))
+        topic: str = self.make_topic(
+            (self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver, network_uuid, network_name,
+             device_uuid, device_name, point.uuid, point.name))
 
         if point_store.fault:
-            payload = {
+            payload: dict = {
                 'fault': point_store.fault,
                 'fault_message': point_store.fault_message,
                 'ts': point_store.ts_fault,
             }
         else:
-            payload = {
+            payload: dict = {
                 'fault': point_store.fault,
                 'value': point_store.value,
                 'value_raw': point_store.value_raw,
@@ -68,10 +73,11 @@ class MqttClient(MqttClientBase, EventServiceBase):
             }
         if not isinstance(payload['ts'], str):
             payload['ts'] = datetime_to_str(payload['ts'])
+
         logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {payload}')
         self._client.publish(topic, json.dumps(payload), self.config.qos, self.config.retain)
         if self.config.publish_value and not point_store.fault:
-            topic = topic.replace('/' + MQTT_TOPIC_COV_ALL + '/', '/' + MQTT_TOPIC_COV_VALUE + '/', 1)
+            topic: str = topic.replace('/' + MQTT_TOPIC_COV_ALL + '/', '/' + MQTT_TOPIC_COV_VALUE + '/', 1)
             logger.debug(f'MQTT PUB: {self.to_string()} {topic} > {point_store.value}')
             self._client.publish(topic, point_store.value, self.config.qos, self.config.retain)
 
@@ -98,15 +104,6 @@ class MqttClient(MqttClientBase, EventServiceBase):
 
     def _on_message(self, client, userdata, message):
         pass
-        # topic_split = message.topic.split('/')
-        # if len(topic_split) < MQTT_TOPIC_MIN:
-        #     return
-        # if topic_split[MQTT_TOPIC_MIN] == MQTT_TOPIC_ALL:
-        #     self.__handle_all_message(topic_split, message)
-        # elif topic_split[MQTT_TOPIC_MIN] == MQTT_TOPIC_DRIVER:
-        #     self.__handle_driver_message(topic_split, message)
-        # else:
-        #     return
 
     def _mqtt_topic_min(self):
         return len(self.config.topic.split('/') + 1)
@@ -125,11 +122,12 @@ class MqttClient(MqttClientBase, EventServiceBase):
             self.publish_debug_message(self.config.debug_topic, event.data)
 
         elif event.event_type == EventType.POINT_COV:
-            self.publish_cov(event.data.get('point'), event.data.get('point_store'),
-                             event.data.get('device').uuid, event.data.get('device').name,
+            self.publish_cov(event.data.get('source_driver'),
                              event.data.get('network').uuid, event.data.get('network').name,
-                             event.data.get('source_driver'))
+                             event.data.get('device').uuid, event.data.get('device').name,
+                             event.data.get('point'), event.data.get('point_store'),
+                             )
 
         elif event.event_type == EventType.POINT_UPDATE or event.event_type == EventType.DEVICE_UPDATE or \
-            event.event_type == EventType.NETWORK_UPDATE:
+                event.event_type == EventType.NETWORK_UPDATE:
             self.publish_update(event.data.get('model'), event.data.get('updates'))

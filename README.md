@@ -84,10 +84,10 @@ rubix/points/value/{event}/...
 ```
 ```
 COV:
-  rubix/points/value/cov/all/{point_uuid}/{point_name}/{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}/
+  rubix/points/value/cov/all/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point_uuid}/{point_name}
 
   [optional] (value only)
-  rubix/points/value/cov/value/{point_uuid}/{point_name}/{device_uuid}/{device_name}/{network_uuid}/{network_name}/{source_driver}/
+  rubix/points/value/cov/value/{source_driver}/{network_uuid}/{network_name}/{device_uuid}/{device_name}/{point_uuid}/{point_name}
 
 UPDATE:
   rubix/points/value/update/{model}/{model.uuid}
@@ -105,10 +105,10 @@ all modbus rtu points:
   rubix/points/value/cov/all/+/+/+/+/+/+/modbus_rtu
 
 by point uuid:
-  rubix/points/value/cov/all/example_uuid/#
+  rubix/points/value/cov/all/+/+/+/+/+/example_uuid
 
 by point name:
-  rubix/points/value/cov/all/+/example_name/#
+  rubix/points/value/cov/all/+/+/{network_name}/+/{device_name}/+/{point_name}
 ```
 **UPDATE:**
 ```
