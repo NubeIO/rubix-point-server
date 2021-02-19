@@ -4,12 +4,12 @@ import time
 
 import schedule
 from influxdb import InfluxDBClient
+from registry.registry import RubixRegistry
 
 from src import InfluxSetting
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
-from src.models.wires.model_wires_plat import WiresPlatModel
 from src.services.histories.history_binding import HistoryBinding
 from src.utils import Singleton
 
@@ -69,21 +69,21 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     @exception_handler
     def sync(self):
         logger.info('InfluxDB sync has is been called')
-        self.__wires_plat = WiresPlatModel.find_one()
+        self.__wires_plat = RubixRegistry().read_wires_plat()
         if not self.__wires_plat:
-            logger.error("Please add wires-plat")
+            logger.error("Please add wires-plat on Rubix Service")
         else:
             self._sync()
 
     def _sync(self):
         store = []
         plat = {
-            'client_id': self.__wires_plat.client_id,
-            'client_name': self.__wires_plat.client_name,
-            'site_id': self.__wires_plat.site_id,
-            'site_name': self.__wires_plat.site_name,
-            'device_id': self.__wires_plat.device_id,
-            'device_name': self.__wires_plat.device_name
+            'client_id': self.__wires_plat.get('client_id'),
+            'client_name': self.__wires_plat.get('client_name'),
+            'site_id': self.__wires_plat.get('site_id'),
+            'site_name': self.__wires_plat.get('site_name'),
+            'device_id': self.__wires_plat.get('device_id'),
+            'device_name': self.__wires_plat.get('device_name')
         }
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)

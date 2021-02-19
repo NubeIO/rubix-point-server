@@ -4,11 +4,11 @@ import time
 import psycopg2
 import schedule
 from psycopg2.extras import execute_values
+from registry.registry import RubixRegistry
 
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
-from src.models.wires.model_wires_plat import WiresPlatModel
 from src.services.histories.history_binding import HistoryBinding
 from src.setting import PostgresSetting
 from src.utils import Singleton
@@ -65,9 +65,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
     @exception_handler
     def sync(self):
         logger.info('PostgreSQL sync has is been called')
-        self.__wires_plat = WiresPlatModel.find_one()
+        self.__wires_plat = RubixRegistry().read_wires_plat()
         if not self.__wires_plat:
-            logger.error("Please add wires-plat")
+            logger.error("Please add wires-plat on Rubix Service")
         else:
             self._sync()
 
@@ -79,10 +79,12 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid):
                 point_store_history: PointStoreHistoryModel = psh
                 point: PointModel = point_store_history.point
-                detail = (point.uuid, point.name, self.__wires_plat.client_id, self.__wires_plat.client_name,
-                          self.__wires_plat.site_id, self.__wires_plat.site_name, self.__wires_plat.device_id,
-                          self.__wires_plat.device_name, point.device.uuid, point.device.name,
-                          point.device.network.uuid, point.device.network.name, point.driver)
+                detail = (point.uuid, point.name,
+                          self.__wires_plat.get('client_id'), self.__wires_plat.get('client_name'),
+                          self.__wires_plat.get('site_id'), self.__wires_plat.get('site_name'),
+                          self.__wires_plat.get('device_id'), self.__wires_plat.get('device_name'),
+                          point.device.uuid, point.device.name, point.device.network.uuid, point.device.network.name,
+                          point.driver)
 
                 data_detail.append(detail)
                 history = (point_store_history.id, point_store_history.point_uuid, point_store_history.value,

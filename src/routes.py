@@ -4,7 +4,6 @@ from flask_restful import Api
 from src.resources.resource_device import DeviceResourceByUUID, DeviceResourceByName, DeviceResourceList
 from src.resources.resource_network import NetworkResourceByUUID, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResourceByUUID, PointResourceByName, PointResourceList
-from src.resources.resource_wires_plat import WiresPlatResource
 from src.source_drivers.generic.resources.device.device_plural import GenericDevicePlural
 from src.source_drivers.generic.resources.device.device_singular import GenericDeviceSingularByUUID, \
     GenericDeviceSingularByName
@@ -94,9 +93,6 @@ api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByUUID, '/uuid/<string:uuid>
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByModbusPointUUID, '/modbus/<string:uuid>')
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByGenericPointUUID, '/generic/<string:uuid>')
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:uuid>')
-
-bp_wires = Blueprint('wires', __name__, url_prefix='/api/wires')
-Api(bp_wires).add_resource(WiresPlatResource, '/plat')
 
 bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 api_system = Api(bp_system)
