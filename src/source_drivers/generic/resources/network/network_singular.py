@@ -1,7 +1,8 @@
 from abc import abstractmethod
 
-from flask_restful import abort, reqparse
+from flask_restful import reqparse
 from flask_restful.reqparse import request
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.source_drivers.generic.models.network import GenericNetworkModel
 from src.source_drivers.generic.resources.network.network_base import GenericNetworkBase, generic_network_marshaller
@@ -20,7 +21,7 @@ class GenericNetworkSingular(GenericNetworkBase):
     def get(cls, **kwargs):
         network: GenericNetworkModel = cls.get_network(**kwargs)
         if not network:
-            abort(404, message='Generic Network not found')
+            raise NotFoundException('Generic Network not found')
         return generic_network_marshaller(network, request.args)
 
     @classmethod
@@ -29,29 +30,23 @@ class GenericNetworkSingular(GenericNetworkBase):
         network: GenericNetworkModel = cls.get_network(**kwargs)
         if network is None:
             return generic_network_marshaller(cls.add_network(data), request.args)
-        try:
-            network.update(**data)
-            return generic_network_marshaller(cls.get_network(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+        network.update(**data)
+        return generic_network_marshaller(cls.get_network(**kwargs), request.args)
 
     @classmethod
     def patch(cls, **kwargs):
         data = cls.patch_parser.parse_args()
         network: GenericNetworkModel = cls.get_network(**kwargs)
         if network is None:
-            abort(404, message=f"Does not exist {kwargs}")
-        try:
-            network.update(**data)
-            return generic_network_marshaller(cls.get_network(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f"Does not exist {kwargs}")
+        network.update(**data)
+        return generic_network_marshaller(cls.get_network(**kwargs), request.args)
 
     @classmethod
     def delete(cls, **kwargs):
         network: GenericNetworkModel = cls.get_network(**kwargs)
         if network is None:
-            abort(404, message=f"Does not exist {kwargs}")
+            raise NotFoundException("Does not exist {kwargs}")
         network.delete_from_db()
         return '', 204
 

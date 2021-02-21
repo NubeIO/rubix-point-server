@@ -1,8 +1,9 @@
 import uuid as uuid_
 from abc import abstractmethod
 
-from flask_restful import Resource, marshal_with, abort, reqparse
-from sqlalchemy.exc import IntegrityError
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.models.point.model_point_store import PointStoreModel
 from src.source_drivers.modbus.models.mapping import MPGBPMapping
@@ -16,7 +17,7 @@ def sync_point_value(mapping: MPGBPMapping):
     return mapping
 
 
-class MPGBPMappingResourceList(Resource):
+class MPGBPMappingResourceList(RubixResource):
     @classmethod
     @marshal_with(mapping_mp_gbp_all_fields)
     def get(cls):
@@ -31,37 +32,29 @@ class MPGBPMappingResourceList(Resource):
                                 type=mapping_mp_gbp_attributes[attr].get('type'),
                                 required=mapping_mp_gbp_attributes[attr].get('required', False),
                                 default=None)
-        try:
-            data = parser.parse_args()
-            data.uuid = str(uuid_.uuid4())
-            mapping: MPGBPMapping = MPGBPMapping(**data)
-            mapping.save_to_db()
-            sync_point_value(mapping)
-            return mapping
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except ValueError as e:
-            abort(400, message=str(e))
-        except Exception as e:
-            abort(500, message=str(e))
+        data = parser.parse_args()
+        data.uuid = str(uuid_.uuid4())
+        mapping: MPGBPMapping = MPGBPMapping(**data)
+        mapping.save_to_db()
+        sync_point_value(mapping)
+        return mapping
 
 
-class MPGBPMappingResourceBase(Resource):
+class MPGBPMappingResourceBase(RubixResource):
     @classmethod
     @marshal_with(mapping_mp_gbp_all_fields)
     def get(cls, uuid):
         mapping = cls.get_mapping(uuid)
         if not mapping:
-            abort(404, message=f'Does not exist {uuid}')
+            raise NotFoundException(f'Does not exist {uuid}')
         return mapping
 
     @classmethod
     def delete(cls, uuid):
         mapping = cls.get_mapping(uuid)
         if mapping is None:
-            abort(404, message=f'Does not exist {uuid}')
-        else:
-            mapping.delete_from_db()
+            raise NotFoundException(f'Does not exist {uuid}')
+        mapping.delete_from_db()
         return '', 204
 
     @classmethod
@@ -83,15 +76,12 @@ class MPGBPMappingResourceByUUID(MPGBPMappingResourceBase):
         data = MPGBPMappingResourceByUUID.parser.parse_args()
         mapping: MPGBPMapping = cls.get_mapping(uuid)
         if not mapping:
-            abort(404, message='Does not exist {}'.format(uuid))
-        try:
-            MPGBPMapping.filter_by_uuid(uuid).update(data)
-            MPGBPMapping.commit()
-            output_mapping: MPGBPMapping = cls.get_mapping(uuid)
-            sync_point_value(mapping)
-            return output_mapping
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f'Does not exist {uuid}')
+        MPGBPMapping.filter_by_uuid(uuid).update(data)
+        MPGBPMapping.commit()
+        output_mapping: MPGBPMapping = cls.get_mapping(uuid)
+        sync_point_value(mapping)
+        return output_mapping
 
     @classmethod
     def get_mapping(cls, uuid) -> MPGBPMapping:

@@ -1,4 +1,5 @@
-from flask_restful import abort, marshal_with, reqparse
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.source_drivers.modbus.models.point import ModbusPointModel
 from src.source_drivers.modbus.resources.point.point_base import ModbusPointBase
@@ -23,7 +24,7 @@ class ModbusPointSingular(ModbusPointBase):
     def get(cls, **kwargs):
         point: ModbusPointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message=f'Modbus Point not found')
+            raise NotFoundException('Modbus Point not found')
         return point
 
     @classmethod
@@ -31,30 +32,24 @@ class ModbusPointSingular(ModbusPointBase):
     def put(cls, **kwargs):
         data = cls.parser.parse_args()
         point: ModbusPointModel = cls.get_point(**kwargs)
-        if point is None:
+        if not point:
             return cls.add_point(data)
-        try:
-            return point.update(**data)
-        except Exception as e:
-            abort(500, message=str(e))
+        return point.update(**data)
 
     @classmethod
     @marshal_with(modbus_point_all_fields)
     def patch(cls, **kwargs):
         data = cls.patch_parser.parse_args()
         point: ModbusPointModel = cls.get_point(**kwargs)
-        if point is None:
-            abort(404, message=f'Modbus Point not found')
-        try:
-            return point.update(**data)
-        except Exception as e:
-            abort(500, message=str(e))
+        if not point:
+            raise NotFoundException('Modbus Point not found')
+        return point.update(**data)
 
     @classmethod
     def delete(cls, **kwargs):
         point: ModbusPointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message=f'Modbus Point not found')
+            raise NotFoundException('Modbus Point not found')
         point.delete_from_db()
         return '', 204
 

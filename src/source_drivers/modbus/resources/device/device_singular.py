@@ -1,5 +1,6 @@
-from flask_restful import abort, reqparse
+from flask_restful import reqparse
 from flask_restful.reqparse import request
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.resources.device.device_base import ModbusDeviceBase, modbus_device_marshaller
@@ -18,7 +19,7 @@ class ModbusDeviceSingular(ModbusDeviceBase):
     def get(cls, **kwargs):
         device: ModbusDeviceModel = cls.get_device(**kwargs)
         if not device:
-            abort(404, message='Modbus Device not found')
+            raise NotFoundException('Modbus Device not found')
         return modbus_device_marshaller(device, request.args)
 
     @classmethod
@@ -27,29 +28,24 @@ class ModbusDeviceSingular(ModbusDeviceBase):
         device: ModbusDeviceModel = cls.get_device(**kwargs)
         if device is None:
             return modbus_device_marshaller(cls.add_device(data), request.args)
-        try:
-            device.update(**data)
-            return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+
+        device.update(**data)
+        return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
 
     @classmethod
     def patch(cls, **kwargs):
         data = cls.patch_parser.parse_args()
         device: ModbusDeviceModel = cls.get_device(**kwargs)
         if device is None:
-            abort(404, message=f"Does not exist {kwargs}")
-        try:
-            device.update(**data)
-            return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f"Does not exist {kwargs}")
+        device.update(**data)
+        return modbus_device_marshaller(cls.get_device(**kwargs), request.args)
 
     @classmethod
     def delete(cls, **kwargs):
         device: ModbusDeviceModel = cls.get_device(**kwargs)
         if not device:
-            abort(404, message=f'Not found {kwargs}')
+            raise NotFoundException(f'Not found {kwargs}')
         device.delete_from_db()
         return '', 204
 

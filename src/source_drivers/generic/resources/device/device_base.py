@@ -1,7 +1,7 @@
 import uuid
 
-from flask_restful import Resource, reqparse, abort
-from sqlalchemy.exc import IntegrityError
+from flask_restful import reqparse
+from rubix_http.resource import RubixResource
 
 from src.resources.utils import model_marshaller_with_children
 from src.source_drivers.generic.models.device import GenericDeviceModel
@@ -14,7 +14,7 @@ def generic_device_marshaller(data: any, args: dict):
                                           generic_device_all_fields_with_children)
 
 
-class GenericDeviceBase(Resource):
+class GenericDeviceBase(RubixResource):
     parser = reqparse.RequestParser()
     for attr in generic_device_all_attributes:
         parser.add_argument(attr,
@@ -26,11 +26,6 @@ class GenericDeviceBase(Resource):
     @classmethod
     def add_device(cls, data):
         _uuid = str(uuid.uuid4())
-        try:
-            device = GenericDeviceModel(uuid=_uuid, **data)
-            device.save_to_db()
-            return device
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except Exception as e:
-            abort(500, message=str(e))
+        device = GenericDeviceModel(uuid=_uuid, **data)
+        device.save_to_db()
+        return device

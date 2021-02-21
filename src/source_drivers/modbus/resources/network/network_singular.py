@@ -1,5 +1,6 @@
-from flask_restful import abort, reqparse
+from flask_restful import reqparse
 from flask_restful.reqparse import request
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.resources.network.network_base import ModbusNetworkBase, modbus_network_marshaller
@@ -18,7 +19,7 @@ class ModbusNetworkSingular(ModbusNetworkBase):
     def get(cls, **kwargs):
         network: ModbusNetworkModel = cls.find_network(**kwargs)
         if not network:
-            abort(404, message='Modbus Network not found')
+            raise NotFoundException('Modbus Network not found')
         return modbus_network_marshaller(network, request.args)
 
     # TODO: don't allow type in patch
@@ -28,29 +29,23 @@ class ModbusNetworkSingular(ModbusNetworkBase):
         network: ModbusNetworkModel = cls.find_network(**kwargs)
         if network is None:
             return modbus_network_marshaller(cls.add_network(data), request.args)
-        try:
-            network.update(**data)
-            return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+        network.update(**data)
+        return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
 
     @classmethod
     def patch(cls, **kwargs):
         data = cls.patch_parser.parse_args()
         network: ModbusNetworkModel = cls.find_network(**kwargs)
         if network is None:
-            abort(404, message=f"Does not exist {kwargs}")
-        try:
-            network.update(**data)
-            return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f"Does not exist {kwargs}")
+        network.update(**data)
+        return modbus_network_marshaller(cls.find_network(**kwargs), request.args)
 
     @classmethod
     def delete(cls, **kwargs):
         network: ModbusNetworkModel = cls.find_network(**kwargs)
         if not network:
-            abort(404, message=f"Not found {kwargs}")
+            raise NotFoundException(f"Not found {kwargs}")
         network.delete_from_db()
         return '', 204
 

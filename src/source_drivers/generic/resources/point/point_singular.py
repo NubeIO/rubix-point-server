@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
-from flask_restful import abort, marshal_with, reqparse
+from flask_restful import marshal_with, reqparse
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.source_drivers.generic.models.point import GenericPointModel
 from src.source_drivers.generic.resources.point.point_base import GenericPointBase
@@ -21,7 +22,7 @@ class GenericPointSingular(GenericPointBase):
     def get(cls, **kwargs):
         point: GenericPointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message=f'Generic Point not found')
+            raise NotFoundException('Generic Point not found')
         return point
 
     @classmethod
@@ -31,10 +32,7 @@ class GenericPointSingular(GenericPointBase):
         point: GenericPointModel = cls.get_point(**kwargs)
         if point is None:
             return cls.add_point(data)
-        try:
-            return point.update(**data)
-        except Exception as e:
-            abort(500, message=str(e))
+        return point.update(**data)
 
     @classmethod
     @marshal_with(generic_point_all_fields)
@@ -42,17 +40,14 @@ class GenericPointSingular(GenericPointBase):
         data = cls.patch_parser.parse_args()
         point: GenericPointModel = cls.get_point(**kwargs)
         if point is None:
-            abort(404, message=f'Generic Point not found')
-        try:
-            return point.update(**data)
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException('Generic Point not found')
+        return point.update(**data)
 
     @classmethod
     def delete(cls, **kwargs):
         point: GenericPointModel = cls.get_point(**kwargs)
         if point is None:
-            abort(404, message=f'Generic Point not found')
+            raise NotFoundException('Generic Point not found')
         point.delete_from_db()
         return '', 204
 
