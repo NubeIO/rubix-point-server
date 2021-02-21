@@ -1,5 +1,6 @@
-from flask_restful import Resource, abort
 from flask_restful.reqparse import request
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.models.network.model_network import NetworkModel
 from src.resources.rest_schema.schema_network import network_all_fields, network_all_fields_with_children, \
@@ -13,25 +14,25 @@ def network_marshaller(data: any, args: dict):
                                     network_all_fields_with_children)
 
 
-class NetworkResourceByUUID(Resource):
+class NetworkResourceByUUID(RubixResource):
     @classmethod
     def get(cls, uuid):
         network = NetworkModel.find_by_uuid(uuid)
         if not network:
-            abort(404, message='Network not found')
+            raise NotFoundException('Network not found')
         return network_marshaller(network, request.args)
 
 
-class NetworkResourceByName(Resource):
+class NetworkResourceByName(RubixResource):
     @classmethod
     def get(cls, name):
         network = NetworkModel.find_by_name(name)
         if not network:
-            abort(404, message='Network not found')
+            raise NotFoundException('Network not found')
         return network_marshaller(network, request.args)
 
 
-class NetworkResourceList(Resource):
+class NetworkResourceList(RubixResource):
     @classmethod
     def get(cls):
         return network_marshaller(NetworkModel.find_all(), request.args)

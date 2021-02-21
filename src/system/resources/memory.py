@@ -1,4 +1,4 @@
-from flask_restful import Resource
+from rubix_http.resource import RubixResource
 
 
 def get_current_memory_usage():
@@ -8,7 +8,8 @@ def get_current_memory_usage():
     return int(mem_usage.strip())
 
 
-class GetSystemMem(Resource):
-    def get(self):
+class GetSystemMem(RubixResource):
+    @classmethod
+    def get(cls):
         mem = get_current_memory_usage()
         return {'networks': mem}

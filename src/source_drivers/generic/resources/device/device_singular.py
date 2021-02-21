@@ -1,7 +1,8 @@
 from abc import abstractmethod
 
-from flask_restful import abort, reqparse
+from flask_restful import reqparse
 from flask_restful.reqparse import request
+from rubix_http.exceptions.exception import NotFoundException
 
 from src.source_drivers.generic.models.device import GenericDeviceModel
 from src.source_drivers.generic.resources.device.device_base import GenericDeviceBase, generic_device_marshaller
@@ -20,7 +21,7 @@ class GenericDeviceSingular(GenericDeviceBase):
     def get(cls, **kwargs):
         device: GenericDeviceModel = cls.get_device(**kwargs)
         if not device:
-            abort(404, message='Generic Device not found')
+            raise NotFoundException('Generic Device not found')
         return generic_device_marshaller(device, request.args)
 
     @classmethod
@@ -29,29 +30,23 @@ class GenericDeviceSingular(GenericDeviceBase):
         device: GenericDeviceModel = cls.get_device(**kwargs)
         if device is None:
             return generic_device_marshaller(cls.add_device(data), request.args)
-        try:
-            device.update(**data)
-            return generic_device_marshaller(cls.get_device(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+        device.update(**data)
+        return generic_device_marshaller(cls.get_device(**kwargs), request.args)
 
     @classmethod
     def patch(cls, **kwargs):
         data = cls.patch_parser.parse_args()
         device: GenericDeviceModel = cls.get_device(**kwargs)
         if device is None:
-            abort(404, message=f"Does not exist {kwargs}")
-        try:
-            device.update(**data)
-            return generic_device_marshaller(cls.get_device(**kwargs), request.args)
-        except Exception as e:
-            abort(500, message=str(e))
+            raise NotFoundException(f"Does not exist {kwargs}")
+        device.update(**data)
+        return generic_device_marshaller(cls.get_device(**kwargs), request.args)
 
     @classmethod
     def delete(cls, **kwargs):
         device: GenericDeviceModel = cls.get_device(**kwargs)
         if device is None:
-            abort(404, message=f"Does not exist {kwargs}")
+            raise NotFoundException(f"Does not exist {kwargs}")
         device.delete_from_db()
         return '', 204
 

@@ -1,7 +1,7 @@
 import uuid
 
-from flask_restful import Resource, abort, reqparse
-from sqlalchemy.exc import IntegrityError
+from flask_restful import reqparse
+from rubix_http.resource import RubixResource
 
 from src.resources.utils import model_network_marshaller
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
@@ -16,7 +16,7 @@ def modbus_network_marshaller(data: any, args: dict):
                                     modbus_network_all_fields_with_children)
 
 
-class ModbusNetworkBase(Resource):
+class ModbusNetworkBase(RubixResource):
     parser = reqparse.RequestParser()
     for attr in modbus_network_all_attributes:
         parser.add_argument(attr,
@@ -28,11 +28,6 @@ class ModbusNetworkBase(Resource):
     @staticmethod
     def add_network(data):
         _uuid = str(uuid.uuid4())
-        try:
-            network = ModbusNetworkModel(uuid=_uuid, **data)
-            network.save_to_db()
-            return network
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except Exception as e:
-            abort(500, message=str(e))
+        network = ModbusNetworkModel(uuid=_uuid, **data)
+        network.save_to_db()
+        return network

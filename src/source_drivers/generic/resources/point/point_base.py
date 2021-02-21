@@ -1,14 +1,14 @@
 import uuid
 
-from flask_restful import Resource, reqparse, abort
-from sqlalchemy.exc import IntegrityError
+from flask_restful import reqparse
+from rubix_http.resource import RubixResource
 
 from src.source_drivers.generic.models.point import GenericPointModel
 from src.source_drivers.generic.models.priority_array import PriorityArrayModel
 from src.source_drivers.generic.resources.rest_schema.schema_generic_point import generic_point_all_attributes
 
 
-class GenericPointBase(Resource):
+class GenericPointBase(RubixResource):
     parser = reqparse.RequestParser()
     for attr in generic_point_all_attributes:
         parser.add_argument(attr,
@@ -20,12 +20,7 @@ class GenericPointBase(Resource):
     @classmethod
     def add_point(cls, data):
         _uuid = str(uuid.uuid4())
-        try:
-            point = GenericPointModel(uuid=_uuid, **data)
-            point.priority_array = PriorityArrayModel.create_new_priority_array_model(uuid)
-            point.save_to_db()
-            return point
-        except IntegrityError as e:
-            abort(400, message=str(e.orig))
-        except Exception as e:
-            abort(500, message=str(e))
+        point = GenericPointModel(uuid=_uuid, **data)
+        point.priority_array = PriorityArrayModel.create_new_priority_array_model(uuid)
+        point.save_to_db()
+        return point

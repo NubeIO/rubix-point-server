@@ -1,7 +1,8 @@
 from distutils.util import strtobool
 
 from flask_restful import fields
-from flask_restful import abort, marshal
+from flask_restful import marshal
+from rubix_http.exceptions.exception import BadDataException
 
 
 def model_network_marshaller(data: any, args: dict, base_fields: dict, children_without_point_fields: dict,
@@ -14,7 +15,7 @@ def model_network_marshaller(data: any, args: dict, base_fields: dict, children_
         if 'points' in args:
             points = bool(strtobool(args['points']))
     except:
-        abort(400, message='Invalid query string')
+        raise BadDataException('Invalid query string')
 
     if with_children:
         if points:
@@ -31,7 +32,7 @@ def model_marshaller_with_children(data: any, args: dict, base_fields: dict, chi
         try:
             with_children = bool(strtobool(args['with_children']))
         except:
-            abort(400, message='Invalid query string')
+            raise BadDataException('Invalid query string')
 
     if with_children:
         return marshal(data, children_fields)

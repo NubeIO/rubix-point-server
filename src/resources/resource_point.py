@@ -1,25 +1,27 @@
 from abc import abstractmethod
 
-from flask_restful import Resource, abort, marshal_with
+from flask_restful import marshal_with
+from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.models.point.model_point import PointModel
 from src.resources.rest_schema.schema_point import point_all_fields
 
 
-class PointResource(Resource):
+class PointResource(RubixResource):
     @classmethod
     @marshal_with(point_all_fields)
     def get(cls, **kwargs):
         point: PointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message='Point not found')
+            raise NotFoundException('Point not found')
         return point
 
     @classmethod
     def delete(cls, **kwargs):
         point: PointModel = cls.get_point(**kwargs)
         if not point:
-            abort(404, message='Point not found')
+            raise NotFoundException('Point not found')
         point.delete_from_db()
         return '', 204
 
@@ -43,7 +45,7 @@ class PointResourceByName(PointResource):
         return PointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'), kwargs.get('point_name'))
 
 
-class PointResourceList(Resource):
+class PointResourceList(RubixResource):
     @classmethod
     @marshal_with(point_all_fields)
     def get(cls):
