@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.6](https://github.com/NubeIO/rubix-point-server/tree/v1.3.6) (2020-02-22)
+### Added
+- Upgrade rubix-http version
+
 ## [v1.3.5](https://github.com/NubeIO/rubix-point-server/tree/v1.3.5) (2020-02-22)
 ### Added
 - Add postgresql history sync
