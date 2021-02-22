@@ -1,4 +1,14 @@
 # CHANGELOG
+## [v1.3.5](https://github.com/NubeIO/rubix-point-server/tree/v1.3.5) (2020-02-22)
+### Added
+- Add postgresql history sync
+- Priority array writer payload change
+- Edit/Add APIs for uuid, name services
+- Insert validation on network, device, point name
+- Add Rubix Registry & remove wires-plat
+- Standardize publish MQTT topic
+- Implement rubix-http for standardizing HTTP error msg
+
 ## [v1.3.4](https://github.com/NubeIO/rubix-point-server/tree/v1.3.4) (2020-02-16)
 ### Added
 - Updates to protocal-brige
