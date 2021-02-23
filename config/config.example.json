@@ -41,9 +41,10 @@
   },
   "mqtt_rest_bridge_listener": {
     "enabled": true,
-    "name": "ps_mqtt_rest_bridge_listener",
-    "host": "localhost",
+    "name": "ps-mqtt-rest-bridge-listener",
+    "host": "0.0.0.0",
     "port": 1883,
+    "authentication": false,
     "username": "username",
     "password": "password",
     "keepalive": 60,
@@ -55,7 +56,7 @@
   },
   "generic_point_listener": {
     "enabled": true,
-    "name": "rubix_points_generic_point",
+    "name": "rubix-points-generic-point-listener",
     "host": "0.0.0.0",
     "port": 1883,
     "authentication": false,
@@ -66,13 +67,13 @@
     "retain": false,
     "attempt_reconnect_on_unavailable": true,
     "attempt_reconnect_secs": 5,
-    "publish_value": true,
+    "timeout": 10,
     "topic": "rubix/points/generic/cov"
   },
   "mqtt": [
     {
       "enabled": true,
-      "name": "rubix_points",
+      "name": "rubix-points",
       "host": "0.0.0.0",
       "port": 1883,
       "authentication": false,
@@ -83,7 +84,8 @@
       "retain": false,
       "attempt_reconnect_on_unavailable": true,
       "attempt_reconnect_secs": 5,
-      "publish_value": false,
+      "timeout": 10,
+      "publish_value": true,
       "topic": "rubix/points/value",
       "publish_debug": true,
       "debug_topic": "rubix/points/debug"
