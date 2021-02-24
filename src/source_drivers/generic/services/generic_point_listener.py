@@ -1,25 +1,21 @@
 import logging
 from json import loads as json_loads, JSONDecodeError
+from typing import Callable, Iterable
 
 from registry.registry import RubixRegistry
+from rubix_mqtt.mqtt import MqttClientBase
 
 from src import GenericListenerSetting
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.services.event_service_base import EventServiceBase
-from src.services.mqtt_client.mqtt_client_base import MqttClientBase
-from src.setting import MqttSettingBase
 from src.source_drivers import GENERIC_SERVICE_NAME
 from src.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
 
-class MqttListenerMetadata(Singleton, type(MqttClientBase), type(EventServiceBase)):
-    pass
-
-
-class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListenerMetadata):
+class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=Singleton):
 
     def __init__(self):
         MqttClientBase.__init__(self)
@@ -27,21 +23,19 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
 
     @property
     def config(self) -> GenericListenerSetting:
-        return self._config
+        return super().config
 
-    def start(self, config: MqttSettingBase):
+    def start(self, config: GenericListenerSetting, subscribe_topic: str = None, callback: Callable = lambda: None,
+              loop_forever: bool = True):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_source_driver(self)
-        super().start(config)
-
-    def _on_connection_successful(self):
         wires_plat: dict = RubixRegistry().read_wires_plat()
         if not wires_plat:
             logger.error('Please add wires-plat on Rubix Service')
-        topic: str = self.make_topic(
-            (wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'), self.config.topic))
-        logger.info(f'MQTT sub to {topic}/#')
-        self._client.subscribe(f'{topic}/#')
+            return
+        subscribe_topic: str = self.make_topic(
+            (wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'), config.topic))
+        super().start(config, subscribe_topic, callback, loop_forever)
 
     @exception_handler
     def _on_message(self, client, userdata, message):
@@ -82,3 +76,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=MqttListe
             point.update_point_store(value, priority, value_raw, fault, fault_message)
         except Exception as e:
             logger.error(str(e))
+
+    @classmethod
+    def make_topic(cls, part: Iterable, sep: str = '/'):
+        return sep.join(part)

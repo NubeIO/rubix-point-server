@@ -67,9 +67,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         logger.info('PostgreSQL sync has is been called')
         self.__wires_plat = RubixRegistry().read_wires_plat()
         if not self.__wires_plat:
-            logger.error("Please add wires-plat on Rubix Service")
-        else:
-            self._sync()
+            logger.error('Please add wires-plat on Rubix Service')
+            return
+        self._sync()
 
     def _sync(self):
         data_detail = []

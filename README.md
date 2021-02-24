@@ -80,19 +80,28 @@ python run.py -s config/config.json
   
 #### Topic structure:
 ```
-<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/{event}/...
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/<event>/...
 ```
 ```
 COV:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/{source_driver}/{network_uuid}/<network_name>/{device_uuid}/<device_name>/{point_uuid}/<point_name>
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/<source_driver>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
 
   [optional] (value only)
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/value/{source_driver}/{network_uuid}/<network_name>/{device_uuid}/<device_name>/{point_uuid}/<point_name>
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/value/<source_driver>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
 
 UPDATE:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/{model}/{model.uuid}
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/<model>/<model.uuid>
 ```
 
+Debug topic
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/debug
+```
+
+Debug topic example
+```
++/+/+/+/+/+/rubix/points/debug
+```
 
 #### Example topics:
 

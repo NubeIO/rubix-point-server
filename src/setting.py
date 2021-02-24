@@ -4,6 +4,7 @@ from typing import List
 
 from flask import Flask
 from mrb.setting import MqttSetting as MqttRestBridgeSetting
+from rubix_mqtt.setting import MqttSettingBase
 
 
 class BaseSetting:
@@ -49,30 +50,13 @@ class DriverSetting(BaseSetting):
         self.bridge: bool = True
 
 
-class MqttSettingBase(BaseSetting):
-    def __init__(self):
-        self.enabled = True
-        self.name = 'rubix_points'
-        self.host = '0.0.0.0'
-        self.port = 1883
-        self.authentication = False
-        self.username = 'username'
-        self.password = 'password'
-        self.keepalive = 60
-        self.qos = 1
-        self.retain = False
-        self.attempt_reconnect_on_unavailable = True
-        self.attempt_reconnect_secs = 5
-        self.publish_value = True
-        self.topic = ''
-
-
 class MqttSetting(MqttSettingBase):
     KEY = 'mqtt'
 
     def __init__(self):
         super(MqttSetting, self).__init__()
-        self.name = 'rubix_points'
+        self.name = 'rubix-points'
+        self.publish_value = True
         self.topic = 'rubix/points/value'
         self.publish_debug = True
         self.debug_topic = 'rubix/points/debug'
@@ -83,7 +67,7 @@ class GenericListenerSetting(MqttSettingBase):
 
     def __init__(self):
         super(GenericListenerSetting, self).__init__()
-        self.name = 'rubix_points_generic_point'
+        self.name = 'rubix-points-generic-point-listener'
         self.topic = 'rubix/points/generic/cov'
 
 
