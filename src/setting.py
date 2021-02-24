@@ -116,9 +116,13 @@ class CleanerSetting(BaseSetting):
 
 class AppSetting:
     PORT: int = 1515
+    GLOBAL_DIR_ENV = 'RUBIX_POINT_GLOBAL'
     DATA_DIR_ENV = 'RUBIX_POINT_DATA'
+    CONFIG_DIR_ENV = 'RUBIX_POINT_CONFIG'
     KEY: str = 'APP_SETTING'
-    default_data_dir: str = 'out'
+    default_global_dir = 'out'
+    default_data_dir: str = 'data'
+    default_config_dir: str = 'config'
     default_identifier: str = 'ps'
     default_setting_file: str = 'config.json'
     default_logging_conf: str = 'logging.conf'
@@ -127,7 +131,11 @@ class AppSetting:
 
     def __init__(self, **kwargs):
         self.__port = kwargs.get('port') or AppSetting.PORT
-        self.__data_dir = self.__compute_dir(kwargs.get('data_dir'), AppSetting.default_data_dir)
+        self.__global_dir = self.__compute_dir(kwargs.get('global_dir'), AppSetting.default_global_dir, 0o777)
+        self.__data_dir = self.__compute_dir(kwargs.get('data_dir'),
+                                             os.path.join(self.global_dir, AppSetting.default_data_dir))
+        self.__config_dir = self.__compute_dir(kwargs.get('config_dir'),
+                                               os.path.join(self.global_dir, AppSetting.default_config_dir))
         self.__identifier = kwargs.get('identifier') or AppSetting.default_identifier
         self.__prod = kwargs.get('prod') or False
         self.__service_setting = ServiceSetting()
@@ -145,8 +153,16 @@ class AppSetting:
         return self.__port
 
     @property
+    def global_dir(self):
+        return self.__global_dir
+
+    @property
     def data_dir(self):
         return self.__data_dir
+
+    @property
+    def config_dir(self):
+        return self.__config_dir
 
     @property
     def identifier(self):
@@ -197,13 +213,13 @@ class AppSetting:
             GenericListenerSetting.KEY: self.listener,
             MqttSetting.KEY: [s.to_dict() for s in self.mqtt_settings],
             CleanerSetting.KEY: self.cleaner,
-            'prod': self.prod, 'data_dir': self.data_dir
+            'prod': self.prod, 'global_dir': self.global_dir, 'data_dir': self.data_dir, 'config_dir': self.config_dir
         }
         return json.dumps(m, default=lambda o: o.to_dict() if isinstance(o, BaseSetting) else o.__dict__,
                           indent=2 if pretty else None)
 
     def reload(self, setting_file: str, is_json_str: bool = False):
-        data = self.__read_file(setting_file, self.__data_dir, is_json_str)
+        data = self.__read_file(setting_file, self.__config_dir, is_json_str)
         self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
