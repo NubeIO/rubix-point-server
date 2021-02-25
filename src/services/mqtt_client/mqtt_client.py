@@ -84,14 +84,14 @@ class MqttClient(MqttClientBase, EventServiceBase):
         if not isinstance(payload['ts'], str):
             payload['ts'] = datetime_to_str(payload['ts'])
 
-        topic: str = self.make_topic((MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver,
+        topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver,
                                       network_uuid, network_name,
                                       device_uuid, device_name,
                                       point.uuid, point.name))
         self.__publish_mqtt_value(topic, json.dumps(payload))
 
         if self.config.publish_value and not point_store.fault:
-            topic: str = self.make_topic((MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, source_driver,
+            topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, source_driver,
                                           network_uuid, network_name,
                                           device_uuid, device_name,
                                           point.uuid, point.name))
@@ -101,7 +101,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
     def publish_update(self, model: ModelBase, updates: dict):
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
-        topic: str = self.make_topic((MQTT_TOPIC_UPDATE, model.get_model_event_name(), model.uuid))
+        topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), model.uuid))
         self.__publish_mqtt_value(topic, json.dumps(updates))
 
     @allow_only_on_prefix
