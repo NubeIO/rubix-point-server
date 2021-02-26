@@ -21,6 +21,6 @@ class GenericPointBase(RubixResource):
     def add_point(cls, data):
         _uuid = str(uuid.uuid4())
         point = GenericPointModel(uuid=_uuid, **data)
-        point.priority_array = PriorityArrayModel.create_new_priority_array_model(uuid)
+        point.priority_array_write = PriorityArrayModel.create_new_priority_array_model(_uuid)
         point.save_to_db()
         return point
