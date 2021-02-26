@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.8](https://github.com/NubeIO/rubix-point-server/tree/v1.3.8) (2020-02-26)
+### Added
+- Priority array write issue fix
+
 ## [v1.3.7](https://github.com/NubeIO/rubix-point-server/tree/v1.3.7) (2020-02-25)
 ### Added
 - Improvement on MQTT code bases (made debug topic standard)
