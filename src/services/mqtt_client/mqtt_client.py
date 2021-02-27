@@ -12,6 +12,7 @@ from src.services.event_service_base import EventServiceBase, Event, EventType
 from src.utils.model_utils import datetime_to_str
 from .mqtt_registry import MqttRegistry
 from ...setting import MqttSetting
+from ...utils import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def allow_only_on_prefix(func):
     return inner_function
 
 
-class MqttClient(MqttClientBase, EventServiceBase):
+class MqttClient(MqttClientBase, EventServiceBase, metaclass=Singleton):
     SEPARATOR: str = '/'
 
     def __init__(self):
