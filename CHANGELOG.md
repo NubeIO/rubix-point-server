@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.3.9](https://github.com/NubeIO/rubix-point-server/tree/v1.3.9) (2020-03-01)
+### Added
+- COV point store issue fix
+
 ## [v1.3.8](https://github.com/NubeIO/rubix-point-server/tree/v1.3.8) (2020-02-26)
 ### Added
 - Priority array write issue fix
