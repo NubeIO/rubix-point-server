@@ -17,11 +17,9 @@ class ModbusDeviceModel(DeviceMixinModel):
     tcp_ip = db.Column(db.String(80))
     tcp_port = db.Column(db.Integer())
     zero_based = db.Column(db.Boolean(), nullable=False, default=False)
-    timeout = db.Column(db.Float(), nullable=False, default=1)
-    timeout_global = db.Column(db.Boolean(), nullable=False, default=True)
     ping_point = db.Column(db.String(10))
-    # polling_interval_runtime = db.Column(db.Integer(), default=2)
-    # point_interval_ms_between_points = db.Column(db.Integer(), default=30)
+    polling_interval_runtime = db.Column(db.Integer(), default=2)
+    point_interval_ms_between_points = db.Column(db.Integer(), default=30)
     modbus_network_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (

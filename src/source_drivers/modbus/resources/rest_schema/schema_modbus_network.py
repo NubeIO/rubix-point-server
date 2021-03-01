@@ -12,12 +12,6 @@ modbus_network_all_attributes['type'] = {
 modbus_network_all_attributes['timeout'] = {
     'type': float,
 }
-modbus_network_all_attributes['device_timeout_global'] = {
-    'type': float,
-}
-modbus_network_all_attributes['point_timeout_global'] = {
-    'type': float,
-}
 modbus_network_all_attributes['rtu_port'] = {
     'type': str,
 }

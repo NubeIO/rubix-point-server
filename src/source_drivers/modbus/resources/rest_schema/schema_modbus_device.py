@@ -12,17 +12,17 @@ modbus_device_all_attributes['tcp_ip'] = {
 modbus_device_all_attributes['tcp_port'] = {
     'type': int,
 }
-modbus_device_all_attributes['ping_point'] = {
-    'type': str,
-}
 modbus_device_all_attributes['zero_based'] = {
     'type': bool,
 }
-modbus_device_all_attributes['timeout'] = {
-    'type': float,
+modbus_device_all_attributes['ping_point'] = {
+    'type': str,
 }
-modbus_device_all_attributes['timeout_global'] = {
-    'type': bool,
+modbus_device_all_attributes['polling_interval_runtime'] = {
+    'type': int,
+}
+modbus_device_all_attributes['point_interval_ms_between_points'] = {
+    'type': int,
 }
 
 modbus_device_return_attributes = deepcopy(device_return_attributes)

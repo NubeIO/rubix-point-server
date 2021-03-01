@@ -1,17 +1,15 @@
 from sqlalchemy.orm import validates
 
 from src import db
-from src.source_drivers import MODBUS_SERVICE_NAME
 from src.models.network.model_network_mixin import NetworkMixinModel
+from src.source_drivers import MODBUS_SERVICE_NAME
 from src.source_drivers.modbus.interfaces.network.network import ModbusType, ModbusRtuParity
 
 
 class ModbusNetworkModel(NetworkMixinModel):
     __tablename__ = 'modbus_networks'
     type = db.Column(db.Enum(ModbusType), nullable=False)
-    timeout = db.Column(db.Float(), nullable=False, default=1)
-    device_timeout_global = db.Column(db.Float(), nullable=False, default=1)
-    point_timeout_global = db.Column(db.Float(), nullable=False, default=1)
+    timeout = db.Column(db.Integer(), nullable=False, default=3)
     rtu_port = db.Column(db.String(80), nullable=True, unique=True)
     rtu_speed = db.Column(db.Integer(), default=9600)
     rtu_stop_bits = db.Column(db.Integer(), default=1)
