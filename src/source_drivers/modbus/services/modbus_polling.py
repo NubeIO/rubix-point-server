@@ -66,7 +66,10 @@ class ModbusPolling(EventServiceBase):
 
     def __poll_network_device(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
         """
-        Poll network > device points
+        Poll connection points
+
+        Rejects if ping_point is true and unable to poll the point
+        If accepted then poll points under a connection on a new thread
         """
         current_connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network, device)
         if device.ping_point:
@@ -85,7 +88,7 @@ class ModbusPolling(EventServiceBase):
 
     def __poll_network_device_thread(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
         """
-        Poll network > device points if connection successful when we have device.ping_point
+        Poll connection points on a thread
         """
         while True:
             current_connection: Union[ModbusRegistryConnection, None] = \
@@ -93,6 +96,10 @@ class ModbusPolling(EventServiceBase):
             if not current_connection:
                 self.__log_debug(f'Stopping thread for {network} {device}')
                 break
+            network, device = self.__get_network_and_device(network.uuid, device.uuid)
+            current_connection.is_changed = False
+            if not (network and device):
+                return
             current_connection.is_running = True
             points: List[ModbusPointModel] = self.__get_all_device_points(device.uuid)
             for point in points:
@@ -105,6 +112,14 @@ class ModbusPolling(EventServiceBase):
                 time.sleep(float(device.point_interval_ms_between_points) / 1000)
             db.session.commit()
             time.sleep(device.polling_interval_runtime)
+
+    def __get_network_and_device(self, network_uuid: str, device_uuid: str) -> \
+            Tuple[ModbusNetworkModel, ModbusDeviceModel]:
+        results = db.session.query(ModbusNetworkModel, ModbusDeviceModel) \
+            .select_from(ModbusNetworkModel).filter_by(type=self.__network_type, uuid=network_uuid, enable=True) \
+            .join(ModbusDeviceModel).filter_by(type=self.__network_type, uuid=device_uuid, enable=True) \
+            .first()
+        return results
 
     def __get_all_networks_and_devices(self) -> List[Tuple[ModbusNetworkModel, ModbusDeviceModel]]:
         results = db.session.query(ModbusNetworkModel, ModbusDeviceModel) \
