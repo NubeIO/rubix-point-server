@@ -52,9 +52,9 @@ def poll_point(service: EventServiceBase, client: BaseModbusClient, network: Mod
                   'writable': point.writable,
                   'write_value': write_value
                   })
-    if not zero_based:
+    if zero_based:
         point_register -= 1
-        logger.debug(f"Device zero_based True. point_register -= 1: {point_register + 1} -> {point_register}")
+        logger.debug(f"Device zero_based True, [point_register - 1 = {point_register}]")
 
     fault: bool = False
     fault_message: str = ""
