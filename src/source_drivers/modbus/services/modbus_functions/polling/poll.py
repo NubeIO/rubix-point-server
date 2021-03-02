@@ -104,12 +104,12 @@ def poll_point(service: EventServiceBase, client: BaseModbusClient, network: Mod
                                               value_raw=str(array),
                                               point_uuid=point.uuid)
         else:
-            logger.error(f"ERROR: non number received, NOTIFY DEVELOPER. type {type(val)}")
+            fault_message = f"Received not numeric value, type is: {type(val)}"
             fault = True
-            fault_message = f"ERROR: non number received, NOTIFY DEVELOPER. type {type(val)}"
+            logger.error(fault_message)
 
     except ModbusIOException as e:
-        logger.error(f'ERROR: {str(e)}')
+        logger.error(str(e))
         fault = True
         fault_message = str(e)
         error = e

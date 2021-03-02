@@ -190,7 +190,7 @@ class ModbusPolling(EventServiceBase):
         raise NotImplementedError
 
     def __log_debug(self, message: str):
-        logger.debug(f'MODBUS: {self.__network_type.name} {message}')
+        logger.debug(f'{self.__network_type.name}: {message}')
 
 
 class RtuPolling(ModbusPolling, ):
