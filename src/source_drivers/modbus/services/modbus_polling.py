@@ -91,6 +91,7 @@ class ModbusPolling(EventServiceBase):
             current_connection: Union[ModbusRegistryConnection, None] = \
                 self.get_registry().get_connection(network, device)
             if not current_connection:
+                self.__log_debug(f'Stopping thread for {network} {device}')
                 break
             current_connection.is_running = True
             points: List[ModbusPointModel] = self.__get_all_device_points(device.uuid)

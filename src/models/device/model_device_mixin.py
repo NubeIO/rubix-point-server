@@ -8,7 +8,7 @@ class DeviceMixinModel(DeviceModel):
     __abstract__ = True
 
     @classmethod
-    def get_polymorphic_identity(cls):
+    def get_polymorphic_identity(cls) -> str:
         pass
 
     @declared_attr
@@ -22,4 +22,4 @@ class DeviceMixinModel(DeviceModel):
         }
 
     def __repr__(self):
-        return f"{self.get_polymorphic_identity()}Device(uuid = {self.uuid})"
+        return f"{self.get_polymorphic_identity().title()}Device(uuid = {self.uuid})"

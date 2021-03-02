@@ -8,7 +8,7 @@ class NetworkMixinModel(NetworkModel):
     __abstract__ = True
 
     @classmethod
-    def get_polymorphic_identity(cls):
+    def get_polymorphic_identity(cls) -> str:
         pass
 
     @declared_attr
@@ -22,4 +22,4 @@ class NetworkMixinModel(NetworkModel):
         }
 
     def __repr__(self):
-        return f"{self.get_polymorphic_identity()}Network(uuid = {self.uuid})"
+        return f"{self.get_polymorphic_identity().title()}Network(uuid = {self.uuid})"
