@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ModbusTcpRegistryKey(ModbusRegistryKey):
     def create_connection_key(self) -> str:
-        return f'{self.device.tcp_ip}:{self.device.tcp_port}:{self.network.timeout}'
+        return f'{self.device.tcp_ip}:{self.device.tcp_port}:{self.device.timeout}'
 
 
 class ModbusTcpRegistry(ModbusRegistry):
@@ -20,7 +20,7 @@ class ModbusTcpRegistry(ModbusRegistry):
     def add_connection(self, network: ModbusNetworkModel, device: ModbusDeviceModel) -> ModbusRegistryConnection:
         host: str = device.tcp_ip
         port: int = device.tcp_port
-        timeout: int = network.timeout
+        timeout: int = device.timeout
         registry_key: ModbusTcpRegistryKey = ModbusTcpRegistryKey(network, device)
         self.remove_connection_if_exist(registry_key.key)
         logger.debug(f'Adding tcp_connection {registry_key.key}')

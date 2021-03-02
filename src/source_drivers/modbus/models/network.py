@@ -9,7 +9,6 @@ from src.source_drivers.modbus.interfaces.network.network import ModbusType, Mod
 class ModbusNetworkModel(NetworkMixinModel):
     __tablename__ = 'modbus_networks'
     type = db.Column(db.Enum(ModbusType), nullable=False)
-    timeout = db.Column(db.Integer(), nullable=False, default=3)
     rtu_port = db.Column(db.String(80), nullable=True, unique=True)
     rtu_speed = db.Column(db.Integer(), default=9600)
     rtu_stop_bits = db.Column(db.Integer(), default=1)

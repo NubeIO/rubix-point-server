@@ -18,6 +18,9 @@ modbus_device_all_attributes['zero_based'] = {
 modbus_device_all_attributes['ping_point'] = {
     'type': str,
 }
+modbus_device_all_attributes['timeout'] = {
+    'type': int,
+}
 modbus_device_all_attributes['polling_interval_runtime'] = {
     'type': int,
 }

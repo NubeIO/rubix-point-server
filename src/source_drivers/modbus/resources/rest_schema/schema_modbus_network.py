@@ -9,9 +9,6 @@ modbus_network_all_attributes['type'] = {
     'nested': True,
     'dict': 'type.name'
 }
-modbus_network_all_attributes['timeout'] = {
-    'type': float,
-}
 modbus_network_all_attributes['rtu_port'] = {
     'type': str,
 }

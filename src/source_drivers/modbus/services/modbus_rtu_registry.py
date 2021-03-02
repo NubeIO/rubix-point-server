@@ -17,7 +17,7 @@ class ModbusRtuRegistryKey(ModbusRegistryKey):
         self.__rtu_stop_bits: int = network.rtu_stop_bits
         self.__rtu_parity: str = network.rtu_parity.name
         self.__rtu_byte_size: int = network.rtu_byte_size
-        self.__timeout: int = network.timeout
+        self.__timeout: int = device.timeout
         super().__init__(network, device)
 
     def create_key(self):
@@ -37,7 +37,7 @@ class ModbusRtuRegistry(ModbusRegistry):
         rtu_stop_bits: int = network.rtu_stop_bits
         rtu_parity: str = network.rtu_parity.name
         rtu_byte_size: int = network.rtu_byte_size
-        timeout: int = network.timeout
+        timeout: int = device.timeout
 
         registry_key: ModbusRtuRegistryKey = ModbusRtuRegistryKey(network, device)
         method = 'rtu'
