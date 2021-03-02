@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 
 
 class ModbusPolling(EventServiceBase):
-    _polling_period: int = 2
-    _count: int = 0
+    __polling_interval: int = 2
+    __count: int = 0
 
     def __init__(self, network_type: ModbusType):
         super().__init__(MODBUS_SERVICE_NAME, True)
@@ -37,12 +37,12 @@ class ModbusPolling(EventServiceBase):
 
     def polling(self):
         self._set_internal_service_timeout(1)
-        logger.info(f"MODBUS: {self.__network_type.name} Polling started")
+        self.__log_info("Polling started")
         while True:
             event: Event = self._event_queue.get()
             if event.event_type is EventType.INTERNAL_SERVICE_TIMEOUT:
                 self.__poll()
-                self._set_internal_service_timeout(ModbusPolling._polling_period)
+                self._set_internal_service_timeout(ModbusPolling.__polling_interval)
             elif event.event_type is EventType.CALLABLE:
                 self._handle_internal_callable(event)
             else:
@@ -50,8 +50,8 @@ class ModbusPolling(EventServiceBase):
 
     @exception_handler
     def __poll(self):
-        self._count += 1
-        self.__log_debug(f'Poll loop {self._count}...')
+        self.__count += 1
+        self.__log_debug(f'Poll loop {self.__count}...')
         results: List[Tuple[ModbusNetworkModel, ModbusDeviceModel]] = self.__get_all_networks_and_devices()
         available_keys: List[str] = []
         for row in results:
@@ -63,6 +63,7 @@ class ModbusPolling(EventServiceBase):
         for key in self.get_registry().get_connections().keys():
             if key not in available_keys:
                 self.get_registry().remove_connection_if_exist(key)
+        db.session.commit()
 
     def __poll_network_device(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
         """
@@ -97,7 +98,6 @@ class ModbusPolling(EventServiceBase):
                 self.__log_debug(f'Stopping thread for {network} {device}')
                 break
             network, device = self.__get_network_and_device(network.uuid, device.uuid)
-            current_connection.is_changed = False
             if not (network and device):
                 return
             current_connection.is_running = True
@@ -188,6 +188,9 @@ class ModbusPolling(EventServiceBase):
     @abstractmethod
     def get_registry(self) -> ModbusRegistry:
         raise NotImplementedError
+
+    def __log_info(self, message: str):
+        logger.info(f'{self.__network_type.name}: {message}')
 
     def __log_debug(self, message: str):
         logger.debug(f'{self.__network_type.name}: {message}')
