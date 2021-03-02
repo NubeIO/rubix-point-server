@@ -1,5 +1,5 @@
 import logging
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 from typing import Dict
 
 from pymodbus.client.sync import BaseModbusClient
@@ -12,7 +12,7 @@ from src.utils import Singleton
 logger = logging.getLogger(__name__)
 
 
-class ModbusRegistryKey(ABC):
+class ModbusRegistryKey:
     def __init__(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
         self.network: ModbusNetworkModel = network
         self.device: ModbusDeviceModel = device
@@ -33,6 +33,7 @@ class ModbusRegistryConnection:
         self.connection_key: str = connection_key
         self.client: BaseModbusClient = client
         self.is_running: bool = False
+        self.is_deleted: bool = False
 
 
 class ModbusRegistry(metaclass=Singleton):
@@ -50,8 +51,12 @@ class ModbusRegistry(metaclass=Singleton):
     def get_connections(self) -> Dict[str, ModbusRegistryConnection]:
         return self.connections
 
-    def add_and_get_connection(self, network: ModbusNetworkModel,
-                               device: ModbusDeviceModel) -> ModbusRegistryConnection:
+    def get_connection(self, network, device) -> ModbusRegistryConnection:
+        registry_key: ModbusRegistryKey = self.get_registry_key(network, device)
+        return self.connections.get(registry_key.key)
+
+    def add_edit_and_get_connection(self, network: ModbusNetworkModel,
+                                    device: ModbusDeviceModel) -> ModbusRegistryConnection:
         registry_key: ModbusRegistryKey = self.get_registry_key(network, device)
         connection: ModbusRegistryConnection = self.connections.get(registry_key.key)
         if connection and connection.connection_key != registry_key.connection_key:
@@ -77,9 +82,10 @@ class ModbusRegistry(metaclass=Singleton):
 
     def remove_connection_if_exist(self, key):
         logger.debug(f'Removing rtu_connection {key}')
-        rtu_connection = self.connections.get(key)
-        if rtu_connection:
-            rtu_connection.client.close()
+        connection = self.connections.get(key)
+        if connection:
+            connection.client.close()
+            del self.connections[key]
 
     @abstractmethod
     def get_registry_key(self, network: ModbusNetworkModel, device: ModbusDeviceModel) -> ModbusRegistryKey:
