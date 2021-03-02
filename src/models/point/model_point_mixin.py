@@ -8,7 +8,7 @@ class PointMixinModel(PointModel):
     __abstract__ = True
 
     @classmethod
-    def get_polymorphic_identity(cls):
+    def get_polymorphic_identity(cls) -> str:
         pass
 
     @declared_attr
@@ -22,4 +22,4 @@ class PointMixinModel(PointModel):
         }
 
     def __repr__(self):
-        return f"{self.get_polymorphic_identity()}Point(uuid = {self.uuid})"
+        return f"{self.get_polymorphic_identity().title()}Point(uuid = {self.uuid})"

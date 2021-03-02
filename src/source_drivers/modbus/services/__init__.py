@@ -1,3 +1,3 @@
 from .modbus_polling import RtuPolling, TcpPolling, ModbusPolling
-from .rtu_registry import RtuRegistry
-from .tcp_registry import TcpRegistry
+from .modbus_rtu_registry import ModbusRtuRegistry
+from .modbus_tcp_registry import ModbusTcpRegistry

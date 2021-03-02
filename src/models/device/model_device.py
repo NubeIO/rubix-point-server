@@ -30,7 +30,7 @@ class DeviceModel(ModelBase):
     )
 
     def __repr__(self):
-        return f"Device(device_uuid = {self.device_uuid})"
+        return f"Device(uuid = {self.uuid})"
 
     @validates('name')
     def validate_name(self, _, value):

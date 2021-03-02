@@ -1,10 +1,10 @@
-from sqlalchemy.orm import validates
 from sqlalchemy import UniqueConstraint
+from sqlalchemy.orm import validates
 
 from src import db
-from src.source_drivers import MODBUS_SERVICE_NAME
-from src.models.network.model_network import NetworkModel
 from src.models.device.model_device_mixin import DeviceMixinModel
+from src.models.network.model_network import NetworkModel
+from src.source_drivers import MODBUS_SERVICE_NAME
 from src.source_drivers.modbus.models.network import ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
 
@@ -17,19 +17,18 @@ class ModbusDeviceModel(DeviceMixinModel):
     tcp_ip = db.Column(db.String(80))
     tcp_port = db.Column(db.Integer())
     zero_based = db.Column(db.Boolean(), nullable=False, default=False)
-    timeout = db.Column(db.Float(), nullable=False, default=1)
-    timeout_global = db.Column(db.Boolean(), nullable=False, default=True)
     ping_point = db.Column(db.String(10))
+    timeout = db.Column(db.Integer(), nullable=False, default=3)
+    polling_interval_runtime = db.Column(db.Integer(), default=2)
+    point_interval_ms_between_points = db.Column(db.Integer(), default=30)
     modbus_network_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (
-        # UniqueConstraint('address', 'type', 'modbus_network_uuid_constraint'),
-        # UniqueConstraint('tcp_ip', 'type', 'modbus_network_uuid_constraint'), //removed as TCP devices when a
-        # gateway is used have the same IP
+        UniqueConstraint('tcp_ip', 'address', 'modbus_network_uuid_constraint'),
     )
 
     @classmethod
-    def get_polymorphic_identity(cls):
+    def get_polymorphic_identity(cls) -> str:
         return MODBUS_SERVICE_NAME
 
     @validates('tcp_ip')

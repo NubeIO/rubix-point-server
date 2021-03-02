@@ -27,14 +27,8 @@ modbus_point_all_attributes['data_endian'] = {
     'nested': True,
     'dict': 'data_endian.name'
 }
-modbus_point_all_attributes['timeout'] = {
-    'type': float,
-}
-modbus_point_all_attributes['timeout_global'] = {
-    'type': bool,
-}
 
-modbud_poll_non_existing_attributes = {
+modbus_poll_non_existing_attributes = {
     'network_type': {
         'type': str,
         'required': True

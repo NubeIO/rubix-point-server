@@ -67,13 +67,13 @@ class Background:
                         kwargs={'config': setting.listener}).start()
 
         if setting.drivers.modbus_tcp:
-            from src.source_drivers.modbus.services import TcpPolling, TcpRegistry
-            TcpRegistry().register()
+            from src.source_drivers.modbus.services import TcpPolling, ModbusTcpRegistry
+            ModbusTcpRegistry().register()
             FlaskThread(target=TcpPolling().polling, daemon=True).start()
 
         if setting.drivers.modbus_rtu:
-            from src.source_drivers.modbus.services import RtuPolling, RtuRegistry
-            RtuRegistry().register()
+            from src.source_drivers.modbus.services import RtuPolling, ModbusRtuRegistry
+            ModbusRtuRegistry().register()
             FlaskThread(target=RtuPolling().polling, daemon=True).start()
 
         if setting.drivers.bridge and setting.mqtt_rest_bridge_setting.enabled:

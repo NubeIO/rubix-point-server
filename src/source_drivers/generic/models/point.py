@@ -13,5 +13,5 @@ class GenericPointModel(PointMixinModel):
     unit = db.Column(db.String, nullable=True)
 
     @classmethod
-    def get_polymorphic_identity(cls):
+    def get_polymorphic_identity(cls) -> str:
         return GENERIC_SERVICE_NAME

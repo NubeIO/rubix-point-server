@@ -52,7 +52,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
 
     @property
     def config(self) -> MqttSetting:
-        return super().config
+        return super().config if isinstance(super().config, MqttSetting) else MqttSetting()
 
     def start(self, config: MqttSetting, subscribe_topic: str = None, callback: Callable = lambda: None,
               loop_forever: bool = True):
@@ -101,7 +101,8 @@ class MqttClient(MqttClientBase, EventServiceBase):
     def publish_update(self, model: ModelBase, updates: dict):
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
-        topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), model.uuid))
+        topic: str = self.make_topic(
+            (self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), getattr(model, 'uuid', '<uuid>')))
         self.__publish_mqtt_value(topic, json.dumps(updates))
 
     @allow_only_on_prefix

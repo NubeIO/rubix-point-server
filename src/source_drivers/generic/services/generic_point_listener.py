@@ -23,7 +23,7 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=Singleton
 
     @property
     def config(self) -> GenericListenerSetting:
-        return super().config
+        return super().config if isinstance(super().config, GenericListenerSetting) else GenericListenerSetting()
 
     def start(self, config: GenericListenerSetting, subscribe_topic: str = None, callback: Callable = lambda: None,
               loop_forever: bool = True):

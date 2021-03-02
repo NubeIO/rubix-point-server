@@ -8,7 +8,7 @@ from src.source_drivers import MODBUS_SERVICE_NAME
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
-from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbud_poll_non_existing_attributes, \
+from src.source_drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_poll_non_existing_attributes, \
     point_store_fields, modbus_point_all_fields
 from src.source_drivers.modbus.services import ModbusPolling
 
@@ -32,10 +32,10 @@ class ModbusPointPoll(RubixResource):
 
 class ModbusPointPollNonExisting(RubixResource):
     parser = reqparse.RequestParser()
-    for attr in modbud_poll_non_existing_attributes:
+    for attr in modbus_poll_non_existing_attributes:
         parser.add_argument(attr,
-                            type=modbud_poll_non_existing_attributes[attr]['type'],
-                            required=modbud_poll_non_existing_attributes[attr].get('required', False),
+                            type=modbus_poll_non_existing_attributes[attr]['type'],
+                            required=modbus_poll_non_existing_attributes[attr].get('required', False),
                             store_missing=False)
 
     @classmethod

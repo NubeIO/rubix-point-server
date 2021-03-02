@@ -15,8 +15,6 @@ class ModbusPointModel(PointMixinModel):
     function_code = db.Column(db.Enum(ModbusFunctionCode), nullable=False)
     data_type = db.Column(db.Enum(ModbusDataType), nullable=False, default=ModbusDataType.RAW)
     data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False, default=ModbusDataEndian.BEB_LEW)
-    timeout = db.Column(db.Float(), nullable=False, default=1)  # TODO: not used
-    timeout_global = db.Column(db.Boolean(), nullable=False, default=True)  # TODO: not used
     modbus_device_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (
@@ -28,7 +26,7 @@ class ModbusPointModel(PointMixinModel):
         return cls.query.filter_by(device_uuid=device_uuid)
 
     @classmethod
-    def get_polymorphic_identity(cls):
+    def get_polymorphic_identity(cls) -> str:
         return MODBUS_SERVICE_NAME
 
     @classmethod
