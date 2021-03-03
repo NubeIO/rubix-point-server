@@ -1,7 +1,11 @@
 # CHANGELOG
+## [v1.4.1](https://github.com/NubeIO/rubix-point-server/tree/v1.4.1) (2020-03-03)
+### Added
+- Runtime values addition reflect
+
 ## [v1.4.0](https://github.com/NubeIO/rubix-point-server/tree/v1.4.0) (2020-03-02)
 ### Added
-- Added in timedelay between points on modbus polling
+- Added in time-delay between points on modbus polling
 
 ## [v1.3.9](https://github.com/NubeIO/rubix-point-server/tree/v1.3.9) (2020-03-01)
 ### Added
