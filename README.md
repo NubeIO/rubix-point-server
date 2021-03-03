@@ -53,12 +53,14 @@ Usage: rubix-point [OPTIONS]
 
 Options:
   -p, --port INTEGER              Port  [default: 1515]
+  -g, --global-dir PATH           Global dir
   -d, --data-dir PATH             Application data dir
+  -c, --config-dir PATH           Application config dir
   --prod                          Production mode
   -s, --setting-file TEXT         Rubix Point: setting json file
   -l, --logging-conf TEXT         Rubix Point: logging config file
   --workers INTEGER               Gunicorn: The number of worker processes for handling requests.
-  -c, --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
+  --gunicorn-config TEXT      Gunicorn: config file(gunicorn.conf.py)
   --log-level [FATAL|ERROR|WARN|INFO|DEBUG]
                                   Logging level
   -h, --help                      Show this message and exit.
