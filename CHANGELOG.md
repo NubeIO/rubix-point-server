@@ -1,7 +1,12 @@
 # CHANGELOG
+## [v1.4.2](https://github.com/NubeIO/rubix-point-server/tree/v1.4.2) (2020-03-03)
+### Added
+- Upgrade mqtt-rest-bridge (listener issue fix)
+- Separate data and config files
+
 ## [v1.4.1](https://github.com/NubeIO/rubix-point-server/tree/v1.4.1) (2020-03-03)
 ### Added
-- Runtime values addition reflect
+- Runtime values edition reflect
 
 ## [v1.4.0](https://github.com/NubeIO/rubix-point-server/tree/v1.4.0) (2020-03-02)
 ### Added
