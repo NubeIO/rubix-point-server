@@ -33,7 +33,6 @@ class ModbusRegistryConnection:
         self.connection_key: str = connection_key
         self.client: BaseModbusClient = client
         self.is_running: bool = False
-        self.is_deleted: bool = False
 
 
 class ModbusRegistry(metaclass=Singleton):
@@ -82,7 +81,7 @@ class ModbusRegistry(metaclass=Singleton):
 
     def remove_connection_if_exist(self, key):
         logger.debug(f'Removing rtu_connection {key}')
-        connection = self.connections.get(key)
+        connection: ModbusRegistryConnection = self.connections.get(key)
         if connection:
             connection.client.close()
             del self.connections[key]
