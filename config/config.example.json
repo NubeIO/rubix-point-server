@@ -24,7 +24,7 @@
     "retries": 3,
     "timer": 1,
     "path": "",
-    "measurement": "history",
+    "measurement": "points",
     "attempt_reconnect_secs": 5
   },
   "postgres": {
@@ -36,7 +36,7 @@
     "ssl_mode": "allow",
     "connect_timeout": 5,
     "timer": 1,
-    "table_name": "history",
+    "table_name": "points",
     "attempt_reconnect_secs": 5
   },
   "mqtt_rest_bridge_listener": {
