@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.4.3](https://github.com/NubeIO/rubix-point-server/tree/v1.4.2) (2020-03-04)
+### Added
+- Postgres sync update & tags addition
+
 ## [v1.4.2](https://github.com/NubeIO/rubix-point-server/tree/v1.4.2) (2020-03-03)
 ### Added
 - Upgrade mqtt-rest-bridge (listener issue fix)
