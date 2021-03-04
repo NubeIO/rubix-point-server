@@ -86,7 +86,7 @@ class InfluxSetting(BaseSetting):
         self.retries = 3
         self.timer = 1
         self.path = ''
-        self.measurement = 'history'
+        self.measurement = 'points'
         self.attempt_reconnect_secs = 5
 
 
@@ -102,7 +102,7 @@ class PostgresSetting(BaseSetting):
         self.ssl_mode = 'allow'
         self.connect_timeout = 5
         self.timer = 1
-        self.table_name = 'history'
+        self.table_name = 'points'
         self.attempt_reconnect_secs = 5
 
 
