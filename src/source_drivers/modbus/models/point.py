@@ -3,7 +3,7 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.models.point.model_point_mixin import PointMixinModel
-from src.source_drivers import MODBUS_SERVICE_NAME
+from src.source_drivers.drivers import Drivers
 from src.source_drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 
 
@@ -27,7 +27,7 @@ class ModbusPointModel(PointMixinModel):
 
     @classmethod
     def get_polymorphic_identity(cls) -> str:
-        return MODBUS_SERVICE_NAME
+        return Drivers.MODBUS.value
 
     @classmethod
     def create_temporary_from_string(cls, string: str):

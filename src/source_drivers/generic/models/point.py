@@ -1,6 +1,6 @@
 from src import db
 from src.models.point.model_point_mixin import PointMixinModel
-from src.source_drivers import GENERIC_SERVICE_NAME
+from src.source_drivers.drivers import Drivers
 from src.source_drivers.generic.interfaces.point.points import GenericPointType
 
 
@@ -14,4 +14,4 @@ class GenericPointModel(PointMixinModel):
 
     @classmethod
     def get_polymorphic_identity(cls) -> str:
-        return GENERIC_SERVICE_NAME
+        return Drivers.GENERIC.value

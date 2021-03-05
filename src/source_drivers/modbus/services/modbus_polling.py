@@ -12,7 +12,6 @@ from src.event_dispatcher import EventDispatcher
 from src.handlers.exception import exception_handler
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException, Event
-from src.source_drivers import MODBUS_SERVICE_NAME
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.source_drivers.modbus.models.point import ModbusPointModel
@@ -20,6 +19,7 @@ from .modbus_functions.polling.poll import poll_point
 from .modbus_registry import ModbusRegistryConnection, ModbusRegistry
 from .modbus_rtu_registry import ModbusRtuRegistry
 from .modbus_tcp_registry import ModbusTcpRegistry, ModbusTcpRegistryKey
+from ...drivers import Drivers
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class ModbusPolling(EventServiceBase):
     __count: int = 0
 
     def __init__(self, network_type: ModbusType):
-        super().__init__(MODBUS_SERVICE_NAME, True)
+        super().__init__(Drivers.MODBUS.value, True)
         self.__network_type = network_type
         self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
         self.supported_events[EventType.CALLABLE] = True

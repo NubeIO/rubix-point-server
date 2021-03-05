@@ -4,7 +4,7 @@ from rubix_http.resource import RubixResource
 
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import EventCallableBlocking
-from src.source_drivers import MODBUS_SERVICE_NAME
+from src.source_drivers.drivers import Drivers
 from src.source_drivers.modbus.models.device import ModbusDeviceModel
 from src.source_drivers.modbus.models.network import ModbusNetworkModel
 from src.source_drivers.modbus.models.point import ModbusPointModel
@@ -22,7 +22,7 @@ class ModbusPointPoll(RubixResource):
             raise NotFoundException('Modbus Point not found')
         else:
             event = EventCallableBlocking(ModbusPolling.poll_point, (point,))
-            EventDispatcher().dispatch_to_source_only(event, MODBUS_SERVICE_NAME)
+            EventDispatcher().dispatch_to_source_only(event, Drivers.MODBUS.value)
             event.condition.wait()
             if event.error:
                 raise Exception(str(event.data))
@@ -54,7 +54,7 @@ class ModbusPointPollNonExisting(RubixResource):
         point.check_self()
 
         event = EventCallableBlocking(ModbusPolling.poll_point_not_existing, (point, device, network))
-        EventDispatcher().dispatch_to_source_only(event, MODBUS_SERVICE_NAME)
+        EventDispatcher().dispatch_to_source_only(event, Drivers.MODBUS.value)
         event.condition.wait()
         if event.error:
             raise Exception(str(event.data))

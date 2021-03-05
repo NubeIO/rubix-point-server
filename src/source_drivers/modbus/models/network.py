@@ -2,7 +2,7 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.models.network.model_network_mixin import NetworkMixinModel
-from src.source_drivers import MODBUS_SERVICE_NAME
+from src.source_drivers.drivers import Drivers
 from src.source_drivers.modbus.interfaces.network.network import ModbusType, ModbusRtuParity
 
 
@@ -17,7 +17,7 @@ class ModbusNetworkModel(NetworkMixinModel):
 
     @classmethod
     def get_polymorphic_identity(cls) -> str:
-        return MODBUS_SERVICE_NAME
+        return Drivers.MODBUS.value
 
     @validates('type')
     def validate_type(self, _, value):
