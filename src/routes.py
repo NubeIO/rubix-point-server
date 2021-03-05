@@ -1,35 +1,35 @@
 from flask import Blueprint
 from flask_restful import Api
 
+from src.drivers.generic.resources.device.device_plural import GenericDevicePlural
+from src.drivers.generic.resources.device.device_singular import GenericDeviceSingularByUUID, \
+    GenericDeviceSingularByName
+from src.drivers.generic.resources.network.network_plural import GenericNetworkPlural
+from src.drivers.generic.resources.network.network_singular import GenericNetworkSingularByUUID, \
+    GenericNetworkSingularByName
+from src.drivers.generic.resources.point.point_plural import GenericPointPlural
+from src.drivers.generic.resources.point.point_singular import GenericPointSingularByUUID, \
+    GenericPointSingularByName
+from src.drivers.generic.resources.point.point_value_writer import GenericUUIDPointValueWriter, \
+    GenericNamePointValueWriter
+from src.drivers.modbus.resources.device.device_plural import ModbusDevicePlural
+from src.drivers.modbus.resources.device.device_singular import ModbusDeviceSingularByUUID, \
+    ModbusDeviceSingularByName
+from src.drivers.modbus.resources.mapping.mapping import MPGBPMappingResourceList, \
+    MPGBPMappingResourceByGenericPointUUID, MPGBPMappingResourceByBACnetPointUUID, \
+    MPGBPMappingResourceByModbusPointUUID, MPGBPMappingResourceByUUID
+from src.drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
+from src.drivers.modbus.resources.network.network_singular import ModbusNetworkSingularByName, \
+    ModbusNetworkSingularByUUID
+from src.drivers.modbus.resources.point.point_plural import ModbusPointPlural
+from src.drivers.modbus.resources.point.point_poll import ModbusPointPollNonExisting, ModbusPointPoll
+from src.drivers.modbus.resources.point.point_singular import ModbusPointSingularByUUID, \
+    ModbusPointSingularByName
+from src.drivers.modbus.resources.point.point_stores import ModbusPointPluralPointStore, ModbusPointStore, \
+    ModbusDevicePointPluralPointStore
 from src.resources.resource_device import DeviceResourceByUUID, DeviceResourceByName, DeviceResourceList
 from src.resources.resource_network import NetworkResourceByUUID, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResourceByUUID, PointResourceByName, PointResourceList
-from src.source_drivers.generic.resources.device.device_plural import GenericDevicePlural
-from src.source_drivers.generic.resources.device.device_singular import GenericDeviceSingularByUUID, \
-    GenericDeviceSingularByName
-from src.source_drivers.generic.resources.network.network_plural import GenericNetworkPlural
-from src.source_drivers.generic.resources.network.network_singular import GenericNetworkSingularByUUID, \
-    GenericNetworkSingularByName
-from src.source_drivers.generic.resources.point.point_plural import GenericPointPlural
-from src.source_drivers.generic.resources.point.point_singular import GenericPointSingularByUUID, \
-    GenericPointSingularByName
-from src.source_drivers.generic.resources.point.point_value_writer import GenericUUIDPointValueWriter, \
-    GenericNamePointValueWriter
-from src.source_drivers.modbus.resources.device.device_plural import ModbusDevicePlural
-from src.source_drivers.modbus.resources.device.device_singular import ModbusDeviceSingularByUUID, \
-    ModbusDeviceSingularByName
-from src.source_drivers.modbus.resources.mapping.mapping import MPGBPMappingResourceList, \
-    MPGBPMappingResourceByGenericPointUUID, MPGBPMappingResourceByBACnetPointUUID, \
-    MPGBPMappingResourceByModbusPointUUID, MPGBPMappingResourceByUUID
-from src.source_drivers.modbus.resources.network.network_plural import ModbusNetworkPlural
-from src.source_drivers.modbus.resources.network.network_singular import ModbusNetworkSingularByName, \
-    ModbusNetworkSingularByUUID
-from src.source_drivers.modbus.resources.point.point_plural import ModbusPointPlural
-from src.source_drivers.modbus.resources.point.point_poll import ModbusPointPollNonExisting, ModbusPointPoll
-from src.source_drivers.modbus.resources.point.point_singular import ModbusPointSingularByUUID, \
-    ModbusPointSingularByName
-from src.source_drivers.modbus.resources.point.point_stores import ModbusPointPluralPointStore, ModbusPointStore, \
-    ModbusDevicePointPluralPointStore
 from src.system.resources.memory import GetSystemMem
 from src.system.resources.ping import Ping
 

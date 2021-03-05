@@ -14,7 +14,7 @@ class EventDispatcher(metaclass=Singleton):
         else:
             raise Exception('Invalid service type added', service)
 
-    def add_source_driver(self, new_driver: EventServiceBase):
+    def add_driver(self, new_driver: EventServiceBase):
         if not isinstance(new_driver, EventServiceBase):
             raise Exception('Invalid driver type added', new_driver)
         else:
