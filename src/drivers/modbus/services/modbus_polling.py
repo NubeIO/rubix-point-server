@@ -8,6 +8,7 @@ from pymodbus.exceptions import ConnectionException, ModbusIOException
 from sqlalchemy.orm.exc import ObjectDeletedError
 
 from src import db, FlaskThread
+from src.drivers.enums.drivers import Drivers
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.drivers.modbus.models.point import ModbusPointModel
@@ -19,7 +20,6 @@ from .modbus_functions.polling.poll import poll_point
 from .modbus_registry import ModbusRegistryConnection, ModbusRegistry
 from .modbus_rtu_registry import ModbusRtuRegistry
 from .modbus_tcp_registry import ModbusTcpRegistry, ModbusTcpRegistryKey
-from ...drivers import Drivers
 
 logger = logging.getLogger(__name__)
 

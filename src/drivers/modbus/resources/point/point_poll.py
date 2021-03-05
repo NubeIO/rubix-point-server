@@ -2,7 +2,7 @@ from flask_restful import reqparse, marshal_with
 from rubix_http.exceptions.exception import NotFoundException
 from rubix_http.resource import RubixResource
 
-from src.drivers.drivers import Drivers
+from src.drivers.enums.drivers import Drivers
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel
 from src.drivers.modbus.models.point import ModbusPointModel

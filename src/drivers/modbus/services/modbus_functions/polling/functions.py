@@ -4,7 +4,7 @@ from pymodbus.bit_write_message import WriteSingleCoilResponse
 from pymodbus.client.sync import BaseModbusClient
 from pymodbus.exceptions import ModbusIOException
 
-from src.drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
+from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 from src.drivers.modbus.services.modbus_functions.function_utils import _set_data_length, _assertion, \
     _mod_point_data_endian, convert_to_data_type, _builder_data_type
 from src.drivers.modbus.services.modbus_functions.polling import modbus_poll_debug_log, modbus_poll_debug

@@ -6,9 +6,9 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
-from src.drivers.generic.interfaces.point.points import GenericPointType
+from src.drivers.generic.enums.point.points import GenericPointType
 from src.drivers.generic.models.priority_array import PriorityArrayModel
-from src.interfaces.point import HistoryType, MathOperation
+from src.enums.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel

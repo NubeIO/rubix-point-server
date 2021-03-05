@@ -1,4 +1,4 @@
-from src.drivers.drivers import Drivers
+from src.drivers.enums.drivers import Drivers
 from src.models.device.model_device_mixin import DeviceMixinModel
 
 

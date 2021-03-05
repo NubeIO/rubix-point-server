@@ -4,7 +4,7 @@ from typing import Dict
 
 from pymodbus.client.sync import BaseModbusClient
 
-from src.drivers.modbus.interfaces.network.network import ModbusType
+from src.drivers.modbus.enums.network.network import ModbusType
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel
 from src.utils import Singleton

@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from src import db
+from src.enums.point import HistoryType
 from src.handlers.exception import exception_handler
-from src.interfaces.point import HistoryType
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point import PointModel

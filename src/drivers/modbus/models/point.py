@@ -2,8 +2,8 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
-from src.drivers.drivers import Drivers
-from src.drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
+from src.drivers.enums.drivers import Drivers
+from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 from src.models.point.model_point_mixin import PointMixinModel
 
 

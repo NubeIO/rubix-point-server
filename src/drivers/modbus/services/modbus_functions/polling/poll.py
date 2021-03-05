@@ -4,7 +4,7 @@ import numbers
 from pymodbus.client.sync import BaseModbusClient
 from pymodbus.exceptions import ModbusIOException
 
-from src.drivers.modbus.interfaces.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
+from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel
 from src.drivers.modbus.models.point import ModbusPointModel

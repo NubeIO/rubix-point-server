@@ -6,7 +6,7 @@ from registry.registry import RubixRegistry
 from rubix_mqtt.mqtt import MqttClientBase
 
 from src import GenericListenerSetting
-from src.drivers.drivers import Drivers
+from src.drivers.enums.drivers import Drivers
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.services.event_service_base import EventServiceBase

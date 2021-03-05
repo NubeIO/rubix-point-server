@@ -1,7 +1,7 @@
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
 
-from src.drivers.modbus.interfaces.point.points import ModbusDataEndian, ModbusDataType
+from src.drivers.modbus.enums.point.points import ModbusDataEndian, ModbusDataType
 
 
 def _set_data_length(data_type: ModbusDataType, reg_length: int) -> int:

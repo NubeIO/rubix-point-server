@@ -2,8 +2,8 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
-from src.drivers.drivers import Drivers
-from src.drivers.modbus.models.network import ModbusType
+from src.drivers.enums.drivers import Drivers
+from src.drivers.modbus.enums.network.network import ModbusType
 from src.drivers.modbus.models.point import ModbusPointModel
 from src.models.device.model_device_mixin import DeviceMixinModel
 from src.models.network.model_network import NetworkModel
