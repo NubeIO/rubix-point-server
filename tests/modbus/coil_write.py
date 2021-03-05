@@ -1,10 +1,6 @@
-import time
-
-from pymodbus.client.sync import ModbusSerialClient
 import logging
 
-from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
+from pymodbus.client.sync import ModbusSerialClient
 
 logging.basicConfig()
 log = logging.getLogger()
@@ -31,5 +27,4 @@ if client.connect():  # Trying for connect to Modbus Server/Slave
         # print(res.registers)
         print(res)
     else:
-        # print(res)
         print(res)

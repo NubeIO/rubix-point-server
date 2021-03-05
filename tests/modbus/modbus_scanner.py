@@ -1,6 +1,6 @@
 import sys
 
-from pymodbus.client.sync import ModbusTcpClient, ModbusSerialClient
+from pymodbus.client.sync import ModbusSerialClient
 
 
 class Modbus():
