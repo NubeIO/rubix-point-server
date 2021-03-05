@@ -1,11 +1,8 @@
-import time
-
-from pymodbus.client.sync import ModbusSerialClient
 import logging
 
+from pymodbus.client.sync import ModbusSerialClient
 from pymodbus.constants import Endian
-from pymodbus.datastore import context
-from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
+from pymodbus.payload import BinaryPayloadBuilder
 
 logging.basicConfig()
 log = logging.getLogger()

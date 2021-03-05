@@ -2,9 +2,10 @@
 # writes the CPU temperature for the raspberry pi device to a modbus register.
 # If an exception occurs, it will wait 5 seconds and try again.
 
-import time
-import sys
 import logging
+import sys
+import time
+
 from pymodbus.client.sync import ModbusTcpClient
 
 FORMAT = '%(asctime)-15s [%(levelname)s] %(message)s'

@@ -5,7 +5,7 @@ from flask import current_app
 from mrb.brige import MqttRestBridge
 from rubix_http.resource import RubixResource
 
-from src.source_drivers.generic.services.generic_point_listener import GenericPointListener
+from src.drivers.generic.services.generic_point_listener import GenericPointListener
 from src.utils.project import get_version
 
 start_time = time.time()

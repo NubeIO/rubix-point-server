@@ -1,9 +1,9 @@
 import argparse
 import time
-from pymodbus.client.sync import ModbusSerialClient
-from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
-from pymodbus.constants import Endian
 
+from pymodbus.client.sync import ModbusSerialClient
+from pymodbus.constants import Endian
+from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
 
 parser = argparse.ArgumentParser(description='Nube iO R-IO-10 initialiser.')
 parser.add_argument('port', metavar='PORT', type=str, help='serial port')
@@ -27,7 +27,6 @@ UI_configs = args.ui_configs or UI_DEFAULTS
 UO_writes = args.uo_writes
 DO_writes = args.do_writes
 poll_loop = args.loop or 5
-
 
 UO_config_offset = 5 - 1
 UI_config_offset = 7 - 1
@@ -84,7 +83,7 @@ def read_UI(points):
         if res.isError():
             print(f'        ERROR: failed to read UI{offset + 1}', )
         else:
-            value = decoder.fromRegisters(res.registers, byteorder=Endian.Big, wordorder=Endian.Little)\
+            value = decoder.fromRegisters(res.registers, byteorder=Endian.Big, wordorder=Endian.Little) \
                 .decode_32bit_float()
             print(f'        UI{offset + 1} : {value}')
         decoder.reset()

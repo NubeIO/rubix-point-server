@@ -7,7 +7,7 @@ from mrb.message import HttpMethod, Response
 from sqlalchemy import and_, or_
 
 from src import db, FlaskThread
-from src.source_drivers.modbus.models.mapping import MPGBPMapping
+from src.drivers.modbus.models.mapping import MPGBPMapping
 from src.utils.model_utils import get_datetime
 
 

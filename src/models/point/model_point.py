@@ -6,15 +6,15 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
-from src.interfaces.point import HistoryType, MathOperation
+from src.drivers.generic.enums.point.points import GenericPointType
+from src.drivers.generic.models.priority_array import PriorityArrayModel
+from src.enums.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.event_service_base import Event, EventType
-from src.source_drivers.generic.interfaces.point.points import GenericPointType
-from src.source_drivers.generic.models.priority_array import PriorityArrayModel
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ class PointModel(ModelBase):
 
     @classmethod
     def apply_point_type(cls, value: float):
-        from src.source_drivers.generic.models.point import GenericPointModel
+        from src.drivers.generic.models.point import GenericPointModel
         generic_point = GenericPointModel.find_by_uuid(cls.uuid)
         if generic_point is not None and value is not None:
             if generic_point.type == GenericPointType.STRING:

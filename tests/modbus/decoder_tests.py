@@ -1,11 +1,8 @@
+import logging
+
 from pymodbus.client.sync import ModbusSerialClient
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
-from pymodbus.payload import BinaryPayloadBuilder
-from pymodbus.client.sync import ModbusTcpClient as ModbusClient
-from pymodbus.compat import iteritems
-from collections import OrderedDict
-import logging
 
 FORMAT = ('%(asctime)-15s %(threadName)-15s'
           ' %(levelname)-8s %(module)-15s:%(lineno)-8s %(message)s')
