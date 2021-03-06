@@ -80,6 +80,8 @@ point_return_attributes = {
     },
     'driver': {
         'type': str,
+        'nested': True,
+        'dict': 'driver.name'
     },
     'created_on': {
         'type': str,

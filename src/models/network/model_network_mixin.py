@@ -1,6 +1,7 @@
 from sqlalchemy.ext.declarative import declared_attr
 
 from src import db
+from src.drivers.enums.drivers import Drivers
 from src.models.network.model_network import NetworkModel
 
 
@@ -8,7 +9,7 @@ class NetworkMixinModel(NetworkModel):
     __abstract__ = True
 
     @classmethod
-    def get_polymorphic_identity(cls) -> str:
+    def get_polymorphic_identity(cls) -> Drivers:
         pass
 
     @declared_attr
@@ -22,4 +23,4 @@ class NetworkMixinModel(NetworkModel):
         }
 
     def __repr__(self):
-        return f"{self.get_polymorphic_identity().title()}Network(uuid = {self.uuid})"
+        return f"{self.get_polymorphic_identity().value}Network(uuid = {self.uuid})"

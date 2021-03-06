@@ -103,7 +103,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                     'edge_device_name': point.device.name,
                     'network_uuid': point.device.network.uuid,
                     'network_name': point.device.network.name,
-                    'driver': point.driver,
+                    'driver': point.driver.name,
                 })
                 fields = {
                     'id': point_store_history.id,

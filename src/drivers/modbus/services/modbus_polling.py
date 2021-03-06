@@ -29,7 +29,7 @@ class ModbusPolling(EventServiceBase):
     __count: int = 0
 
     def __init__(self, network_type: ModbusType):
-        super().__init__(Drivers.MODBUS.value, True)
+        super().__init__(Drivers.MODBUS.name, True)
         self.__network_type = network_type
         self.supported_events[EventType.INTERNAL_SERVICE_TIMEOUT] = True
         self.supported_events[EventType.CALLABLE] = True

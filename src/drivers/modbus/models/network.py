@@ -16,8 +16,8 @@ class ModbusNetworkModel(NetworkMixinModel):
     rtu_byte_size = db.Column(db.Integer(), default=8)
 
     @classmethod
-    def get_polymorphic_identity(cls) -> str:
-        return Drivers.MODBUS.value
+    def get_polymorphic_identity(cls) -> Drivers:
+        return Drivers.MODBUS
 
     @validates('type')
     def validate_type(self, _, value):

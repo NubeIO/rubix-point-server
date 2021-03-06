@@ -6,5 +6,5 @@ class GenericDeviceModel(DeviceMixinModel):
     __tablename__ = 'generic_devices'
 
     @classmethod
-    def get_polymorphic_identity(cls) -> str:
-        return Drivers.GENERIC.value
+    def get_polymorphic_identity(cls) -> Drivers:
+        return Drivers.GENERIC
