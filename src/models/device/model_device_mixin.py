@@ -1,6 +1,7 @@
 from sqlalchemy.ext.declarative import declared_attr
 
 from src import db
+from src.drivers.enums.drivers import Drivers
 from src.models.device.model_device import DeviceModel
 
 
@@ -8,7 +9,7 @@ class DeviceMixinModel(DeviceModel):
     __abstract__ = True
 
     @classmethod
-    def get_polymorphic_identity(cls) -> str:
+    def get_polymorphic_identity(cls) -> Drivers:
         pass
 
     @declared_attr
@@ -22,4 +23,4 @@ class DeviceMixinModel(DeviceModel):
         }
 
     def __repr__(self):
-        return f"{self.get_polymorphic_identity().title()}Device(uuid = {self.uuid})"
+        return f"{self.get_polymorphic_identity().value}Device(uuid = {self.uuid})"

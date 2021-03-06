@@ -2,5 +2,5 @@ import enum
 
 
 class Drivers(enum.Enum):
-    MODBUS = 'modbus'
-    GENERIC = 'generic'
+    MODBUS = 'Modbus'
+    GENERIC = 'Generic'

@@ -28,8 +28,8 @@ class ModbusDeviceModel(DeviceMixinModel):
     )
 
     @classmethod
-    def get_polymorphic_identity(cls) -> str:
-        return Drivers.MODBUS.value
+    def get_polymorphic_identity(cls) -> Drivers:
+        return Drivers.MODBUS
 
     @validates('tcp_ip')
     def validate_tcp_ip(self, _, value):

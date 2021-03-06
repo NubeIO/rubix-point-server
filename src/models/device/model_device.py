@@ -4,6 +4,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
+from src.drivers.enums.drivers import Drivers
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.services.event_service_base import EventType
@@ -18,7 +19,7 @@ class DeviceModel(ModelBase):
     fault = db.Column(db.Boolean(), nullable=True)
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     points = db.relationship('PointModel', cascade="all,delete", backref='device', lazy=True)
-    driver = db.Column(db.String(80))
+    driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
 
     __mapper_args__ = {
         'polymorphic_identity': 'device',

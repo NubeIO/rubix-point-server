@@ -6,6 +6,7 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
+from src.drivers.enums.drivers import Drivers
 from src.drivers.generic.enums.point.points import GenericPointType
 from src.drivers.generic.models.priority_array import PriorityArrayModel
 from src.enums.point import HistoryType, MathOperation
@@ -41,7 +42,7 @@ class PointModel(ModelBase):
     tags = db.Column(db.String(320), nullable=True)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=False, cascade="all,delete")
-    driver = db.Column(db.String(80))
+    driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',

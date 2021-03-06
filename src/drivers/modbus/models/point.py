@@ -26,8 +26,8 @@ class ModbusPointModel(PointMixinModel):
         return cls.query.filter_by(device_uuid=device_uuid)
 
     @classmethod
-    def get_polymorphic_identity(cls) -> str:
-        return Drivers.MODBUS.value
+    def get_polymorphic_identity(cls) -> Drivers:
+        return Drivers.MODBUS
 
     @classmethod
     def create_temporary_from_string(cls, string: str):

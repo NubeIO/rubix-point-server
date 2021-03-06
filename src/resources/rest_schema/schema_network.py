@@ -2,8 +2,8 @@ from copy import deepcopy
 
 from flask_restful import fields
 
-from src.resources.utils import map_rest_schema
 from src.resources.rest_schema.schema_device import device_all_fields_with_children, device_all_fields
+from src.resources.utils import map_rest_schema
 
 network_all_attributes = {
     'name': {
@@ -27,7 +27,9 @@ network_return_attributes = {
         'type': str,
     },
     'driver': {
-        'type': str
+        'type': str,
+        'nested': True,
+        'dict': 'driver.name'
     },
     'created_on': {
         'type': str,

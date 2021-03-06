@@ -3,6 +3,7 @@ import re
 from sqlalchemy.orm import validates
 
 from src import db
+from src.drivers.enums.drivers import Drivers
 from src.models.model_base import ModelBase
 from src.services.event_service_base import EventType
 
@@ -15,7 +16,7 @@ class NetworkModel(ModelBase):
     fault = db.Column(db.Boolean(), nullable=True)
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     devices = db.relationship('DeviceModel', cascade="all,delete", backref='network', lazy=True)
-    driver = db.Column(db.String(80))
+    driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
 
     __mapper_args__ = {
         'polymorphic_identity': 'network',

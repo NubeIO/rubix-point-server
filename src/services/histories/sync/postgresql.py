@@ -98,7 +98,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                              point.device.network.uuid, point.device.network.name,
                              point.device.uuid, point.device.name,
                              point.uuid, point.name,
-                             point.driver)
+                             point.driver.name)
             points_list.append(_point)
 
             if point.tags:
