@@ -2,6 +2,7 @@ import logging
 from threading import Thread
 
 from flask import current_app
+from gevent import thread
 from mrb.brige import MqttRestBridge
 
 from .setting import AppSetting
@@ -60,6 +61,7 @@ class Background:
                         kwargs={'config': setting.postgres}).start()
 
         # Drivers
+        thread.sleep(5)
         logger.info("Starting Drivers...")
         if setting.drivers.generic and setting.listener.enabled:
             from src.drivers.generic.services.generic_point_listener import GenericPointListener
@@ -76,10 +78,16 @@ class Background:
             ModbusRtuRegistry().register()
             FlaskThread(target=RtuPolling().polling, daemon=True).start()
 
+        # Sync
+        logger.info("Starting Sync Services...")
         if setting.drivers.bridge and setting.mqtt_rest_bridge_setting.enabled:
             FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
                                               mqtt_setting=setting.mqtt_rest_bridge_setting,
                                               callback=Background.sync_on_start).start, daemon=True).start()
+
+        if setting.services.mqtt and any(config.enabled for config in setting.mqtt_settings):
+            from src.services.points_registry import PointsRegistry
+            FlaskThread(target=PointsRegistry().register, daemon=True).start()
 
     @staticmethod
     def sync_on_start():

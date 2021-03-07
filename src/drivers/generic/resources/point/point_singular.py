@@ -7,6 +7,7 @@ from src.drivers.generic.models.point import GenericPointModel
 from src.drivers.generic.resources.point.point_base import GenericPointBase
 from src.drivers.generic.resources.rest_schema.schema_generic_point import generic_point_all_fields, \
     generic_point_all_attributes
+from src.services.points_registry import PointsRegistry
 
 
 class GenericPointSingular(GenericPointBase):
@@ -28,20 +29,26 @@ class GenericPointSingular(GenericPointBase):
     @classmethod
     @marshal_with(generic_point_all_fields)
     def put(cls, **kwargs):
-        data = cls.parser.parse_args()
+        data: dict = cls.parser.parse_args()
         point: GenericPointModel = cls.get_point(**kwargs)
         if point is None:
             return cls.add_point(data)
-        return point.update(**data)
+        return cls.update_point(data, point)
+
+    @classmethod
+    def update_point(cls, data: dict, point: GenericPointModel) -> GenericPointModel:
+        updated_point: GenericPointModel = point.update(**data)
+        PointsRegistry().update_point(updated_point)
+        return updated_point
 
     @classmethod
     @marshal_with(generic_point_all_fields)
     def patch(cls, **kwargs):
-        data = cls.patch_parser.parse_args()
+        data: dict = cls.patch_parser.parse_args()
         point: GenericPointModel = cls.get_point(**kwargs)
         if point is None:
             raise NotFoundException('Generic Point not found')
-        return point.update(**data)
+        return cls.update_point(data, point)
 
     @classmethod
     def delete(cls, **kwargs):
@@ -49,6 +56,7 @@ class GenericPointSingular(GenericPointBase):
         if point is None:
             raise NotFoundException('Generic Point not found')
         point.delete_from_db()
+        PointsRegistry().delete_point(point.uuid)
         return '', 204
 
     @classmethod

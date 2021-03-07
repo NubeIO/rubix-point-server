@@ -50,9 +50,9 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=Singleton
         topic = message.topic.split('/')
         if len(topic) != self._mqtt_topic_min():
             return
-        network_name = topic[-3]
+        point_name = topic[-3]
         device_name = topic[-2]
-        point_name = topic[-1]
+        network_name = topic[-1]
         try:
             payload = json_loads(message.payload)
             if not payload and ('value' not in payload.keys() or 'fault' not in payload.keys()):

@@ -6,6 +6,7 @@ from rubix_http.resource import RubixResource
 from src.drivers.generic.models.point import GenericPointModel
 from src.drivers.generic.models.priority_array import PriorityArrayModel
 from src.drivers.generic.resources.rest_schema.schema_generic_point import generic_point_all_attributes
+from src.services.points_registry import PointsRegistry
 
 
 class GenericPointBase(RubixResource):
@@ -19,8 +20,9 @@ class GenericPointBase(RubixResource):
 
     @classmethod
     def add_point(cls, data):
-        _uuid = str(uuid.uuid4())
-        point = GenericPointModel(uuid=_uuid, **data)
+        _uuid: str = str(uuid.uuid4())
+        point: GenericPointModel = GenericPointModel(uuid=_uuid, **data)
         point.priority_array_write = PriorityArrayModel.create_new_priority_array_model(_uuid)
         point.save_to_db()
+        PointsRegistry().add_point(point)
         return point

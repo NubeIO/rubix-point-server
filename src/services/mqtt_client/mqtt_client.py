@@ -49,6 +49,7 @@ class MqttClient(MqttClientBase, EventServiceBase):
         self.supported_events[EventType.DEVICE_UPDATE] = True
         self.supported_events[EventType.NETWORK_UPDATE] = True
         self.supported_events[EventType.MQTT_DEBUG] = True
+        self.supported_events[EventType.POINT_REGISTRY_UPDATE] = True
 
     @property
     def config(self) -> MqttSetting:
@@ -61,9 +62,8 @@ class MqttClient(MqttClientBase, EventServiceBase):
         MqttRegistry().add(self)
         super().start(config, subscribe_topic, callback, loop_forever)
 
-    @allow_only_on_prefix
-    def publish_cov(self, source_driver: str, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
-                    point: PointModel, point_store: PointStoreModel):
+    def _publish_cov(self, source_driver: str, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
+                     point: PointModel, point_store: PointStoreModel):
         if point is None or point_store is None or device_uuid is None or network_uuid is None or source_driver is \
                 None or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
@@ -88,22 +88,21 @@ class MqttClient(MqttClientBase, EventServiceBase):
                                       network_uuid, network_name,
                                       device_uuid, device_name,
                                       point.uuid, point.name))
-        self.__publish_mqtt_value(topic, json.dumps(payload))
+        self._publish_mqtt_value(topic, json.dumps(payload))
 
         if self.config.publish_value and not point_store.fault:
             topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, source_driver,
                                           network_uuid, network_name,
                                           device_uuid, device_name,
                                           point.uuid, point.name))
-            self.__publish_mqtt_value(topic, str(point_store.value))
+            self._publish_mqtt_value(topic, str(point_store.value))
 
-    @allow_only_on_prefix
-    def publish_update(self, model: ModelBase, updates: dict):
+    def _publish_update(self, model: ModelBase, updates: dict):
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
         topic: str = self.make_topic(
             (self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), getattr(model, 'uuid', '<uuid>')))
-        self.__publish_mqtt_value(topic, json.dumps(updates))
+        self._publish_mqtt_value(topic, json.dumps(updates))
 
     @allow_only_on_prefix
     def _run_event(self, event: Event):
@@ -111,20 +110,22 @@ class MqttClient(MqttClientBase, EventServiceBase):
             return
 
         if event.event_type == EventType.MQTT_DEBUG:
-            self.__publish_mqtt_value(self.make_topic((self.config.debug_topic,)), event.data)
+            self._publish_mqtt_value(self.make_topic((self.config.debug_topic,)), event.data)
+
+        if event.event_type == EventType.POINT_REGISTRY_UPDATE:
+            self._publish_mqtt_value(self.make_topic((self.config.topic, 'points')), event.data)
 
         elif event.event_type == EventType.POINT_COV:
-            self.publish_cov(event.data.get('source_driver'),
-                             event.data.get('network').uuid, event.data.get('network').name,
-                             event.data.get('device').uuid, event.data.get('device').name,
-                             event.data.get('point'), event.data.get('point_store'),
-                             )
+            self._publish_cov(event.data.get('source_driver'),
+                              event.data.get('network').uuid, event.data.get('network').name,
+                              event.data.get('device').uuid, event.data.get('device').name,
+                              event.data.get('point'), event.data.get('point_store'))
 
         elif event.event_type == EventType.POINT_UPDATE or event.event_type == EventType.DEVICE_UPDATE or \
                 event.event_type == EventType.NETWORK_UPDATE:
-            self.publish_update(event.data.get('model'), event.data.get('updates'))
+            self._publish_update(event.data.get('model'), event.data.get('updates'))
 
-    def __publish_mqtt_value(self, topic: str, payload: str):
+    def _publish_mqtt_value(self, topic: str, payload: str):
         if not self.status():
             logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
