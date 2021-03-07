@@ -3,12 +3,12 @@ import logging
 from typing import Callable
 
 from registry.registry import RubixRegistry
-from rubix_mqtt.mqtt import MqttClientBase
 
 from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
+from src.services.mqtt_client.mqtt_listener import MqttListener
 from src.utils.model_utils import datetime_to_str
 from .mqtt_registry import MqttRegistry
 from ...setting import MqttSetting
@@ -38,11 +38,10 @@ def allow_only_on_prefix(func):
     return inner_function
 
 
-class MqttClient(MqttClientBase, EventServiceBase):
-    SEPARATOR: str = '/'
+class MqttClient(MqttListener, EventServiceBase):
 
     def __init__(self):
-        MqttClientBase.__init__(self)
+        MqttListener.__init__(self)
         EventServiceBase.__init__(self, SERVICE_NAME_MQTT_CLIENT, False)
         self.supported_events[EventType.POINT_COV] = True
         self.supported_events[EventType.POINT_UPDATE] = True
@@ -84,23 +83,23 @@ class MqttClient(MqttClientBase, EventServiceBase):
         if not isinstance(payload['ts'], str):
             payload['ts'] = datetime_to_str(payload['ts'])
 
-        topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver,
-                                      network_uuid, network_name,
-                                      device_uuid, device_name,
-                                      point.uuid, point.name))
+        topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver,
+                                        network_uuid, network_name,
+                                        device_uuid, device_name,
+                                        point.uuid, point.name))
         self._publish_mqtt_value(topic, json.dumps(payload))
 
         if self.config.publish_value and not point_store.fault:
-            topic: str = self.make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, source_driver,
-                                          network_uuid, network_name,
-                                          device_uuid, device_name,
-                                          point.uuid, point.name))
+            topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, source_driver,
+                                            network_uuid, network_name,
+                                            device_uuid, device_name,
+                                            point.uuid, point.name))
             self._publish_mqtt_value(topic, str(point_store.value))
 
     def _publish_update(self, model: ModelBase, updates: dict):
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
-        topic: str = self.make_topic(
+        topic: str = self.__make_topic(
             (self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), getattr(model, 'uuid', '<uuid>')))
         self._publish_mqtt_value(topic, json.dumps(updates))
 
@@ -110,10 +109,10 @@ class MqttClient(MqttClientBase, EventServiceBase):
             return
 
         if event.event_type == EventType.MQTT_DEBUG:
-            self._publish_mqtt_value(self.make_topic((self.config.debug_topic,)), event.data)
+            self._publish_mqtt_value(self.__make_topic((self.config.debug_topic,)), event.data)
 
         if event.event_type == EventType.POINT_REGISTRY_UPDATE:
-            self._publish_mqtt_value(self.make_topic((self.config.topic, 'points')), event.data)
+            self._publish_mqtt_value(self.__make_topic((self.config.topic, 'points')), event.data)
 
         elif event.event_type == EventType.POINT_COV:
             self._publish_cov(event.data.get('source_driver'),
@@ -142,5 +141,5 @@ class MqttClient(MqttClientBase, EventServiceBase):
                                           wires_plat.get('site_id'), wires_plat.get('site_name'),
                                           wires_plat.get('device_id'), wires_plat.get('device_name')))
 
-    def make_topic(self, parts: tuple) -> str:
+    def __make_topic(self, parts: tuple) -> str:
         return MqttClient.SEPARATOR.join((self.prefix_topic(),) + parts)

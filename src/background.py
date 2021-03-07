@@ -63,11 +63,6 @@ class Background:
         # Drivers
         thread.sleep(5)
         logger.info("Starting Drivers...")
-        if setting.drivers.generic and setting.listener.enabled:
-            from src.drivers.generic.services.generic_point_listener import GenericPointListener
-            FlaskThread(target=GenericPointListener().start, daemon=True,
-                        kwargs={'config': setting.listener}).start()
-
         if setting.drivers.modbus_tcp:
             from src.drivers.modbus.services.polling.modbus_polling import TcpPolling, ModbusTcpRegistry
             ModbusTcpRegistry().register()

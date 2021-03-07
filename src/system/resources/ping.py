@@ -5,7 +5,6 @@ from flask import current_app
 from mrb.brige import MqttRestBridge
 from rubix_http.resource import RubixResource
 
-from src.drivers.generic.services.generic_point_listener import GenericPointListener
 from src.utils.project import get_version
 
 start_time = time.time()
@@ -46,10 +45,6 @@ class Ping(RubixResource):
             'settings': {
                 setting.services.KEY: setting.services.to_dict(),
                 setting.drivers.KEY: setting.drivers.to_dict()
-            },
-            'generic_point_listener': {
-                'enabled': setting.listener.enabled,
-                'status': GenericPointListener().status()
             },
             'mqtt_rest_bridge_listener': {
                 'enabled': setting.mqtt_rest_bridge_setting.enabled,

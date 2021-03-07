@@ -60,15 +60,8 @@ class MqttSetting(MqttSettingBase):
         self.topic = 'rubix/points/value'
         self.publish_debug = True
         self.debug_topic = 'rubix/points/debug'
-
-
-class GenericListenerSetting(MqttSettingBase):
-    KEY = 'generic_point_listener'
-
-    def __init__(self):
-        super(GenericListenerSetting, self).__init__()
-        self.name = 'rubix-points-generic-point-listener'
-        self.topic = 'rubix/points/generic/cov'
+        self.listen = True
+        self.listen_topic = 'rubix/points/listen'
 
 
 class InfluxSetting(BaseSetting):
@@ -142,7 +135,6 @@ class AppSetting:
         self.__driver_setting = DriverSetting()
         self.__influx_setting = InfluxSetting()
         self.__postgres_setting = PostgresSetting()
-        self.__listener_setting = GenericListenerSetting()
         self.__mqtt_rest_bridge_setting = MqttRestBridgeSetting()
         self.__mqtt_rest_bridge_setting.name = 'ps_mqtt_rest_bridge_listener'
         self.__mqtt_settings: List[MqttSetting] = [MqttSetting()]
@@ -197,10 +189,6 @@ class AppSetting:
         return self.__mqtt_rest_bridge_setting
 
     @property
-    def listener(self) -> GenericListenerSetting:
-        return self.__listener_setting
-
-    @property
     def cleaner(self) -> CleanerSetting:
         return self.__cleaner_setting
 
@@ -210,7 +198,6 @@ class AppSetting:
             ServiceSetting.KEY: self.services,
             InfluxSetting.KEY: self.influx,
             PostgresSetting.KEY: self.postgres,
-            GenericListenerSetting.KEY: self.listener,
             MqttSetting.KEY: [s.to_dict() for s in self.mqtt_settings],
             CleanerSetting.KEY: self.cleaner,
             'prod': self.prod, 'global_dir': self.global_dir, 'data_dir': self.data_dir, 'config_dir': self.config_dir
@@ -225,7 +212,6 @@ class AppSetting:
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
         self.__postgres_setting = self.__postgres_setting.reload(data.get(PostgresSetting.KEY))
         self.__mqtt_rest_bridge_setting = self.__mqtt_rest_bridge_setting.reload(data.get('mqtt_rest_bridge_listener'))
-        self.__listener_setting = self.__listener_setting.reload(data.get(GenericListenerSetting.KEY))
         self.__cleaner_setting = self.__cleaner_setting.reload(data.get(CleanerSetting.KEY))
 
         mqtt_settings = data.get(MqttSetting.KEY, [])

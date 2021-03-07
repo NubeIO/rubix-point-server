@@ -1,50 +1,47 @@
 import logging
 from json import loads as json_loads, JSONDecodeError
-from typing import Callable, Iterable
+from typing import Callable
 
 from registry.registry import RubixRegistry
 from rubix_mqtt.mqtt import MqttClientBase
 
-from src import GenericListenerSetting
 from src.drivers.enums.drivers import Drivers
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
-from src.services.event_service_base import EventServiceBase
-from src.utils import Singleton
+from src.setting import MqttSetting
 
 logger = logging.getLogger(__name__)
 
 
-class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=Singleton):
+class MqttListener(MqttClientBase):
+    SEPARATOR: str = '/'
 
     def __init__(self):
         MqttClientBase.__init__(self)
-        EventServiceBase.__init__(self, Drivers.GENERIC.name, False)
 
     @property
-    def config(self) -> GenericListenerSetting:
-        return super().config if isinstance(super().config, GenericListenerSetting) else GenericListenerSetting()
+    def config(self) -> MqttSetting:
+        return super().config if isinstance(super().config, MqttSetting) else MqttSetting()
 
-    def start(self, config: GenericListenerSetting, subscribe_topic: str = None, callback: Callable = lambda: None,
+    def start(self, config: MqttSetting, subscribe_topic: str = None, callback: Callable = lambda: None,
               loop_forever: bool = True):
-        from src.event_dispatcher import EventDispatcher
-        EventDispatcher().add_driver(self)
         wires_plat: dict = RubixRegistry().read_wires_plat()
         if not wires_plat:
             logger.error('Please add wires-plat on Rubix Service')
             return
-        subscribe_topic: str = self.make_topic(
-            (wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'), config.topic))
+        subscribe_topic: str = self.__make_topic(
+            (wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'), config.listen_topic))
+        logger.info(f'Listening at: {subscribe_topic}')
         super().start(config, subscribe_topic, callback, loop_forever)
 
     @exception_handler
     def _on_message(self, client, userdata, message):
-        if self.config.topic in message.topic:
+        if self.config.listen_topic in message.topic:
             self.__update_point(message)
 
     def _mqtt_topic_min(self):
-        return len(self.make_topic(('<client_id>', '<site_id>', '<device_id>', self.config.topic, '<point_name>',
-                                    '<device_name>', '<network_name>')).split('/'))
+        return len(self.__make_topic(('<client_id>', '<site_id>', '<device_id>', self.config.topic, '<point_name>',
+                                      '<device_name>', '<network_name>')).split('/'))
 
     def __update_point(self, message):
         topic = message.topic.split('/')
@@ -78,5 +75,5 @@ class GenericPointListener(MqttClientBase, EventServiceBase, metaclass=Singleton
             logger.error(str(e))
 
     @classmethod
-    def make_topic(cls, part: Iterable, sep: str = '/'):
-        return sep.join(part)
+    def __make_topic(cls, parts: tuple):
+        return MqttListener.SEPARATOR.join(parts)
