@@ -42,12 +42,12 @@ class MqttListener(MqttClientBase):
         if self.config.listen_topic in message.topic:
             self.__update_generic_point(message)
 
-    def _mqtt_topic_min_with_uuid(self):
+    def _mqtt_topic_by_uuid_length(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<site_id>', '<device_id>', self.config.listen_topic, '<function>', 'uuid', '<point_uuid>'
         )).split(self.SEPARATOR))
 
-    def _mqtt_topic_min_with_name(self):
+    def _mqtt_topic_by_name_length(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<site_id>', '<device_id>', self.config.listen_topic, '<function>', 'name',
             '<network_name>', '<device_name>', '<point_name>'
@@ -59,35 +59,35 @@ class MqttListener(MqttClientBase):
 
     def __update_generic_point_by_uuid(self, message: MQTTMessage):
         topic = message.topic.split('/')
-        if len(topic) != self._mqtt_topic_min_with_uuid() and topic[-4] == 'uuid':
+        if not (len(topic) == self._mqtt_topic_by_uuid_length() and topic[7] == 'uuid'):
             return
         point_uuid: str = topic[-1]
         point: PointModel = PointModel.find_by_uuid(point_uuid)
-        if point is None or point.driver != Drivers.GENERIC:
+        if point is None or (point and point.driver != Drivers.GENERIC):
             logger.warning(f'No points with point.uuid={point_uuid}')
             return
-        self.__update_generic_point_store(message.payload, point)
+        self.__update_generic_point_store(message, point)
 
     def __update_generic_point_by_name(self, message: MQTTMessage):
         topic = message.topic.split('/')
-        if len(topic) != self._mqtt_topic_min_with_name() and topic[-4] == 'name':
+        if not (len(topic) == self._mqtt_topic_by_name_length() and topic[7] == 'name'):
             return
         point_name: str = topic[-1]
         device_name: str = topic[-2]
         network_name: str = topic[-3]
         point: PointModel = PointModel.find_by_name(network_name, device_name, point_name)
-        if point is None or point.driver != Drivers.GENERIC:
+        if point is None or (point and point.driver != Drivers.GENERIC):
             logger.warning(f'No points with network.name={network_name}, device.name={device_name}, '
                            f'point.name={point_name}')
             return
-        self.__update_generic_point_store(message.payload, point)
+        self.__update_generic_point_store(message, point)
 
     @staticmethod
     def __update_generic_point_store(message: MQTTMessage, point: PointModel):
         try:
             payload: dict = json.loads(message.payload)
         except Exception as e:
-            logger.warning(f'Invalid generic point COV payload. point={point.uuid}. error=({str(e)})')
+            logger.warning(f'Invalid generic point COV payload for point.uuid={point.uuid}. Here, error=({str(e)})')
             return
         value = payload.get('value', None)
         value_raw = payload.get('value_raw', None)
