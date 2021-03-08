@@ -137,9 +137,10 @@ class MqttClient(MqttListener, EventServiceBase):
         if not wires_plat:
             logger.error('Please add wires-plat on Rubix Service')
             return ''
-        return MqttClient.SEPARATOR.join((wires_plat.get('client_id'), wires_plat.get('client_name'),
-                                          wires_plat.get('site_id'), wires_plat.get('site_name'),
-                                          wires_plat.get('device_id'), wires_plat.get('device_name')))
+        return cls.SEPARATOR.join((wires_plat.get('client_id'), wires_plat.get('client_name'),
+                                   wires_plat.get('site_id'), wires_plat.get('site_name'),
+                                   wires_plat.get('device_id'), wires_plat.get('device_name')))
 
-    def __make_topic(self, parts: tuple) -> str:
-        return MqttClient.SEPARATOR.join((self.prefix_topic(),) + parts)
+    @classmethod
+    def __make_topic(cls, parts: tuple) -> str:
+        return cls.SEPARATOR.join((cls.prefix_topic(),) + parts)

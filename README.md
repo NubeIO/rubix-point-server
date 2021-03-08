@@ -136,18 +136,19 @@ points list:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
 ```
 
-### Generic Point MQTT Listener
+### Generic Points MQTT Listener
 
-All generic point values are updated over MQTT.  
-These COVs are then broadcast again over the normal MQTT clients as above
+- All generic point values are updated over MQTT
+- These COVs are then broadcast again over the normal MQTT clients as above
+
 #### Topic structure:
 
 ```
-<client_id>/<site_id>/<device_id>/rubix/points/generic/cov/<point_name>/<device_name>/<network_name>
+<client_id>/<site_id>/<device_id>/rubix/points/listen/cov/name/<point_name>/<device_name>/<network_name>
+<client_id>/<site_id>/<device_id>/rubix/points/listen/cov/uuid/<point_uuid>
 ```
 
-
-### Points List Publisher
+### Generic Points List Publisher
 
 ```
 <client_id>/<site_id>/<device_id>/rubix/points/value/points

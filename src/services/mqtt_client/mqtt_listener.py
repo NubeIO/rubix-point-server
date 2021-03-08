@@ -1,7 +1,8 @@
+import json
 import logging
-from json import loads as json_loads, JSONDecodeError
 from typing import Callable
 
+from paho.mqtt.client import MQTTMessage
 from registry.registry import RubixRegistry
 from rubix_mqtt.mqtt import MqttClientBase
 
@@ -29,40 +30,64 @@ class MqttListener(MqttClientBase):
         if not wires_plat:
             logger.error('Please add wires-plat on Rubix Service')
             return
-        subscribe_topic: str = self.__make_topic(
-            (wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'), config.listen_topic))
+        subscribe_topic: str = self.__make_topic((
+            wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'),
+            config.listen_topic, 'cov', '#'
+        ))
         logger.info(f'Listening at: {subscribe_topic}')
         super().start(config, subscribe_topic, callback, loop_forever)
 
     @exception_handler
-    def _on_message(self, client, userdata, message):
+    def _on_message(self, client, userdata, message: MQTTMessage):
         if self.config.listen_topic in message.topic:
-            self.__update_point(message)
+            self.__update_generic_point(message)
 
-    def _mqtt_topic_min(self):
-        return len(self.__make_topic(('<client_id>', '<site_id>', '<device_id>', self.config.topic, '<point_name>',
-                                      '<device_name>', '<network_name>')).split('/'))
+    def _mqtt_topic_min_with_uuid(self):
+        return len(self.__make_topic((
+            '<client_id>', '<site_id>', '<device_id>', self.config.listen_topic, '<function>', 'uuid', '<point_uuid>'
+        )).split(self.SEPARATOR))
 
-    def __update_point(self, message):
+    def _mqtt_topic_min_with_name(self):
+        return len(self.__make_topic((
+            '<client_id>', '<site_id>', '<device_id>', self.config.listen_topic, '<function>', 'name',
+            '<network_name>', '<device_name>', '<point_name>'
+        )).split(self.SEPARATOR))
+
+    def __update_generic_point(self, message: MQTTMessage):
+        self.__update_generic_point_by_uuid(message)
+        self.__update_generic_point_by_name(message)
+
+    def __update_generic_point_by_uuid(self, message: MQTTMessage):
         topic = message.topic.split('/')
-        if len(topic) != self._mqtt_topic_min():
+        if len(topic) != self._mqtt_topic_min_with_uuid() and topic[-4] == 'uuid':
             return
-        point_name = topic[-3]
-        device_name = topic[-2]
-        network_name = topic[-1]
-        try:
-            payload = json_loads(message.payload)
-            if not payload and ('value' not in payload.keys() or 'fault' not in payload.keys()):
-                raise ValueError('No value or fault provided')
-        except (JSONDecodeError, ValueError) as e:
-            logger.warning(f'Invalid generic point COV payload. point={point_name}, device={device_name}, '
-                           f'network={network_name}. error=({str(e)})')
+        point_uuid: str = topic[-1]
+        point: PointModel = PointModel.find_by_uuid(point_uuid)
+        if point is None or point.driver != Drivers.GENERIC:
+            logger.warning(f'No points with point.uuid={point_uuid}')
             return
+        self.__update_generic_point_store(message.payload, point)
 
+    def __update_generic_point_by_name(self, message: MQTTMessage):
+        topic = message.topic.split('/')
+        if len(topic) != self._mqtt_topic_min_with_name() and topic[-4] == 'name':
+            return
+        point_name: str = topic[-1]
+        device_name: str = topic[-2]
+        network_name: str = topic[-3]
         point: PointModel = PointModel.find_by_name(network_name, device_name, point_name)
         if point is None or point.driver != Drivers.GENERIC:
-            logger.warning(f'Unknown generic point COV received with point name={point_name}, device name={device_name}'
-                           f', network name={network_name}')
+            logger.warning(f'No points with network.name={network_name}, device.name={device_name}, '
+                           f'point.name={point_name}')
+            return
+        self.__update_generic_point_store(message.payload, point)
+
+    @staticmethod
+    def __update_generic_point_store(message: MQTTMessage, point: PointModel):
+        try:
+            payload: dict = json.loads(message.payload)
+        except Exception as e:
+            logger.warning(f'Invalid generic point COV payload. point={point.uuid}. error=({str(e)})')
             return
         value = payload.get('value', None)
         value_raw = payload.get('value_raw', None)
@@ -76,4 +101,4 @@ class MqttListener(MqttClientBase):
 
     @classmethod
     def __make_topic(cls, parts: tuple):
-        return MqttListener.SEPARATOR.join(parts)
+        return cls.SEPARATOR.join(parts)
