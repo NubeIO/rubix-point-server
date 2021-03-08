@@ -151,5 +151,5 @@ points list:
 ### Generic Points List Publisher
 
 ```
-<client_id>/<site_id>/<device_id>/rubix/points/value/points
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
 ```
