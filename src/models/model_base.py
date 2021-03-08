@@ -1,4 +1,5 @@
 from sqlalchemy.orm import validates
+from sqlalchemy import inspect
 
 from src import db
 from src.event_dispatcher import EventDispatcher
@@ -53,14 +54,16 @@ class ModelBase(db.Model):
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+        changed: bool = self.inspect_changes()
         self.check_self()
         db.session.commit()
-        event = Event(self.get_model_event_type(), {
-            'model': self,
-            'updates': kwargs
-        })
-        # TODO: source_driver name to publish change to source driver
-        EventDispatcher().dispatch_from_service(None, event, None)
+        if changed:
+            event = Event(self.get_model_event_type(), {
+                'model': self,
+                'updates': kwargs
+            })
+            # TODO: source_driver name to publish change to source driver
+            EventDispatcher().dispatch_from_service(None, event, None)
 
     def get_model_event_name(self) -> str:
         raise NotImplemented
@@ -70,6 +73,12 @@ class ModelBase(db.Model):
 
     def check_self(self) -> (bool, any):
         return True
+
+    def inspect_changes(self) -> bool:
+        for attr in inspect(self).attrs:
+            if attr.history.has_changes():
+                return True
+        return False
 
     @validates('name')
     def validate_name(self, _, name):
