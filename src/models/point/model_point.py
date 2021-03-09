@@ -206,7 +206,7 @@ class PointModel(ModelBase):
         if device is None or network is None:
             raise Exception(f'Cannot find network or device for point {self.uuid}')
         if service_name is None:
-            service_name = network.driver
+            service_name = network.driver.name
 
         if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
                 device.history_enable:
