@@ -2,7 +2,6 @@ import logging
 
 from pymodbus.client.sync import ModbusSerialClient as SerialClient
 
-from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.drivers.modbus.services.modbus_registry import ModbusRegistry, ModbusRegistryConnection, \
     ModbusRegistryKey
@@ -11,17 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class ModbusRtuRegistryKey(ModbusRegistryKey):
-    def __init__(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
+    def __init__(self, network: ModbusNetworkModel):
         self.__port: str = network.rtu_port
         self.__rtu_speed: int = network.rtu_speed
         self.__rtu_stop_bits: int = network.rtu_stop_bits
         self.__rtu_parity: str = network.rtu_parity.name
         self.__rtu_byte_size: int = network.rtu_byte_size
-        self.__timeout: int = device.timeout
-        super().__init__(network, device)
-
-    def create_key(self):
-        return f'{self.network.uuid}:{self.device.uuid}'
+        self.__timeout: int = network.timeout
+        super().__init__(network)
 
     def create_connection_key(self) -> str:
         return f'{self.__port}:{self.__rtu_speed}:{self.__rtu_stop_bits}:{self.__rtu_parity}:{self.__rtu_byte_size}:' \
@@ -31,15 +27,15 @@ class ModbusRtuRegistryKey(ModbusRegistryKey):
 class ModbusRtuRegistry(ModbusRegistry):
 
     # TODO retries=0, retry_on_empty=False fix these up
-    def add_connection(self, network: ModbusNetworkModel, device: ModbusDeviceModel) -> ModbusRegistryConnection:
+    def add_connection(self, network: ModbusNetworkModel) -> ModbusRegistryConnection:
         port: str = network.rtu_port
         rtu_speed: int = network.rtu_speed
         rtu_stop_bits: int = network.rtu_stop_bits
         rtu_parity: str = network.rtu_parity.name
         rtu_byte_size: int = network.rtu_byte_size
-        timeout: int = device.timeout
+        timeout: int = network.timeout
 
-        registry_key: ModbusRtuRegistryKey = ModbusRtuRegistryKey(network, device)
+        registry_key: ModbusRtuRegistryKey = ModbusRtuRegistryKey(network)
         method = 'rtu'
         self.remove_connection_if_exist(registry_key.key)
         logger.debug(f'Adding rtu_connection {registry_key.key}')
@@ -52,8 +48,8 @@ class ModbusRtuRegistry(ModbusRegistry):
         self.connections[registry_key.key].client.connect()
         return self.connections[registry_key.key]
 
-    def get_registry_key(self, network: ModbusNetworkModel, device: ModbusDeviceModel) -> ModbusRegistryKey:
-        return ModbusRtuRegistryKey(network, device)
+    def get_registry_key(self, network: ModbusNetworkModel) -> ModbusRegistryKey:
+        return ModbusRtuRegistryKey(network)
 
     def get_type(self) -> ModbusType:
         return ModbusType.RTU

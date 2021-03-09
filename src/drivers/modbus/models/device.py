@@ -14,34 +14,17 @@ class ModbusDeviceModel(DeviceMixinModel):
 
     type = db.Column(db.Enum(ModbusType), nullable=False)
     address = db.Column(db.Integer(), nullable=False)
-    tcp_ip = db.Column(db.String(80))
-    tcp_port = db.Column(db.Integer())
     zero_based = db.Column(db.Boolean(), nullable=False, default=False)
     ping_point = db.Column(db.String(10))
-    timeout = db.Column(db.Integer(), nullable=False, default=3)
-    polling_interval_runtime = db.Column(db.Integer(), default=2)
-    point_interval_ms_between_points = db.Column(db.Integer(), default=30)
     modbus_network_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('tcp_ip', 'address', 'modbus_network_uuid_constraint'),
+        UniqueConstraint('address', 'modbus_network_uuid_constraint'),
     )
 
     @classmethod
     def get_polymorphic_identity(cls) -> Drivers:
         return Drivers.MODBUS
-
-    @validates('tcp_ip')
-    def validate_tcp_ip(self, _, value):
-        if not value and self.type == ModbusType.TCP.name:
-            raise ValueError("tcp_ip should be be there on type TCP")
-        return value
-
-    @validates('tcp_port')
-    def validate_tcp_port(self, _, value):
-        if not value and self.type == ModbusType.TCP.name:
-            raise ValueError("tcp_port should be be there on type TCP")
-        return value
 
     @validates('ping_point')
     def validate_ping_point(self, _, value):

@@ -1,7 +1,7 @@
 import logging
 import time
 from abc import abstractmethod
-from typing import Union, List, Tuple
+from typing import Union, List
 
 from pymodbus.client.sync import BaseModbusClient
 from pymodbus.exceptions import ConnectionException, ModbusIOException
@@ -48,70 +48,52 @@ class ModbusPolling(EventServiceBase):
             else:
                 self._handle_internal_callable(event)
 
-    @exception_handler
     def __poll(self):
         self.__count += 1
         self.__log_debug(f'Poll loop {self.__count}...')
-        results: List[Tuple[ModbusNetworkModel, ModbusDeviceModel]] = self.__get_all_networks_and_devices()
+        networks: List[ModbusNetworkModel] = self.__get_all_networks()
         available_keys: List[str] = []
-        for row in results:
-            network, device = row
-            registry_key = ModbusTcpRegistryKey(network, device)  # you can use TCP or RTU, choice is yours
+        for network in networks:
+            registry_key = ModbusTcpRegistryKey(network)  # you can use TCP or RTU, choice is yours
             available_keys.append(registry_key.key)
-            self.__poll_network_device(network, device)
+            self.__poll_network(network)
 
         for key in self.get_registry().get_connections().keys():
             if key not in available_keys:
                 self.get_registry().remove_connection_if_exist(key)
         db.session.commit()
 
-    def __poll_network_device(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
-        """
-        Poll connection points
-
-        Rejects if ping_point is true and unable to poll the point
-        If accepted then poll points under a connection on a new thread
-        """
-        current_connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network, device)
-        if device.ping_point:
-            try:
-                ping_point = ModbusPointModel.create_temporary_from_string(device.ping_point)
-                self.__poll_point(current_connection.client, network, device, ping_point, True, False)
-            except (ConnectionException, ModbusIOException):
-                return
-            except ValueError as e:
-                logger.error(f'Modbus device ping_point error: {e}')
+    def __poll_network(self, network: ModbusNetworkModel):
+        current_connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network)
         if not current_connection.is_running:
-            FlaskThread(target=self.__poll_network_device_thread, daemon=True,
-                        kwargs={'network': network,
-                                'device': device
-                                }).start()
+            FlaskThread(target=self.__poll_network_thread, daemon=True,
+                        kwargs={'network': network}).start()
 
-    def __poll_network_device_thread(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
-        self.__poll_network_device_loop_forever(network, device)
-
-    @exception_handler
-    def __poll_network_device_loop_forever(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
+    def __poll_network_thread(self, network: ModbusNetworkModel):
         """
         Poll connection points on a thread
         """
-        self.__log_debug(f'Starting thread for {network} {device}')
+        self.__log_debug(f'Starting thread for {network}')
         while True:
             current_connection: Union[ModbusRegistryConnection, None] = \
-                self.get_registry().get_connection(network, device)
+                self.get_registry().get_connection(network)
             if not current_connection:
-                self.__log_debug(f'Stopping thread for {network} {device}')
+                self.__log_debug(f'Stopping thread for {network}, no connection')
                 break
-            network_device: Union[Tuple[ModbusNetworkModel, ModbusDeviceModel], None] = self.__get_network_and_device(
-                network.uuid, device.uuid)
-            if not network_device:
-                self.__log_debug(f'Stopping thread for {network} {device}')
+            network: Union[ModbusNetworkModel, None] = self.__get_network(network.uuid)
+            if not network:
+                self.__log_debug(f'Stopping thread for {network}, network not found')
                 return
-            network, device = network_device
-            if not (network and device):
-                self.__log_debug(f'Stopping thread for {network} {device}')
-                return
-            current_connection.is_running = True
+            self.__poll_network_devices(current_connection, network)
+
+    @exception_handler
+    def __poll_network_devices(self, current_connection, network: ModbusNetworkModel):
+        current_connection.is_running = True
+        devices: List[ModbusDeviceModel] = self.__get_network_devices(network.uuid)
+        for device in devices:
+            if not self.__ping_point(current_connection, network, device):
+                # we suppose that device is offline, so we are not wasting time for looping
+                continue
             points: List[ModbusPointModel] = self.__get_all_device_points(device.uuid)
             for point in points:
                 try:
@@ -120,34 +102,45 @@ class ModbusPolling(EventServiceBase):
                     break
                 except ModbusIOException:
                     continue
-                time.sleep(float(device.point_interval_ms_between_points) / 1000)
-            db.session.commit()
-            time.sleep(device.polling_interval_runtime)
+                time.sleep(float(network.point_interval_ms_between_points) / 1000)
+        db.session.commit()
+        time.sleep(network.polling_interval_runtime)
 
-    def __get_network_and_device(self, network_uuid: str, device_uuid: str) -> \
-            Tuple[ModbusNetworkModel, ModbusDeviceModel]:
-        results = db.session.query(ModbusNetworkModel, ModbusDeviceModel) \
-            .select_from(ModbusNetworkModel).filter_by(type=self.__network_type, uuid=network_uuid, enable=True) \
-            .join(ModbusDeviceModel).filter_by(type=self.__network_type, uuid=device_uuid, enable=True) \
-            .first()
-        return results
+    def __ping_point(self, current_connection: ModbusRegistryConnection, network: ModbusNetworkModel,
+                     device: ModbusDeviceModel) -> bool:
+        """
+        Poll connection points
+        Checks whether the pinging point is fine or not?
+        """
+        if device.ping_point:
+            try:
+                ping_point = ModbusPointModel.create_temporary_from_string(device.ping_point)
+                self.__poll_point(current_connection.client, network, device, ping_point, True, False)
+            except (ConnectionException, ModbusIOException):
+                return False
+            except ValueError as e:
+                logger.error(f'Modbus device ping_point error: {e}')
+                return False
+        return True
 
-    def __get_all_networks_and_devices(self) -> List[Tuple[ModbusNetworkModel, ModbusDeviceModel]]:
-        results = db.session.query(ModbusNetworkModel, ModbusDeviceModel) \
-            .select_from(ModbusNetworkModel).filter_by(type=self.__network_type, enable=True) \
-            .join(ModbusDeviceModel).filter_by(type=self.__network_type, enable=True) \
-            .all()
-        return results
+    def __get_all_networks(self) -> List[ModbusNetworkModel]:
+        return ModbusNetworkModel.query.filter_by(type=self.__network_type, enable=True).all()
 
-    def __get_all_device_points(self, device_uuid: str) -> List[ModbusPointModel]:
-        results: List[ModbusPointModel] = db.session.query(ModbusPointModel) \
-            .filter_by(device_uuid=device_uuid, enable=True) \
-            .all()
-        return results
+    @staticmethod
+    def __get_network(network_uuid: str) -> Union[ModbusNetworkModel, None]:
+        return ModbusNetworkModel.query.filter_by(uuid=network_uuid, enable=True).first()
+
+    @staticmethod
+    def __get_network_devices(network_uuid: str) -> List[ModbusDeviceModel]:
+        return ModbusDeviceModel.query.filter_by(network_uuid=network_uuid, enable=True).all()
+
+    @staticmethod
+    def __get_all_device_points(device_uuid: str) -> List[ModbusPointModel]:
+        return ModbusPointModel.query.filter_by(device_uuid=device_uuid, enable=True).all()
 
     def poll_point_not_existing(self, point: ModbusPointModel, device: ModbusDeviceModel, network: ModbusNetworkModel):
         self.__log_debug(f'Manual poll request Non Existing Point {point}')
-        connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network, device)
+        connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network)
         if network.type is not self.__network_type:
             raise HandledByDifferentServiceException
         point_store = self.__poll_point(connection.client, network, device, point, False, False)
@@ -160,7 +153,7 @@ class ModbusPolling(EventServiceBase):
             raise HandledByDifferentServiceException
         network: ModbusNetworkModel = ModbusNetworkModel.find_by_uuid(device.network_uuid)
         self.__log_debug(f'Manual poll request: network: {network.uuid}, device: {device.uuid}, point: {point.uuid}')
-        connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network, device)
+        connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network)
         self.__poll_point(connection.client, network, device, point)
         return point
 

@@ -3,12 +3,6 @@ from src.drivers.modbus.resources.rest_schema.schema_modbus_device import modbus
 from src.resources.rest_schema.schema_network import *
 
 modbus_network_all_attributes = deepcopy(network_all_attributes)
-modbus_network_all_attributes['type'] = {
-    'type': str,
-    'required': True,
-    'nested': True,
-    'dict': 'type.name'
-}
 modbus_network_all_attributes['rtu_port'] = {
     'type': str,
 }
@@ -24,6 +18,27 @@ modbus_network_all_attributes['rtu_parity'] = {
     'dict': 'rtu_parity.name'
 }
 modbus_network_all_attributes['rtu_byte_size'] = {
+    'type': int,
+}
+modbus_network_all_attributes['tcp_ip'] = {
+    'type': str,
+}
+modbus_network_all_attributes['tcp_port'] = {
+    'type': int,
+}
+modbus_network_all_attributes['type'] = {
+    'type': str,
+    'required': True,
+    'nested': True,
+    'dict': 'type.name'
+}
+modbus_network_all_attributes['timeout'] = {
+    'type': int,
+}
+modbus_network_all_attributes['polling_interval_runtime'] = {
+    'type': int,
+}
+modbus_network_all_attributes['point_interval_ms_between_points'] = {
     'type': int,
 }
 
