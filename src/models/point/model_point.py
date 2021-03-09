@@ -196,7 +196,7 @@ class PointModel(ModelBase):
         return value
 
     def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,
-                    service_name: str = None):
+                    driver_name: str = None):
         if point_store is None:
             raise Exception('Point.publish_cov point_store cannot be None')
         if device is None:
@@ -205,8 +205,8 @@ class PointModel(ModelBase):
             network = NetworkModel.find_by_uuid(device.network_uuid)
         if device is None or network is None:
             raise Exception(f'Cannot find network or device for point {self.uuid}')
-        if service_name is None:
-            service_name = network.driver.name
+        if driver_name is None:
+            driver_name = network.driver.name
 
         if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
                 device.history_enable:
@@ -218,5 +218,5 @@ class PointModel(ModelBase):
             'point_store': point_store,
             'device': device,
             'network': network,
-            'source_driver': service_name
+            'driver_name': driver_name
         }))

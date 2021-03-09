@@ -61,10 +61,10 @@ class MqttClient(MqttListener, EventServiceBase):
         MqttRegistry().add(self)
         super().start(config, subscribe_topic, callback, loop_forever)
 
-    def _publish_cov(self, source_driver: str, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
+    def _publish_cov(self, driver_name, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
                      point: PointModel, point_store: PointStoreModel):
-        if point is None or point_store is None or device_uuid is None or network_uuid is None or source_driver is \
-                None or network_name is None or device_name is None:
+        if point is None or point_store is None or device_uuid is None or network_uuid is None or driver_name is None \
+                or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
 
         if point_store.fault:
@@ -80,17 +80,18 @@ class MqttClient(MqttListener, EventServiceBase):
                 'value_raw': point_store.value_raw,
                 'ts': point_store.ts_value,
             }
+
         if not isinstance(payload['ts'], str):
             payload['ts'] = datetime_to_str(payload['ts'])
 
-        topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, source_driver,
+        topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, driver_name,
                                         network_uuid, network_name,
                                         device_uuid, device_name,
                                         point.uuid, point.name))
         self._publish_mqtt_value(topic, json.dumps(payload))
 
         if self.config.publish_value and not point_store.fault:
-            topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, source_driver,
+            topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, driver_name,
                                             network_uuid, network_name,
                                             device_uuid, device_name,
                                             point.uuid, point.name))
@@ -115,7 +116,7 @@ class MqttClient(MqttListener, EventServiceBase):
             self._publish_mqtt_value(self.__make_topic((self.config.topic, 'points')), event.data, True)
 
         elif event.event_type == EventType.POINT_COV:
-            self._publish_cov(event.data.get('source_driver'),
+            self._publish_cov(event.data.get('driver_name'),
                               event.data.get('network').uuid, event.data.get('network').name,
                               event.data.get('device').uuid, event.data.get('device').name,
                               event.data.get('point'), event.data.get('point_store'))
