@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.4.5](https://github.com/NubeIO/rubix-point-server/tree/v1.4.5) (2020-03-09)
+### Added
+- Fix: same network can't have multiple devices
+- Don't publish value on MQTT when PATCH did nothing change
+
 ## [v1.4.4-rc1](https://github.com/NubeIO/rubix-point-server/tree/v1.4.4-rc1) (2020-03-09)
 ### Added
 - Convert drivers list values to enum

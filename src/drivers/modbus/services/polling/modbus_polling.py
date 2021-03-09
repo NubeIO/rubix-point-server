@@ -17,7 +17,6 @@ from src.drivers.modbus.services.modbus_rtu_registry import ModbusRtuRegistry
 from src.drivers.modbus.services.modbus_tcp_registry import ModbusTcpRegistry, ModbusTcpRegistryKey
 from src.drivers.modbus.services.polling.poll import poll_point
 from src.event_dispatcher import EventDispatcher
-from src.handlers.exception import exception_handler
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException, Event
 
@@ -84,9 +83,12 @@ class ModbusPolling(EventServiceBase):
             if not network:
                 self.__log_debug(f'Stopping thread for {network}, network not found')
                 return
-            self.__poll_network_devices(current_connection, network)
+            try:
+                self.__poll_network_devices(current_connection, network)
+            except Exception as e:
+                self.__log_error(str(e))
+                time.sleep(network.polling_interval_runtime)
 
-    @exception_handler
     def __poll_network_devices(self, current_connection, network: ModbusNetworkModel):
         current_connection.is_running = True
         devices: List[ModbusDeviceModel] = self.__get_network_devices(network.uuid)
@@ -195,6 +197,9 @@ class ModbusPolling(EventServiceBase):
 
     def __log_info(self, message: str):
         logger.info(f'{self.__network_type.name}: {message}')
+
+    def __log_error(self, message: str):
+        logger.error(f'{self.__network_type.name}: {message}')
 
     def __log_debug(self, message: str):
         logger.debug(f'{self.__network_type.name}: {message}')
