@@ -5,11 +5,10 @@ from pymodbus.client.sync import BaseModbusClient
 from pymodbus.exceptions import ModbusIOException
 
 from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
-from src.drivers.modbus.services.modbus_functions.function_utils import _set_data_length, _assertion, \
+from src.drivers.modbus.services.polling.function_utils import _set_data_length, _assertion, \
     _mod_point_data_endian, convert_to_data_type, _builder_data_type
-from src.drivers.modbus.services.modbus_functions.polling import modbus_poll_debug_log, modbus_poll_debug
 
-logger = logging.getLogger(modbus_poll_debug_log)
+logger = logging.getLogger(__name__)
 
 
 def read_analogue(client: BaseModbusClient, reg_start: int, reg_length: int, _unit: int, data_type: ModbusDataType,
@@ -149,9 +148,8 @@ def write_analogue(client: BaseModbusClient, reg_start: int, reg_length: int, _u
 
 
 def debug_log(function, _unit, fc, reg_length, reg_start):
-    modbus_poll_debug(logger, f'{function}, "reg_start": {reg_start}, "reg_length": {reg_length}, '
-                              f'"_unit:" {_unit}}}, "FC": {fc}}}')
+    logger.debug(f'{function}, "reg_start": {reg_start}, "reg_length": {reg_length}, "_unit:" {_unit}}}, "FC": {fc}}}')
 
 
 def assertion_ok_debug_log():
-    modbus_poll_debug(logger, 'Assertion OK')
+    logger.debug('Assertion OK')
