@@ -8,7 +8,7 @@ from src.drivers.modbus.models.network import ModbusNetworkModel
 from src.drivers.modbus.models.point import ModbusPointModel
 from src.drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_poll_non_existing_attributes, \
     point_store_fields, modbus_point_all_fields
-from src.drivers.modbus.services import ModbusPolling
+from src.drivers.modbus.services.polling.modbus_polling import ModbusPolling
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import EventCallableBlocking
 

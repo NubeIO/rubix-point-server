@@ -12,14 +12,14 @@ from src.drivers.enums.drivers import Drivers
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.drivers.modbus.models.point import ModbusPointModel
+from src.drivers.modbus.services.modbus_registry import ModbusRegistryConnection, ModbusRegistry
+from src.drivers.modbus.services.modbus_rtu_registry import ModbusRtuRegistry
+from src.drivers.modbus.services.modbus_tcp_registry import ModbusTcpRegistry, ModbusTcpRegistryKey
+from src.drivers.modbus.services.polling.poll import poll_point
 from src.event_dispatcher import EventDispatcher
 from src.handlers.exception import exception_handler
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException, Event
-from .modbus_functions.polling.poll import poll_point
-from .modbus_registry import ModbusRegistryConnection, ModbusRegistry
-from .modbus_rtu_registry import ModbusRtuRegistry
-from .modbus_tcp_registry import ModbusTcpRegistry, ModbusTcpRegistryKey
 
 logger = logging.getLogger(__name__)
 
@@ -88,17 +88,28 @@ class ModbusPolling(EventServiceBase):
                                 }).start()
 
     def __poll_network_device_thread(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
+        self.__poll_network_device_loop_forever(network, device)
+
+    @exception_handler
+    def __poll_network_device_loop_forever(self, network: ModbusNetworkModel, device: ModbusDeviceModel):
         """
         Poll connection points on a thread
         """
+        self.__log_debug(f'Starting thread for {network} {device}')
         while True:
             current_connection: Union[ModbusRegistryConnection, None] = \
                 self.get_registry().get_connection(network, device)
             if not current_connection:
                 self.__log_debug(f'Stopping thread for {network} {device}')
                 break
-            network, device = self.__get_network_and_device(network.uuid, device.uuid)
+            network_device: Union[Tuple[ModbusNetworkModel, ModbusDeviceModel], None] = self.__get_network_and_device(
+                network.uuid, device.uuid)
+            if not network_device:
+                self.__log_debug(f'Stopping thread for {network} {device}')
+                return
+            network, device = network_device
             if not (network and device):
+                self.__log_debug(f'Stopping thread for {network} {device}')
                 return
             current_connection.is_running = True
             points: List[ModbusPointModel] = self.__get_all_device_points(device.uuid)

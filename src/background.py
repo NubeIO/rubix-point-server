@@ -67,12 +67,12 @@ class Background:
                         kwargs={'config': setting.listener}).start()
 
         if setting.drivers.modbus_tcp:
-            from src.drivers.modbus.services import TcpPolling, ModbusTcpRegistry
+            from src.drivers.modbus.services.polling.modbus_polling import TcpPolling, ModbusTcpRegistry
             ModbusTcpRegistry().register()
             FlaskThread(target=TcpPolling().polling, daemon=True).start()
 
         if setting.drivers.modbus_rtu:
-            from src.drivers.modbus.services import RtuPolling, ModbusRtuRegistry
+            from src.drivers.modbus.services.polling.modbus_polling import RtuPolling, ModbusRtuRegistry
             ModbusRtuRegistry().register()
             FlaskThread(target=RtuPolling().polling, daemon=True).start()
 

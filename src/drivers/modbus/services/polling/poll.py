@@ -8,7 +8,7 @@ from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusData
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel
 from src.drivers.modbus.models.point import ModbusPointModel
-from src.drivers.modbus.services.modbus_functions.polling.functions import read_digital, write_digital, \
+from src.drivers.modbus.services.polling.functions import read_digital, write_digital, \
     read_analogue, write_analogue
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase

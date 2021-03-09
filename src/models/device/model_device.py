@@ -15,7 +15,7 @@ class DeviceModel(ModelBase):
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     network_uuid = db.Column(db.String, db.ForeignKey('networks.uuid'), nullable=False)
     name = db.Column(db.String(80), nullable=False)
-    enable = db.Column(db.String(80), nullable=False)
+    enable = db.Column(db.Boolean(), nullable=False)
     fault = db.Column(db.Boolean(), nullable=True)
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     points = db.relationship('PointModel', cascade="all,delete", backref='device', lazy=True)
