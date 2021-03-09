@@ -1,5 +1,13 @@
 # CHANGELOG
-## [v1.4.3](https://github.com/NubeIO/rubix-point-server/tree/v1.4.2) (2020-03-04)
+## [v1.4.4-rc1](https://github.com/NubeIO/rubix-point-server/tree/v1.4.4-rc1) (2020-03-09)
+### Added
+- Convert drivers list values to enum
+- Rename package source_drivers to drivers
+- Rename interfaces to enums
+- Polling improvements
+- Device enable model change to boolean from string
+
+## [v1.4.3](https://github.com/NubeIO/rubix-point-server/tree/v1.4.3) (2020-03-04)
 ### Added
 - Postgres sync update & tags addition
 
