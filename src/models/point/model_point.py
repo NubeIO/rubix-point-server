@@ -9,6 +9,7 @@ from src import db
 from src.drivers.enums.drivers import Drivers
 from src.drivers.generic.enums.point.points import GenericPointType
 from src.drivers.generic.models.priority_array import PriorityArrayModel
+from src.enums.model import ModelEvent
 from src.enums.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
@@ -116,8 +117,8 @@ class PointModel(ModelBase):
             raise ValueError("history_interval needs to be at least 1, default is 15 (in minutes)")
         return value
 
-    def get_model_event_name(self) -> str:
-        return 'point'
+    def get_model_event(self) -> ModelEvent:
+        return ModelEvent.POINT
 
     def get_model_event_type(self) -> EventType:
         return EventType.POINT_UPDATE

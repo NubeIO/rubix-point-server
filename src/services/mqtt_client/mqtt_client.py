@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Callable
+from typing import Callable, List
 
 from registry.registry import RubixRegistry
 
@@ -54,12 +54,13 @@ class MqttClient(MqttListener, EventServiceBase):
     def config(self) -> MqttSetting:
         return super().config if isinstance(super().config, MqttSetting) else MqttSetting()
 
-    def start(self, config: MqttSetting, subscribe_topic: str = None, callback: Callable = lambda: None,
+    @allow_only_on_prefix
+    def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None,
               loop_forever: bool = True):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_service(self)
         MqttRegistry().add(self)
-        super().start(config, subscribe_topic, callback, loop_forever)
+        super().start(config, subscribe_topics, callback, loop_forever)
 
     def _publish_cov(self, driver_name, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
                      point: PointModel, point_store: PointStoreModel):
@@ -102,7 +103,7 @@ class MqttClient(MqttListener, EventServiceBase):
         if model is None or updates is None or len(updates) == 0:
             raise Exception('Invalid MQTT publish arguments')
         topic: str = self.__make_topic(
-            (self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event_name(), getattr(model, 'uuid', '<uuid>')))
+            (self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event().name, getattr(model, 'uuid', '<uuid>')))
         self._publish_mqtt_value(topic, json.dumps(updates))
 
     @allow_only_on_prefix

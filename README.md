@@ -83,6 +83,8 @@ python run.py -s config/config.json
 #### Topic structure:
 ```
 <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/<event>/...
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/<all|value>/<Drivers>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/<ModelEvent>/<model.uuid>
 ```
 ```
 COV:
