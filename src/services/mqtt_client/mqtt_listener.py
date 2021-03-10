@@ -1,5 +1,6 @@
 import json
 import logging
+from abc import abstractmethod
 from typing import Callable, Union
 
 from paho.mqtt.client import MQTTMessage
@@ -56,6 +57,8 @@ class MqttListener(MqttClientBase):
         )).split(self.SEPARATOR))
 
     def __update_generic_point(self, message: MQTTMessage):
+        if not message.payload:
+            return
         self.__update_generic_point_by_uuid(message)
         self.__update_generic_point_by_name(message)
 
@@ -67,8 +70,13 @@ class MqttListener(MqttClientBase):
         point: PointModel = PointModel.find_by_uuid(point_uuid)
         if point is None or (point and point.driver != Drivers.GENERIC):
             logger.warning(f'No points with point.uuid={point_uuid}')
+            self.__clear_mqtt_retain_value(message)
             return
         self.__update_generic_point_store(message, point)
+
+    def __clear_mqtt_retain_value(self, message):
+        """Clear retain value coz the point doesn't exist anymore"""
+        self._publish_mqtt_value(message.topic, '', True)
 
     def __update_generic_point_by_name(self, message: MQTTMessage):
         topic = message.topic.split('/')
@@ -81,6 +89,7 @@ class MqttListener(MqttClientBase):
         if point is None or (point and point.driver != Drivers.GENERIC):
             logger.warning(f'No points with network.name={network_name}, device.name={device_name}, '
                            f'point.name={point_name}')
+            self.__clear_mqtt_retain_value(message)
             return
         self.__update_generic_point_store(message, point)
 
@@ -100,6 +109,10 @@ class MqttListener(MqttClientBase):
             point.update_point_store(value, priority, value_raw, fault, fault_message)
         except Exception as e:
             logger.error(str(e))
+
+    @abstractmethod
+    def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = False):
+        raise NotImplementedError
 
     @classmethod
     def __make_topic(cls, parts: tuple):
