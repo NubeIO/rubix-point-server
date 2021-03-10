@@ -84,11 +84,12 @@ class MqttClient(MqttListener, EventServiceBase):
         if not isinstance(payload['ts'], str):
             payload['ts'] = datetime_to_str(payload['ts'])
 
-        topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, driver_name,
-                                        network_uuid, network_name,
-                                        device_uuid, device_name,
-                                        point.uuid, point.name))
-        self._publish_mqtt_value(topic, json.dumps(payload))
+        if self.config.publish_value:
+            topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, driver_name,
+                                            network_uuid, network_name,
+                                            device_uuid, device_name,
+                                            point.uuid, point.name))
+            self._publish_mqtt_value(topic, json.dumps(payload))
 
         if self.config.publish_value and not point_store.fault:
             topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, driver_name,
@@ -108,11 +109,10 @@ class MqttClient(MqttListener, EventServiceBase):
     def _run_event(self, event: Event):
         if event.data is None:
             return
-
-        if event.event_type == EventType.MQTT_DEBUG:
+        if event.event_type == EventType.MQTT_DEBUG and self.config.publish_debug:
             self._publish_mqtt_value(self.__make_topic((self.config.debug_topic,)), event.data)
 
-        if event.event_type == EventType.POINT_REGISTRY_UPDATE:
+        if event.event_type == EventType.POINT_REGISTRY_UPDATE and self.config.publish_value:
             self._publish_mqtt_value(self.__make_topic((self.config.topic, 'points')), event.data, True)
 
         elif event.event_type == EventType.POINT_COV:
@@ -122,7 +122,7 @@ class MqttClient(MqttListener, EventServiceBase):
                               event.data.get('point'), event.data.get('point_store'))
 
         elif event.event_type == EventType.POINT_UPDATE or event.event_type == EventType.DEVICE_UPDATE or \
-                event.event_type == EventType.NETWORK_UPDATE:
+                event.event_type == EventType.NETWORK_UPDATE and self.config.publish_value:
             self._publish_update(event.data.get('model'), event.data.get('updates'))
 
     def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = False):

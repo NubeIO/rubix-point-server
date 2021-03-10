@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Callable
+from typing import Callable, Union
 
 from paho.mqtt.client import MQTTMessage
 from registry.registry import RubixRegistry
@@ -30,11 +30,13 @@ class MqttListener(MqttClientBase):
         if not wires_plat:
             logger.error('Please add wires-plat on Rubix Service')
             return
-        subscribe_topic: str = self.__make_topic((
-            wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'),
-            config.listen_topic, 'cov', '#'
-        ))
-        logger.info(f'Listening at: {subscribe_topic}')
+        subscribe_topic: Union[str, None] = None
+        if self.config.listen:
+            subscribe_topic = self.__make_topic((
+                wires_plat.get('client_id'), wires_plat.get('site_id'), wires_plat.get('device_id'),
+                config.listen_topic, 'cov', '#'
+            ))
+            logger.info(f'Listening at: {subscribe_topic}')
         super().start(config, subscribe_topic, callback, loop_forever)
 
     @exception_handler
