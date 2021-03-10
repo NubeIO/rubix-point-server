@@ -110,10 +110,10 @@ class MqttClient(MqttListener, EventServiceBase):
         if event.data is None:
             return
         if event.event_type == EventType.MQTT_DEBUG and self.config.publish_debug:
-            self._publish_mqtt_value(self.__make_topic((self.config.debug_topic,)), event.data)
+            self._publish_mqtt_value(self.__make_topic((self.config.debug_topic,)), event.data, False)
 
         if event.event_type == EventType.POINT_REGISTRY_UPDATE and self.config.publish_value:
-            self._publish_mqtt_value(self.__make_topic((self.config.topic, 'points')), event.data, True)
+            self._publish_mqtt_value(self.__make_topic((self.config.topic, 'points')), event.data)
 
         elif event.event_type == EventType.POINT_COV:
             self._publish_cov(event.data.get('driver_name'),
@@ -125,11 +125,10 @@ class MqttClient(MqttListener, EventServiceBase):
                 event.event_type == EventType.NETWORK_UPDATE and self.config.publish_value:
             self._publish_update(event.data.get('model'), event.data.get('updates'))
 
-    def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = False):
+    def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = True):
         if not self.status():
             logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
-        retain = retain or self.config.retain
         logger.debug(f"MQTT_PUBLISH: 'topic': {topic}, 'payload': {payload}, 'retain':retain")
         self.client.publish(topic, str(payload), qos=self.config.qos, retain=retain)
 
