@@ -56,7 +56,7 @@ class GenericPointSingular(GenericPointBase):
         if point is None:
             raise NotFoundException('Generic Point not found')
         point.delete_from_db()
-        PointsRegistry().delete_point(point.uuid)
+        PointsRegistry().delete_point(point)
         return '', 204
 
     @classmethod

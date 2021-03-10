@@ -56,6 +56,7 @@ class MqttSetting(MqttSettingBase):
     def __init__(self):
         super(MqttSetting, self).__init__()
         self.name = 'rubix-points'
+        self.retain_clear_interval = 10
         self.publish_value = True
         self.topic = 'rubix/points/value'
         self.publish_debug = True

@@ -3,10 +3,12 @@ import logging
 from abc import abstractmethod
 from typing import Callable, Union, List
 
+from gevent import sleep
 from paho.mqtt.client import MQTTMessage
 from registry.registry import RubixRegistry
 from rubix_mqtt.mqtt import MqttClientBase
 
+from src import FlaskThread
 from src.drivers.enums.drivers import Drivers
 from src.enums.model import ModelEvent
 from src.handlers.exception import exception_handler
@@ -43,11 +45,27 @@ class MqttListener(MqttClientBase):
             return
         subscribe_topics: List[str] = []
         if self.config.listen:
-            subscribe_topics.append(self.__make_topic((self.get_listener_topic_prefix(), '#')))
+            # Resubscribe logic is not necessary here, these topics are for this app and will clear out when we start
+            topic: str = self.__make_topic((self.get_listener_topic_prefix(), '#'))
+            subscribe_topics.append(topic)
         if self.config.publish_value:
-            subscribe_topics.append(self.__make_topic((self.get_value_topic_prefix(), '#')))
+            topic: str = self.__make_topic((self.get_value_topic_prefix(), '#'))
+            subscribe_topics.append(topic)
+            FlaskThread(target=self.__resubscribe_value_topic, args=(topic,)).start()
         logger.info(f'Listening at: {subscribe_topics}')
         super().start(config, subscribe_topics, callback, loop_forever)
+
+    def __resubscribe_value_topic(self, topic):
+        """
+        We resubscribe value topic for clearing un-necessary topic with retain on a certain interval of time
+        For example: when we have points details on MQTT and we delete it, now it needs to be deleted from the MQTT
+        broker too, this resubscribing logic does this on bulk.
+        """
+        while True:
+            sleep(self.config.retain_clear_interval * 60)
+            logger.info(f'Re-subscribing topic: {topic}')
+            self.client.unsubscribe(topic)
+            self.client.subscribe(topic)
 
     def get_listener_topic_prefix(self) -> str:
         return self.__make_topic((

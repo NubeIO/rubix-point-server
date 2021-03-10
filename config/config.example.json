@@ -67,6 +67,7 @@
       "attempt_reconnect_on_unavailable": true,
       "attempt_reconnect_secs": 5,
       "timeout": 10,
+      "retain_clear_interval": 10,
       "publish_value": true,
       "topic": "rubix/points/value",
       "listen": true,
