@@ -35,7 +35,7 @@ class ModbusNetworkModel(NetworkMixinModel):
         if value == ModbusType.RTU.name:
             if not self.rtu_port:
                 raise ValueError("rtu_port should be be there on type RTU")
-            if not self.rtu_byte_size or self.rtu_byte_size not in range(5, 9):
+            if self.rtu_byte_size is not None and self.rtu_byte_size not in range(5, 9):
                 raise ValueError("rtu_byte_size The number of bits in a byte of serial data. This can be one of 5, 6, "
                                  "7, or 8. This defaults to 8")
         elif value == ModbusType.TCP.name:

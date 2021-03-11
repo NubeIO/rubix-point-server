@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.4.6](https://github.com/NubeIO/rubix-point-server/tree/v1.4.6) (2020-03-11)
+### Added
+- Fix: modbus ping point
+
 ## [v1.4.5](https://github.com/NubeIO/rubix-point-server/tree/v1.4.5) (2020-03-09)
 ### Added
 - Fix: same network can't have multiple devices
