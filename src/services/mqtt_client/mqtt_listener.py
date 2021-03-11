@@ -98,15 +98,13 @@ class MqttListener(MqttClientBase):
             self.__update_generic_point_by_uuid(topic, message)
         elif len(topic) == self._mqtt_listener_topic_by_name_length() and topic[7] == 'name':
             self.__update_generic_point_by_name(topic, message)
-        else:
-            self.__clear_mqtt_retain_value(message)
+        self.__clear_mqtt_retain_value(message, force_clear=True)
 
     def __update_generic_point_by_uuid(self, topic: List[str], message: MQTTMessage):
         point_uuid: str = topic[-1]
         point: PointModel = PointModel.find_by_uuid(point_uuid)
         if point is None or (point and point.driver != Drivers.GENERIC):
             logger.warning(f'No point with point.uuid={point_uuid}')
-            self.__clear_mqtt_retain_value(message)
         else:
             self.__update_generic_point_store(message, point)
 
@@ -118,7 +116,6 @@ class MqttListener(MqttClientBase):
         if point is None or (point and point.driver != Drivers.GENERIC):
             logger.warning(f'No point with network.name={network_name}, device.name={device_name}, '
                            f'point.name={point_name}')
-            self.__clear_mqtt_retain_value(message)
         else:
             self.__update_generic_point_store(message, point)
 
@@ -199,10 +196,14 @@ class MqttListener(MqttClientBase):
             self.config.topic, 'points'
         )).split(self.SEPARATOR))
 
-    def __clear_mqtt_retain_value(self, message: MQTTMessage):
+    def __clear_mqtt_retain_value(self, message: MQTTMessage, force_clear: bool = False):
         """Clear retain value coz the point doesn't exist anymore"""
-        logger.warning(f'Clearing topic: {message.topic}, having message: {message.payload}')
-        self._publish_mqtt_value(message.topic, '', True)
+        if message.retain:
+            logger.warning(f'Clearing topic: {message.topic}, having message: {message.payload}')
+            self._publish_mqtt_value(message.topic, '', True)
+        elif force_clear:
+            logger.debug(f'Clearing topic: {message.topic}, having message: {message.payload}')
+            self._publish_mqtt_value(message.topic, '', True)
 
     @staticmethod
     def __update_generic_point_store(message: MQTTMessage, point: PointModel):
