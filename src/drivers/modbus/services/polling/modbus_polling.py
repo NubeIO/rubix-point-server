@@ -57,9 +57,10 @@ class ModbusPolling(EventServiceBase):
             available_keys.append(registry_key.key)
             self.__poll_network(network)
 
-        for key in self.get_registry().get_connections().keys():
-            if key not in available_keys:
-                self.get_registry().remove_connection_if_exist(key)
+        # TODO revert this logic when ping point connection is handled, lock implementation
+        # for key in self.get_registry().get_connections().keys():
+        #     if key not in available_keys:
+        #         self.get_registry().remove_connection_if_exist(key)
         db.session.commit()
 
     def __poll_network(self, network: ModbusNetworkModel):
@@ -143,7 +144,8 @@ class ModbusPolling(EventServiceBase):
     def poll_point_not_existing(self, point: ModbusPointModel, device: ModbusDeviceModel, network: ModbusNetworkModel):
         self.__log_debug(f'Manual poll request Non Existing Point {point}')
         connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network)
-        if network.type is not self.__network_type:
+        # TODO network.type is in string for should be on Enum check `ModelBase > create_temporary`
+        if network.type != self.__network_type.name:
             raise HandledByDifferentServiceException
         point_store = self.__poll_point(connection.client, network, device, point, False, False)
         return point_store

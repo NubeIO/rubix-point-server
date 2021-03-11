@@ -29,10 +29,6 @@ modbus_point_all_attributes['data_endian'] = {
 }
 
 modbus_poll_non_existing_attributes = {
-    'network_type': {
-        'type': str,
-        'required': True
-    },
     'network_rtu_port': {
         'type': str,
     },
@@ -48,18 +44,22 @@ modbus_poll_non_existing_attributes = {
     'network_rtu_byte_size': {
         'type': int,
     },
+    'network_tcp_ip': {
+        'type': str,
+    },
+    'network_tcp_port': {
+        'type': int,
+    },
+    'network_type': {
+        'type': str,
+        'required': True
+    },
     'network_timeout': {
         'type': int,
     },
     'device_address': {
         'type': int,
         'required': True
-    },
-    'device_ip': {
-        'type': str,
-    },
-    'device_port': {
-        'type': int,
     },
     'device_zero_based': {
         'type': bool,

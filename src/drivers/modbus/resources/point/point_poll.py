@@ -54,7 +54,7 @@ class ModbusPointPollNonExisting(RubixResource):
         point.check_self()
 
         event = EventCallableBlocking(ModbusPolling.poll_point_not_existing, (point, device, network))
-        EventDispatcher().dispatch_to_source_only(event, Drivers.MODBUS)
+        EventDispatcher().dispatch_to_source_only(event, Drivers.MODBUS.name)
         event.condition.wait()
         if event.error:
             raise Exception(str(event.data))
