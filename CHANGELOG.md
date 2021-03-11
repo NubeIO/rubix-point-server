@@ -1,4 +1,14 @@
 # CHANGELOG
+## [v1.5.0](https://github.com/NubeIO/rubix-point-server/tree/v1.5.0) (2020-03-11)
+### Added
+- Publish points uuid list on MQTT
+- Removed out generic listener and adding that functionality on MqttClient
+- Update generic point_store value by MQTT name or uuid request
+- Use MQTT flags on MQTT data publish
+- Don't give retain option to user (we standardize it, retain True on values, models publish and False on debug)
+- Clear retain values and listen values (we can only have valid topic with retain True)
+- Resubscribe on certain interval to clear values (it clears no more invalid topics, and frontend won't have much data when subscribing)
+
 ## [v1.4.6](https://github.com/NubeIO/rubix-point-server/tree/v1.4.6) (2020-03-11)
 ### Added
 - Fix: modbus ping point
