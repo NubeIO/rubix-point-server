@@ -1,7 +1,8 @@
-from sqlalchemy.orm import validates
 from sqlalchemy import inspect
+from sqlalchemy.orm import validates
 
 from src import db
+from src.enums.model import ModelEvent
 from src.event_dispatcher import EventDispatcher
 from src.services.event_service_base import Event, EventType
 
@@ -65,7 +66,7 @@ class ModelBase(db.Model):
             # TODO: source_driver name to publish change to source driver
             EventDispatcher().dispatch_from_service(None, event, None)
 
-    def get_model_event_name(self) -> str:
+    def get_model_event(self) -> ModelEvent:
         raise NotImplemented
 
     def get_model_event_type(self) -> EventType:

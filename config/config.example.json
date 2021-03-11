@@ -49,26 +49,9 @@
     "password": "password",
     "keepalive": 60,
     "qos": 1,
-    "retain": false,
     "attempt_reconnect_on_unavailable": true,
     "attempt_reconnect_secs": 5,
     "timeout": 10
-  },
-  "generic_point_listener": {
-    "enabled": true,
-    "name": "rubix-points-generic-point-listener",
-    "host": "0.0.0.0",
-    "port": 1883,
-    "authentication": false,
-    "username": "username",
-    "password": "password",
-    "keepalive": 60,
-    "qos": 1,
-    "retain": false,
-    "attempt_reconnect_on_unavailable": true,
-    "attempt_reconnect_secs": 5,
-    "timeout": 10,
-    "topic": "rubix/points/generic/cov"
   },
   "mqtt": [
     {
@@ -81,12 +64,14 @@
       "password": "password",
       "keepalive": 60,
       "qos": 1,
-      "retain": false,
       "attempt_reconnect_on_unavailable": true,
       "attempt_reconnect_secs": 5,
       "timeout": 10,
+      "retain_clear_interval": 10,
       "publish_value": true,
       "topic": "rubix/points/value",
+      "listen": true,
+      "listen_topic": "rubix/points/listen",
       "publish_debug": true,
       "debug_topic": "rubix/points/debug"
     }

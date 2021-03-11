@@ -83,13 +83,15 @@ python run.py -s config/config.json
 #### Topic structure:
 ```
 <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/<event>/...
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/<all|value>/<Drivers>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/<ModelEvent>/<model.uuid>
 ```
 ```
 COV:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/<source_driver>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/<driver>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
 
   [optional] (value only)
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/value/<source_driver>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/value/<driver>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
 
 UPDATE:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/<model>/<model.uuid>
@@ -113,10 +115,10 @@ all points:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/#
 
 all modbus rtu points:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/+/+/+/+/modbus_rtu
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/modbus/+/+/+/+/+/+
 
 by point uuid:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/+/+/+/example_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/+/+/+/<point_uuid>/+
 
 by point name:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/<network_name>/+/<device_name>/+/<point_name>
@@ -131,14 +133,25 @@ device:
 
 point:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/point/example_point_uuid
+
+points list:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
 ```
 
-### Generic Point MQTT client
+### Generic Points MQTT Listener
 
-All generic point values are updated over MQTT.  
-These COVs are then broadcast again over the normal MQTT clients as above
+- All generic point values are updated over MQTT
+- These COVs are then broadcast again over the normal MQTT clients as above
+
 #### Topic structure:
 
 ```
-<client_id>/<site_id>/<device_id>/rubix/points/generic/cov/<network_name>/<device_name>/<point_name>
+<client_id>/<site_id>/<device_id>/rubix/points/listen/cov/name/<point_name>/<device_name>/<network_name>
+<client_id>/<site_id>/<device_id>/rubix/points/listen/cov/uuid/<point_uuid>
+```
+
+### Generic Points List Publisher
+
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
 ```

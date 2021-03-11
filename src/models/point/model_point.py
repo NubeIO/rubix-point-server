@@ -9,6 +9,7 @@ from src import db
 from src.drivers.enums.drivers import Drivers
 from src.drivers.generic.enums.point.points import GenericPointType
 from src.drivers.generic.models.priority_array import PriorityArrayModel
+from src.enums.model import ModelEvent
 from src.enums.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
@@ -116,8 +117,8 @@ class PointModel(ModelBase):
             raise ValueError("history_interval needs to be at least 1, default is 15 (in minutes)")
         return value
 
-    def get_model_event_name(self) -> str:
-        return 'point'
+    def get_model_event(self) -> ModelEvent:
+        return ModelEvent.POINT
 
     def get_model_event_type(self) -> EventType:
         return EventType.POINT_UPDATE
@@ -196,7 +197,7 @@ class PointModel(ModelBase):
         return value
 
     def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,
-                    service_name: str = None):
+                    driver_name: str = None):
         if point_store is None:
             raise Exception('Point.publish_cov point_store cannot be None')
         if device is None:
@@ -205,8 +206,8 @@ class PointModel(ModelBase):
             network = NetworkModel.find_by_uuid(device.network_uuid)
         if device is None or network is None:
             raise Exception(f'Cannot find network or device for point {self.uuid}')
-        if service_name is None:
-            service_name = network.driver.name
+        if driver_name is None:
+            driver_name = network.driver.name
 
         if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
                 device.history_enable:
@@ -218,5 +219,5 @@ class PointModel(ModelBase):
             'point_store': point_store,
             'device': device,
             'network': network,
-            'source_driver': service_name
+            'driver_name': driver_name
         }))

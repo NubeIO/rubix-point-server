@@ -306,7 +306,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
 [[package]]
 name = "mqtt-rest-bridge"
-version = "1.1.3"
+version = "1.1.4"
 description = "MQTT-REST-Bridge"
 category = "main"
 optional = false
@@ -316,13 +316,13 @@ develop = false
 [package.dependencies]
 paho-mqtt = "1.5.1"
 requests = "2.25.1"
-rubix-mqtt = "rev v1.0.0"
+rubix-mqtt = "rev v1.1.0"
 
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/mqtt-rest-bridge"
-reference = "v1.1.3"
-resolved_reference = "7007c98304b396a53c77ba61b46e95fe62dc3d9d"
+reference = "v1.1.4"
+resolved_reference = "eacabd8b28c0b800089aed58532bca9c13e771ab"
 
 [[package]]
 name = "msgpack"
@@ -560,7 +560,7 @@ resolved_reference = "f6a5bb0e547ce367b273844cd91be86cf4f25fac"
 
 [[package]]
 name = "rubix-mqtt"
-version = "1.0.0"
+version = "1.1.0"
 description = "Rubix MQTT for creating MQTT connection"
 category = "main"
 optional = false
@@ -573,8 +573,8 @@ paho-mqtt = ">=1.5.1"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/rubix-mqtt"
-reference = "v1.0.0"
-resolved_reference = "56a1c85485545c9519c782d794b5a02acde22498"
+reference = "v1.1.0"
+resolved_reference = "a2a1895bcf5012f6503127936fad7eee667f8cf2"
 
 [[package]]
 name = "rubix-registry"
@@ -716,7 +716,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "7bd8ac7debfeafd83fa63b1169907f799eba4bc5ca5d0305e2747f6677f4dfd8"
+content-hash = "f4efebca285781828fc01d6288ebb961b9c09eacfe5e492d6e0d6795a70d9adb"
 
 [metadata.files]
 altgraph = [
