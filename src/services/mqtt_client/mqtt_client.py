@@ -130,7 +130,7 @@ class MqttClient(MqttListener, EventServiceBase):
         if not self.status():
             logger.error(f"MQTT client {self.to_string()} is not connected...")
             return
-        logger.debug(f"MQTT_PUBLISH: 'topic': {topic}, 'payload': {payload}, 'retain':retain")
+        logger.debug(f"MQTT_PUBLISH: 'topic': {topic}, 'payload': {payload}, 'retain':{retain}")
         self.client.publish(topic, str(payload), qos=self.config.qos, retain=retain)
 
     @classmethod
