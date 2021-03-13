@@ -1,4 +1,5 @@
 import logging
+import uuid
 from abc import abstractmethod
 from typing import Dict
 
@@ -19,7 +20,7 @@ class ModbusRegistryKey:
         self.connection_key: str = self.create_connection_key()
 
     def create_key(self):
-        return f'{self.network.uuid}'
+        return self.network.uuid or str(uuid.uuid4())  # there will be no uuid on poll_point
 
     @abstractmethod
     def create_connection_key(self) -> str:
@@ -37,8 +38,8 @@ class ModbusRegistry(metaclass=Singleton):
     """
     Connection format
     {
-      "<key1>": "<RtuConnection1>",
-      "<key2>": "<RtuConnection2>"
+      "<key1>": "<ModbusRegistryConnection1>",
+      "<key2>": "<ModbusRegistryConnection2>"
     }
     """
 
@@ -56,8 +57,10 @@ class ModbusRegistry(metaclass=Singleton):
         registry_key: ModbusRegistryKey = self.get_registry_key(network)
         connection: ModbusRegistryConnection = self.connections.get(registry_key.key)
         if connection and connection.connection_key != registry_key.connection_key:
+            # connection has some changes
             connection = self.__class__().add_connection(network)
         if not connection:
+            # creating connection for the first time
             connection = self.__class__().add_connection(network)
         return connection
 

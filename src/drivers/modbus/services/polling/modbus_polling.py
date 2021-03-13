@@ -1,6 +1,7 @@
 import logging
 import time
 from abc import abstractmethod
+from copy import deepcopy
 from typing import Union, List
 
 from pymodbus.client.sync import BaseModbusClient
@@ -57,10 +58,10 @@ class ModbusPolling(EventServiceBase):
             available_keys.append(registry_key.key)
             self.__poll_network(network)
 
-        # TODO revert this logic when ping point connection is handled, lock implementation
-        # for key in self.get_registry().get_connections().keys():
-        #     if key not in available_keys:
-        #         self.get_registry().remove_connection_if_exist(key)
+        keys: List[str] = list(self.get_registry().get_connections().keys())
+        for key in deepcopy(keys):
+            if key not in available_keys:
+                self.get_registry().remove_connection_if_exist(key)
         db.session.commit()
 
     def __poll_network(self, network: ModbusNetworkModel):
