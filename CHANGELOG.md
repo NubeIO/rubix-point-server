@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.5.1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.1) (2020-03-13)
+### Added
+- Modbus polling loop remove on network deletion
+- Support for Generic Point payload write
+
 ## [v1.5.0](https://github.com/NubeIO/rubix-point-server/tree/v1.5.0) (2020-03-11)
 ### Added
 - Publish points uuid list on MQTT
