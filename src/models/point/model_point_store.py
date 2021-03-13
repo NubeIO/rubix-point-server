@@ -101,7 +101,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
             api_to_topic_mapper(
                 api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
                 destination_identifier='ps',
-                body={"priority_array": {"_16": self.value}},
+                body={"value": self.value},
                 http_method=HttpMethod.PATCH)
         elif mapping.bacnet_point_uuid and bp:
             api_to_topic_mapper(
