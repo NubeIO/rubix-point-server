@@ -126,8 +126,8 @@ class MqttListener(MqttClientBase):
         topic: List[str] = message.topic.split(self.SEPARATOR)
         if len(topic) == self._mqtt_cov_value_topic():
             self.__check_and_clear_cov_point(topic, message)
-        elif len(topic) == self._mqtt_update_value_topic():
-            self.__check_and_clear_update_model(topic, message)
+        elif len(topic) == self._mqtt_model_value_topic():
+            self.__check_and_clear_model(topic, message)
         elif not (len(topic) == self._mqtt_points_list_topic() and topic[-1] == 'points'):
             self.__clear_mqtt_retain_value(message)
 
@@ -145,7 +145,7 @@ class MqttListener(MqttClientBase):
             logger.warning(f'No point with topic: {message.topic}')
             self.__clear_mqtt_retain_value(message)
 
-    def __check_and_clear_update_model(self, topic: List[str], message: MQTTMessage):
+    def __check_and_clear_model(self, topic: List[str], message: MQTTMessage):
         model_uuid: str = topic[-1]
         model_event: str = topic[-2]
         if model_event == ModelEvent.POINT.name:
@@ -184,10 +184,10 @@ class MqttListener(MqttClientBase):
             '<device_uuid>', '<device_name>', '<point_id>', '<point_name>'
         )).split(self.SEPARATOR))
 
-    def _mqtt_update_value_topic(self) -> int:
+    def _mqtt_model_value_topic(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<client_name>', '<site_id>', '<site_name>', '<device_id>', '<device_name>',
-            self.config.topic, 'update', '<model>', '<model.uuid>'
+            self.config.topic, 'model', '<model>', '<model.uuid>'
         )).split(self.SEPARATOR))
 
     def _mqtt_points_list_topic(self) -> int:

@@ -42,7 +42,7 @@ class NetworkModel(ModelBase):
         return ModelEvent.NETWORK
 
     def get_model_event_type(self) -> EventType:
-        return EventType.NETWORK_UPDATE
+        return EventType.NETWORK_MODEL
 
     def set_fault(self, is_fault: bool):
         self.fault = is_fault

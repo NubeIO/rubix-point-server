@@ -51,7 +51,7 @@ class DeviceModel(ModelBase):
         return ModelEvent.DEVICE
 
     def get_model_event_type(self) -> EventType:
-        return EventType.DEVICE_UPDATE
+        return EventType.DEVICE_MODEL
 
     def set_fault(self, is_fault: bool):
         self.fault = is_fault
