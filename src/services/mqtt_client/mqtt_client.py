@@ -19,10 +19,10 @@ SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
 MQTT_TOPIC_ALL = 'all'
 MQTT_TOPIC_DRIVER = 'driver'
-MQTT_TOPIC_UPDATE = 'update'
-MQTT_TOPIC_UPDATE_POINT = 'point'
-MQTT_TOPIC_UPDATE_DEVICE = 'device'
-MQTT_TOPIC_UPDATE_NETWORK = 'network'
+MQTT_TOPIC_MODEL = 'model'
+MQTT_TOPIC_MODEL_POINT = 'point'
+MQTT_TOPIC_MODEL_DEVICE = 'device'
+MQTT_TOPIC_MODEL_NETWORK = 'network'
 MQTT_TOPIC_COV = 'cov'
 MQTT_TOPIC_COV_ALL = 'all'
 MQTT_TOPIC_COV_VALUE = 'value'
@@ -44,9 +44,9 @@ class MqttClient(MqttListener, EventServiceBase):
         MqttListener.__init__(self)
         EventServiceBase.__init__(self, SERVICE_NAME_MQTT_CLIENT, False)
         self.supported_events[EventType.POINT_COV] = True
-        self.supported_events[EventType.POINT_UPDATE] = True
-        self.supported_events[EventType.DEVICE_UPDATE] = True
-        self.supported_events[EventType.NETWORK_UPDATE] = True
+        self.supported_events[EventType.POINT_MODEL] = True
+        self.supported_events[EventType.DEVICE_MODEL] = True
+        self.supported_events[EventType.NETWORK_MODEL] = True
         self.supported_events[EventType.MQTT_DEBUG] = True
         self.supported_events[EventType.POINT_REGISTRY_UPDATE] = True
 
@@ -99,12 +99,12 @@ class MqttClient(MqttListener, EventServiceBase):
                                             point.uuid, point.name))
             self._publish_mqtt_value(topic, str(point_store.value))
 
-    def _publish_update(self, model: ModelBase, updates: dict):
-        if model is None or updates is None or len(updates) == 0:
+    def _publish_model(self, model: ModelBase, payload: dict):
+        if model is None:
             raise Exception('Invalid MQTT publish arguments')
         topic: str = self.__make_topic(
-            (self.config.topic, MQTT_TOPIC_UPDATE, model.get_model_event().name, getattr(model, 'uuid', '<uuid>')))
-        self._publish_mqtt_value(topic, json.dumps(updates))
+            (self.config.topic, MQTT_TOPIC_MODEL, model.get_model_event().name, getattr(model, 'uuid', '<uuid>')))
+        self._publish_mqtt_value(topic, json.dumps(payload))
 
     @allow_only_on_prefix
     def _run_event(self, event: Event):
@@ -122,9 +122,9 @@ class MqttClient(MqttListener, EventServiceBase):
                               event.data.get('device').uuid, event.data.get('device').name,
                               event.data.get('point'), event.data.get('point_store'))
 
-        elif event.event_type == EventType.POINT_UPDATE or event.event_type == EventType.DEVICE_UPDATE or \
-                event.event_type == EventType.NETWORK_UPDATE and self.config.publish_value:
-            self._publish_update(event.data.get('model'), event.data.get('updates'))
+        elif event.event_type == EventType.POINT_MODEL or event.event_type == EventType.DEVICE_MODEL or \
+                event.event_type == EventType.NETWORK_MODEL and self.config.publish_value:
+            self._publish_model(event.data.get('model'), event.data.get('payload'))
 
     def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = True):
         if not self.status():

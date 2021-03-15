@@ -121,7 +121,7 @@ class PointModel(ModelBase):
         return ModelEvent.POINT
 
     def get_model_event_type(self) -> EventType:
-        return EventType.POINT_UPDATE
+        return EventType.POINT_MODEL
 
     def update(self, **kwargs):
         super().update(**kwargs)

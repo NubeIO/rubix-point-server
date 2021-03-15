@@ -84,7 +84,7 @@ python run.py -s config/config.json
 ```
 <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/<event>/...
 <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/<all|value>/<Drivers>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
-<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/<ModelEvent>/<model.uuid>
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/<ModelEvent>/<model.uuid>
 ```
 ```
 COV:
@@ -93,8 +93,8 @@ COV:
   [optional] (value only)
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/value/<driver>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
 
-UPDATE:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/<model>/<model.uuid>
+MODEL:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/<model>/<model.uuid>
 ```
 
 Debug topic
@@ -123,16 +123,16 @@ by point uuid:
 by point name:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/<network_name>/+/<device_name>/+/<point_name>
 ```
-**UPDATE:**
+**MODEL:**
 ```
 network:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/network/example_network_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/network/example_network_uuid
 
 device:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/device/example_device_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/device/example_device_uuid
 
 point:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/update/point/example_point_uuid
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/point/example_point_uuid
 
 points list:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
