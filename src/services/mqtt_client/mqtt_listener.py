@@ -128,7 +128,8 @@ class MqttListener(MqttClientBase):
             self.__check_and_clear_cov_point(topic, message)
         elif len(topic) == self._mqtt_model_value_topic():
             self.__check_and_clear_model(topic, message)
-        elif not (len(topic) == self._mqtt_points_list_topic() and topic[-1] == 'points'):
+        elif not (len(topic) == self._mqtt_points_list_topic() and topic[-1] == 'points') or \
+                not (len(topic) == self._mqtt_schedules_list_topic() and topic[-1] == 'schedules'):
             self.__clear_mqtt_retain_value(message)
 
     def __check_and_clear_cov_point(self, topic: List[str], message: MQTTMessage):
@@ -194,6 +195,12 @@ class MqttListener(MqttClientBase):
         return len(self.__make_topic((
             '<client_id>', '<client_name>', '<site_id>', '<site_name>', '<device_id>', '<device_name>',
             self.config.topic, 'points'
+        )).split(self.SEPARATOR))
+
+    def _mqtt_schedules_list_topic(self) -> int:
+        return len(self.__make_topic((
+            '<client_id>', '<client_name>', '<site_id>', '<site_name>', '<device_id>', '<device_name>',
+            self.config.topic, 'schedules'
         )).split(self.SEPARATOR))
 
     def __clear_mqtt_retain_value(self, message: MQTTMessage, force_clear: bool = False):

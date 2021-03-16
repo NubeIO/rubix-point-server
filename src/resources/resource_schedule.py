@@ -57,8 +57,7 @@ class ScheduleResource(ScheduleResourceBase):
         schedule: ScheduleModel = cls.get_schedule(**kwargs)
         if not schedule:
             return cls.add_schedule(data)
-        schedule.update(**data)
-        return cls.get_schedule(**kwargs)
+        return schedule.update(**data)
 
     @classmethod
     @marshal_with(schedule_all_fields)
@@ -67,8 +66,7 @@ class ScheduleResource(ScheduleResourceBase):
         schedule: ScheduleModel = cls.get_schedule(**kwargs)
         if not schedule:
             raise NotFoundException('Schedule not found')
-        schedule.update(**data)
-        return cls.get_schedule(**kwargs)
+        return schedule.update(**data)
 
     @classmethod
     @abstractmethod
