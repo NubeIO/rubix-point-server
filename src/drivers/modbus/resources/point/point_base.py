@@ -5,6 +5,7 @@ from rubix_http.resource import RubixResource
 
 from src.drivers.modbus.models.point import ModbusPointModel
 from src.drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_attributes
+from src.models.point.priority_array import PriorityArrayModel
 
 
 class ModbusPointBase(RubixResource):
@@ -20,5 +21,6 @@ class ModbusPointBase(RubixResource):
     def add_point(cls, data):
         _uuid = str(uuid.uuid4())
         point = ModbusPointModel(uuid=_uuid, **data)
+        point.priority_array_write = PriorityArrayModel.create_new_priority_array_model(_uuid)
         point.save_to_db()
         return point

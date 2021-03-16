@@ -8,7 +8,6 @@ from sqlalchemy.orm import validates
 from src import db
 from src.drivers.enums.drivers import Drivers
 from src.drivers.generic.enums.point.points import GenericPointType
-from src.drivers.generic.models.priority_array import PriorityArrayModel
 from src.enums.model import ModelEvent
 from src.enums.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
@@ -16,6 +15,7 @@ from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
+from src.models.point.priority_array import PriorityArrayModel
 from src.services.event_service_base import Event, EventType
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,11 @@ class PointModel(ModelBase):
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
     writable = db.Column(db.Boolean, nullable=False, default=False)
-    write_value = db.Column(db.Float, nullable=True, default=None)  # TODO: more data types...
+    priority_array_write = db.relationship('PriorityArrayModel',
+                                           backref='points',
+                                           lazy=False,
+                                           uselist=False,
+                                           cascade="all,delete")
     cov_threshold = db.Column(db.Float, nullable=False, default=0)
     value_round = db.Column(db.Integer(), nullable=False, default=2)
     value_offset = db.Column(db.Float(), nullable=False, default=0)

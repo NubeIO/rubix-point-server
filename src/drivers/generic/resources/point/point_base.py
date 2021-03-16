@@ -4,8 +4,8 @@ from flask_restful import reqparse
 from rubix_http.resource import RubixResource
 
 from src.drivers.generic.models.point import GenericPointModel
-from src.drivers.generic.models.priority_array import PriorityArrayModel
 from src.drivers.generic.resources.rest_schema.schema_generic_point import generic_point_all_attributes
+from src.models.point.priority_array import PriorityArrayModel
 from src.services.points_registry import PointsRegistry
 
 

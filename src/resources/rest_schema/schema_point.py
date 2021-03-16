@@ -1,6 +1,27 @@
+from collections import OrderedDict
+
 from flask_restful import fields
 
 from src.resources.utils import map_rest_schema
+
+priority_array_write_fields = OrderedDict({
+    '_1': fields.Float,
+    '_2': fields.Float,
+    '_3': fields.Float,
+    '_4': fields.Float,
+    '_5': fields.Float,
+    '_6': fields.Float,
+    '_7': fields.Float,
+    '_8': fields.Float,
+    '_9': fields.Float,
+    '_10': fields.Float,
+    '_11': fields.Float,
+    '_12': fields.Float,
+    '_13': fields.Float,
+    '_14': fields.Float,
+    '_15': fields.Float,
+    '_16': fields.Float,
+})
 
 point_store_fields = {
     'point_uuid': fields.String,
@@ -88,6 +109,9 @@ point_return_attributes = {
     },
     'updated_on': {
         'type': str,
+    },
+    'priority_array_write': {
+        'type': fields.Nested(priority_array_write_fields),
     },
     'point_store': {
         'type': fields.Nested(point_store_fields),

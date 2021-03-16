@@ -3,7 +3,7 @@ from src import db
 
 class PriorityArrayModel(db.Model):
     __tablename__ = 'priority_array'
-    generic_uuid = db.Column(db.String, db.ForeignKey('generic_points.uuid'), primary_key=True, nullable=False)
+    point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
     _1 = db.Column(db.Float(), nullable=True)
     _2 = db.Column(db.Float(), nullable=True)
     _3 = db.Column(db.Float(), nullable=True)
@@ -22,19 +22,19 @@ class PriorityArrayModel(db.Model):
     _16 = db.Column(db.Float(), nullable=True)
 
     def __repr__(self):
-        return f"PriorityArray(generic_uuid = {self.generic_uuid})"
+        return f"PriorityArray(uuid = {self.point_uuid})"
 
     @classmethod
-    def create_new_priority_array_model(cls, generic_uuid):
-        return PriorityArrayModel(generic_uuid=generic_uuid)
+    def create_new_priority_array_model(cls, point_uuid):
+        return PriorityArrayModel(point_uuid=point_uuid)
 
     @classmethod
-    def filter_by_point_uuid(cls, generic_uuid):
-        return cls.query.filter_by(generic_uuid=generic_uuid)
+    def filter_by_point_uuid(cls, point_uuid):
+        return cls.query.filter_by(point_uuid=point_uuid)
 
     @classmethod
-    def get_highest_priority_value(cls, generic_uuid):
-        priority_array = cls.filter_by_point_uuid(generic_uuid).first()
+    def get_highest_priority_value(cls, point_uuid):
+        priority_array = cls.filter_by_point_uuid(point_uuid).first()
         if priority_array:
             for i in range(1, 17):
                 value = getattr(priority_array, f'_{i}')
