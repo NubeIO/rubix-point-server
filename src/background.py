@@ -92,12 +92,21 @@ class Background:
         from mrb.message import HttpMethod
         from .models.point.model_point_store import PointStoreModel
 
-        """Sync mapped points values from LoRa > Generic points values"""
+        """
+        Sync mapped points values from LoRa > Generic points values
+        Because: LoRa Points > Generic Points
+        """
         FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_gp", 'destination_identifier': 'lora',
                                                         'http_method': HttpMethod.GET}).start()
 
-        """Sync mapped points values from BACnet > Generic points values"""
+        """
+        Sync mapped points values from BACnet > Generic points values
+        Because: BACnet Points <> Generic Points
+        """
         FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/bp_gp", 'destination_identifier': 'bacnet',
                                                         'http_method': HttpMethod.GET}).start()
-        """Sync mapped points values from Modbus > Generic | BACnet points values """
+        """
+        Sync mapped points values from Modbus > Generic | BACnet points values
+        Because: Modbus Points <> Generic | BACnet Points 
+        """
         FlaskThread(target=PointStoreModel.sync_points_values_mp_gbp).start()

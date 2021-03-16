@@ -7,6 +7,7 @@ from mrb.message import HttpMethod, Response
 from sqlalchemy import and_, or_
 
 from src import db, FlaskThread
+from src.drivers.enums.drivers import Drivers
 from src.drivers.modbus.models.mapping import MPGBPMapping
 from src.utils.model_utils import get_datetime
 
@@ -44,7 +45,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         else:
             return None
 
-    def update(self, cov_threshold: float = None, sync: bool = True) -> bool:
+    def update(self, driver: Drivers, cov_threshold: float = None, sync: bool = True) -> bool:
         ts = get_datetime()
         if not self.fault:
             self.fault = bool(self.fault)
@@ -78,13 +79,35 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         db.session.commit()
         updated: bool = bool(res.rowcount)
         if MqttRestBridge.status() and updated and sync:
-            """Generic Point value is updated, need to sync BACnet Point value"""
-            FlaskThread(target=self.__sync_point_value_bp_gp, daemon=True).start()
-            """Modbus Point value is updated, need to sync Generic & BACnet Point"""
-            FlaskThread(target=self.__sync_point_value_mp_gbp, daemon=True).start()
+            if driver == Drivers.GENERIC:
+                """
+                Generic Point value is updated, need to sync Modbus Point
+                Because: Modbus Point <> Generic | BACnet Point
+                """
+                FlaskThread(target=self.__sync_point_value_gp_mp, daemon=True).start()
+                """
+                Generic Point value is updated, need to sync BACnet Point
+                Because: Generic Point <> BACnet Point
+                """
+                FlaskThread(target=self.__sync_point_value_gp_bp, daemon=True).start()
+            elif driver == Drivers.MODBUS:
+                """
+                Modbus Point value is updated, need to sync Generic & BACnet Point
+                Because: Modbus Point <> Generic | BACnet Point
+                """
+                FlaskThread(target=self.__sync_point_value_mp_gbp, daemon=True).start()
         return updated
 
-    def __sync_point_value_bp_gp(self):
+    def __sync_point_value_gp_mp(self):
+        mapping: MPGBPMapping = MPGBPMapping.find_by_modbus_point_uuid(self.point_uuid)
+        if mapping:
+            api_to_topic_mapper(
+                api=f"/api/points/points_value/uuid/{mapping.modbus_point_uuid}",
+                destination_identifier='bacnet',
+                body={"priority_array_write": {"_16": self.value}},
+                http_method=HttpMethod.PATCH)
+
+    def __sync_point_value_gp_bp(self):
         response: Response = api_to_topic_mapper(api=f"api/mappings/bp_gp/generic/{self.point_uuid}",
                                                  destination_identifier='bacnet',
                                                  http_method=HttpMethod.GET)
@@ -99,7 +122,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
             return
         if mapping.generic_point_uuid and gp:
             api_to_topic_mapper(
-                api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
+                api=f"/api/points/points_value/uuid/{mapping.generic_point_uuid}",
                 destination_identifier='ps',
                 body={"value": self.value},
                 http_method=HttpMethod.PATCH)

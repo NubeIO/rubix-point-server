@@ -79,7 +79,8 @@ class PointModel(ModelBase):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         super().save_to_db()
 
-    def update_point_value(self, point_store: PointStoreModel, cov_threshold: float = None, sync: bool = True) -> bool:
+    def update_point_value(self, point_store: PointStoreModel, driver: Drivers, cov_threshold: float = None,
+                           sync: bool = True) -> bool:
         if not point_store.fault:
             if cov_threshold is None:
                 cov_threshold = self.cov_threshold
@@ -91,7 +92,7 @@ class PointModel(ModelBase):
                 value = self.apply_offset(value, self.value_offset, self.value_operation)
                 value = round(value, self.value_round)
             point_store.value = self.apply_point_type(value)
-        return point_store.update(cov_threshold, sync)
+        return point_store.update(driver, cov_threshold, sync)
 
     @validates('tags')
     def validate_tags(self, _, value):
@@ -131,7 +132,7 @@ class PointModel(ModelBase):
         super().update(**kwargs)
 
         point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
-        updated: bool = self.update_point_value(point_store, 0)
+        updated: bool = self.update_point_value(point_store, self.driver, 0)
         self.point_store = point_store
 
         if updated:
@@ -156,7 +157,7 @@ class PointModel(ModelBase):
                                       value_raw=value_raw if value_raw is not None else highest_priority_value,
                                       fault=fault,
                                       fault_message=fault_message)
-        updated = self.update_point_value(point_store, sync=sync)
+        updated = self.update_point_value(point_store, self.driver, sync=sync)
         if updated:
             self.publish_cov(point_store)
         db.session.commit()

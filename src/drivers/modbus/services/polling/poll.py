@@ -144,7 +144,7 @@ def poll_point(service: EventServiceBase, client: BaseModbusClient, network: Mod
 
     if update:
         try:
-            is_updated = point.update_point_value(point_store_new)
+            is_updated = point.update_point_value(point_store_new, point.driver)
         except BaseException as e:
             logger.error(e)
             return point_store_new
