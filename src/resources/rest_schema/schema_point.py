@@ -119,8 +119,8 @@ point_return_attributes = {
 }
 
 point_all_fields = {}
-map_rest_schema(point_return_attributes, point_all_fields)
 map_rest_schema(point_all_attributes, point_all_fields)
+map_rest_schema(point_return_attributes, point_all_fields)
 
 
 def add_nested_priority_array_write():

@@ -99,12 +99,12 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         return updated
 
     def __sync_point_value_gp_mp(self):
-        mapping: MPGBPMapping = MPGBPMapping.find_by_modbus_point_uuid(self.point_uuid)
+        mapping: MPGBPMapping = MPGBPMapping.find_by_generic_point_uuid(self.point_uuid)
         if mapping:
             api_to_topic_mapper(
-                api=f"/api/points/points_value/uuid/{mapping.modbus_point_uuid}",
-                destination_identifier='bacnet',
-                body={"priority_array_write": {"_16": self.value}},
+                api=f"/api/modbus/points_value/uuid/{mapping.modbus_point_uuid}",
+                destination_identifier='ps',
+                body={"value": self.value},
                 http_method=HttpMethod.PATCH)
 
     def __sync_point_value_gp_bp(self):
@@ -122,7 +122,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
             return
         if mapping.generic_point_uuid and gp:
             api_to_topic_mapper(
-                api=f"/api/points/points_value/uuid/{mapping.generic_point_uuid}",
+                api=f"/api/generic/points_value/uuid/{mapping.generic_point_uuid}",
                 destination_identifier='ps',
                 body={"value": self.value},
                 http_method=HttpMethod.PATCH)

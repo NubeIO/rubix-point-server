@@ -10,6 +10,8 @@ from src.drivers.generic.resources.network.network_singular import GenericNetwor
 from src.drivers.generic.resources.point.point_plural import GenericPointPlural
 from src.drivers.generic.resources.point.point_singular import GenericPointSingularByUUID, \
     GenericPointSingularByName
+from src.drivers.generic.resources.point.point_value_writer import GenericPointUUIDValueWriter, \
+    GenericPointNameValueWriter
 from src.drivers.modbus.resources.device.device_plural import ModbusDevicePlural
 from src.drivers.modbus.resources.device.device_singular import ModbusDeviceSingularByUUID, \
     ModbusDeviceSingularByName
@@ -25,11 +27,10 @@ from src.drivers.modbus.resources.point.point_singular import ModbusPointSingula
     ModbusPointSingularByName
 from src.drivers.modbus.resources.point.point_stores import ModbusPointPluralPointStore, ModbusPointStore, \
     ModbusDevicePointPluralPointStore
+from src.drivers.modbus.resources.point.point_value_writer import ModbusPointUUIDValueWriter, ModbusPointNameValueWriter
 from src.resources.resource_device import DeviceResourceByUUID, DeviceResourceByName, DeviceResourceList
 from src.resources.resource_network import NetworkResourceByUUID, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResourceByUUID, PointResourceByName, PointResourceList
-from src.resources.resource_point_value_writer import PointUUIDValueWriter, \
-    PointNameValueWriter
 from src.resources.resource_schedule import ScheduleResourceByUUID, ScheduleResourceList
 from src.system.resources.memory import GetSystemMem
 from src.system.resources.ping import Ping
@@ -51,9 +52,6 @@ api_point = Api(bp_point)
 api_point.add_resource(PointResourceList, '')
 api_point.add_resource(PointResourceByUUID, '/uuid/<string:uuid>')
 api_point.add_resource(PointResourceByName, '/name/<string:network_name>/<string:device_name>/<string:point_name>')
-api_point.add_resource(PointUUIDValueWriter, '/points_value/uuid/<string:uuid>')
-api_point.add_resource(PointNameValueWriter,
-                       '/points_value/name/<string:network_name>/<string:device_name>/<string:point_name>')
 
 bp_generic = Blueprint('generic', __name__, url_prefix='/api/generic')
 api_generic = Api(bp_generic)
@@ -67,6 +65,9 @@ api_generic.add_resource(GenericPointPlural, '/points')
 api_generic.add_resource(GenericPointSingularByUUID, '/points/uuid/<string:uuid>')
 api_generic.add_resource(GenericPointSingularByName,
                          '/points/name/<string:network_name>/<string:device_name>/<string:point_name>')
+api_generic.add_resource(GenericPointUUIDValueWriter, '/points_value/uuid/<string:uuid>')
+api_generic.add_resource(GenericPointNameValueWriter,
+                         '/points_value/name/<string:network_name>/<string:device_name>/<string:point_name>')
 
 bp_modbus = Blueprint('modbus', __name__, url_prefix='/api/modbus')
 api_modbus = Api(bp_modbus)
@@ -85,6 +86,9 @@ api_modbus.add_resource(ModbusPointPollNonExisting, '/poll/point')
 api_modbus.add_resource(ModbusPointPluralPointStore, '/point_stores')
 api_modbus.add_resource(ModbusPointStore, '/point_stores/<string:uuid>')
 api_modbus.add_resource(ModbusDevicePointPluralPointStore, '/<string:device_uuid>/point_stores')
+api_modbus.add_resource(ModbusPointUUIDValueWriter, '/points_value/uuid/<string:uuid>')
+api_modbus.add_resource(ModbusPointNameValueWriter,
+                        '/points_value/name/<string:network_name>/<string:device_name>/<string:point_name>')
 
 # Modbus <> Generic|BACnet points mappings
 bp_mapping_mp_gbp = Blueprint('mappings_mp_gbp', __name__, url_prefix='/api/mp_gbp/mappings')

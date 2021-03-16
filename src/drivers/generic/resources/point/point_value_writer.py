@@ -6,10 +6,10 @@ from mrb.validator import is_bridge
 from rubix_http.exceptions.exception import NotFoundException, BadDataException
 from rubix_http.resource import RubixResource
 
-from src.models.point.model_point import PointModel
+from src.drivers.generic.models.point import GenericPointModel
 
 
-class PointValueWriterBase(RubixResource):
+class GenericPointValueWriterBase(RubixResource):
     patch_parser = reqparse.RequestParser()
     patch_parser.add_argument('value', type=float, required=False)
     patch_parser.add_argument('value_raw', type=str, required=False)
@@ -19,13 +19,13 @@ class PointValueWriterBase(RubixResource):
 
     @classmethod
     @abstractmethod
-    def get_point(cls, **kwargs) -> PointModel:
+    def get_point(cls, **kwargs) -> GenericPointModel:
         raise NotImplementedError('Please override get_point method')
 
     @classmethod
     def patch(cls, **kwargs):
-        data = PointValueWriterBase.patch_parser.parse_args()
-        point: PointModel = cls.get_point(**kwargs)
+        data = cls.patch_parser.parse_args()
+        point: GenericPointModel = cls.get_point(**kwargs)
         if not point:
             raise NotFoundException('Point does not exist')
         if not point.writable:
@@ -39,13 +39,14 @@ class PointValueWriterBase(RubixResource):
         return {}
 
 
-class PointUUIDValueWriter(PointValueWriterBase):
+class GenericPointUUIDValueWriter(GenericPointValueWriterBase):
     @classmethod
-    def get_point(cls, **kwargs) -> PointModel:
-        return PointModel.find_by_uuid(kwargs.get('uuid'))
+    def get_point(cls, **kwargs) -> GenericPointModel:
+        return GenericPointModel.find_by_uuid(kwargs.get('uuid'))
 
 
-class PointNameValueWriter(PointValueWriterBase):
+class GenericPointNameValueWriter(GenericPointValueWriterBase):
     @classmethod
-    def get_point(cls, **kwargs) -> PointModel:
-        return PointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'), kwargs.get('point_name'))
+    def get_point(cls, **kwargs) -> GenericPointModel:
+        return GenericPointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'),
+                                              kwargs.get('point_name'))

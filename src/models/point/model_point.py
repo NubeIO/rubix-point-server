@@ -142,15 +142,7 @@ class PointModel(ModelBase):
 
     def update_point_store(self, value: float, priority: int, value_raw: str, fault: bool, fault_message: str,
                            sync: bool = True):
-        if not priority:
-            priority = 16
-        if priority not in range(1, 17):
-            raise ValueError('priority should be in range(1, 17)')
-        if value_raw is not None and value is not None:
-            raise ValueError('Invalid, cannot pass both value_raw and value')
-        if priority:
-            PriorityArrayModel.filter_by_point_uuid(self.uuid).update({f"_{priority}": value})
-            db.session.commit()
+        self.update_priority_value(priority, value, value_raw)
         highest_priority_value = PriorityArrayModel.get_highest_priority_value(self.uuid)
         point_store = PointStoreModel(point_uuid=self.uuid,
                                       value_original=highest_priority_value,
@@ -161,6 +153,17 @@ class PointModel(ModelBase):
         if updated:
             self.publish_cov(point_store)
         db.session.commit()
+
+    def update_priority_value(self, priority, value, value_raw):
+        if not priority:
+            priority = 16
+        if priority not in range(1, 17):
+            raise ValueError('priority should be in range(1, 17)')
+        if value_raw is not None and value is not None:
+            raise ValueError('Invalid, cannot pass both value_raw and value')
+        if priority:
+            PriorityArrayModel.filter_by_point_uuid(self.uuid).update({f"_{priority}": value})
+            db.session.commit()
 
     @classmethod
     def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:
