@@ -76,8 +76,8 @@ modbus_poll_non_existing_attributes = {
         'type': str,
         'required': True
     },
-    'point_write_value': {
-        'type': float,
+    'point_priority_array_write': {
+        'type': dict,
     },
     'point_data_type': {
         'type': str,
@@ -90,5 +90,5 @@ modbus_poll_non_existing_attributes = {
 modbus_point_return_attributes = deepcopy(point_return_attributes)
 
 modbus_point_all_fields = {}
-map_rest_schema(modbus_point_return_attributes, modbus_point_all_fields)
 map_rest_schema(modbus_point_all_attributes, modbus_point_all_fields)
+map_rest_schema(modbus_point_return_attributes, modbus_point_all_fields)

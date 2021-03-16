@@ -25,8 +25,8 @@ class PriorityArrayModel(db.Model):
         return f"PriorityArray(uuid = {self.point_uuid})"
 
     @classmethod
-    def create_new_priority_array_model(cls, point_uuid):
-        return PriorityArrayModel(point_uuid=point_uuid)
+    def create_priority_array_model(cls, point_uuid, priority_array_write):
+        return PriorityArrayModel(point_uuid=point_uuid, **priority_array_write)
 
     @classmethod
     def filter_by_point_uuid(cls, point_uuid):
@@ -34,7 +34,11 @@ class PriorityArrayModel(db.Model):
 
     @classmethod
     def get_highest_priority_value(cls, point_uuid):
-        priority_array = cls.filter_by_point_uuid(point_uuid).first()
+        priority_array: dict = cls.filter_by_point_uuid(point_uuid).first()
+        return cls.get_highest_priority_value_from_dict(priority_array)
+
+    @classmethod
+    def get_highest_priority_value_from_dict(cls, priority_array: dict):
         if priority_array:
             for i in range(1, 17):
                 value = getattr(priority_array, f'_{i}')

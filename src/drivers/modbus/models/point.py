@@ -5,6 +5,7 @@ from src import db
 from src.drivers.enums.drivers import Drivers
 from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
 from src.models.point.model_point_mixin import PointMixinModel
+from src.models.point.priority_array import PriorityArrayModel
 
 
 class ModbusPointModel(PointMixinModel):
@@ -47,19 +48,16 @@ class ModbusPointModel(PointMixinModel):
 
     @validates('function_code')
     def validate_function_code(self, _, value):
-        if not self.write_value and value in [ModbusFunctionCode.WRITE_COIL, ModbusFunctionCode.WRITE_COILS,
-                                              ModbusFunctionCode.WRITE_REGISTER, ModbusFunctionCode.WRITE_REGISTERS]:
-            raise ValueError(f"write_value shouldn't be null for {self.function_code}")
-        if isinstance(value, ModbusFunctionCode):
-            return value
-        elif isinstance(value, int):
-            try:
-                return ModbusFunctionCode(value)
-            except Exception:
+        if not isinstance(value, ModbusFunctionCode):
+            if not value or value not in ModbusFunctionCode.__members__:
                 raise ValueError("Invalid function code")
-        elif not value or value not in ModbusFunctionCode.__members__:
-            raise ValueError("Invalid function code")
-        return ModbusFunctionCode[value]
+            function_code: ModbusFunctionCode = ModbusFunctionCode[value]
+        else:
+            function_code: ModbusFunctionCode = value
+        if self.is_writable(function_code):
+            if PriorityArrayModel.get_highest_priority_value_from_dict(self.priority_array_write) is None:
+                raise ValueError(f"priority_array_write shouldn't be null for {value}")
+        return function_code
 
     @validates('register')
     def validate_register(self, _, value):
@@ -94,14 +92,10 @@ class ModbusPointModel(PointMixinModel):
         self.modbus_device_uuid_constraint = self.device_uuid
 
         reg_length = self.register_length
-        point_fc = self.function_code
-        if not isinstance(point_fc, ModbusFunctionCode):
-            point_fc = ModbusFunctionCode[self.function_code]
+        point_fc: ModbusFunctionCode = self.function_code
 
-        if point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_REGISTER \
-                or point_fc == ModbusFunctionCode.WRITE_COILS or point_fc == ModbusFunctionCode.WRITE_REGISTERS:
+        if self.is_writable(point_fc):
             self.writable = True
-
             if reg_length > 1 and point_fc == ModbusFunctionCode.WRITE_COIL:
                 self.function_code = ModbusFunctionCode.WRITE_COILS
             elif reg_length == 1 and point_fc == ModbusFunctionCode.WRITE_COILS:
@@ -110,12 +104,9 @@ class ModbusPointModel(PointMixinModel):
                 self.function_code = ModbusFunctionCode.WRITE_REGISTERS
             elif reg_length == 1 and point_fc == ModbusFunctionCode.WRITE_REGISTERS:
                 self.function_code = ModbusFunctionCode.WRITE_REGISTER
-
-        elif point_fc == ModbusFunctionCode.READ_COILS or point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS or \
-                point_fc == ModbusFunctionCode.READ_HOLDING_REGISTERS or \
-                point_fc == ModbusFunctionCode.READ_INPUT_REGISTERS:
+        else:
             self.writable = False
-            self.write_value = None
+            self.priority_array_write = None
 
         data_type = self.data_type
         if not isinstance(data_type, ModbusDataType):
@@ -132,3 +123,8 @@ class ModbusPointModel(PointMixinModel):
             self.register_length = 2
 
         return True
+
+    @staticmethod
+    def is_writable(value: ModbusFunctionCode) -> bool:
+        return value in [ModbusFunctionCode.WRITE_COIL, ModbusFunctionCode.WRITE_COILS,
+                         ModbusFunctionCode.WRITE_REGISTER, ModbusFunctionCode.WRITE_REGISTERS]

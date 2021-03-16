@@ -14,5 +14,5 @@ generic_point_all_attributes['unit'] = {
 
 generic_point_return_attributes = deepcopy(point_return_attributes)
 generic_point_all_fields = {}
-map_rest_schema(generic_point_return_attributes, generic_point_all_fields)
 map_rest_schema(generic_point_all_attributes, generic_point_all_fields)
+map_rest_schema(generic_point_return_attributes, generic_point_all_fields)

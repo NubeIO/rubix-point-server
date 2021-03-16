@@ -9,7 +9,7 @@ from rubix_http.resource import RubixResource
 from src.models.point.model_point import PointModel
 
 
-class GenericPointValueWriterBase(RubixResource):
+class PointValueWriterBase(RubixResource):
     patch_parser = reqparse.RequestParser()
     patch_parser.add_argument('value', type=float, required=False)
     patch_parser.add_argument('value_raw', type=str, required=False)
@@ -24,7 +24,7 @@ class GenericPointValueWriterBase(RubixResource):
 
     @classmethod
     def patch(cls, **kwargs):
-        data = GenericPointValueWriterBase.patch_parser.parse_args()
+        data = PointValueWriterBase.patch_parser.parse_args()
         point: PointModel = cls.get_point(**kwargs)
         if not point:
             raise NotFoundException('Point does not exist')
@@ -39,13 +39,13 @@ class GenericPointValueWriterBase(RubixResource):
         return {}
 
 
-class GenericUUIDPointValueWriter(GenericPointValueWriterBase):
+class PointUUIDValueWriter(PointValueWriterBase):
     @classmethod
     def get_point(cls, **kwargs) -> PointModel:
         return PointModel.find_by_uuid(kwargs.get('uuid'))
 
 
-class GenericNamePointValueWriter(GenericPointValueWriterBase):
+class PointNameValueWriter(PointValueWriterBase):
     @classmethod
     def get_point(cls, **kwargs) -> PointModel:
         return PointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'), kwargs.get('point_name'))
