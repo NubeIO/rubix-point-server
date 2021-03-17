@@ -1,13 +1,11 @@
-import json
 import re
 
 from sqlalchemy.orm import validates
 
 from src import db
 from src.enums.model import ModelEvent
-from src.event_dispatcher import EventDispatcher
 from src.models.model_base import ModelBase
-from src.services.event_service_base import EventType, Event
+from src.services.event_service_base import EventType
 
 
 class ScheduleModel(ModelBase):
@@ -32,20 +30,16 @@ class ScheduleModel(ModelBase):
 
     def update(self, **kwargs):
         if super().update(**kwargs):
-            self.publish_schedules()
+            from src.services.schedules_registry import SchedulesRegistry
+            SchedulesRegistry().update_schedule(self)
         return self
 
     def delete_from_db(self):
         super().delete_from_db()
-        self.publish_schedules()
+        from src.services.schedules_registry import SchedulesRegistry
+        SchedulesRegistry().delete_schedule(self)
 
     def save_to_db(self):
         super().save_to_db()
-        self.publish_schedules()
-
-    def publish_schedules(self):
-        # TODO: better use of dispatching
-        schedules = self.find_all()
-        payload = [{'uuid': s.uuid, 'name': s.name} for s in schedules]
-        event = Event(EventType.SCHEDULES, json.dumps(payload))
-        EventDispatcher().dispatch_from_service(None, event, None)
+        from src.services.schedules_registry import SchedulesRegistry
+        SchedulesRegistry().add_schedule(self)

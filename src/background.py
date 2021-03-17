@@ -83,6 +83,8 @@ class Background:
         if setting.services.mqtt and any(config.enabled for config in setting.mqtt_settings):
             from src.services.points_registry import PointsRegistry
             FlaskThread(target=PointsRegistry().register, daemon=True).start()
+            from src.services.schedules_registry import SchedulesRegistry
+            FlaskThread(target=SchedulesRegistry().register, daemon=True).start()
 
     @staticmethod
     def sync_on_start():
