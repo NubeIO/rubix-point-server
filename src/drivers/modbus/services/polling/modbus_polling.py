@@ -10,13 +10,14 @@ from sqlalchemy.orm.exc import ObjectDeletedError
 
 from src import db, FlaskThread
 from src.drivers.enums.drivers import Drivers
+from src.drivers.modbus.enums.point.points import ModbusFunctionCode
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel, ModbusType
 from src.drivers.modbus.models.point import ModbusPointModel
 from src.drivers.modbus.services.modbus_registry import ModbusRegistryConnection, ModbusRegistry
 from src.drivers.modbus.services.modbus_rtu_registry import ModbusRtuRegistry
 from src.drivers.modbus.services.modbus_tcp_registry import ModbusTcpRegistry, ModbusTcpRegistryKey
-from src.drivers.modbus.services.polling.poll import poll_point
+from src.drivers.modbus.services.polling.poll import poll_point, poll_point_aggregate
 from src.event_dispatcher import EventDispatcher
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException, Event
@@ -87,9 +88,10 @@ class ModbusPolling(EventServiceBase):
                 return
             try:
                 self.__poll_network_devices(current_connection, network)
+                db.session.commit()
             except Exception as e:
                 self.__log_error(str(e))
-                time.sleep(network.polling_interval_runtime)
+            time.sleep(network.polling_interval_runtime)
 
     def __poll_network_devices(self, current_connection, network: ModbusNetworkModel):
         current_connection.is_running = True
@@ -99,16 +101,76 @@ class ModbusPolling(EventServiceBase):
                 # we suppose that device is offline, so we are not wasting time for looping
                 continue
             points: List[ModbusPointModel] = self.__get_all_device_points(device.uuid)
-            for point in points:
-                try:
-                    self.__poll_point(current_connection.client, network, device, point, True)
-                except ConnectionException:
-                    break
-                except ModbusIOException:
-                    continue
-                time.sleep(float(network.point_interval_ms_between_points) / 1000)
-        db.session.commit()
-        time.sleep(network.polling_interval_runtime)
+
+            if not device.supports_multiple_rw:
+                for point in points:
+                    try:
+                        self.__poll_point(current_connection.client, network, device, [point])
+                    except ConnectionException:
+                        return
+                    except ModbusIOException:
+                        pass
+                    time.sleep(float(network.point_interval_ms_between_points) / 1000)
+            else:
+                """
+                group and sort points into corresponding FCs
+                """
+                fc_lists: List[List[PointStoreModel]] = [[], [], [], [], [], []]
+
+                for point in points:
+                    if point.function_code is ModbusFunctionCode.READ_COILS:
+                        fc_lists[0].append(point)
+                    elif point.function_code is ModbusFunctionCode.READ_DISCRETE_INPUTS:
+                        fc_lists[1].append(point)
+                    elif point.function_code is ModbusFunctionCode.READ_HOLDING_REGISTERS:
+                        fc_lists[2].append(point)
+                    elif point.function_code is ModbusFunctionCode.READ_INPUT_REGISTERS:
+                        fc_lists[3].append(point)
+                    elif point.function_code is ModbusFunctionCode.WRITE_COIL or \
+                            point.function_code is ModbusFunctionCode.WRITE_COILS:
+                        fc_lists[4].append(point)
+                    elif point.function_code is ModbusFunctionCode.WRITE_REGISTER or \
+                            point.function_code is ModbusFunctionCode.WRITE_REGISTERS:
+                        fc_lists[5].append(point)
+                    else:
+                        raise Exception(f'FC {point.function_code} unsupported for aggregate')
+
+                for fc_list in fc_lists:
+                    fc_list.sort(key=lambda p: p.register)
+
+                    last_point = 0
+                    response_size = 0
+                    for i in range(len(fc_list)):
+                        response_size += fc_list[i].register_length
+                        next_reg = 0
+                        if i < len(fc_list) - 1:
+                            next_reg: int = fc_list[i].register + fc_list[i].register_length
+
+                        """
+                        if - end of list
+                            - response size limit reached
+                            - next point is not continuous from current point
+                        """
+                        if i == len(fc_list) - 1 or response_size + fc_list[i+1].register_length >= 253 or \
+                                fc_list[i + 1].register != next_reg:
+                            try:
+                                if last_point == i:
+                                    self.__log_debug(f'Polling SINGLE FC {fc_list[i].function_code}')
+                                    self.__poll_point(current_connection.client, network, device, fc_list[i:i+1])
+                                    last_point += 1
+                                else:
+                                    self.__log_debug(f'Polling AGGREGATE FC {fc_list[i].function_code}')
+                                    self.__poll_point(current_connection.client, network, device,
+                                                      fc_list[last_point:i+1])
+                                    last_point = i + 1
+                                response_size = 0
+                            except ConnectionException:
+                                return
+                            except ModbusIOException:
+                                pass
+                            time.sleep(float(network.point_interval_ms_between_points) / 1000)
+                        else:
+                            continue
 
     def __ping_point(self, current_connection: ModbusRegistryConnection, network: ModbusNetworkModel,
                      device: ModbusDeviceModel) -> bool:
@@ -119,7 +181,7 @@ class ModbusPolling(EventServiceBase):
         if device.ping_point:
             try:
                 ping_point = ModbusPointModel.create_temporary_from_string(device.ping_point)
-                self.__poll_point(current_connection.client, network, device, ping_point, True, False)
+                self.__poll_point(current_connection.client, network, device, [ping_point], True, False)
             except (ConnectionException, ModbusIOException):
                 return False
             except ValueError as e:
@@ -148,7 +210,7 @@ class ModbusPolling(EventServiceBase):
         # TODO network.type is in string for should be on Enum check `ModelBase > create_temporary`
         if network.type != self.__network_type.name:
             raise HandledByDifferentServiceException
-        point_store = self.__poll_point(connection.client, network, device, point, False, False)
+        point_store = self.__poll_point(connection.client, network, device, [point], False, False)
         return point_store
 
     def poll_point(self, point: ModbusPointModel) -> ModbusPointModel:
@@ -159,18 +221,23 @@ class ModbusPolling(EventServiceBase):
         network: ModbusNetworkModel = ModbusNetworkModel.find_by_uuid(device.network_uuid)
         self.__log_debug(f'Manual poll request: network: {network.uuid}, device: {device.uuid}, point: {point.uuid}')
         connection: ModbusRegistryConnection = self.get_registry().add_edit_and_get_connection(network)
-        self.__poll_point(connection.client, network, device, point)
+        self.__poll_point(connection.client, network, device, [point])
         return point
 
     def __poll_point(self, client: BaseModbusClient, network: ModbusNetworkModel, device: ModbusDeviceModel,
-                     point: ModbusPointModel, update_all: bool = True,
+                     point_list: List[ModbusPointModel], update_all: bool = True,
                      update_point_store: bool = True) -> Union[PointStoreModel, None]:
         point_store: Union[PointStoreModel, None] = None
         if update_all:
             try:
                 error = None
                 try:
-                    point_store = poll_point(self, client, network, device, point, update_point_store)
+                    if len(point_list) == 1:
+                        point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
+                    elif len(point_list) > 1:
+                        poll_point_aggregate(self, client, network, device, point_list)
+                    else:
+                        raise Exception("Invalid __poll_point point_list length")
                 except ConnectionException as e:
                     if not network.fault:
                         network.set_fault(True)
@@ -191,7 +258,7 @@ class ModbusPolling(EventServiceBase):
             except ObjectDeletedError:
                 return None
         else:
-            point_store = poll_point(self, client, network, device, point, update_point_store)
+            point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
         return point_store
 
     @abstractmethod
