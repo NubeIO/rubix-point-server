@@ -30,6 +30,7 @@ from src.drivers.modbus.resources.point.point_stores import ModbusPointPluralPoi
 from src.resources.resource_device import DeviceResourceByUUID, DeviceResourceByName, DeviceResourceList
 from src.resources.resource_network import NetworkResourceByUUID, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResourceByUUID, PointResourceByName, PointResourceList
+from src.resources.resource_schedule import ScheduleResourceByUUID, ScheduleResourceList
 from src.system.resources.memory import GetSystemMem
 from src.system.resources.ping import Ping
 
@@ -98,3 +99,8 @@ bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 api_system = Api(bp_system)
 api_system.add_resource(GetSystemMem, '/memory')
 api_system.add_resource(Ping, '/ping')
+
+bp_schedule = Blueprint('schedules', __name__, url_prefix='/api/schedules')
+api_schedule = Api(bp_schedule)
+api_schedule.add_resource(ScheduleResourceList, '')
+api_schedule.add_resource(ScheduleResourceByUUID, '/uuid/<string:uuid>')

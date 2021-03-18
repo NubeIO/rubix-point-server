@@ -63,6 +63,7 @@ class ModelBase(db.Model):
         db.session.commit()
         if changed:
             self._dispatch_event(kwargs)
+        return changed
 
     def get_model_event(self) -> ModelEvent:
         raise NotImplemented

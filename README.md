@@ -136,6 +136,9 @@ point:
 
 points list:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
+  
+schedule list:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/schedules
 ```
 
 ### Generic Points MQTT Listener
@@ -154,4 +157,9 @@ points list:
 
 ```
 <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
+```
+
+### Schedule List Publisher
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/schedules
 ```

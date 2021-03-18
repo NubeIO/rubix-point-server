@@ -49,6 +49,7 @@ class MqttClient(MqttListener, EventServiceBase):
         self.supported_events[EventType.NETWORK_MODEL] = True
         self.supported_events[EventType.MQTT_DEBUG] = True
         self.supported_events[EventType.POINT_REGISTRY_UPDATE] = True
+        self.supported_events[EventType.SCHEDULES] = True
 
     @property
     def config(self) -> MqttSetting:
@@ -125,6 +126,9 @@ class MqttClient(MqttListener, EventServiceBase):
         elif event.event_type == EventType.POINT_MODEL or event.event_type == EventType.DEVICE_MODEL or \
                 event.event_type == EventType.NETWORK_MODEL and self.config.publish_value:
             self._publish_model(event.data.get('model'), event.data.get('payload'))
+
+        elif event.event_type == EventType.SCHEDULES and self.config.publish_value:
+            self._publish_mqtt_value(self.__make_topic((self.config.topic, 'schedules')), event.data)
 
     def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = True):
         if not self.status():
