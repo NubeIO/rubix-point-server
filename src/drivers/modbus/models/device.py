@@ -16,6 +16,7 @@ class ModbusDeviceModel(DeviceMixinModel):
     address = db.Column(db.Integer(), nullable=False)
     zero_based = db.Column(db.Boolean(), nullable=False, default=False)
     ping_point = db.Column(db.String(10))
+    supports_multiple_rw = db.Column(db.Boolean(), nullable=False, default=False)
     modbus_network_uuid_constraint = db.Column(db.String, nullable=False)
 
     __table_args__ = (

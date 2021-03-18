@@ -1,7 +1,10 @@
+from typing import List
+
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder, BinaryPayloadBuilder
 
 from src.drivers.modbus.enums.point.points import ModbusDataEndian, ModbusDataType
+from src.drivers.modbus.models.point import ModbusPointModel
 
 
 def _set_data_length(data_type: ModbusDataType, reg_length: int) -> int:
@@ -58,7 +61,7 @@ def convert_to_data_type(data, data_type: ModbusDataType, byteorder: Endian, wor
     Converts the data to int, int32, float and so on
     :return: value in the selected data type
     """
-    decoder = BinaryPayloadDecoder.fromRegisters(data.registers, byteorder=byteorder,
+    decoder = BinaryPayloadDecoder.fromRegisters(data, byteorder=byteorder,
                                                  wordorder=word_order)
     value = None
     if data_type == ModbusDataType.INT16:
@@ -95,3 +98,11 @@ def _builder_data_type(payload, data_type: ModbusDataType, byteorder: Endian, wo
     elif data_type == ModbusDataType.DOUBLE:
         builder.add_64bit_float(payload)
     return builder.to_registers()
+
+
+def pack_point_write_registers(point_list: List[ModbusPointModel]):
+    final_payload = []
+    for point in point_list:
+        byteorder, word_order = _mod_point_data_endian(point.data_endian)
+        final_payload.extend(_builder_data_type(point.write_value, point.data_type, byteorder, word_order))
+    return final_payload

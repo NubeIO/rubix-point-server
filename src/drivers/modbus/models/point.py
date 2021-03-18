@@ -121,13 +121,14 @@ class ModbusPointModel(PointMixinModel):
         if not isinstance(data_type, ModbusDataType):
             data_type = ModbusDataType[self.data_type]
         if point_fc == ModbusFunctionCode.READ_DISCRETE_INPUTS or point_fc == ModbusFunctionCode.READ_COILS or \
-                point_fc == ModbusFunctionCode.WRITE_COIL or point_fc == ModbusFunctionCode.WRITE_COILS:
+                point_fc == ModbusFunctionCode.WRITE_COIL:
             data_type = ModbusDataType.DIGITAL
             self.data_type = ModbusDataType.DIGITAL
+            self.register_length = 1
             self.value_round = 0
 
         if data_type == ModbusDataType.FLOAT or data_type == ModbusDataType.INT32 or \
                 data_type == ModbusDataType.UINT32:
-            assert reg_length % 2 == 0, f'register_length invalid for data_type {data_type}'
+            self.register_length = 2
 
         return True
