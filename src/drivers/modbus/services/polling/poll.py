@@ -53,20 +53,27 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
 
     arr_ind = 0
     val = 0
+    arr_slice = array[0:1]
     for point in point_slice:
         point_store_new = None
         if not fault:
 
             if point.data_type is not ModbusDataType.RAW and point.data_type is not ModbusDataType.DIGITAL:
                 byteorder, word_order = _mod_point_data_endian(point.data_endian)
-                val = convert_to_data_type(array[arr_ind:arr_ind+point.register_length], point.data_type, byteorder,
+                arr_slice = array[arr_ind:arr_ind+point.register_length]
+                val = convert_to_data_type(arr_slice, point.data_type, byteorder,
                                            word_order)
-            else:
+            elif point.data_type is ModbusDataType.DIGITAL:
+                arr_slice = array[arr_ind:arr_ind+1]
                 val = array[arr_ind]
+            else:
+                arr_slice = array[arr_ind:point.register_length]
+                val = array[arr_ind]
+
             arr_ind += point.register_length
 
             if isinstance(val, numbers.Number):
-                point_store_new = PointStoreModel(value_original=float(str(val)), value_raw=str(array),
+                point_store_new = PointStoreModel(value_original=float(str(val)), value_raw=str(arr_slice),
                                                   point_uuid=point.uuid)
             else:
                 fault_message = f"Received not numeric value, type is: {type(val)}"

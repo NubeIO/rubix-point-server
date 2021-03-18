@@ -95,6 +95,8 @@ def write_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _un
     debug_log('write_digital', _unit, func, reg_length, reg_start)
     data_type: ModbusDataType = ModbusDataType.DIGITAL
     reg_length: int = _set_data_length(data_type, reg_length)
+    for i in range(len(write_values)):
+        write_values[i] = int(write_values[i])
     if func == ModbusFunctionCode.WRITE_COIL:
         write = client.write_coil(reg_start, int(write_values[0]), unit=_unit)
     elif func == ModbusFunctionCode.WRITE_COILS:
