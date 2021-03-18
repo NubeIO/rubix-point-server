@@ -53,7 +53,7 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
 
     arr_ind = 0
     val = 0
-    arr_slice = array[0:1]
+    arr_slice = None if array is None else array[0:1]
     for point in point_slice:
         point_store_new = None
         if not fault:

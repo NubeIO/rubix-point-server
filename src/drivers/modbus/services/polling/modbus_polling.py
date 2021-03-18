@@ -103,6 +103,7 @@ class ModbusPolling(EventServiceBase):
             points: List[ModbusPointModel] = self.__get_all_device_points(device.uuid)
 
             if not device.supports_multiple_rw:
+                self.__log_debug(f'Device {device.uuid} aggregate R/W UNSUPPORTED')
                 for point in points:
                     try:
                         self.__poll_point(current_connection.client, network, device, [point])
@@ -112,6 +113,7 @@ class ModbusPolling(EventServiceBase):
                         pass
                     time.sleep(float(network.point_interval_ms_between_points) / 1000)
             else:
+                self.__log_debug(f'Device {device.uuid} aggregate R/W SUPPORTED')
                 """
                 group and sort points into corresponding FCs
                 """

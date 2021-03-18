@@ -12,6 +12,9 @@ modbus_device_all_attributes['zero_based'] = {
 modbus_device_all_attributes['ping_point'] = {
     'type': str,
 }
+modbus_device_all_attributes['supports_multiple_rw'] = {
+    'type': bool,
+}
 
 modbus_device_return_attributes = deepcopy(device_return_attributes)
 modbus_device_return_attributes['type'] = {
