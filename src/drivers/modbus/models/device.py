@@ -1,3 +1,4 @@
+from rubix_http.exceptions.exception import NotFoundException
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
@@ -41,7 +42,7 @@ class ModbusDeviceModel(DeviceMixinModel):
         network = NetworkModel.find_by_uuid(self.network_uuid)
         # can't get sqlalchemy column default to do this so this is solution
         if network is None:
-            raise Exception(f'No network found with uuid {self.network_uuid}')
+            raise NotFoundException(f'No network found with uuid {self.network_uuid}')
         self.type = network.type
         self.modbus_network_uuid_constraint = self.network_uuid
         return True
