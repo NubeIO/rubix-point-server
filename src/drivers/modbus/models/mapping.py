@@ -3,7 +3,9 @@ from mrb.message import Response, HttpMethod
 from sqlalchemy.orm import validates
 
 from src import db
+from src.enums.model import ModelEvent
 from src.models.model_base import ModelBase
+from src.services.event_service_base import EventType
 
 
 class MPGBPMapping(ModelBase):
@@ -19,6 +21,12 @@ class MPGBPMapping(ModelBase):
     modbus_point_name = db.Column(db.String(80), nullable=False)
     generic_point_name = db.Column(db.String(80), nullable=True)
     bacnet_point_name = db.Column(db.String(80), nullable=True)
+
+    def get_model_event(self) -> ModelEvent:
+        return ModelEvent.MAPPING
+
+    def get_model_event_type(self) -> EventType:
+        return EventType.MAPPING_MODEL
 
     @validates('generic_point_uuid')
     def validate_generic_point_uuid(self, _, value):

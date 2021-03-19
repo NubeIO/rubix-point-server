@@ -92,7 +92,7 @@ api_modbus.add_resource(ModbusPointNameValueWriter,
                         '/points_value/name/<string:network_name>/<string:device_name>/<string:point_name>')
 
 # Modbus <> Generic|BACnet points mappings
-bp_mapping_mp_gbp = Blueprint('mappings_mp_gbp', __name__, url_prefix='/api/mp_gbp/mappings')
+bp_mapping_mp_gbp = Blueprint('mappings_mp_gbp', __name__, url_prefix='/api/mappings/mp_gbp')
 api_mapping_mp_gbp = Api(bp_mapping_mp_gbp)
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceList, '')
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByUUID, '/uuid/<string:uuid>')
