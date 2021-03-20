@@ -3,7 +3,7 @@ from rubix_http.resource import RubixResource
 from src.models.point.model_point_store import PointStoreModel
 
 
-class MPBPSync(RubixResource):
+class MPToBPSync(RubixResource):
 
     @classmethod
     def get(cls):

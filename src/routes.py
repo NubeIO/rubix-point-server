@@ -27,7 +27,7 @@ from src.drivers.modbus.resources.point.point_singular import ModbusPointSingula
     ModbusPointSingularByName
 from src.drivers.modbus.resources.point.point_stores import ModbusPointPluralPointStore, ModbusPointStore, \
     ModbusDevicePointPluralPointStore
-from src.drivers.modbus.resources.point.point_sync import MPBPSync
+from src.drivers.modbus.resources.point.point_sync import MPToBPSync
 from src.drivers.modbus.resources.point.point_value_writer import ModbusPointUUIDValueWriter, ModbusPointNameValueWriter
 from src.resources.resource_device import DeviceResourceByUUID, DeviceResourceByName, DeviceResourceList
 from src.resources.resource_network import NetworkResourceByUUID, NetworkResourceByName, NetworkResourceList
@@ -100,9 +100,9 @@ api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByModbusPointUUID, '/modbus/
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByGenericPointUUID, '/generic/<string:uuid>')
 api_mapping_mp_gbp.add_resource(MPGBPMappingResourceByBACnetPointUUID, '/bacnet/<string:uuid>')
 
-bp_sync_mp_bp = Blueprint('sync_mp_bp', __name__, url_prefix='/api/sync/mp_bp')
-api_sync_mp_bp = Api(bp_sync_mp_bp)
-api_sync_mp_bp.add_resource(MPBPSync, '')
+bp_sync = Blueprint('sync', __name__, url_prefix='/api/sync')
+api_sync = Api(bp_sync)
+api_sync.add_resource(MPToBPSync, '/mp_to_bp')
 
 bp_system = Blueprint('system', __name__, url_prefix='/api/system')
 api_system = Api(bp_system)

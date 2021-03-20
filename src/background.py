@@ -93,11 +93,11 @@ class Background:
         from .models.point.model_point_store import PointStoreModel
 
         """Sync mapped points values from LoRa > Generic points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_gp", 'destination_identifier': 'lora',
+        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_to_gp", 'destination_identifier': 'lora',
                                                         'http_method': HttpMethod.GET}).start()
 
         """Sync mapped points values from BACnet > Generic points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/bp_gp", 'destination_identifier': 'bacnet',
+        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/bp_to_gp", 'destination_identifier': 'bacnet',
                                                         'http_method': HttpMethod.GET}).start()
         """Sync mapped points values from Modbus > Generic | BACnet points values"""
         PointStoreModel.sync_points_values_mp_to_gbp_process()
