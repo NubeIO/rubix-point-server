@@ -1,10 +1,16 @@
 # CHANGELOG
+## [v1.5.3](https://github.com/NubeIO/rubix-point-server/tree/v1.5.3) (2020-03-21)
+### Added
+- Add priority array on Modbus points
+- Modbus value writer for writable points
+- Sync points mappings issues fixes
+- Change API from `/api/mp_gbp/mappings` to `/api/mappings/mp_gbp`
+
 ## [v1.5.2](https://github.com/NubeIO/rubix-point-server/tree/v1.5.2) (2020-03-19)
 ### Added
 - Modbus polling poll aggregation
 - schedules api
 - Model publish improvement over MQTT
-
 
 ## [v1.5.1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.1) (2020-03-13)
 ### Added
