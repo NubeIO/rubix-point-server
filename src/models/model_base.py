@@ -90,10 +90,10 @@ class ModelBase(db.Model):
         return {c.key: str(getattr(self, c.key))
                 for c in inspect(self).mapper.column_attrs}
 
-    def _dispatch_event(self, payload: dict = {}):
+    def _dispatch_event(self, payload: dict = None):
         # TODO: better use of dispatching
         event = Event(self.get_model_event_type(), {
             'model': self,
-            'payload': payload
+            'payload': payload or {}
         })
         EventDispatcher().dispatch_from_service(None, event, None)

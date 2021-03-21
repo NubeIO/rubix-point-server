@@ -13,7 +13,7 @@ from src.models.point.model_point_store import PointStoreModel
 
 def sync_point_value(mapping: MPGBPMapping):
     point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.modbus_point_uuid)
-    point_store.sync_point_value_with_mapping_mp_gbp(mapping)
+    point_store.sync_point_value_with_mapping_mp_to_gbp(mapping.generic_point_uuid, mapping.bacnet_point_uuid)
     return mapping
 
 

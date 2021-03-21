@@ -6,3 +6,4 @@ class ModelEvent(enum.Enum):
     DEVICE = 1
     NETWORK = 2
     SCHEDULE = 3
+    MAPPING = 4
