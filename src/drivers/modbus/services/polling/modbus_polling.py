@@ -117,7 +117,7 @@ class ModbusPolling(EventServiceBase):
                 """
                 group and sort points into corresponding FCs
                 """
-                fc_lists: List[List[PointStoreModel]] = [[], [], [], [], [], []]
+                fc_lists: List[List[ModbusPointModel]] = [[], [], [], [], [], []]
 
                 for point in points:
                     if point.function_code is ModbusFunctionCode.READ_COILS:
