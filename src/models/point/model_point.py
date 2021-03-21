@@ -79,8 +79,7 @@ class PointModel(ModelBase):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         super().save_to_db()
 
-    def update_point_value(self, point_store: PointStoreModel, driver: Drivers, cov_threshold: float = None,
-                           sync: bool = True) -> bool:
+    def update_point_value(self, point_store: PointStoreModel, driver: Drivers, cov_threshold: float = None) -> bool:
         if not point_store.fault:
             if cov_threshold is None:
                 cov_threshold = self.cov_threshold
@@ -92,7 +91,7 @@ class PointModel(ModelBase):
                 value = self.apply_offset(value, self.value_offset, self.value_operation)
                 value = round(value, self.value_round)
             point_store.value = self.apply_point_type(value)
-        return point_store.update(driver, cov_threshold, sync)
+        return point_store.update(driver, cov_threshold)
 
     @validates('tags')
     def validate_tags(self, _, value):
@@ -140,8 +139,7 @@ class PointModel(ModelBase):
 
         return self
 
-    def update_point_store(self, value: float, priority: int, value_raw: str, fault: bool, fault_message: str,
-                           sync: bool = True):
+    def update_point_store(self, value: float, priority: int, value_raw: str, fault: bool, fault_message: str):
         self.update_priority_value(priority, value, value_raw)
         highest_priority_value = PriorityArrayModel.get_highest_priority_value(self.uuid)
         point_store = PointStoreModel(point_uuid=self.uuid,
@@ -149,7 +147,7 @@ class PointModel(ModelBase):
                                       value_raw=value_raw if value_raw is not None else highest_priority_value,
                                       fault=fault,
                                       fault_message=fault_message)
-        updated = self.update_point_value(point_store, self.driver, sync=sync)
+        updated = self.update_point_value(point_store, self.driver)
         if updated:
             self.publish_cov(point_store)
         db.session.commit()

@@ -100,4 +100,4 @@ class Background:
         FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/bp_to_gp", 'destination_identifier': 'bacnet',
                                                         'http_method': HttpMethod.GET}).start()
         """Sync mapped points values from Modbus > Generic | BACnet points values"""
-        PointStoreModel.sync_points_values_mp_to_gbp_process()
+        PointStoreModel.sync_points_values_mp_to_gbp_process(force_sync=True)

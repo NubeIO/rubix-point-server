@@ -46,7 +46,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
         else:
             return None
 
-    def update(self, driver: Drivers, cov_threshold: float = None, sync: bool = True) -> bool:
+    def update(self, driver: Drivers, cov_threshold: float = None) -> bool:
         ts = get_datetime()
         if not self.fault:
             self.fault = bool(self.fault)
@@ -79,7 +79,7 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                 self.ts_fault = ts
         db.session.commit()
         updated: bool = bool(res.rowcount)
-        if MqttRestBridge.status() and updated and sync:
+        if MqttRestBridge.status() and updated:
             if driver == Drivers.GENERIC:
                 """Generic > Modbus point value"""
                 self.__sync_point_value_gp_to_mp_process()
@@ -140,8 +140,8 @@ class PointStoreModel(PointStoreModelMixin, db.Model):
                          gp, bp)
 
     @classmethod
-    def sync_points_values_mp_to_gbp_process(cls, gp: bool = True, bp: bool = True):
-        if not MqttRestBridge.status():
+    def sync_points_values_mp_to_gbp_process(cls, gp: bool = True, bp: bool = True, force_sync: bool = False):
+        if not MqttRestBridge.status() and not force_sync:
             return
         mappings: List[MPGBPMapping] = MPGBPMapping.find_all()
         for mapping in mappings:
