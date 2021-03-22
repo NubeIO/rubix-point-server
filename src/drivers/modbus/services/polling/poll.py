@@ -14,6 +14,7 @@ from src.drivers.modbus.services.polling.function_utils import _mod_point_data_e
 from src.drivers.modbus.services.polling.functions import read_digital, write_digital, \
     read_analogue, write_analogue, write_analogue_aggregate
 from src.models.point.model_point_store import PointStoreModel
+from src.models.point.priority_array import PriorityArrayModel
 from src.services.event_service_base import EventServiceBase
 
 logger = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ def poll_point(service: EventServiceBase, client: BaseModbusClient, network: Mod
     point_fc: ModbusFunctionCode = point.function_code
     point_data_type: ModbusDataType = point.data_type
     point_data_endian: ModbusDataEndian = point.data_endian
-    write_value: float = point.write_value if point.write_value else 0
+    write_value: float = PriorityArrayModel.get_highest_priority_value_from_dict(point.priority_array_write) or 0
 
     fault: bool = False
     fault_message: str = ""
@@ -142,7 +143,7 @@ def poll_point(service: EventServiceBase, client: BaseModbusClient, network: Mod
 
     if update:
         try:
-            is_updated = point.update_point_value(point_store_new)
+            is_updated = point.update_point_value(point_store_new, point.driver)
         except BaseException as e:
             logger.error(e)
             return point_store_new

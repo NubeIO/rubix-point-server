@@ -1,7 +1,18 @@
 # CHANGELOG
+## [v1.5.3-r1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.3-r1) (2020-03-22)
+### Added
+- Fix: write_analogue issue fix (should be an integer) on v1.5.3
+
 ## [v1.5.2-r1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.2-r1) (2020-03-22)
 ### Added
 - Fix: write_analogue issue fix (should be an integer)
+
+## [v1.5.3](https://github.com/NubeIO/rubix-point-server/tree/v1.5.3) (2020-03-21)
+### Added
+- Add priority array on Modbus points
+- Modbus value writer for writable points
+- Sync points mappings issues fixes
+- Change API from `/api/mp_gbp/mappings` to `/api/mappings/mp_gbp`
 
 ## [v1.5.2](https://github.com/NubeIO/rubix-point-server/tree/v1.5.2) (2020-03-19)
 ### Added

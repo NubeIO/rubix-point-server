@@ -10,6 +10,7 @@ from src.drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_
     point_store_fields, modbus_point_all_fields
 from src.drivers.modbus.services.polling.modbus_polling import ModbusPolling
 from src.event_dispatcher import EventDispatcher
+from src.models.point.priority_array import PriorityArrayModel
 from src.services.event_service_base import EventCallableBlocking
 
 
@@ -48,7 +49,10 @@ class ModbusPointPollNonExisting(RubixResource):
 
         network = ModbusNetworkModel.create_temporary(**network_data)
         device = ModbusDeviceModel.create_temporary(**device_data)
-        point = ModbusPointModel.create_temporary(**point_data)
+        priority_array_write: dict = point_data.pop('priority_array_write', {})
+        point = ModbusPointModel.create_temporary(
+            priority_array_write=PriorityArrayModel.create_priority_array_model(None, priority_array_write),
+            **point_data)
         network.check_self()
         device.check_self()
         point.check_self()
