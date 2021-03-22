@@ -6,6 +6,10 @@
 - Sync points mappings issues fixes
 - Change API from `/api/mp_gbp/mappings` to `/api/mappings/mp_gbp`
 
+## [v1.5.2-r1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.2-r1) (2020-03-22)
+### Added
+- Fix: write_analogue issue fix (should be an integer)
+
 ## [v1.5.2](https://github.com/NubeIO/rubix-point-server/tree/v1.5.2) (2020-03-19)
 ### Added
 - Modbus polling poll aggregation

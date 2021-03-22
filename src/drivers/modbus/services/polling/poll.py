@@ -9,10 +9,10 @@ from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusData
 from src.drivers.modbus.models.device import ModbusDeviceModel
 from src.drivers.modbus.models.network import ModbusNetworkModel
 from src.drivers.modbus.models.point import ModbusPointModel
-from src.drivers.modbus.services.polling.functions import read_digital, write_digital, \
-    read_analogue, write_analogue, write_analogue_aggregate
 from src.drivers.modbus.services.polling.function_utils import _mod_point_data_endian, convert_to_data_type, \
     pack_point_write_registers
+from src.drivers.modbus.services.polling.functions import read_digital, write_digital, \
+    read_analogue, write_analogue, write_analogue_aggregate
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.priority_array import PriorityArrayModel
 from src.services.event_service_base import EventServiceBase
@@ -41,6 +41,7 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
 
     array = None
     fault = False
+    fault_message = None
     error = None
     try:
         val, array = __poll_point(client, device_address, zero_based, point_register, point_register_length, point_fc,
@@ -53,8 +54,6 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
         error = e
 
     arr_ind = 0
-    val = 0
-    arr_slice = None if array is None else array[0:1]
     for point in point_slice:
         point_store_new = None
         if not fault:
