@@ -80,7 +80,7 @@ def read_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _uni
         raise read
 
 
-def write_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _unit: int, write_values: List[int],
+def write_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _unit: int, write_values: List[float],
                   func: ModbusFunctionCode) -> (any, list):
     """
     Write coil
@@ -88,23 +88,26 @@ def write_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _un
     :param reg_start: modbus client
     :param reg_length: modbus client
     :param _unit: modbus address as an int
-    :param write_values: List[int] of values to write to coils
+    :param write_values: List[float] of values to write to coils
     :param func: modbus function type
     :return: tuple (val: any, array: list)
     """
     debug_log('write_digital', _unit, func, reg_length, reg_start)
     data_type: ModbusDataType = ModbusDataType.DIGITAL
     reg_length: int = _set_data_length(data_type, reg_length)
+
+    write_values_: List[int] = [0] * len(write_values)
     for i in range(len(write_values)):
-        write_values[i] = int(write_values[i])
+        write_values_[i] = int(write_values[i])
+
     if func == ModbusFunctionCode.WRITE_COIL:
-        write = client.write_coil(reg_start, int(write_values[0]), unit=_unit)
+        write = client.write_coil(reg_start, int(write_values_[0]), unit=_unit)
     elif func == ModbusFunctionCode.WRITE_COILS:
-        if len(write_values) == 1:
-            write_values = [write_values[0]] * reg_length
-        elif len(write_values) != reg_length:
+        if len(write_values_) == 1:
+            write_values_ = [write_values_[0]] * reg_length
+        elif len(write_values_) != reg_length:
             raise Exception('Invalid WRITE_COILS (multiple) write_values length')
-        write = client.write_coils(reg_start, write_values, unit=_unit)
+        write = client.write_coils(reg_start, write_values_, unit=_unit)
     else:
         raise Exception('Invalid Modbus function code', func)
 
@@ -113,7 +116,7 @@ def write_digital(client: BaseModbusClient, reg_start: int, reg_length: int, _un
         if isinstance(write, WriteSingleCoilResponse):
             return int(write.value), [int(write.value)]
         else:
-            return int(write_values[0]), write_values
+            return write_values_[0], write_values_
     else:
         if not isinstance(write, ModbusIOException):
             write = ModbusIOException(write)
@@ -137,7 +140,7 @@ def write_analogue(client: BaseModbusClient, reg_start: int, reg_length: int, _u
     debug_log('write_analogue', _unit, func, reg_length, reg_start)
     byteorder, word_order = _mod_point_data_endian(endian)
     if func == ModbusFunctionCode.WRITE_REGISTER:
-        payload = [int(write_value)]
+        payload = int(write_value)
         write = client.write_register(reg_start, payload, unit=_unit)
     elif func == ModbusFunctionCode.WRITE_REGISTERS:
         payload = _builder_data_type(write_value, data_type, byteorder, word_order)
