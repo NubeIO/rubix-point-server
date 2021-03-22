@@ -1,10 +1,13 @@
 # CHANGELOG
+## [v1.5.2-r1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.2-r1) (2020-03-22)
+### Added
+- Fix: write_analogue issue fix (should be an integer)
+
 ## [v1.5.2](https://github.com/NubeIO/rubix-point-server/tree/v1.5.2) (2020-03-19)
 ### Added
 - Modbus polling poll aggregation
 - schedules api
 - Model publish improvement over MQTT
-
 
 ## [v1.5.1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.1) (2020-03-13)
 ### Added
