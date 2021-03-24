@@ -5,6 +5,7 @@ from src.drivers.modbus.models.point import ModbusPointModel
 from src.drivers.modbus.resources.point.point_base import ModbusPointBase
 from src.drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_fields, \
     modbus_point_all_attributes
+from src.models.point.priority_array import PriorityArrayModel
 
 
 class ModbusPointSingular(ModbusPointBase):
@@ -34,6 +35,13 @@ class ModbusPointSingular(ModbusPointBase):
         point: ModbusPointModel = cls.get_point(**kwargs)
         if not point:
             return cls.add_point(data)
+        return cls.update_point(data, point)
+
+    @classmethod
+    def update_point(cls, data: dict, point: ModbusPointModel) -> ModbusPointModel:
+        priority_array_write: dict = data.pop('priority_array_write') if data.get('priority_array_write') else {}
+        if priority_array_write:
+            PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
         return point.update(**data)
 
     @classmethod
@@ -43,7 +51,7 @@ class ModbusPointSingular(ModbusPointBase):
         point: ModbusPointModel = cls.get_point(**kwargs)
         if not point:
             raise NotFoundException('Modbus Point not found')
-        return point.update(**data)
+        return cls.update_point(data, point)
 
     @classmethod
     def delete(cls, **kwargs):
