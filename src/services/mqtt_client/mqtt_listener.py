@@ -128,7 +128,7 @@ class MqttListener(MqttClientBase):
             self.__check_and_clear_cov_point(topic, message)
         elif len(topic) == self._mqtt_model_value_topic():
             self.__check_and_clear_model(topic, message)
-        elif not (len(topic) == self._mqtt_points_list_topic() and topic[-1] == 'points') or \
+        elif not (len(topic) == self._mqtt_points_list_topic() and topic[-1] == 'points') and \
                 not (len(topic) == self._mqtt_schedules_list_topic() and topic[-1] == 'schedules'):
             self.__clear_mqtt_retain_value(message)
 

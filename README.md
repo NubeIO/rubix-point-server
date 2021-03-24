@@ -149,7 +149,7 @@ schedule list:
 #### Topic structure:
 
 ```
-<client_id>/<site_id>/<device_id>/rubix/points/listen/cov/name/<point_name>/<device_name>/<network_name>
+<client_id>/<site_id>/<device_id>/rubix/points/listen/cov/name/<network_name>/<device_name>/<point_name>
 <client_id>/<site_id>/<device_id>/rubix/points/listen/cov/uuid/<point_uuid>
 ```
 
