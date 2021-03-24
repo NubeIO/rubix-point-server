@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.5.4](https://github.com/NubeIO/rubix-point-server/tree/v1.5.4) (2020-03-24)
+### Added
+- Fix: priority array patch on point model
+
 ## [v1.5.3-r1](https://github.com/NubeIO/rubix-point-server/tree/v1.5.3-r1) (2020-03-22)
 ### Added
 - Fix: write_analogue issue fix (should be an integer) on v1.5.3

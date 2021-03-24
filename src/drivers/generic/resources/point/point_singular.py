@@ -7,6 +7,7 @@ from src.drivers.generic.models.point import GenericPointModel
 from src.drivers.generic.resources.point.point_base import GenericPointBase
 from src.drivers.generic.resources.rest_schema.schema_generic_point import generic_point_all_fields, \
     generic_point_all_attributes
+from src.models.point.priority_array import PriorityArrayModel
 from src.services.points_registry import PointsRegistry
 
 
@@ -37,6 +38,9 @@ class GenericPointSingular(GenericPointBase):
 
     @classmethod
     def update_point(cls, data: dict, point: GenericPointModel) -> GenericPointModel:
+        priority_array_write: dict = data.pop('priority_array_write') if data.get('priority_array_write') else {}
+        if priority_array_write:
+            PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
         updated_point: GenericPointModel = point.update(**data)
         PointsRegistry().update_point(updated_point)
         return updated_point
