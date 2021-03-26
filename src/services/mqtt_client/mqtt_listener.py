@@ -84,6 +84,7 @@ class MqttListener(MqttClientBase):
 
     @exception_handler
     def _on_message(self, client, userdata, message: MQTTMessage):
+        logger.debug(f'Listener Topic: {message.topic}, Message: {message.payload}')
         if not message.payload:
             return
         if self.get_listener_topic_prefix() in message.topic:
