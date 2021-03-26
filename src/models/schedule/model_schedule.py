@@ -22,6 +22,10 @@ class ScheduleModel(ModelBase):
     def __repr__(self):
         return f"Schedule(uuid = {self.uuid})"
 
+    @classmethod
+    def find_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
+
     def get_model_event(self) -> ModelEvent:
         return ModelEvent.SCHEDULE
 

@@ -15,6 +15,7 @@ from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point import PointModel
+from src.models.schedule.model_schedule import ScheduleModel
 from src.setting import MqttSetting
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ class MqttListener(MqttClientBase):
     def get_listener_topic_prefix(self) -> str:
         return self.__make_topic((
             self.wires_plat.get('client_id'), self.wires_plat.get('site_id'), self.wires_plat.get('device_id'),
-            self.config.listen_topic, 'cov'
+            self.config.listen_topic
         ))
 
     def get_value_topic_prefix(self) -> str:
@@ -86,18 +87,21 @@ class MqttListener(MqttClientBase):
         if not message.payload:
             return
         if self.get_listener_topic_prefix() in message.topic:
-            self.__update_generic_point(message)
+            self.__check_and_clear_listener_topic(message)
         elif self.get_value_topic_prefix() in message.topic:
             self.__check_and_clear_value_topic(message)
         else:
             self.__clear_mqtt_retain_value(message)
 
-    def __update_generic_point(self, message: MQTTMessage):
+    def __check_and_clear_listener_topic(self, message: MQTTMessage):
         topic: List[str] = message.topic.split(self.SEPARATOR)
         if len(topic) == self._mqtt_listener_topic_by_uuid_length() and topic[7] == 'uuid':
             self.__update_generic_point_by_uuid(topic, message)
         elif len(topic) == self._mqtt_listener_topic_by_name_length() and topic[7] == 'name':
             self.__update_generic_point_by_name(topic, message)
+        elif len(topic) == self._mqtt_schedules_value_topic_length():
+            self.__check_and_clear_schedule(topic, message)
+            return
         self.__clear_mqtt_retain_value(message, force_clear=True)
 
     def __update_generic_point_by_uuid(self, topic: List[str], message: MQTTMessage):
@@ -124,12 +128,12 @@ class MqttListener(MqttClientBase):
         Checks whether the subscribed data value exist or not on models, if it doesn't exist we clear retain value
         """
         topic: List[str] = message.topic.split(self.SEPARATOR)
-        if len(topic) == self._mqtt_cov_value_topic():
+        if len(topic) == self._mqtt_cov_value_topic_length():
             self.__check_and_clear_cov_point(topic, message)
-        elif len(topic) == self._mqtt_model_value_topic():
+        elif len(topic) == self._mqtt_model_value_topic_length():
             self.__check_and_clear_model(topic, message)
-        elif not (len(topic) == self._mqtt_points_list_topic() and topic[-1] == 'points') and \
-                not (len(topic) == self._mqtt_schedules_list_topic() and topic[-1] == 'schedules'):
+        elif not (len(topic) == self._mqtt_points_list_topic_length() and topic[-1] == 'points') and \
+                not (len(topic) == self._mqtt_schedules_list_topic_length() and topic[-1] == 'schedules'):
             self.__clear_mqtt_retain_value(message)
 
     def __check_and_clear_cov_point(self, topic: List[str], message: MQTTMessage):
@@ -167,6 +171,15 @@ class MqttListener(MqttClientBase):
         else:
             self.__clear_mqtt_retain_value(message)
 
+    def __check_and_clear_schedule(self, topic: List[str], message: MQTTMessage):
+        schedule_uuid_or_name: str = topic[-1]
+        schedule_type: str = topic[-2]
+        if (schedule_type == 'uuid' and ScheduleModel.find_by_uuid(schedule_uuid_or_name) is None) or \
+                (schedule_type == 'name' and ScheduleModel.find_by_name(schedule_uuid_or_name) is None) or \
+                schedule_type not in ['uuid', 'name']:
+            logger.warning(f'No schedule with topic: {message.topic}')
+            self.__clear_mqtt_retain_value(message)
+
     def _mqtt_listener_topic_by_uuid_length(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<site_id>', '<device_id>', self.config.listen_topic, '<function>', 'uuid', '<point_uuid>'
@@ -178,26 +191,32 @@ class MqttListener(MqttClientBase):
             '<network_name>', '<device_name>', '<point_name>'
         )).split(self.SEPARATOR))
 
-    def _mqtt_cov_value_topic(self) -> int:
+    def _mqtt_cov_value_topic_length(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<client_name>', '<site_id>', '<site_name>', '<device_id>', '<device_name>',
             self.config.topic, 'cov', '<type>', '<driver>', '<network_uuid>', '<network_name>',
             '<device_uuid>', '<device_name>', '<point_id>', '<point_name>'
         )).split(self.SEPARATOR))
 
-    def _mqtt_model_value_topic(self) -> int:
+    def _mqtt_model_value_topic_length(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<client_name>', '<site_id>', '<site_name>', '<device_id>', '<device_name>',
             self.config.topic, 'model', '<model>', '<model.uuid>'
         )).split(self.SEPARATOR))
 
-    def _mqtt_points_list_topic(self) -> int:
+    def _mqtt_schedules_value_topic_length(self) -> int:
+        return len(self.__make_topic((
+            '<client_id>', '<site_id>', '<device_id>', self.config.listen_topic,
+            'schedules', '<schedule_uuid>', '<schedule_name>'
+        )).split(self.SEPARATOR))
+
+    def _mqtt_points_list_topic_length(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<client_name>', '<site_id>', '<site_name>', '<device_id>', '<device_name>',
             self.config.topic, 'points'
         )).split(self.SEPARATOR))
 
-    def _mqtt_schedules_list_topic(self) -> int:
+    def _mqtt_schedules_list_topic_length(self) -> int:
         return len(self.__make_topic((
             '<client_id>', '<client_name>', '<site_id>', '<site_name>', '<device_id>', '<device_name>',
             self.config.topic, 'schedules'
