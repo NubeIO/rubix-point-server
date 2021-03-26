@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.5.6](https://github.com/NubeIO/rubix-point-server/tree/v1.5.6) (2020-03-26)
+### Added
+- Process MQTT message on different process
+
 ## [v1.5.5](https://github.com/NubeIO/rubix-point-server/tree/v1.5.5) (2020-03-26)
 ### Added
 - Fix: Listener retain msg clearing issue
