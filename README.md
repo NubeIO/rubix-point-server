@@ -153,6 +153,11 @@ schedule list:
 <client_id>/<site_id>/<device_id>/rubix/points/listen/cov/uuid/<point_uuid>
 ```
 
+### Schedule Value
+```
+<client_id>/<site_id>/<device_id>/rubix/points/listen/schedules/<name|uuid>/<schedule_name|schedule_uuid>
+```
+
 ### Generic Points List Publisher
 
 ```

@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v1.5.5](https://github.com/NubeIO/rubix-point-server/tree/v1.5.5) (2020-03-26)
+### Added
+- Fix: Listener retain msg clearing issue
+- Don't clear schedule listener value
+- Add schedule resource by name
+
 ## [v1.5.4](https://github.com/NubeIO/rubix-point-server/tree/v1.5.4) (2020-03-24)
 ### Added
 - Fix: priority array patch on point model

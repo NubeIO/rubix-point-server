@@ -80,6 +80,12 @@ class ScheduleResourceByUUID(ScheduleResource):
         return ScheduleModel.find_by_uuid(kwargs.get('uuid'))
 
 
+class ScheduleResourceByName(ScheduleResource):
+    @classmethod
+    def get_schedule(cls, **kwargs) -> ScheduleModel:
+        return ScheduleModel.find_by_name(kwargs.get('name'))
+
+
 class ScheduleResourceList(ScheduleResourceBase):
     @classmethod
     @marshal_with(schedule_all_fields)
