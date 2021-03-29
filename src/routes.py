@@ -7,6 +7,9 @@ from src.drivers.generic.resources.device.device_singular import GenericDeviceSi
 from src.drivers.generic.resources.network.network_plural import GenericNetworkPlural
 from src.drivers.generic.resources.network.network_singular import GenericNetworkSingularByUUID, \
     GenericNetworkSingularByName
+from src.drivers.generic.resources.network_droplet.network_droplet_plural import GenericNetworkDropletPlural
+from src.drivers.generic.resources.network_droplet.network_droplet_singular import GenericNetworkDropletSingularByUUID, \
+    GenericNetworkDropletSingularByName
 from src.drivers.generic.resources.point.point_plural import GenericPointPlural
 from src.drivers.generic.resources.point.point_singular import GenericPointSingularByUUID, \
     GenericPointSingularByName
@@ -56,6 +59,9 @@ api_point.add_resource(PointResourceByName, '/name/<string:network_name>/<string
 
 bp_generic = Blueprint('generic', __name__, url_prefix='/api/generic')
 api_generic = Api(bp_generic)
+api_generic.add_resource(GenericNetworkDropletPlural, '/networks_droplets')
+api_generic.add_resource(GenericNetworkDropletSingularByUUID, '/networks_droplets/uuid/<string:uuid>')
+api_generic.add_resource(GenericNetworkDropletSingularByName, '/networks_droplets/name/<string:name>')
 api_generic.add_resource(GenericNetworkPlural, '/networks')
 api_generic.add_resource(GenericNetworkSingularByUUID, '/networks/uuid/<string:uuid>')
 api_generic.add_resource(GenericNetworkSingularByName, '/networks/name/<string:name>')

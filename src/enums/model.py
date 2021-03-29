@@ -7,3 +7,4 @@ class ModelEvent(enum.Enum):
     NETWORK = 2
     SCHEDULE = 3
     MAPPING = 4
+    NETWORK_DROPLET = 5

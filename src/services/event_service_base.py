@@ -16,6 +16,7 @@ class EventType(IntEnum):
     POINT_MODEL = auto()
     DEVICE_MODEL = auto()
     NETWORK_MODEL = auto()
+    NETWORK_DROPLET_MODEL = auto()
     SCHEDULE_MODEL = auto()
     MAPPING_MODEL = auto()
     MQTT_DEBUG = auto()
