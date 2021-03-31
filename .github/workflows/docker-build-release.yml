@@ -142,7 +142,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.NUBEIO_CI_GITHUBPACKAGE_TOKEN }}
+          password: ${{ secrets.NUBEIO_CI_GITHUB_PACKAGES_PAT }}
 
       - name: Docker build
         uses: docker/build-push-action@v2
