@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.5.7](https://github.com/NubeIO/rubix-point-server/tree/v1.5.7) (2020-03-31)
+### Added
+- Fix: write value issue (priority_array addition support)
+
 ## [v1.5.6](https://github.com/NubeIO/rubix-point-server/tree/v1.5.6) (2020-03-26)
 ### Added
 - Process MQTT message on different process
