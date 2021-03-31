@@ -51,8 +51,8 @@ jobs:
         id: docker_image_name
         run: |
           localRegistry=localhost:5000/${{ steps.grep.outputs.name }}
-          ghcr=ghcr.io/nubeio/${{ steps.grep.outputs.name }}
-          dockerHub=nubeio/${{ steps.grep.outputs.name }}
+          ghcr=ghcr.io/nubeio/rubix-point
+          dockerHub=nubeio/rubix-point
           echo ::set-output name=images::$ghcr
 
   build:
