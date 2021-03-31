@@ -29,7 +29,8 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
     write_values = []
     for point in point_slice:
         point_register_length += point.register_length
-        write_values.append(point.write_value)
+        write_value: float = PriorityArrayModel.get_highest_priority_value_from_dict(point.priority_array_write) or 0
+        write_values.append(write_value)
     point_fc: ModbusFunctionCode = point_slice[0].function_code
     if point_fc is ModbusFunctionCode.WRITE_COIL:
         point_fc = ModbusFunctionCode.WRITE_COILS
