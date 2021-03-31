@@ -30,7 +30,7 @@ jobs:
       afterRelease: ${{ steps.context.outputs.isAfterMergedReleasePR }}
       sha: ${{ steps.context.outputs.commitId }}
       version: ${{ steps.context.outputs.version }}
-      fqn: ${{ steps.grep.outputs.name }}-${{ steps.context.outputs.version }}-${{ steps.context.outputs.commitId }}
+      fqn: ${{ env.APP_NAME }}-${{ steps.context.outputs.version }}-${{ steps.context.outputs.shortCommitId }}
 
     steps:
       - uses: actions/checkout@v2
