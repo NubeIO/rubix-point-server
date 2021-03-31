@@ -1,11 +1,11 @@
 name: docker-build-release
 
 on:
+  pull_request:
+    types: [ opened, synchronize, reopened, closed ]
+    branches: [ main, master ]
   push:
-    branches:
-      - dev
-      - main
-      - master
+    branches: [ main, master ]
     tags:
       - 'v*'
 
