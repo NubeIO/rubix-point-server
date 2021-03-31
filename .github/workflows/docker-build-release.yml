@@ -20,8 +20,6 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      name: ${{ steps.grep.outputs.name }}
-      branch: ${{ steps.context.outputs.branch }}
       shouldBuild: ${{ steps.context.outputs.decision_build }}
       shouldPublish: ${{ steps.context.outputs.decision_publish }}
       isRelease: ${{ steps.context.outputs.isTag }}
