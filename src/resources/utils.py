@@ -14,7 +14,7 @@ def model_network_marshaller(data: any, args: dict, base_fields: dict, children_
             with_children = bool(strtobool(args['with_children']))
         if 'points' in args:
             points = bool(strtobool(args['points']))
-    except:
+    except Exception:
         raise BadDataException('Invalid query string')
 
     if with_children:
@@ -31,7 +31,7 @@ def model_marshaller_with_children(data: any, args: dict, base_fields: dict, chi
     if 'with_children' in args:
         try:
             with_children = bool(strtobool(args['with_children']))
-        except:
+        except Exception:
             raise BadDataException('Invalid query string')
 
     if with_children:

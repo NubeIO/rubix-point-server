@@ -13,7 +13,8 @@ from src.drivers.modbus.models.mapping import MPGBPMapping
 from src.utils.model_utils import get_datetime
 
 
-class PointStoreModelMixin(object):
+class PointStoreModelMixin(db.Model):
+    __abstract__ = True
     value = db.Column(db.Float(), nullable=True)
     value_original = db.Column(db.Float(), nullable=True)
     value_raw = db.Column(db.String(), nullable=True)
@@ -23,7 +24,7 @@ class PointStoreModelMixin(object):
     ts_fault = db.Column(db.DateTime())
 
 
-class PointStoreModel(PointStoreModelMixin, db.Model):
+class PointStoreModel(PointStoreModelMixin):
     __tablename__ = 'point_stores'
     point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), primary_key=True, nullable=False)
 
