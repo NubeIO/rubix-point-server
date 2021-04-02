@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.5.8](https://github.com/NubeIO/rubix-point-server/tree/v1.5.8) (2020-04-02)
+### Added
+- Fix: multiple r/w
+- Miscellaneous improvements on code
+
 ## [v1.5.7](https://github.com/NubeIO/rubix-point-server/tree/v1.5.7) (2020-03-31)
 ### Added
 - Fix: write value issue (priority_array addition support)
