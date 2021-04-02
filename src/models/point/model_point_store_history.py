@@ -6,7 +6,7 @@ from src.models.point.model_point_store import PointStoreModelMixin, PointStoreM
 from src.utils.model_utils import ModelUtils
 
 
-class PointStoreHistoryModel(PointStoreModelMixin, db.Model):
+class PointStoreHistoryModel(PointStoreModelMixin):
     __tablename__ = 'point_stores_history'
     id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     point_uuid = db.Column(db.String, db.ForeignKey('points.uuid'), nullable=False)

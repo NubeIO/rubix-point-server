@@ -46,7 +46,7 @@ class GenericNetworkSingular(GenericNetworkBase):
     def delete(cls, **kwargs):
         network: GenericNetworkModel = cls.get_network(**kwargs)
         if network is None:
-            raise NotFoundException("Does not exist {kwargs}")
+            raise NotFoundException(f"Does not exist {kwargs}")
         network.delete_from_db()
         return '', 204
 

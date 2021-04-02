@@ -7,7 +7,6 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.drivers.enums.drivers import Drivers
-from src.drivers.generic.enums.point.points import GenericPointType
 from src.enums.model import ModelEvent
 from src.enums.point import HistoryType, MathOperation
 from src.models.device.model_device import DeviceModel
@@ -189,17 +188,7 @@ class PointModel(ModelBase):
         value = ((value - input_min) * (output_max - output_min)) / (input_max - input_min) + output_min
         return value
 
-    @classmethod
-    def apply_point_type(cls, value: float):
-        from src.drivers.generic.models.point import GenericPointModel
-        generic_point = GenericPointModel.find_by_uuid(cls.uuid)
-        if generic_point is not None and value is not None:
-            if generic_point.type == GenericPointType.STRING:
-                value = None
-            elif generic_point.type == GenericPointType.INT:
-                value = round(value, 0)
-            elif generic_point.type == GenericPointType.BOOL:
-                value = float(bool(value))
+    def apply_point_type(self, value: float) -> float:
         return value
 
     def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,

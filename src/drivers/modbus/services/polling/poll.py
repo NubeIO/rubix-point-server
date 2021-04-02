@@ -85,7 +85,7 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
             point_store_new = PointStoreModel(fault=fault, fault_message=fault_message, point_uuid=point.uuid)
 
         try:
-            if point.update_point_value(point_store_new):
+            if point.update_point_value(point_store_new, point.driver):
                 point.publish_cov(point_store_new, device, network, service.service_name)
         except BaseException as e:
             logger.error(e)
