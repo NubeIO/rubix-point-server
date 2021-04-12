@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import re
 
 from sqlalchemy import UniqueConstraint
@@ -8,7 +9,7 @@ from sqlalchemy.orm import validates
 from src import db
 from src.drivers.enums.drivers import Drivers
 from src.enums.model import ModelEvent
-from src.enums.point import HistoryType, MathOperation
+from src.enums.point import HistoryType
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
@@ -16,6 +17,7 @@ from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.point.priority_array import PriorityArrayModel
 from src.services.event_service_base import Event, EventType
+from src.utils.math_functions import eval_arithmetic_expression
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +39,7 @@ class PointModel(ModelBase):
                                            cascade="all,delete")
     cov_threshold = db.Column(db.Float, nullable=False, default=0)
     value_round = db.Column(db.Integer(), nullable=False, default=2)
-    value_offset = db.Column(db.Float(), nullable=False, default=0)
-    value_operation = db.Column(db.Enum(MathOperation), nullable=True)
+    value_operation = db.Column(db.String, nullable=True)
     input_min = db.Column(db.Float())
     input_max = db.Column(db.Float())
     scale_min = db.Column(db.Float())
@@ -66,6 +67,15 @@ class PointModel(ModelBase):
             raise ValueError("name should be alphanumeric and can contain '_', '-'")
         return value
 
+    @validates('value_operation')
+    def validate_value_operation(self, _, value):
+        try:
+            if value.strip():
+                eval_arithmetic_expression(value.lower().replace('x', str(random.randint(1, 9))))
+        except Exception as e:
+            raise ValueError("Invalid value_operation, must be a valid arithmetic expression")
+        return value
+
     @classmethod
     def find_by_name(cls, network_name: str, device_name: str, point_name: str):
         results = cls.query.filter_by(name=point_name) \
@@ -87,7 +97,7 @@ class PointModel(ModelBase):
             if value is not None:
                 value = self.apply_scale(value, self.input_min, self.input_max, self.scale_min,
                                          self.scale_max)
-                value = self.apply_offset(value, self.value_offset, self.value_operation)
+                value = self.apply_value_operation(value, self.value_operation)
                 value = round(value, self.value_round)
             point_store.value = self.apply_point_type(value)
         return point_store.update(driver, cov_threshold)
@@ -163,22 +173,11 @@ class PointModel(ModelBase):
             db.session.commit()
 
     @classmethod
-    def apply_offset(cls, original_value: float, value_offset: float, value_operation: MathOperation) -> float or None:
+    def apply_value_operation(cls, original_value, value_operation: str) -> float or None:
         """Do calculations on original value with the help of point details"""
-        if original_value is None or value_operation is None:
+        if original_value is None or value_operation is None or not value_operation.strip():
             return original_value
-        value = original_value
-        if value_operation == MathOperation.ADD:
-            value += value_offset
-        elif value_operation == MathOperation.SUBTRACT:
-            value -= value_offset
-        elif value_operation == MathOperation.MULTIPLY:
-            value *= value_offset
-        elif value_operation == MathOperation.DIVIDE:
-            value /= value_offset
-        elif value_operation == MathOperation.BOOL_INVERT:
-            value = not bool(value)
-        return value
+        return eval_arithmetic_expression(value_operation.lower().replace('x', str(original_value)))
 
     @classmethod
     def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \

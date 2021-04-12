@@ -70,13 +70,8 @@ point_all_attributes = {
     'value_round': {
         'type': int,
     },
-    'value_offset': {
-        'type': float,
-    },
     'value_operation': {
-        'type': str,
-        'nested': True,
-        'dict': 'value_operation.name'
+        'type': str
     },
     'input_min': {
         'type': float,
