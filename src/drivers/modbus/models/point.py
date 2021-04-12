@@ -60,7 +60,7 @@ class ModbusPointModel(PointMixinModel):
                 raise ValueError("Invalid function code")
             function_code: ModbusFunctionCode = ModbusFunctionCode[value]
         if self.is_writable(function_code):
-            if PriorityArrayModel.get_highest_priority_value_from_dict(self.priority_array_write) is None:
+            if PriorityArrayModel.get_highest_priority_value_from_priority_array(self.priority_array_write) is None:
                 raise ValueError(f"priority_array_write shouldn't be null for {function_code}")
         return function_code
 

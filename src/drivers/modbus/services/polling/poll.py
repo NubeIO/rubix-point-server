@@ -29,7 +29,8 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
     write_values = []
     for point in point_slice:
         point_register_length += point.register_length
-        write_value: float = PriorityArrayModel.get_highest_priority_value_from_dict(point.priority_array_write) or 0
+        write_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
+            point.priority_array_write) or 0
         write_values.append(write_value)
     point_fc: ModbusFunctionCode = point_slice[0].function_code
     if point_fc is ModbusFunctionCode.WRITE_COIL:
@@ -61,11 +62,11 @@ def poll_point_aggregate(service: EventServiceBase, client: BaseModbusClient, ne
 
             if point.data_type is not ModbusDataType.RAW and point.data_type is not ModbusDataType.DIGITAL:
                 byteorder, word_order = _mod_point_data_endian(point.data_endian)
-                arr_slice = array[arr_ind:arr_ind+point.register_length]
+                arr_slice = array[arr_ind:arr_ind + point.register_length]
                 val = convert_to_data_type(arr_slice, point.data_type, byteorder,
                                            word_order)
             elif point.data_type is ModbusDataType.DIGITAL:
-                arr_slice = array[arr_ind:arr_ind+1]
+                arr_slice = array[arr_ind:arr_ind + 1]
                 val = array[arr_ind]
             else:
                 arr_slice = array[arr_ind:point.register_length]
@@ -114,7 +115,8 @@ def poll_point(service: EventServiceBase, client: BaseModbusClient, network: Mod
     point_fc: ModbusFunctionCode = point.function_code
     point_data_type: ModbusDataType = point.data_type
     point_data_endian: ModbusDataEndian = point.data_endian
-    write_value: float = PriorityArrayModel.get_highest_priority_value_from_dict(point.priority_array_write) or 0
+    write_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
+        point.priority_array_write) or 0
 
     fault: bool = False
     fault_message: str = ""
