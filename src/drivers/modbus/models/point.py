@@ -48,15 +48,20 @@ class ModbusPointModel(PointMixinModel):
 
     @validates('function_code')
     def validate_function_code(self, _, value):
-        if not isinstance(value, ModbusFunctionCode):
+        if isinstance(value, ModbusFunctionCode):
+            function_code: ModbusFunctionCode = value
+        elif isinstance(value, int):
+            try:
+                function_code: ModbusFunctionCode = ModbusFunctionCode(value)
+            except Exception:
+                raise ValueError("Invalid function code")
+        else:
             if not value or value not in ModbusFunctionCode.__members__:
                 raise ValueError("Invalid function code")
             function_code: ModbusFunctionCode = ModbusFunctionCode[value]
-        else:
-            function_code: ModbusFunctionCode = value
         if self.is_writable(function_code):
             if PriorityArrayModel.get_highest_priority_value_from_dict(self.priority_array_write) is None:
-                raise ValueError(f"priority_array_write shouldn't be null for {value}")
+                raise ValueError(f"priority_array_write shouldn't be null for {function_code}")
         return function_code
 
     @validates('register')
