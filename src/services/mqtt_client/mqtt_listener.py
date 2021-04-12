@@ -168,7 +168,7 @@ class MqttListener(MqttClientBase):
                 logger.warning(f'No device with device.uuid={model_uuid}')
                 self.__clear_mqtt_retain_value(message)
         elif model_event == ModelEvent.NETWORK.name:
-            network: PointModel = DeviceModel.find_by_uuid(model_uuid)
+            network: NetworkModel = NetworkModel.find_by_uuid(model_uuid)
             if network is None:
                 logger.warning(f'No network with network.uuid={model_uuid}')
                 self.__clear_mqtt_retain_value(message)
