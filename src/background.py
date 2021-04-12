@@ -85,6 +85,8 @@ class Background:
             FlaskThread(target=PointsRegistry().register, daemon=True).start()
             from src.services.schedules_registry import SchedulesRegistry
             FlaskThread(target=SchedulesRegistry().register, daemon=True).start()
+            from .services.mqtt_republish import MqttRepublish
+            FlaskThread(target=MqttRepublish().republish, daemon=True).start()
 
     @staticmethod
     def sync_on_start():

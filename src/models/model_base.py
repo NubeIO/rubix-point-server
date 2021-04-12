@@ -29,12 +29,12 @@ class ModelBase(db.Model):
         self.check_self()
         db.session.add(self)
         db.session.commit()
-        self._dispatch_event(self._to_dict())
+        self.dispatch_event(self.to_dict())
 
     def save_to_db_no_commit(self):
         self.check_self()
         db.session.add(self)
-        self._dispatch_event(self._to_dict())
+        self.dispatch_event(self.to_dict())
 
     @classmethod
     def commit(cls):
@@ -43,7 +43,7 @@ class ModelBase(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-        self._dispatch_event()
+        self.dispatch_event()
 
     @classmethod
     def create_temporary(cls, **kwargs):
@@ -62,7 +62,7 @@ class ModelBase(db.Model):
         self.check_self()
         db.session.commit()
         if changed:
-            self._dispatch_event(kwargs)
+            self.dispatch_event(kwargs)
         return changed
 
     def get_model_event(self) -> ModelEvent:
@@ -86,11 +86,11 @@ class ModelBase(db.Model):
             raise ValueError('name cannot contain forward slash (/)')
         return name
 
-    def _to_dict(self) -> dict:
+    def to_dict(self) -> dict:
         return {c.key: str(getattr(self, c.key))
                 for c in inspect(self).mapper.column_attrs}
 
-    def _dispatch_event(self, payload: dict = None):
+    def dispatch_event(self, payload: dict = None):
         # TODO: better use of dispatching
         event = Event(self.get_model_event_type(), {
             'model': self,
