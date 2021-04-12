@@ -41,6 +41,10 @@ class GenericPointSingular(GenericPointBase):
         priority_array_write: dict = data.pop('priority_array_write') if data.get('priority_array_write') else {}
         if priority_array_write:
             PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
+            updated_priority_array_write: PriorityArrayModel = cls.get_point(uuid=point.uuid).priority_array_write
+            highest_priority_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
+                updated_priority_array_write)
+            point.update_point_store_value(highest_priority_value=highest_priority_value)
         updated_point: GenericPointModel = point.update(**data)
         PointsRegistry().update_point(updated_point)
         return updated_point

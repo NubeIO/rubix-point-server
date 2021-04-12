@@ -105,6 +105,7 @@ def pack_point_write_registers(point_list: List[ModbusPointModel]):
     final_payload = []
     for point in point_list:
         byteorder, word_order = _mod_point_data_endian(point.data_endian)
-        write_value: float = PriorityArrayModel.get_highest_priority_value_from_dict(point.priority_array_write) or 0
+        write_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
+            point.priority_array_write) or 0
         final_payload.extend(_builder_data_type(write_value, point.data_type, byteorder, word_order))
     return final_payload

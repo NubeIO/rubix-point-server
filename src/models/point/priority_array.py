@@ -34,14 +34,14 @@ class PriorityArrayModel(db.Model):
 
     @classmethod
     def get_highest_priority_value(cls, point_uuid):
-        priority_array: dict = cls.filter_by_point_uuid(point_uuid).first()
-        return cls.get_highest_priority_value_from_dict(priority_array)
+        priority_array: PriorityArrayModel = cls.filter_by_point_uuid(point_uuid).first()
+        return cls.get_highest_priority_value_from_priority_array(priority_array)
 
     @classmethod
-    def get_highest_priority_value_from_dict(cls, priority_array: dict):
+    def get_highest_priority_value_from_priority_array(cls, priority_array):
         if priority_array:
             for i in range(1, 17):
-                value = getattr(priority_array, f'_{i}')
+                value = getattr(priority_array, f'_{i}', None)
                 if value is not None:
                     return value
         return None

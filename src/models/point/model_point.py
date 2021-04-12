@@ -150,7 +150,11 @@ class PointModel(ModelBase):
 
     def update_point_store(self, value: float, priority: int, value_raw: str, fault: bool, fault_message: str):
         self.update_priority_value(priority, value, value_raw)
-        highest_priority_value = PriorityArrayModel.get_highest_priority_value(self.uuid)
+        highest_priority_value: float = PriorityArrayModel.get_highest_priority_value(self.uuid)
+        self.update_point_store_value(highest_priority_value, value_raw, fault, fault_message)
+
+    def update_point_store_value(self, highest_priority_value: float, value_raw: str = None, fault: bool = False,
+                                 fault_message: str = ''):
         point_store = PointStoreModel(point_uuid=self.uuid,
                                       value_original=highest_priority_value,
                                       value_raw=value_raw if value_raw is not None else highest_priority_value,
