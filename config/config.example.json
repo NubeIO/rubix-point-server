@@ -36,7 +36,7 @@
     "ssl_mode": "allow",
     "connect_timeout": 5,
     "timer": 1,
-    "table_name": "points",
+    "table_prefix": "tbl",
     "attempt_reconnect_secs": 5
   },
   "mqtt_rest_bridge_listener": {

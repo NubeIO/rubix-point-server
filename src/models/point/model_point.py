@@ -1,4 +1,3 @@
-import json
 import logging
 import random
 import re
@@ -18,6 +17,7 @@ from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.point.priority_array import PriorityArrayModel
 from src.services.event_service_base import Event, EventType
 from src.utils.math_functions import eval_arithmetic_expression
+from src.utils.model_utils import validate_json
 
 logger = logging.getLogger(__name__)
 
@@ -112,14 +112,7 @@ class PointModel(ModelBase):
         """
         if value is not None:
             try:
-                tags = json.loads(value)
-                return_tags: dict = {}
-                for tag in tags:
-                    clean_tag: str = tag.lower()
-                    clean_tag = clean_tag.replace(" ", "_")
-                    clean_tag = re.sub('[^A-Za-z0-9_]+', '', clean_tag)
-                    return_tags[clean_tag] = tags[tag]
-                return json.dumps(return_tags)
+                return validate_json(value)
             except ValueError:
                 raise ValueError('tags needs to be a valid JSON')
         return value

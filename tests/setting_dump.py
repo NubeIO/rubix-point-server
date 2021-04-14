@@ -38,7 +38,7 @@ if __name__ == '__main__':
         "ssl_mode": "allow",
         "connect_timeout": 5,
         "timer": 1,
-        "table_name": "point",
+        "table_prefix": "tbl",
         "attempt_reconnect_secs": 5
       },
       "generic_point_listener": {

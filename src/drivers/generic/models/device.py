@@ -1,11 +1,9 @@
-import json
-import re
-
 from sqlalchemy.orm import validates
 
 from src import db
 from src.drivers.enums.drivers import Drivers
 from src.models.device.model_device_mixin import DeviceMixinModel
+from src.utils.model_utils import validate_json
 
 
 class GenericDeviceModel(DeviceMixinModel):
@@ -22,14 +20,7 @@ class GenericDeviceModel(DeviceMixinModel):
         """
         if value is not None:
             try:
-                tags = json.loads(value)
-                return_tags: dict = {}
-                for tag in tags:
-                    clean_tag: str = tag.lower()
-                    clean_tag = clean_tag.replace(" ", "_")
-                    clean_tag = re.sub('[^A-Za-z0-9_]+', '', clean_tag)
-                    return_tags[clean_tag] = tags[tag]
-                return json.dumps(return_tags)
+                return validate_json(value)
             except ValueError:
                 raise ValueError('tags needs to be a valid JSON')
         return value
