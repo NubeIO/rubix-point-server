@@ -1,3 +1,5 @@
+import json
+import re
 from datetime import datetime
 
 
@@ -31,3 +33,20 @@ def datetime_to_str(datetime_obj: datetime or None) -> str:
         return datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
     else:
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def validate_json(value: str):
+    """
+    Rules for valid json:
+    - force all json to be lower case
+    - if there is a gap add an underscore
+    - no special characters
+    """
+    objects = json.loads(value)
+    return_value: dict = {}
+    for obj in objects:
+        clean_obj: str = obj.lower()
+        clean_obj = clean_obj.replace(" ", "_")
+        clean_obj = re.sub('[^A-Za-z0-9_]+', '', clean_obj)
+        return_value[clean_obj] = objects[obj]
+    return json.dumps(return_value)

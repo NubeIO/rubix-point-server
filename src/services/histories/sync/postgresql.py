@@ -8,6 +8,8 @@ import schedule
 from psycopg2.extras import execute_values
 from registry.registry import RubixRegistry
 
+from src.drivers.generic.models.device import GenericDeviceModel
+from src.drivers.generic.models.network import GenericNetworkModel
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
@@ -29,6 +31,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self.__points_table_name: str = ''
         self.__points_values_table_name: str = ''
         self.__points_tags_table_name: str = ''
+        self.__generic_network_tags_table_name: str = ''
+        self.__generic_device_tags_table_name: str = ''
 
     @property
     def config(self) -> Union[PostgresSetting, None]:
@@ -42,9 +46,11 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
     def setup(self, config: PostgresSetting):
         self.__config = config
-        self.__points_table_name: str = self.config.table_name
+        self.__points_table_name: str = f'{self.config.table_prefix}_points'
         self.__points_values_table_name: str = f'{self.__points_table_name}_values'
         self.__points_tags_table_name: str = f'{self.__points_table_name}_tags'
+        self.__generic_network_tags_table_name: str = f'{self.config.table_prefix}_generic_network_tags'
+        self.__generic_device_tags_table_name: str = f'{self.config.table_prefix}_generic_device_tags'
 
         while not self.status():
             self.connect()
@@ -86,9 +92,27 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self._sync()
 
     def _sync(self):
+        generic_network_tags_list: List[tuple] = []
+        generic_device_tags_list: List[tuple] = []
         points_list: List[tuple] = []
         points_values_list: List[tuple] = []
         points_tags_list: List[tuple] = []
+
+        for generic_network in GenericNetworkModel.find_all():
+            if generic_network.tags:
+                generic_network_tags: dict = json.loads(generic_network.tags)
+                # insert tags from generic_network object
+                for generic_network_tag in generic_network_tags.keys():
+                    generic_network_tags_list.append((generic_network.uuid, generic_network_tag,
+                                                      generic_network_tags[generic_network_tag]))
+
+        for generic_device in GenericDeviceModel.find_all():
+            if generic_device.tags:
+                generic_device_tags: dict = json.loads(generic_device.tags)
+                # insert tags from generic_device object
+                for generic_device_tag in generic_device_tags.keys():
+                    generic_device_tags_list.append((generic_device.uuid, generic_device_tag,
+                                                     generic_device_tags[generic_device_tag]))
 
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
@@ -115,9 +139,68 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                            point_store_history.fault, point_store_history.fault_message,
                                            point_store_history.ts_value, point_store_history.ts_fault)
                 points_values_list.append(point_value_data)
+
+        self._update_generic_network_tags(generic_network_tags_list)
+        self._update_generic_device_tags(generic_device_tags_list)
         self._update_points_list(points_list)
         self._update_points_values(points_values_list)
         self._update_points_tags(points_tags_list)
+
+    def _update_generic_network_tags(self, generic_network_tags_list):
+        if len(generic_network_tags_list):
+            logger.debug(f"Storing generic_network_tags_list: {generic_network_tags_list}")
+            query_generic_network_tag = f'INSERT INTO {self.__generic_network_tags_table_name} ' \
+                                        f'(uuid, tag_name, tag_value) ' \
+                                        f'VALUES %s ON CONFLICT (uuid, tag_name) ' \
+                                        f'DO UPDATE SET tag_value = excluded.tag_value'
+            with self.__client:
+                with self.__client.cursor() as curs:
+                    try:
+                        if len(generic_network_tags_list):
+                            # Remove comma (,) from ('<uuid>',)
+                            in_uuid: str = rreplace(str(tuple(i[0] for i in generic_network_tags_list)), ",)", ")",
+                                                    1)
+                            in_tags_list: str = rreplace(
+                                str(tuple((i[0], i[1]) for i in generic_network_tags_list)), ",)", ")", 1)
+                            query_delete_generic_network_tag = f'DELETE FROM {self.__generic_network_tags_table_name} ' \
+                                                               f'WHERE uuid IN {in_uuid} ' \
+                                                               f'AND (uuid, tag_name) NOT IN {in_tags_list}'
+                            curs.execute(query_delete_generic_network_tag)
+                        execute_values(curs, query_generic_network_tag, generic_network_tags_list)
+                    except psycopg2.Error as e:
+                        logger.error(str(e))
+            logger.info(f'Stored/updated {len(generic_network_tags_list)} rows on '
+                        f'{self.__generic_network_tags_table_name} table')
+        else:
+            logger.debug(f"Nothing to store on {self.__generic_network_tags_table_name}")
+
+    def _update_generic_device_tags(self, generic_device_tags_list):
+        if len(generic_device_tags_list):
+            logger.debug(f"Storing generic_device_tags_list: {generic_device_tags_list}")
+            query_generic_device_tag = f'INSERT INTO {self.__generic_device_tags_table_name} ' \
+                                       f'(uuid, tag_name, tag_value) ' \
+                                       f'VALUES %s ON CONFLICT (uuid, tag_name) ' \
+                                       f'DO UPDATE SET tag_value = excluded.tag_value'
+            with self.__client:
+                with self.__client.cursor() as curs:
+                    try:
+                        if len(generic_device_tags_list):
+                            # Remove comma (,) from ('<uuid>',)
+                            in_uuid: str = rreplace(str(tuple(i[0] for i in generic_device_tags_list)), ",)", ")",
+                                                    1)
+                            in_tags_list: str = rreplace(
+                                str(tuple((i[0], i[1]) for i in generic_device_tags_list)), ",)", ")", 1)
+                            query_delete_generic_device_tag = f'DELETE FROM {self.__generic_device_tags_table_name} ' \
+                                                              f'WHERE uuid IN {in_uuid} ' \
+                                                              f'AND (uuid, tag_name) NOT IN {in_tags_list}'
+                            curs.execute(query_delete_generic_device_tag)
+                        execute_values(curs, query_generic_device_tag, generic_device_tags_list)
+                    except psycopg2.Error as e:
+                        logger.error(str(e))
+            logger.info(f'Stored/updated {len(generic_device_tags_list)} rows on '
+                        f'{self.__generic_device_tags_table_name} table')
+        else:
+            logger.debug(f"Nothing to store on {self.__generic_device_tags_table_name}")
 
     def _update_points_list(self, points_list):
         if len(points_list):
@@ -194,6 +277,16 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             logger.debug(f"Nothing to store on {self.__points_tags_table_name}")
 
     def _create_table_if_not_exists(self):
+        query_generic_network_tag = f'CREATE TABLE IF NOT EXISTS {self.__generic_network_tags_table_name} ' \
+                                    f'(uuid VARCHAR,' \
+                                    f'tag_name VARCHAR, ' \
+                                    f'tag_value VARCHAR,' \
+                                    f'PRIMARY KEY (uuid, tag_name));'
+        query_generic_device_tag = f'CREATE TABLE IF NOT EXISTS {self.__generic_device_tags_table_name} ' \
+                                   f'(uuid VARCHAR,' \
+                                   f'tag_name VARCHAR, ' \
+                                   f'tag_value VARCHAR,' \
+                                   f'PRIMARY KEY (uuid, tag_name));'
         query_point = f'CREATE TABLE IF NOT EXISTS {self.__points_table_name} ' \
                       f'(client_id VARCHAR(80), ' \
                       f'client_name VARCHAR(80), ' \
@@ -228,6 +321,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         with self.__client:
             with self.__client.cursor() as curs:
                 try:
+                    curs.execute(query_generic_network_tag)
+                    curs.execute(query_generic_device_tag)
                     curs.execute(query_point)
                     curs.execute(query_point_value_data)
                     curs.execute(query_point_tag)

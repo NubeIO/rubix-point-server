@@ -96,7 +96,7 @@ class PostgresSetting(BaseSetting):
         self.ssl_mode = 'allow'
         self.connect_timeout = 5
         self.timer = 1
-        self.table_name = 'points'
+        self.table_prefix = 'tbl'
         self.attempt_reconnect_secs = 5
 
 
