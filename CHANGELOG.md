@@ -1,4 +1,14 @@
 # CHANGELOG
+## [v1.5.9](https://github.com/NubeIO/rubix-point-server/tree/v1.5.9) (2020-04-12)
+### Added
+- Fix: math apply_scale function
+- Added tags to devices and networks
+- Update to apply math function
+- Fix: MQTT network retain clear issue
+- Fix: ModbusFunctionCode issue (Invalid function code)
+- Improvement: generic point priority array write on update
+
+
 ## [v1.5.8](https://github.com/NubeIO/rubix-point-server/tree/v1.5.8) (2020-04-02)
 ### Added
 - Fix: multiple r/w
