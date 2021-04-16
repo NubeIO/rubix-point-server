@@ -30,7 +30,6 @@ modbus_point_all_attributes['data_endian'] = {
 
 modbus_point_all_attributes['write_value_once'] = {
     'type': bool,
-    'required': True,
 }
 
 

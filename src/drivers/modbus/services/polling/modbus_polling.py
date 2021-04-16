@@ -20,6 +20,7 @@ from src.drivers.modbus.services.modbus_tcp_registry import ModbusTcpRegistry, M
 from src.drivers.modbus.services.polling.poll import poll_point, poll_point_aggregate
 from src.event_dispatcher import EventDispatcher
 from src.models.point.model_point_store import PointStoreModel
+from src.models.point.priority_array import PriorityArrayModel
 from src.services.event_service_base import EventServiceBase, EventType, HandledByDifferentServiceException, Event
 
 logger = logging.getLogger(__name__)
@@ -230,12 +231,15 @@ class ModbusPolling(EventServiceBase):
                      point_list: List[ModbusPointModel], update_all: bool = True,
                      update_point_store: bool = True) -> Union[PointStoreModel, None]:
         point_store: Union[PointStoreModel, None] = None
-        for point in point_list:
-            if point.function_code == ModbusFunctionCode.WRITE_COIL and point.write_value_once and \
-                    point.point_store is not None and not point.point_store.fault:
-                point_list.remove(point)
-        if len(point_list) > 0:
-            if update_all:
+        if update_all:
+            for point in point_list:
+                write_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
+                    point.priority_array_write) or 0
+                if point.function_code == point.is_writable(point.function_code) and point.write_value_once and \
+                        point.point_store is not None and not point.point_store.fault and \
+                        point.point_store.value_original == write_value:
+                    point_list.remove(point)
+            if len(point_list) > 0:
                 try:
                     error = None
                     try:
@@ -264,8 +268,8 @@ class ModbusPolling(EventServiceBase):
                         raise error
                 except ObjectDeletedError:
                     return None
-            else:
-                point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
+        else:
+            point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
         return point_store
 
     @abstractmethod
