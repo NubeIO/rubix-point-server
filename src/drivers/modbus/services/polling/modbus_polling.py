@@ -230,37 +230,42 @@ class ModbusPolling(EventServiceBase):
                      point_list: List[ModbusPointModel], update_all: bool = True,
                      update_point_store: bool = True) -> Union[PointStoreModel, None]:
         point_store: Union[PointStoreModel, None] = None
-        if update_all:
-            try:
-                error = None
+        for point in point_list:
+            if point.function_code == ModbusFunctionCode.WRITE_COIL and point.write_value_once and \
+                    point.point_store is not None and not point.point_store.fault:
+                point_list.remove(point)
+        if len(point_list) > 0:
+            if update_all:
                 try:
-                    if len(point_list) == 1:
-                        point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
-                    elif len(point_list) > 1:
-                        poll_point_aggregate(self, client, network, device, point_list)
-                    else:
-                        raise Exception("Invalid __poll_point point_list length")
-                except ConnectionException as e:
-                    if not network.fault:
-                        network.set_fault(True)
-                    error = e
-                except ModbusIOException as e:
-                    if not device.fault:
-                        device.set_fault(True)
-                    error = e
+                    error = None
+                    try:
+                        if len(point_list) == 1:
+                            point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
+                        elif len(point_list) > 1:
+                            poll_point_aggregate(self, client, network, device, point_list)
+                        else:
+                            raise Exception("Invalid __poll_point point_list length")
+                    except ConnectionException as e:
+                        if not network.fault:
+                            network.set_fault(True)
+                        error = e
+                    except ModbusIOException as e:
+                        if not device.fault:
+                            device.set_fault(True)
+                        error = e
 
-                if network.fault and not isinstance(error, ConnectionException):
-                    network.set_fault(False)
-                elif device.fault and not isinstance(error, ModbusIOException) and \
-                        not isinstance(error, ConnectionException):
-                    device.set_fault(False)
+                    if network.fault and not isinstance(error, ConnectionException):
+                        network.set_fault(False)
+                    elif device.fault and not isinstance(error, ModbusIOException) and \
+                            not isinstance(error, ConnectionException):
+                        device.set_fault(False)
 
-                if error is not None:
-                    raise error
-            except ObjectDeletedError:
-                return None
-        else:
-            point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
+                    if error is not None:
+                        raise error
+                except ObjectDeletedError:
+                    return None
+            else:
+                point_store = poll_point(self, client, network, device, point_list[0], update_point_store)
         return point_store
 
     @abstractmethod
