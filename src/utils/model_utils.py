@@ -45,8 +45,7 @@ def validate_json(value: str):
     objects = json.loads(value)
     return_value: dict = {}
     for obj in objects:
-        clean_obj: str = obj.lower()
-        clean_obj = clean_obj.replace(" ", "_")
+        clean_obj: str = obj.replace(" ", "_")
         clean_obj = re.sub('[^A-Za-z0-9_]+', '', clean_obj)
         return_value[clean_obj] = objects[obj]
     return json.dumps(return_value)
