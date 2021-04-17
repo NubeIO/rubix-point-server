@@ -17,6 +17,7 @@ class ModbusPointModel(PointMixinModel):
     data_type = db.Column(db.Enum(ModbusDataType), nullable=False, default=ModbusDataType.RAW)
     data_endian = db.Column(db.Enum(ModbusDataEndian), nullable=False, default=ModbusDataEndian.BEB_LEW)
     modbus_device_uuid_constraint = db.Column(db.String, nullable=False)
+    write_value_once = db.Column(db.Boolean(), nullable=False, default=False)
 
     __table_args__ = (
         UniqueConstraint('register', 'function_code', 'modbus_device_uuid_constraint'),

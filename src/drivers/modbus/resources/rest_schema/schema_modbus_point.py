@@ -28,6 +28,11 @@ modbus_point_all_attributes['data_endian'] = {
     'dict': 'data_endian.name'
 }
 
+modbus_point_all_attributes['write_value_once'] = {
+    'type': bool,
+}
+
+
 modbus_poll_non_existing_attributes = {
     'network_rtu_port': {
         'type': str,
