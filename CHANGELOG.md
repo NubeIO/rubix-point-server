@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.6.0](https://github.com/NubeIO/rubix-point-server/tree/v1.6.0) (2020-04-18)
+### Added
+- Tag Keys should support camel case
+- Modbus On point write dont poll write value again 
+
 ## [v1.5.9](https://github.com/NubeIO/rubix-point-server/tree/v1.5.9) (2020-04-12)
 ### Added
 - Fix: math apply_scale function
