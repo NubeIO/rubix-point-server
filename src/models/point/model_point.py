@@ -123,6 +123,30 @@ class PointModel(ModelBase):
             raise ValueError("history_interval needs to be at least 1, default is 15 (in minutes)")
         return value
 
+    @validates('input_min')
+    def validate_input_min(self, _, value):
+        if value is not None and self.input_max is not None and value > self.input_max:
+            raise ValueError("input_min cannot be greater than input_max")
+        return value
+
+    @validates('input_max')
+    def validate_input_max(self, _, value):
+        if self.input_min is not None and value is not None and self.input_min > value:
+            raise ValueError("input_min cannot be greater than input_max")
+        return value
+
+    @validates('scale_min')
+    def validate_scale_min(self, _, value):
+        if value is not None and self.scale_max is not None and value > self.scale_max:
+            raise ValueError("scale_min cannot be greater than scale_max")
+        return value
+
+    @validates('scale_max')
+    def validate_scale_max(self, _, value):
+        if self.scale_min is not None and value is not None and self.scale_min > value:
+            raise ValueError("scale_min cannot be greater than scale_max")
+        return value
+
     def get_model_event(self) -> ModelEvent:
         return ModelEvent.POINT
 
