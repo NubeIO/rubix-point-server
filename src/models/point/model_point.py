@@ -70,9 +70,9 @@ class PointModel(ModelBase):
     @validates('value_operation')
     def validate_value_operation(self, _, value):
         try:
-            if value.strip():
+            if value and value.strip():
                 eval_arithmetic_expression(value.lower().replace('x', str(random.randint(1, 9))))
-        except Exception as e:
+        except Exception:
             raise ValueError("Invalid value_operation, must be a valid arithmetic expression")
         return value
 
@@ -202,7 +202,7 @@ class PointModel(ModelBase):
 
     @classmethod
     def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
-        -> float or None:
+            -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
         if value > input_max:

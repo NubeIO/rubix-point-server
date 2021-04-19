@@ -1,5 +1,5 @@
-from mrb.mapper import api_to_topic_mapper
-from mrb.message import Response, HttpMethod
+from flask import Response
+from rubix_http.request import gw_request
 from sqlalchemy.orm import validates
 
 from src import db
@@ -40,10 +40,9 @@ class MPGBPMapping(ModelBase):
     @validates('bacnet_point_uuid')
     def validate_bacnet_point_uuid(self, _, value):
         if value:
-            response: Response = api_to_topic_mapper(api=f'/api/bacnet/points/uuid/{value}',
-                                                     destination_identifier='bacnet', http_method=HttpMethod.GET)
-            if response.error:
-                raise ValueError(response.error_message)
+            response: Response = gw_request(api=f'/bacnet/api/bacnet/points/uuid/{value}')
+            if response.status_code != 200:
+                raise ValueError(f"bacnet_point_uuid = {value}, does not exist")
         return value
 
     @validates('bacnet_point_name')
