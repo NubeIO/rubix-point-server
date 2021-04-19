@@ -4,11 +4,12 @@ from abc import abstractmethod
 from typing import Callable, Union, List
 
 import gevent
+from flask import current_app
 from gevent import sleep
-from mrb.mapper import api_to_topic_mapper
-from mrb.message import HttpMethod
 from paho.mqtt.client import MQTTMessage
 from registry.registry import RubixRegistry
+from rubix_http.method import HttpMethod
+from rubix_http.request import gw_request
 from rubix_mqtt.mqtt import MqttClientBase
 
 from src import FlaskThread
@@ -28,6 +29,7 @@ class MqttListener(MqttClientBase):
     SEPARATOR: str = '/'
 
     def __init__(self):
+        self.__app_context = current_app.app_context
         self.__wires_plat: Union[dict, None] = None
         self.__config: Union[MqttSetting, None] = None
         MqttClientBase.__init__(self)
@@ -40,8 +42,7 @@ class MqttListener(MqttClientBase):
     def wires_plat(self) -> Union[dict, None]:
         return self.__wires_plat
 
-    def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None,
-              loop_forever: bool = True):
+    def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None):
         self.__config = config
         self.__wires_plat: dict = RubixRegistry().read_wires_plat()
         if not self.__wires_plat:
@@ -57,7 +58,7 @@ class MqttListener(MqttClientBase):
             subscribe_topics.append(topic)
             FlaskThread(target=self.__resubscribe_value_topic, args=(topic,)).start()
         logger.info(f'Listening at: {subscribe_topics}')
-        super().start(config, subscribe_topics, callback, loop_forever)
+        super().start(config, subscribe_topics, callback)
 
     def __resubscribe_value_topic(self, topic):
         """
@@ -88,14 +89,15 @@ class MqttListener(MqttClientBase):
     @exception_handler
     def _on_message(self, client, userdata, message: MQTTMessage):
         logger.debug(f'Listener Topic: {message.topic}, Message: {message.payload}')
-        if not message.payload:
-            return
-        if self.get_listener_topic_prefix() in message.topic:
-            self.__check_and_clear_listener_topic(message)
-        elif self.get_value_topic_prefix() in message.topic:
-            self.__check_and_clear_value_topic(message)
-        else:
-            self.__clear_mqtt_retain_value(message)
+        with self.__app_context():
+            if not message.payload:
+                return
+            if self.get_listener_topic_prefix() in message.topic:
+                self.__check_and_clear_listener_topic(message)
+            elif self.get_value_topic_prefix() in message.topic:
+                self.__check_and_clear_value_topic(message)
+            else:
+                self.__clear_mqtt_retain_value(message)
 
     def __check_and_clear_listener_topic(self, message: MQTTMessage):
         topic: List[str] = message.topic.split(self.SEPARATOR)
@@ -249,16 +251,17 @@ class MqttListener(MqttClientBase):
         priority = payload.get('priority', None)
         # Requesting API instead querying directly, coz API itself have the queueing feature for API call
         # It queues value for same API call
-        api_to_topic_mapper(api=f"/api/generic/points_value/uuid/{point_uuid}",
-                            destination_identifier='ps',
-                            body={
-                                "value": value,
-                                'value_raw': value_raw,
-                                'fault': fault,
-                                'fault_message': fault_message,
-                                'priority': priority
-                            },
-                            http_method=HttpMethod.PATCH)
+        gw_request(
+            api=f"/ps/api/generic/points_value/uuid/{point_uuid}",
+            body={
+                "value": value,
+                'value_raw': value_raw,
+                'fault': fault,
+                'fault_message': fault_message,
+                'priority': priority
+            },
+            http_method=HttpMethod.PATCH
+        )
 
     @abstractmethod
     def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = False):

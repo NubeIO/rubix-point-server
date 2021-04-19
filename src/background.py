@@ -3,7 +3,6 @@ from threading import Thread
 
 from flask import current_app
 from gevent import thread
-from mrb.brige import MqttRestBridge
 
 from .setting import AppSetting
 
@@ -40,7 +39,6 @@ class Background:
                     continue
                 mqtt_client = MqttClient()
                 FlaskThread(target=mqtt_client.start, daemon=True, kwargs={'config': config}).start()
-
         if setting.services.histories:
             from src.services.histories.history_local import HistoryLocal
             FlaskThread(target=HistoryLocal().sync_interval, daemon=True).start()
@@ -75,10 +73,8 @@ class Background:
 
         # Sync
         logger.info("Starting Sync Services...")
-        if setting.drivers.bridge and setting.mqtt_rest_bridge_setting.enabled:
-            FlaskThread(target=MqttRestBridge(port=setting.port, identifier=setting.identifier, prod=setting.prod,
-                                              mqtt_setting=setting.mqtt_rest_bridge_setting,
-                                              callback=Background.sync_on_start).start, daemon=True).start()
+
+        Background.sync_on_start()
 
         if setting.services.mqtt and any(config.enabled for config in setting.mqtt_settings):
             from src.services.points_registry import PointsRegistry
@@ -90,16 +86,14 @@ class Background:
 
     @staticmethod
     def sync_on_start():
-        from mrb.mapper import api_to_topic_mapper
-        from mrb.message import HttpMethod
+        from rubix_http.request import gw_request
         from .models.point.model_point_store import PointStoreModel
 
         """Sync mapped points values from LoRa > Generic points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/lp_to_gp", 'destination_identifier': 'lora',
-                                                        'http_method': HttpMethod.GET}).start()
+        gw_request(api='/lora/api/sync/lp_to_gp')
 
         """Sync mapped points values from BACnet > Generic points values"""
-        FlaskThread(target=api_to_topic_mapper, kwargs={'api': "/api/sync/bp_to_gp", 'destination_identifier': 'bacnet',
-                                                        'http_method': HttpMethod.GET}).start()
+        gw_request(api='/bacnet/api/sync/bp_to_gp')
+
         """Sync mapped points values from Modbus > Generic | BACnet points values"""
-        PointStoreModel.sync_points_values_mp_to_gbp_process(force_sync=True)
+        PointStoreModel.sync_points_values_mp_to_gbp_process()

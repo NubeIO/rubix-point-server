@@ -3,7 +3,6 @@ import os
 from typing import List
 
 from flask import Flask
-from mrb.setting import MqttSetting as MqttRestBridgeSetting
 from rubix_mqtt.setting import MqttSettingBase
 
 
@@ -136,8 +135,6 @@ class AppSetting:
         self.__driver_setting = DriverSetting()
         self.__influx_setting = InfluxSetting()
         self.__postgres_setting = PostgresSetting()
-        self.__mqtt_rest_bridge_setting = MqttRestBridgeSetting()
-        self.__mqtt_rest_bridge_setting.name = 'ps_mqtt_rest_bridge_listener'
         self.__mqtt_settings: List[MqttSetting] = [MqttSetting()]
         self.__cleaner_setting = CleanerSetting()
 
@@ -186,10 +183,6 @@ class AppSetting:
         return self.__mqtt_settings
 
     @property
-    def mqtt_rest_bridge_setting(self) -> MqttRestBridgeSetting:
-        return self.__mqtt_rest_bridge_setting
-
-    @property
     def cleaner(self) -> CleanerSetting:
         return self.__cleaner_setting
 
@@ -212,7 +205,6 @@ class AppSetting:
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
         self.__postgres_setting = self.__postgres_setting.reload(data.get(PostgresSetting.KEY))
-        self.__mqtt_rest_bridge_setting = self.__mqtt_rest_bridge_setting.reload(data.get('mqtt_rest_bridge_listener'))
         self.__cleaner_setting = self.__cleaner_setting.reload(data.get(CleanerSetting.KEY))
 
         mqtt_settings = data.get(MqttSetting.KEY, [])
