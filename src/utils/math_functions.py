@@ -3,7 +3,7 @@ import operator as op
 
 # supported operators
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul, ast.Div: op.truediv, ast.FloorDiv: op.floordiv,
-             ast.Pow: op.pow, ast.Mod: op.mod}
+             ast.Pow: op.pow, ast.Mod: op.mod, ast.USub: op.neg, ast.UAdd: op.pos}
 
 
 def eval_arithmetic_expression(expression: str):
@@ -22,6 +22,10 @@ def eval_arithmetic_expression(expression: str):
     225
     >>> eval_arithmetic_expression('15%2')
     1
+    >>> eval_arithmetic_expression('-15+2')
+    13
+    >>> eval_arithmetic_expression('+15-2')
+    13
     """
     return __eval(ast.parse(expression, mode='eval').body)
 
@@ -31,5 +35,7 @@ def __eval(node):
         return node.n
     elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return operators[type(node.op)](__eval(node.left), __eval(node.right))
+    elif isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
+        return operators[type(node.op)](__eval(node.operand))
     else:
         raise TypeError(node)
