@@ -1,6 +1,7 @@
 import os
 from abc import ABC
 
+from flask_migrate import Migrate
 from gunicorn.app.base import BaseApplication
 from gunicorn.arbiter import Arbiter
 from gunicorn.glogging import Logger
@@ -61,9 +62,15 @@ class GunicornFlaskApplication(BaseApplication, ABC):
         self.application = create_app(self._app_setting)
         return self.application
 
+    def run_migration(self):
+        from flask_migrate import upgrade, Migrate
+        Migrate(self.application, db)
+        upgrade(directory='./migrations')
+
     def wsgi(self):
         output = super(GunicornFlaskApplication, self).wsgi()
         with self.application.app_context():
+            self.run_migration()
             from src.background import Background
             Background.run()
         return output
