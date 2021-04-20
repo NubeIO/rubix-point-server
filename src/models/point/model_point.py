@@ -39,7 +39,7 @@ class PointModel(ModelBase):
                                            cascade="all,delete")
     cov_threshold = db.Column(db.Float, nullable=False, default=0)
     value_round = db.Column(db.Integer(), nullable=False, default=2)
-    value_operation = db.Column(db.String, nullable=True)
+    value_operation = db.Column(db.String, nullable=True, default="x + 0")
     input_min = db.Column(db.Float())
     input_max = db.Column(db.Float())
     scale_min = db.Column(db.Float())
