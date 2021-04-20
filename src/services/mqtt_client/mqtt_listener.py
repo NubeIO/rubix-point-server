@@ -246,13 +246,15 @@ class MqttListener(MqttClientBase):
             return
         value = payload.get('value', None)
         priority = payload.get('priority', None)
+        priority_array_write = payload.get('priority_array_write', None)
         # Requesting API instead querying directly, coz API itself have the queueing feature for API call
         # It queues value for same API call
         gw_request(
             api=f"/ps/api/generic/points_value/uuid/{point_uuid}",
             body={
                 "value": value,
-                'priority': priority
+                'priority': priority,
+                'priority_array_write': priority_array_write
             },
             http_method=HttpMethod.PATCH
         )

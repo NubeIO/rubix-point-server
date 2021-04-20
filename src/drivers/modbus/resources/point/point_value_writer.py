@@ -11,6 +11,7 @@ class ModbusPointValueWriterBase(RubixResource):
     patch_parser = reqparse.RequestParser()
     patch_parser.add_argument('value', type=float, required=False)
     patch_parser.add_argument('priority', type=int, required=False)
+    patch_parser.add_argument('priority_array_write', type=dict, required=False)
 
     @classmethod
     @abstractmethod
@@ -26,7 +27,8 @@ class ModbusPointValueWriterBase(RubixResource):
         if not point.writable:
             raise BadDataException('Point is not writable')
         point.update_priority_value(value=data.get('value'),
-                                    priority=data.get('priority'))
+                                    priority=data.get('priority'),
+                                    priority_array_write=data.get('priority_array_write'))
         return {}
 
 
