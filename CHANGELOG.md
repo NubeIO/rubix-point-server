@@ -1,4 +1,13 @@
 # CHANGELOG
+## [v1.6.1](https://github.com/NubeIO/rubix-point-server/tree/v1.6.1) (2020-04-20)
+### Added
+- Add input and scale min, max validation
+- mqtt-rest-bridge replacement with rubix-http
+- Cascade delete points mapping
+- Add default value for value_operation
+- Support both priority_array_write and write value on priority
+- Add Unary arithmetic operator
+
 ## [v1.6.0](https://github.com/NubeIO/rubix-point-server/tree/v1.6.0) (2020-04-18)
 ### Added
 - Tag Keys should support camel case
