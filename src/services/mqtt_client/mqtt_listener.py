@@ -102,23 +102,23 @@ class MqttListener(MqttClientBase):
     def __check_and_clear_listener_topic(self, message: MQTTMessage):
         topic: List[str] = message.topic.split(self.SEPARATOR)
         if len(topic) == self._mqtt_listener_topic_by_uuid_length() and topic[7] == 'uuid':
-            self.__update_generic_point_by_uuid(topic, message)
+            self.__update_generic_point_by_uuid_process(topic, message)
         elif len(topic) == self._mqtt_listener_topic_by_name_length() and topic[7] == 'name':
-            self.__update_generic_point_by_name(topic, message)
+            self.__update_generic_point_by_name_process(topic, message)
         elif len(topic) == self._mqtt_schedules_value_topic_length():
             self.__check_and_clear_schedule(topic, message)
             return
         self.__clear_mqtt_retain_value(message, force_clear=True)
 
-    def __update_generic_point_by_uuid(self, topic: List[str], message: MQTTMessage):
+    def __update_generic_point_by_uuid_process(self, topic: List[str], message: MQTTMessage):
         point_uuid: str = topic[-1]
         point: PointModel = PointModel.find_by_uuid(point_uuid)
         if point is None or (point and point.driver != Drivers.GENERIC):
             logger.warning(f'No point with point.uuid={point_uuid}')
         else:
-            gevent.spawn(self.__update_generic_point_store_process, message, point.uuid)
+            gevent.spawn(self.__update_generic_point_store, message, point.uuid)
 
-    def __update_generic_point_by_name(self, topic: List[str], message: MQTTMessage):
+    def __update_generic_point_by_name_process(self, topic: List[str], message: MQTTMessage):
         point_name: str = topic[-1]
         device_name: str = topic[-2]
         network_name: str = topic[-3]
@@ -127,7 +127,7 @@ class MqttListener(MqttClientBase):
             logger.warning(f'No point with network.name={network_name}, device.name={device_name}, '
                            f'point.name={point_name}')
         else:
-            gevent.spawn(self.__update_generic_point_store_process, message, point.uuid)
+            gevent.spawn(self.__update_generic_point_store, message, point.uuid)
 
     def __check_and_clear_value_topic(self, message: MQTTMessage):
         """
@@ -238,27 +238,23 @@ class MqttListener(MqttClientBase):
             self._publish_mqtt_value(message.topic, '', True)
 
     @staticmethod
-    def __update_generic_point_store_process(message: MQTTMessage, point_uuid: str):
+    def __update_generic_point_store(message: MQTTMessage, point_uuid: str):
         try:
             payload: dict = json.loads(message.payload)
         except Exception as e:
             logger.warning(f'Invalid generic point COV payload for point.uuid={point_uuid}. Here, error=({str(e)})')
             return
         value = payload.get('value', None)
-        value_raw = payload.get('value_raw', None)
-        fault = payload.get('fault', None)
-        fault_message = payload.get('fault_message', '')
         priority = payload.get('priority', None)
+        priority_array_write = payload.get('priority_array_write', None)
         # Requesting API instead querying directly, coz API itself have the queueing feature for API call
         # It queues value for same API call
         gw_request(
             api=f"/ps/api/generic/points_value/uuid/{point_uuid}",
             body={
                 "value": value,
-                'value_raw': value_raw,
-                'fault': fault,
-                'fault_message': fault_message,
-                'priority': priority
+                'priority': priority,
+                'priority_array_write': priority_array_write
             },
             http_method=HttpMethod.PATCH
         )

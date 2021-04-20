@@ -165,30 +165,28 @@ class PointModel(ModelBase):
 
         return self
 
-    def update_point_store(self, value: float, priority: int, value_raw: str, fault: bool, fault_message: str):
-        self.update_priority_value(priority, value, value_raw)
+    def update_point_store(self, value: float, priority: int, priority_array_write: dict):
+        self.update_priority_value(value, priority, priority_array_write)
         highest_priority_value: float = PriorityArrayModel.get_highest_priority_value(self.uuid)
-        self.update_point_store_value(highest_priority_value, value_raw, fault, fault_message)
+        self.update_point_store_value(highest_priority_value)
 
-    def update_point_store_value(self, highest_priority_value: float, value_raw: str = None, fault: bool = False,
-                                 fault_message: str = ''):
+    def update_point_store_value(self, highest_priority_value: float):
         point_store = PointStoreModel(point_uuid=self.uuid,
-                                      value_original=highest_priority_value,
-                                      value_raw=value_raw if value_raw is not None else highest_priority_value,
-                                      fault=fault,
-                                      fault_message=fault_message)
+                                      value_original=highest_priority_value)
         updated = self.update_point_value(point_store, self.driver)
         if updated:
             self.publish_cov(point_store)
         db.session.commit()
 
-    def update_priority_value(self, priority, value, value_raw):
+    def update_priority_value(self, value: float, priority: int, priority_array_write: dict):
+        if priority_array_write:
+            PriorityArrayModel.filter_by_point_uuid(self.uuid).update(priority_array_write)
+            db.session.commit()
+            return
         if not priority:
             priority = 16
         if priority not in range(1, 17):
             raise ValueError('priority should be in range(1, 17)')
-        if value_raw is not None and value is not None:
-            raise ValueError('Invalid, cannot pass both value_raw and value')
         if priority:
             PriorityArrayModel.filter_by_point_uuid(self.uuid).update({f"_{priority}": value})
             db.session.commit()

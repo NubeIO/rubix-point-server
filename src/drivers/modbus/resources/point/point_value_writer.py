@@ -10,8 +10,8 @@ from src.drivers.modbus.models.point import ModbusPointModel
 class ModbusPointValueWriterBase(RubixResource):
     patch_parser = reqparse.RequestParser()
     patch_parser.add_argument('value', type=float, required=False)
-    patch_parser.add_argument('value_raw', type=str, required=False)
     patch_parser.add_argument('priority', type=int, required=False)
+    patch_parser.add_argument('priority_array_write', type=dict, required=False)
 
     @classmethod
     @abstractmethod
@@ -28,7 +28,7 @@ class ModbusPointValueWriterBase(RubixResource):
             raise BadDataException('Point is not writable')
         point.update_priority_value(value=data.get('value'),
                                     priority=data.get('priority'),
-                                    value_raw=data.get('value_raw'))
+                                    priority_array_write=data.get('priority_array_write'))
         return {}
 
 
