@@ -203,12 +203,13 @@ class PointModel(ModelBase):
             -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
-        if value > input_max:
-            return output_max
-        elif value < input_min:
-            return output_min
+        scaled = ((value - input_min) / (input_max - input_min)) * (output_max - output_min) + output_min
+        if scaled > max(output_max, output_min):
+            return max(output_max, output_min)
+        elif scaled < min(output_max, output_min):
+            return min(output_max, output_min)
         else:
-            return ((value - input_min) / (input_max - input_min)) * (output_max - output_min) + output_min
+            return scaled
 
     def apply_point_type(self, value: float) -> float:
         return value
