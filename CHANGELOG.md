@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.6.2-rc1](https://github.com/NubeIO/rubix-point-server/tree/v1.6.2-rc1) (2020-04-21)
+### Added
+- Test release
+
 ## [v1.6.1](https://github.com/NubeIO/rubix-point-server/tree/v1.6.1) (2020-04-20)
 ### Added
 - Add input and scale min, max validation
