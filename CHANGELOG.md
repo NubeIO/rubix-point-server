@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.6.2](https://github.com/NubeIO/rubix-point-server/tree/v1.6.2) (2020-04-23)
+### Added
+- Update scale function
+- Fix: point patch, value update issue
+
 ## [v1.6.1](https://github.com/NubeIO/rubix-point-server/tree/v1.6.1) (2020-04-20)
 ### Added
 - Add input and scale min, max validation

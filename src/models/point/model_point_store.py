@@ -106,7 +106,7 @@ class PointStoreModel(PointStoreModelMixin):
 
     def __sync_point_value_gp_to_bp(self):
         response: Response = gw_request(api=f"/bacnet/api/mappings/bp_gp/generic/{self.point_uuid}")
-        if not response.status_code == 200:
+        if response.status_code == 200:
             gw_request(
                 api=f"/bacnet/api/bacnet/points/uuid/{json.loads(response.data).get('bacnet_point_uuid')}",
                 body={"priority_array_write": {"_16": self.value}},
@@ -114,7 +114,7 @@ class PointStoreModel(PointStoreModelMixin):
             )
 
     def __sync_point_value_gp_to_bp_process(self):
-        gevent.spawn(self.__sync_point_value_gp_to_bp())
+        gevent.spawn(self.__sync_point_value_gp_to_bp)
 
     def sync_point_value_with_mapping_mp_to_gbp(self, generic_point_uuid: str, bacnet_point_uuid: str,
                                                 gp: bool = True, bp: bool = True):
