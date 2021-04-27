@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.6.3](https://github.com/NubeIO/rubix-point-server/tree/v1.6.3) (2020-04-27)
+### Added
+- Update scale database schema for postgres https://github.com/NubeIO/rubix-point-server/pull/318
+
 ## [v1.6.2](https://github.com/NubeIO/rubix-point-server/tree/v1.6.2) (2020-04-23)
 ### Added
 - Update scale function
