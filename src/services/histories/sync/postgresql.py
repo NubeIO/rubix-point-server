@@ -112,7 +112,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
-            _point: tuple = (self.__wires_plat.get('global_uuid'), point.device.network.uuid, point.device.uuid,
+            _point: tuple = (point.device.network.uuid, point.device.uuid,
                              point.uuid, point.driver.name)
             points_list.append(_point)
 
@@ -191,11 +191,13 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         networks_list: List[tuple] = []
         for network in NetworkModel.find_all():
             networks_list.append((network.uuid, network.name, network.enable, network.fault, network.history_enable,
-                                  network.driver.name, network.created_on, network.updated_on))
+                                  network.driver.name, network.created_on, network.updated_on,
+                                  self.__wires_plat.get('global_uuid')))
         if len(networks_list):
             logger.debug(f"Storing networks_list: {networks_list}")
             query_network = f'INSERT INTO {self.__networks_table_name} ' \
-                            f'(uuid, name, enable, fault, history_enable, driver, created_on, updated_on) ' \
+                            f'(uuid, name, enable, fault, history_enable, driver, created_on, updated_on, ' \
+                            f'wires_plat_global_uuid) ' \
                             f'VALUES %s ON CONFLICT (uuid) ' \
                             f'DO UPDATE SET ' \
                             f'name = excluded.name, ' \
@@ -204,7 +206,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                             f'history_enable = excluded.history_enable, ' \
                             f'driver = excluded.driver, ' \
                             f'created_on = excluded.created_on, ' \
-                            f'updated_on = excluded.updated_on'
+                            f'updated_on = excluded.updated_on, ' \
+                            f'wires_plat_global_uuid = excluded.wires_plat_global_uuid'
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
@@ -386,10 +389,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         if len(points_list):
             logger.debug(f"Storing point_list: {points_list}")
             query_point = f'INSERT INTO {self.__points_table_name} ' \
-                          f'(wires_plat_global_uuid, network_uuid, device_uuid, point_uuid, driver) ' \
+                          f'(network_uuid, device_uuid, point_uuid, driver) ' \
                           f'VALUES %s ON CONFLICT (point_uuid) ' \
                           f'DO UPDATE SET ' \
-                          f'wires_plat_global_uuid = excluded.wires_plat_global_uuid, ' \
                           f'network_uuid = excluded.network_uuid, ' \
                           f'device_uuid = excluded.device_uuid, ' \
                           f'driver = excluded.driver'
@@ -472,7 +474,10 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                         f'history_enable BOOLEAN,' \
                         f'driver VARCHAR,' \
                         f'created_on TIMESTAMP,' \
-                        f'updated_on TIMESTAMP);'
+                        f'updated_on TIMESTAMP,' \
+                        f'wires_plat_global_uuid VARCHAR,' \
+                        f'CONSTRAINT fk_{self.__wires_plat_table_name} FOREIGN KEY(wires_plat_global_uuid) ' \
+                        f'REFERENCES {self.__wires_plat_table_name}(global_uuid) ON DELETE RESTRICT);'
         query_modbus_network = f'CREATE TABLE IF NOT EXISTS {self.__modbus_networks_table_name} ' \
                                f'(uuid VARCHAR PRIMARY KEY,' \
                                f'rtu_port VARCHAR,' \
@@ -488,6 +493,13 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                f'point_interval_ms_between_points NUMERIC,' \
                                f'CONSTRAINT fk_{self.__networks_table_name} FOREIGN KEY(uuid) ' \
                                f'REFERENCES {self.__networks_table_name}(uuid) ON DELETE RESTRICT);'
+        query_generic_network_tag = f'CREATE TABLE IF NOT EXISTS {self.__generic_network_tags_table_name} ' \
+                                    f'(uuid VARCHAR,' \
+                                    f'tag_name VARCHAR, ' \
+                                    f'tag_value VARCHAR,' \
+                                    f'PRIMARY KEY (uuid, tag_name),' \
+                                    f'CONSTRAINT fk_{self.__networks_table_name} FOREIGN KEY(uuid) ' \
+                                    f'REFERENCES {self.__networks_table_name}(uuid) ON DELETE RESTRICT);'
         query_device = f'CREATE TABLE IF NOT EXISTS {self.__devices_table_name} ' \
                        f'(uuid VARCHAR PRIMARY KEY,' \
                        f'network_uuid VARCHAR,' \
@@ -510,24 +522,18 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                               f'modbus_network_uuid_constraint VARCHAR,' \
                               f'CONSTRAINT fk_{self.__devices_table_name} FOREIGN KEY(uuid) ' \
                               f'REFERENCES {self.__devices_table_name}(uuid) ON DELETE RESTRICT);'
-        query_generic_network_tag = f'CREATE TABLE IF NOT EXISTS {self.__generic_network_tags_table_name} ' \
-                                    f'(uuid VARCHAR,' \
-                                    f'tag_name VARCHAR, ' \
-                                    f'tag_value VARCHAR,' \
-                                    f'PRIMARY KEY (uuid, tag_name));'
         query_generic_device_tag = f'CREATE TABLE IF NOT EXISTS {self.__generic_device_tags_table_name} ' \
                                    f'(uuid VARCHAR,' \
                                    f'tag_name VARCHAR, ' \
                                    f'tag_value VARCHAR,' \
-                                   f'PRIMARY KEY (uuid, tag_name));'
+                                   f'PRIMARY KEY (uuid, tag_name),' \
+                                   f'CONSTRAINT fk_{self.__devices_table_name} FOREIGN KEY(uuid) ' \
+                                   f'REFERENCES {self.__devices_table_name}(uuid) ON DELETE RESTRICT);'
         query_point = f'CREATE TABLE IF NOT EXISTS {self.__points_table_name} ' \
-                      f'(wires_plat_global_uuid VARCHAR(80), ' \
-                      f'network_uuid VARCHAR(80),' \
+                      f'(network_uuid VARCHAR(80),' \
                       f'device_uuid VARCHAR(80), ' \
                       f'point_uuid VARCHAR PRIMARY KEY,' \
                       f'driver VARCHAR(80),' \
-                      f'CONSTRAINT fk_{self.__wires_plat_table_name} FOREIGN KEY(wires_plat_global_uuid) ' \
-                      f'REFERENCES {self.__wires_plat_table_name}(global_uuid) ON DELETE RESTRICT, ' \
                       f'CONSTRAINT fk_{self.__networks_table_name} FOREIGN KEY(network_uuid) ' \
                       f'REFERENCES {self.__networks_table_name}(uuid) ON DELETE RESTRICT, ' \
                       f'CONSTRAINT fk_{self.__devices_table_name} FOREIGN KEY(device_uuid) ' \
