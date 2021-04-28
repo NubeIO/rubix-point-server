@@ -148,8 +148,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             query_wires_plat = f'INSERT INTO {self.__wires_plat_table_name} ' \
                                f'(global_uuid , client_id, client_name, site_id, site_name, device_id, device_name, ' \
                                f'site_address, site_city, site_state, site_zip, site_country, site_lat, site_lon, ' \
+                               f'time_zone, ' \
                                f'created_on, updated_on) ' \
-                               f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ' \
+                               f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ' \
                                f'ON CONFLICT (global_uuid) DO UPDATE SET ' \
                                f'client_id = excluded.client_id,' \
                                f'client_name = excluded.client_name,' \
@@ -164,6 +165,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                f'site_country = excluded.site_country,' \
                                f'site_lat = excluded.site_lat,' \
                                f'site_lon = excluded.site_lon,' \
+                               f'time_zone = excluded.time_zone,' \
                                f'created_on = excluded.created_on,' \
                                f'updated_on = excluded.updated_on'
             with self.__client:
@@ -176,7 +178,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                              self.__wires_plat.get('site_address'), self.__wires_plat.get('site_city'),
                                              self.__wires_plat.get('site_state'), self.__wires_plat.get('site_zip'),
                                              self.__wires_plat.get('site_country'), self.__wires_plat.get('site_lat'),
-                                             self.__wires_plat.get('site_lon'), self.__wires_plat.get('created_on'),
+                                             self.__wires_plat.get('site_lon'), self.__wires_plat.get('time_zone'),
+                                             self.__wires_plat.get('created_on'),
                                              self.__wires_plat.get('updated_on'))
                         curs.execute(query_wires_plat, wires_plat)
 
@@ -464,6 +467,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                            f'site_country VARCHAR,' \
                            f'site_lat VARCHAR,' \
                            f'site_lon VARCHAR,' \
+                           f'time_zone VARCHAR,' \
                            f'created_on TIMESTAMP,' \
                            f'updated_on TIMESTAMP);'
         query_network = f'CREATE TABLE IF NOT EXISTS {self.__networks_table_name} ' \
