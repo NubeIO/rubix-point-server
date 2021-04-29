@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.6.4](https://github.com/NubeIO/rubix-point-server/tree/v1.6.4) (2020-04-30)
+### Added
+- Update scale database schema for postgres added point name and wires-plat time zone
+
 ## [v1.6.3](https://github.com/NubeIO/rubix-point-server/tree/v1.6.3) (2020-04-27)
 ### Added
 - Update scale database schema for postgres https://github.com/NubeIO/rubix-point-server/pull/318
