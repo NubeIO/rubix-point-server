@@ -113,9 +113,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
             _point: tuple = (point.device.network.uuid, point.device.uuid,
-                             point.uuid, point.driver.name)
+                             point.uuid, point.driver.name, point.name)
             points_list.append(_point)
-
+            
             if point.tags:
                 point_tags: dict = json.loads(point.tags)
                 # insert tags from point object
@@ -389,12 +389,13 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         if len(points_list):
             logger.debug(f"Storing point_list: {points_list}")
             query_point = f'INSERT INTO {self.__points_table_name} ' \
-                          f'(network_uuid, device_uuid, point_uuid, driver) ' \
+                          f'(network_uuid, device_uuid, point_uuid, driver, name) ' \
                           f'VALUES %s ON CONFLICT (point_uuid) ' \
                           f'DO UPDATE SET ' \
                           f'network_uuid = excluded.network_uuid, ' \
                           f'device_uuid = excluded.device_uuid, ' \
-                          f'driver = excluded.driver'
+                          f'driver = excluded.driver,' \
+                          f'name = excluded.name'
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
@@ -534,6 +535,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                       f'device_uuid VARCHAR(80), ' \
                       f'point_uuid VARCHAR PRIMARY KEY,' \
                       f'driver VARCHAR(80),' \
+                      f'name VARCHAR,' \
                       f'CONSTRAINT fk_{self.__networks_table_name} FOREIGN KEY(network_uuid) ' \
                       f'REFERENCES {self.__networks_table_name}(uuid) ON DELETE RESTRICT, ' \
                       f'CONSTRAINT fk_{self.__devices_table_name} FOREIGN KEY(device_uuid) ' \
