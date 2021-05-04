@@ -541,7 +541,7 @@ resolved_reference = "f403a73fee09108ab159fae49182a4841359750b"
 
 [[package]]
 name = "rubix-mqtt"
-version = "1.2.0"
+version = "1.1.0"
 description = "Rubix MQTT for creating MQTT connection"
 category = "main"
 optional = false
@@ -554,8 +554,8 @@ paho-mqtt = ">=1.5.1"
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/rubix-mqtt"
-reference = "v1.2.0"
-resolved_reference = "cd9070a4c4b6c352826b1a3dff1d1bc016285125"
+reference = "v1.1.0"
+resolved_reference = "a2a1895bcf5012f6503127936fad7eee667f8cf2"
 
 [[package]]
 name = "rubix-registry"
@@ -697,7 +697,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "d5585e0a79e5f3976b5f752dad7f8a9c9125c1601f12fce8f6d6d1a4b975905c"
+content-hash = "4df1489469e629f4cb4a22ed9f999ec7c5ae65c7140f2a31c05d6422783fcb71"
 
 [metadata.files]
 altgraph = [

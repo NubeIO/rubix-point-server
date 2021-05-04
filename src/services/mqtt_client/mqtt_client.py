@@ -56,11 +56,12 @@ class MqttClient(MqttListener, EventServiceBase):
         return super().config if isinstance(super().config, MqttSetting) else MqttSetting()
 
     @allow_only_on_prefix
-    def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None):
+    def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None,
+              loop_forever: bool = True):
         from src.event_dispatcher import EventDispatcher
         EventDispatcher().add_service(self)
         MqttRegistry().add(self)
-        super().start(config, subscribe_topics, callback)
+        super().start(config, subscribe_topics, callback, loop_forever)
 
     def _publish_cov(self, driver_name, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
                      point: PointModel, point_store: PointStoreModel):

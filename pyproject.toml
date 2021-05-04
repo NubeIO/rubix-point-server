@@ -18,7 +18,7 @@ schedule = "^0.6.0"
 psycopg2-binary = "^2.8.6"
 rubix-http = { git = "https://github.com/NubeIO/rubix-http", rev = "v1.1.1" }
 rubix-registry = { git = "https://github.com/NubeIO/rubix-registry", rev = "v1.0.0" }
-rubix-mqtt = { git = "https://github.com/NubeIO/rubix-mqtt", rev = "v1.2.0" }
+rubix-mqtt = { git = "https://github.com/NubeIO/rubix-mqtt", rev = "v1.1.0" }
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.1"

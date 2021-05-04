@@ -42,7 +42,8 @@ class MqttListener(MqttClientBase):
     def wires_plat(self) -> Union[dict, None]:
         return self.__wires_plat
 
-    def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None):
+    def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None,
+              loop_forever: bool = True):
         self.__config = config
         self.__wires_plat: dict = RubixRegistry().read_wires_plat()
         if not self.__wires_plat:
@@ -58,7 +59,7 @@ class MqttListener(MqttClientBase):
             subscribe_topics.append(topic)
             FlaskThread(target=self.__resubscribe_value_topic, args=(topic,)).start()
         logger.info(f'Listening at: {subscribe_topics}')
-        super().start(config, subscribe_topics, callback)
+        super().start(config, subscribe_topics, callback, loop_forever)
 
     def __resubscribe_value_topic(self, topic):
         """
