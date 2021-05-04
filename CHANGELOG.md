@@ -1,4 +1,9 @@
 # CHANGELOG
+# CHANGELOG
+## [v1.6.5](https://github.com/NubeIO/rubix-point-server/tree/v1.6.5) (2020-05-04)
+### Added
+- Start different process of MQTT messages
+
 ## [v1.6.4](https://github.com/NubeIO/rubix-point-server/tree/v1.6.4) (2020-04-30)
 ### Added
 - Update scale database schema for postgres added point name and wires-plat time zone
