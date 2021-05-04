@@ -3,7 +3,6 @@
     "generic": false,
     "modbus_rtu": true,
     "modbus_tcp": false,
-    "bridge": true
   },
   "services": {
     "mqtt": true,
