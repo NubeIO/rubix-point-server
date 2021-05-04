@@ -2,7 +2,7 @@
   "drivers": {
     "generic": false,
     "modbus_rtu": true,
-    "modbus_tcp": false,
+    "modbus_tcp": false
   },
   "services": {
     "mqtt": true,
@@ -21,7 +21,7 @@
     "verify_ssl": false,
     "timeout": 5,
     "retries": 3,
-    "timer": 1,
+    "timer": 5,
     "path": "",
     "measurement": "points",
     "attempt_reconnect_secs": 5
@@ -34,7 +34,7 @@
     "password": "password",
     "ssl_mode": "allow",
     "connect_timeout": 5,
-    "timer": 1,
+    "timer": 5,
     "table_prefix": "tbl",
     "attempt_reconnect_secs": 5
   },

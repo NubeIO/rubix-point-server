@@ -76,7 +76,7 @@ class InfluxSetting(BaseSetting):
         self.verify_ssl = False
         self.timeout = 5
         self.retries = 3
-        self.timer = 1
+        self.timer = 5
         self.path = ''
         self.measurement = 'points'
         self.attempt_reconnect_secs = 5
@@ -93,7 +93,7 @@ class PostgresSetting(BaseSetting):
         self.password = 'password'
         self.ssl_mode = 'allow'
         self.connect_timeout = 5
-        self.timer = 1
+        self.timer = 5
         self.table_prefix = 'tbl'
         self.attempt_reconnect_secs = 5
 
