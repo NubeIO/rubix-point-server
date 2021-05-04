@@ -97,13 +97,13 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                     for point_tag in point_tags:
                         tags[point_tag] = point_tags[point_tag]
                 tags.update({
-                    'point_uuid': point.uuid,
-                    'point_name': point.name,
-                    'edge_device_uuid': point.device.uuid,
-                    'edge_device_name': point.device.name,
-                    'network_uuid': point.device.network.uuid,
-                    'network_name': point.device.network.name,
-                    'driver': point.driver.name,
+                    'rubix_point_uuid': point.uuid,
+                    'rubix_point_name': point.name,
+                    'rubix_device_uuid': point.device.uuid,
+                    'rubix_device_name': point.device.name,
+                    'rubix_network_uuid': point.device.network.uuid,
+                    'rubix_network_name': point.device.network.name,
+                    'rubix_driver': point.driver.name,
                 })
                 fields = {
                     'id': point_store_history.id,

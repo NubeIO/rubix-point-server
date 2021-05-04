@@ -115,7 +115,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             _point: tuple = (point.device.network.uuid, point.device.uuid,
                              point.uuid, point.driver.name, point.name)
             points_list.append(_point)
-            
+
             if point.tags:
                 point_tags: dict = json.loads(point.tags)
                 # insert tags from point object
@@ -185,8 +185,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
                     except psycopg2.Error as e:
                         logger.error(str(e))
-            logger.info(f'Stored/updated 1 rows on '
-                        f'{self.__wires_plat_table_name} table')
+            logger.info(f'Stored/updated 1 rows on {self.__wires_plat_table_name} table')
         else:
             logger.debug(f"Nothing to store on {self.__wires_plat_table_name}")
 
