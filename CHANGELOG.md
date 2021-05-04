@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v1.6.5](https://github.com/NubeIO/rubix-point-server/tree/v1.6.5) (2020-05-04)
+### Added
+- Change automatic tag keys
+- Gunicorn worker timeout: 120
+- Postgres, InfluxDB sync timer: 5 minutes
+
 ## [v1.6.4](https://github.com/NubeIO/rubix-point-server/tree/v1.6.4) (2020-04-30)
 ### Added
 - Update scale database schema for postgres added point name and wires-plat time zone
