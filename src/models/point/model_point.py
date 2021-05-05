@@ -27,11 +27,11 @@ class PointModel(ModelBase):
     uuid = db.Column(db.String(80), primary_key=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     device_uuid = db.Column(db.String, db.ForeignKey('devices.uuid'), nullable=False)
-    enable = db.Column(db.Boolean(), nullable=False)
-    history_enable = db.Column(db.Boolean(), nullable=False, default=False)
+    enable = db.Column(db.Boolean(), nullable=False, default=True)
+    history_enable = db.Column(db.Boolean(), nullable=False, default=True)
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
-    writable = db.Column(db.Boolean, nullable=False, default=False)
+    writable = db.Column(db.Boolean, nullable=False, default=True)
     priority_array_write = db.relationship('PriorityArrayModel',
                                            backref='points',
                                            lazy=True,
