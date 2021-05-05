@@ -41,13 +41,14 @@ class GenericPointSingular(GenericPointBase):
         priority_array_write: dict = data.pop('priority_array_write') if data.get('priority_array_write') else {}
         if priority_array_write:
             PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
-            updated_priority_array_write: PriorityArrayModel = cls.get_point(uuid=point.uuid).priority_array_write
+            updated_priority_array_write: PriorityArrayModel = cls.get_priority_array_write(uuid=point.uuid)
             highest_priority_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
                 updated_priority_array_write)
             point.update_point_store_value(highest_priority_value=highest_priority_value)
-        updated_point: GenericPointModel = point.update(**data)
-        PointsRegistry().update_point(updated_point)
-        return updated_point
+        if data:
+            point.update(**data)
+            PointsRegistry().update_point(point)
+        return point
 
     @classmethod
     @marshal_with(generic_point_all_fields)
@@ -72,12 +73,22 @@ class GenericPointSingular(GenericPointBase):
     def get_point(cls, **kwargs) -> GenericPointModel:
         raise NotImplementedError
 
+    @classmethod
+    @abstractmethod
+    def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
+        raise NotImplementedError
+
 
 class GenericPointSingularByUUID(GenericPointSingular):
     @classmethod
     @abstractmethod
     def get_point(cls, **kwargs) -> GenericPointModel:
         return GenericPointModel.find_by_uuid(kwargs.get('uuid'))
+
+    @classmethod
+    @abstractmethod
+    def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
+        return PriorityArrayModel.filter_by_point_uuid(kwargs.get('uuid')).first()
 
 
 class GenericPointSingularByName(GenericPointSingular):
@@ -86,3 +97,9 @@ class GenericPointSingularByName(GenericPointSingular):
     def get_point(cls, **kwargs) -> GenericPointModel:
         return GenericPointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'),
                                               kwargs.get('point_name'))
+
+    @classmethod
+    @abstractmethod
+    def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
+        return GenericPointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'),
+                                              kwargs.get('point_name')).priority_array_write
