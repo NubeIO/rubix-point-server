@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.6.6](https://github.com/NubeIO/rubix-point-server/tree/v1.6.6) (2020-05-05)
+### Added
+- Optimization of point patch and point value patch
+
 ## [v1.6.5](https://github.com/NubeIO/rubix-point-server/tree/v1.6.5) (2020-05-04)
 ### Added
 - Change automatic tag keys
