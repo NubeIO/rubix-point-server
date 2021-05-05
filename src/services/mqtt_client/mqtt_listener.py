@@ -108,13 +108,13 @@ class MqttListener(MqttClientBase):
         elif len(topic) == self._mqtt_schedules_value_topic_length():
             self.__check_and_clear_schedule(topic, message)
             return
-        self.__clear_mqtt_retain_value(message, force_clear=True)
+        self.__clear_mqtt_retain_value(message, force_clear=True)  # listeners shouldn't have retain: True
 
     def __update_generic_point_by_uuid_process(self, topic: List[str], message: MQTTMessage):
         point_uuid: str = topic[-1]
         point: PointModel = PointModel.find_by_uuid(point_uuid)
-        if point is None or (point and point.driver != Drivers.GENERIC):
-            logger.warning(f'No point with point.uuid={point_uuid}')
+        if point is None or (point and (point.driver != Drivers.GENERIC or point.disable_mqtt)):
+            logger.warning(f'No generic point with disable_mqtt=False and point.uuid={point_uuid}')
         else:
             gevent.spawn(self.__update_generic_point_store, message, point.uuid)
 
@@ -123,9 +123,9 @@ class MqttListener(MqttClientBase):
         device_name: str = topic[-2]
         network_name: str = topic[-3]
         point: PointModel = PointModel.find_by_name(network_name, device_name, point_name)
-        if point is None or (point and point.driver != Drivers.GENERIC):
-            logger.warning(f'No point with network.name={network_name}, device.name={device_name}, '
-                           f'point.name={point_name}')
+        if point is None or (point and (point.driver != Drivers.GENERIC or point.disable_mqtt)):
+            logger.warning(f'No point with disable_mqtt=False and network.name={network_name}, '
+                           f'device.name={device_name}, point.name={point_name}')
         else:
             gevent.spawn(self.__update_generic_point_store, message, point.uuid)
 
@@ -149,11 +149,15 @@ class MqttListener(MqttClientBase):
         device_uuid: str = topic[-4]
         network_name: str = topic[-5]
         network_uuid: str = topic[-6]
-        if PointModel.find_by_uuid(point_uuid) is None or \
+        point_by_uuid: PointModel = PointModel.find_by_uuid(point_uuid)
+        if point_by_uuid is None or \
                 PointModel.find_by_name(network_name, device_name, point_name) is None or \
                 DeviceModel.find_by_uuid(device_uuid) is None or \
                 NetworkModel.find_by_uuid(network_uuid) is None:
             logger.warning(f'No point with topic: {message.topic}')
+            self.__clear_mqtt_retain_value(message)
+        elif point_by_uuid and point_by_uuid.disable_mqtt:
+            logger.warning(f'Flag disable_mqtt is true for point.uuid={point_uuid}')
             self.__clear_mqtt_retain_value(message)
 
     def __check_and_clear_model(self, topic: List[str], message: MQTTMessage):
@@ -163,6 +167,9 @@ class MqttListener(MqttClientBase):
             point: PointModel = PointModel.find_by_uuid(model_uuid)
             if point is None:
                 logger.warning(f'No point with point.uuid={model_uuid}')
+                self.__clear_mqtt_retain_value(message)
+            elif point and point.disable_mqtt:
+                logger.warning(f'Flag disable_mqtt is true for point.uuid={model_uuid}')
                 self.__clear_mqtt_retain_value(message)
         elif model_event == ModelEvent.DEVICE.name:
             device: DeviceModel = DeviceModel.find_by_uuid(model_uuid)

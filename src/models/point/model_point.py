@@ -32,6 +32,7 @@ class PointModel(ModelBase):
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
     writable = db.Column(db.Boolean, nullable=False, default=True)
+    disable_mqtt = db.Column(db.Boolean, nullable=False, default=True)
     priority_array_write = db.relationship('PriorityArrayModel',
                                            backref='points',
                                            lazy=True,
@@ -176,7 +177,6 @@ class PointModel(ModelBase):
         updated = self.update_point_value(point_store, self.driver)
         if updated:
             self.publish_cov(point_store)
-        db.session.commit()
 
     def update_priority_value(self, value: float, priority: int, priority_array_write: dict):
         if priority_array_write:
@@ -232,10 +232,11 @@ class PointModel(ModelBase):
             PointStoreHistoryModel.create_history(point_store)
 
         from src.event_dispatcher import EventDispatcher
-        EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
-            'point': self,
-            'point_store': point_store,
-            'device': device,
-            'network': network,
-            'driver_name': driver_name
-        }))
+        if not self.disable_mqtt:
+            EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
+                'point': self,
+                'point_store': point_store,
+                'device': device,
+                'network': network,
+                'driver_name': driver_name
+            }))
