@@ -15,12 +15,11 @@ class GenericPointModel(PointMixinModel):
         return Drivers.GENERIC
 
     def apply_point_type(self, value: float):
-        generic_point = GenericPointModel.find_by_uuid(self.uuid)
-        if generic_point is not None and value is not None:
-            if generic_point.type == GenericPointType.STRING:
+        if value is not None:
+            if self.type == GenericPointType.STRING:
                 value = None
-            elif generic_point.type == GenericPointType.INT:
+            elif self.type == GenericPointType.INT:
                 value = round(value, 0)
-            elif generic_point.type == GenericPointType.BOOL:
+            elif self.type == GenericPointType.BOOL:
                 value = float(bool(value))
         return value

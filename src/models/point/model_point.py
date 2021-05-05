@@ -34,7 +34,7 @@ class PointModel(ModelBase):
     writable = db.Column(db.Boolean, nullable=False, default=False)
     priority_array_write = db.relationship('PriorityArrayModel',
                                            backref='points',
-                                           lazy=False,
+                                           lazy=True,
                                            uselist=False,
                                            cascade="all,delete")
     cov_threshold = db.Column(db.Float, nullable=False, default=0)
@@ -45,8 +45,8 @@ class PointModel(ModelBase):
     scale_min = db.Column(db.Float())
     scale_max = db.Column(db.Float())
     tags = db.Column(db.String(320), nullable=True)
-    point_store = db.relationship('PointStoreModel', backref='point', lazy=False, uselist=False, cascade="all,delete")
-    point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=False, cascade="all,delete")
+    point_store = db.relationship('PointStoreModel', backref='point', lazy=True, uselist=False, cascade="all,delete")
+    point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=True, cascade="all,delete")
     driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
 
     __mapper_args__ = {
