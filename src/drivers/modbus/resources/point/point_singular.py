@@ -42,7 +42,8 @@ class ModbusPointSingular(ModbusPointBase):
         priority_array_write: dict = data.pop('priority_array_write') if data.get('priority_array_write') else {}
         if priority_array_write:
             PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
-        return point.update(**data)
+        point.update(**data)
+        return point
 
     @classmethod
     @marshal_with(modbus_point_all_fields)
@@ -56,6 +57,7 @@ class ModbusPointSingular(ModbusPointBase):
     @classmethod
     def delete(cls, **kwargs):
         point: ModbusPointModel = cls.get_point(**kwargs)
+        point.publish_cov(point.point_store, force_clear=True)
         if not point:
             raise NotFoundException('Modbus Point not found')
         point.delete_from_db()

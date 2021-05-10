@@ -5,6 +5,7 @@ from typing import List, Dict
 from gevent import thread
 
 from src.drivers.enums.drivers import Drivers
+from src.drivers.generic.models.point import GenericPointModel
 from src.event_dispatcher import EventDispatcher
 from src.models.point.model_point import PointModel
 from src.services.event_service_base import Event, EventType
@@ -24,7 +25,7 @@ class PointsRegistry(metaclass=Singleton):
 
     def register(self):
         logger.info(f"Called points registration")
-        points: List[PointModel] = PointModel.query.filter_by(driver=Drivers.GENERIC)
+        points: List[PointModel] = GenericPointModel.query.filter_by(driver=Drivers.GENERIC)
         for point in points:
             self._add_point(point)
         while not all(mqtt_client.status() for mqtt_client in MqttRegistry().clients()):
@@ -37,26 +38,35 @@ class PointsRegistry(metaclass=Singleton):
     def _create_point_registry(point: PointModel):
         return {'uuid': point.uuid, 'name': f'{point.device.network.name}:{point.device.name}:{point.name}'}
 
-    def _add_point(self, point: PointModel):
-        self.__points.append(self._create_point_registry(point))
+    def _add_point(self, point: GenericPointModel):
+        if not point.disable_mqtt:
+            self.__points.append(self._create_point_registry(point))
 
-    def add_point(self, point: PointModel):
+    def add_point(self, point: GenericPointModel):
         self._add_point(point)
-        self._dispatch_event()
+        if not point.disable_mqtt:
+            self._dispatch_event()
 
-    def update_point(self, point: PointModel):
+    def update_point(self, point: GenericPointModel):
+        is_new: bool = True
         for idx, pnt in enumerate(self.__points):
             if point.uuid == pnt['uuid']:
-                self.__points[idx] = self._create_point_registry(point)
+                if point.disable_mqtt:
+                    del self.__points[idx]
+                else:
+                    self.__points[idx] = self._create_point_registry(point)
+                is_new = False
+                self._dispatch_event()
                 break
-        self._dispatch_event()
+        if is_new:
+            self.add_point(point)
 
-    def delete_point(self, point: PointModel):
+    def delete_point(self, point: GenericPointModel):
         for idx, pnt in enumerate(self.__points):
             if point.uuid == pnt['uuid']:
                 del self.__points[idx]
+                self._dispatch_event()
                 break
-        self._dispatch_event()
 
     def _dispatch_event(self):
         # TODO: better use of dispatching

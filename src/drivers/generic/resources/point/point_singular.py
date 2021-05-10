@@ -44,10 +44,10 @@ class GenericPointSingular(GenericPointBase):
             updated_priority_array_write: PriorityArrayModel = cls.get_priority_array_write(uuid=point.uuid)
             highest_priority_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
                 updated_priority_array_write)
-            point.update_point_store_value(highest_priority_value=highest_priority_value)
-        if data:
-            point.update(**data)
-            PointsRegistry().update_point(point)
+            point.point_store.value_original = highest_priority_value
+            changed: bool = point.update(**data)
+            if changed:
+                PointsRegistry().update_point(point)
         return point
 
     @classmethod
@@ -62,6 +62,7 @@ class GenericPointSingular(GenericPointBase):
     @classmethod
     def delete(cls, **kwargs):
         point: GenericPointModel = cls.get_point(**kwargs)
+        point.publish_cov(point.point_store, force_clear=True)
         if point is None:
             raise NotFoundException('Generic Point not found')
         point.delete_from_db()

@@ -3,9 +3,7 @@ import re
 from sqlalchemy.orm import validates
 
 from src import db
-from src.enums.model import ModelEvent
 from src.models.model_base import ModelBase
-from src.services.event_service_base import EventType
 
 
 class ScheduleModel(ModelBase):
@@ -25,12 +23,6 @@ class ScheduleModel(ModelBase):
     @classmethod
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
-
-    def get_model_event(self) -> ModelEvent:
-        return ModelEvent.SCHEDULE
-
-    def get_model_event_type(self) -> EventType:
-        return EventType.SCHEDULE_MODEL
 
     def update(self, **kwargs):
         if super().update(**kwargs):

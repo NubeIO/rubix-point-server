@@ -4,9 +4,7 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.drivers.enums.drivers import Drivers
-from src.enums.model import ModelEvent
 from src.models.model_base import ModelBase
-from src.services.event_service_base import EventType
 
 
 class NetworkModel(ModelBase):
@@ -37,12 +35,6 @@ class NetworkModel(ModelBase):
     def find_by_name(cls, network_name: str):
         results = cls.query.filter_by(name=network_name).first()
         return results
-
-    def get_model_event(self) -> ModelEvent:
-        return ModelEvent.NETWORK
-
-    def get_model_event_type(self) -> EventType:
-        return EventType.NETWORK_MODEL
 
     def set_fault(self, is_fault: bool):
         self.fault = is_fault

@@ -7,6 +7,7 @@ from src.models.point.model_point_mixin import PointMixinModel
 class GenericPointModel(PointMixinModel):
     __tablename__ = 'generic_points'
 
+    disable_mqtt = db.Column(db.Boolean, nullable=False, default=True)
     type = db.Column(db.Enum(GenericPointType), nullable=False, default=GenericPointType.FLOAT)
     unit = db.Column(db.String, nullable=True)
 
