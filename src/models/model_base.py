@@ -2,9 +2,6 @@ from sqlalchemy import inspect
 from sqlalchemy.orm import validates
 
 from src import db
-from src.enums.model import ModelEvent
-from src.event_dispatcher import EventDispatcher
-from src.services.event_service_base import Event, EventType
 
 
 class ModelBase(db.Model):
@@ -29,12 +26,10 @@ class ModelBase(db.Model):
         self.check_self()
         db.session.add(self)
         db.session.commit()
-        self.dispatch_event(self.to_dict())
 
     def save_to_db_no_commit(self):
         self.check_self()
         db.session.add(self)
-        self.dispatch_event(self.to_dict())
 
     @classmethod
     def commit(cls):
@@ -43,7 +38,6 @@ class ModelBase(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-        self.dispatch_event()
 
     @classmethod
     def create_temporary(cls, **kwargs):
@@ -61,15 +55,7 @@ class ModelBase(db.Model):
         changed: bool = self.inspect_changes()
         self.check_self()
         db.session.commit()
-        if changed:
-            self.dispatch_event(kwargs)
         return changed
-
-    def get_model_event(self) -> ModelEvent:
-        raise NotImplemented
-
-    def get_model_event_type(self) -> EventType:
-        raise NotImplemented
 
     def check_self(self) -> (bool, any):
         return True
@@ -89,11 +75,3 @@ class ModelBase(db.Model):
     def to_dict(self) -> dict:
         return {c.key: str(getattr(self, c.key))
                 for c in inspect(self).mapper.column_attrs}
-
-    def dispatch_event(self, payload: dict = None):
-        # TODO: better use of dispatching
-        event = Event(self.get_model_event_type(), {
-            'model': self,
-            'payload': payload or {}
-        })
-        EventDispatcher().dispatch_from_service(None, event, None)

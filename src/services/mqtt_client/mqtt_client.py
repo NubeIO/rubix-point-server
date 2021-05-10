@@ -4,7 +4,6 @@ from typing import Callable, List
 
 from registry.registry import RubixRegistry
 
-from src.models.model_base import ModelBase
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
@@ -17,12 +16,6 @@ logger = logging.getLogger(__name__)
 
 SERVICE_NAME_MQTT_CLIENT = 'mqtt'
 
-MQTT_TOPIC_ALL = 'all'
-MQTT_TOPIC_DRIVER = 'driver'
-MQTT_TOPIC_MODEL = 'model'
-MQTT_TOPIC_MODEL_POINT = 'point'
-MQTT_TOPIC_MODEL_DEVICE = 'device'
-MQTT_TOPIC_MODEL_NETWORK = 'network'
 MQTT_TOPIC_COV = 'cov'
 MQTT_TOPIC_COV_ALL = 'all'
 MQTT_TOPIC_COV_VALUE = 'value'
@@ -44,9 +37,6 @@ class MqttClient(MqttListener, EventServiceBase):
         MqttListener.__init__(self)
         EventServiceBase.__init__(self, SERVICE_NAME_MQTT_CLIENT, False)
         self.supported_events[EventType.POINT_COV] = True
-        self.supported_events[EventType.POINT_MODEL] = True
-        self.supported_events[EventType.DEVICE_MODEL] = True
-        self.supported_events[EventType.NETWORK_MODEL] = True
         self.supported_events[EventType.MQTT_DEBUG] = True
         self.supported_events[EventType.POINT_REGISTRY_UPDATE] = True
         self.supported_events[EventType.SCHEDULES] = True
@@ -99,13 +89,6 @@ class MqttClient(MqttListener, EventServiceBase):
                                             point.uuid, point.name))
             self._publish_mqtt_value(topic, str(point_store.value))
 
-    def _publish_model(self, model: ModelBase, payload: dict):
-        if model is None:
-            raise Exception('Invalid MQTT publish arguments')
-        topic: str = self.__make_topic(
-            (self.config.topic, MQTT_TOPIC_MODEL, model.get_model_event().name, getattr(model, 'uuid', '<uuid>')))
-        self._publish_mqtt_value(topic, json.dumps(payload))
-
     @allow_only_on_prefix
     def _run_event(self, event: Event):
         if event.data is None:
@@ -121,10 +104,6 @@ class MqttClient(MqttListener, EventServiceBase):
                               event.data.get('network').uuid, event.data.get('network').name,
                               event.data.get('device').uuid, event.data.get('device').name,
                               event.data.get('point'), event.data.get('point_store'))
-
-        elif event.event_type == EventType.POINT_MODEL or event.event_type == EventType.DEVICE_MODEL or \
-                event.event_type == EventType.NETWORK_MODEL and self.config.publish_value:
-            self._publish_model(event.data.get('model'), event.data.get('payload'))
 
         elif event.event_type == EventType.SCHEDULES and self.config.publish_value:
             self._publish_mqtt_value(self.__make_topic((self.config.topic, 'schedules')), event.data)

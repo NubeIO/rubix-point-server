@@ -123,17 +123,8 @@ by point uuid:
 by point name:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/<network_name>/+/<device_name>/+/<point_name>
 ```
-**MODEL:**
+**List:**
 ```
-network:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/network/example_network_uuid
-
-device:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/device/example_device_uuid
-
-point:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/model/point/example_point_uuid
-
 points list:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
   
@@ -156,15 +147,4 @@ schedule list:
 ### Schedule Value
 ```
 <client_id>/<site_id>/<device_id>/rubix/points/listen/schedules/<name|uuid>/<schedule_name|schedule_uuid>
-```
-
-### Generic Points List Publisher
-
-```
-<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
-```
-
-### Schedule List Publisher
-```
-<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/schedules
 ```

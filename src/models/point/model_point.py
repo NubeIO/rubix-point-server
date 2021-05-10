@@ -7,7 +7,6 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.drivers.enums.drivers import Drivers
-from src.enums.model import ModelEvent
 from src.enums.point import HistoryType
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
@@ -147,12 +146,6 @@ class PointModel(ModelBase):
         if self.scale_min is not None and value is not None and self.scale_min > value:
             raise ValueError("scale_min cannot be greater than scale_max")
         return value
-
-    def get_model_event(self) -> ModelEvent:
-        return ModelEvent.POINT
-
-    def get_model_event_type(self) -> EventType:
-        return EventType.POINT_MODEL
 
     def update(self, **kwargs):
         super().update(**kwargs)
