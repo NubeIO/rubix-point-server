@@ -28,13 +28,6 @@ def get_datetime() -> datetime:
     return datetime.utcnow()
 
 
-def datetime_to_str(datetime_obj: datetime or None) -> str:
-    if datetime_obj is not None:
-        return datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
-    else:
-        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
 def validate_json(value: str):
     """
     Rules for valid json:

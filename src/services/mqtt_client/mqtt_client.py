@@ -8,7 +8,6 @@ from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.event_service_base import EventServiceBase, Event, EventType
 from src.services.mqtt_client.mqtt_listener import MqttListener
-from src.utils.model_utils import datetime_to_str
 from .mqtt_registry import MqttRegistry
 from ...setting import MqttSetting
 
@@ -53,41 +52,36 @@ class MqttClient(MqttListener, EventServiceBase):
         super().start(config, subscribe_topics, callback)
 
     def _publish_cov(self, driver_name, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
-                     point: PointModel, point_store: PointStoreModel):
-        if point is None or point_store is None or device_uuid is None or network_uuid is None or driver_name is None \
+                     point: PointModel, point_store: PointStoreModel, clear_value: bool):
+        if point is None or device_uuid is None or network_uuid is None or driver_name is None \
                 or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
 
-        if point_store.fault:
-            payload: dict = {
-                'fault': point_store.fault,
-                'fault_message': point_store.fault_message,
-                'ts': point_store.ts_fault,
-            }
-        else:
-            payload: dict = {
+        payload: str = ''
+        if not clear_value:
+            output: dict = {
                 'fault': point_store.fault,
                 'value': point_store.value,
                 'value_raw': point_store.value_raw,
-                'ts': point_store.ts_value,
+                'ts': str(point_store.ts_value),
             }
-
-        if not isinstance(payload['ts'], str):
-            payload['ts'] = datetime_to_str(payload['ts'])
+            if point_store.fault:
+                output = {**output, 'fault_message': point_store.fault_message, 'ts': str(point_store.ts_fault)}
+            payload = json.dumps(output)
 
         if self.config.publish_value:
             topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL, driver_name,
                                             network_uuid, network_name,
                                             device_uuid, device_name,
                                             point.uuid, point.name))
-            self._publish_mqtt_value(topic, json.dumps(payload))
+            self._publish_mqtt_value(topic, payload)
 
-        if self.config.publish_value and not point_store.fault:
-            topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, driver_name,
-                                            network_uuid, network_name,
-                                            device_uuid, device_name,
-                                            point.uuid, point.name))
-            self._publish_mqtt_value(topic, str(point_store.value))
+            if not point_store.fault:
+                topic: str = self.__make_topic((self.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE, driver_name,
+                                                network_uuid, network_name,
+                                                device_uuid, device_name,
+                                                point.uuid, point.name))
+                self._publish_mqtt_value(topic, '' if clear_value else str(point_store.value))
 
     @allow_only_on_prefix
     def _run_event(self, event: Event):
@@ -103,7 +97,8 @@ class MqttClient(MqttListener, EventServiceBase):
             self._publish_cov(event.data.get('driver_name'),
                               event.data.get('network').uuid, event.data.get('network').name,
                               event.data.get('device').uuid, event.data.get('device').name,
-                              event.data.get('point'), event.data.get('point_store'))
+                              event.data.get('point'), event.data.get('point_store'),
+                              event.data.get('clear_value'))
 
         elif event.event_type == EventType.SCHEDULES and self.config.publish_value:
             self._publish_mqtt_value(self.__make_topic((self.config.topic, 'schedules')), event.data)

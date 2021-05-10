@@ -24,11 +24,17 @@ class GenericPointBase(RubixResource):
     def add_point(cls, data):
         _uuid: str = str(uuid.uuid4())
         priority_array_write: dict = data.pop('priority_array_write', {})
+        priority_array_write_object: PriorityArrayModel = PriorityArrayModel. \
+            create_priority_array_model(_uuid, priority_array_write)
         point = GenericPointModel(
             uuid=_uuid,
-            priority_array_write=PriorityArrayModel.create_priority_array_model(_uuid, priority_array_write),
+            priority_array_write=priority_array_write_object,
             **data
         )
         point.save_to_db()
+        highest_priority_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
+            priority_array_write_object)
+        point.point_store.value_original = highest_priority_value
+        point.update(**data)
         PointsRegistry().add_point(point)
         return point

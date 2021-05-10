@@ -3,6 +3,7 @@ from typing import List
 
 from gevent import thread
 
+from src.drivers.generic.models.point import GenericPointModel
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.services.mqtt_client import MqttRegistry
@@ -21,5 +22,6 @@ class MqttRepublish(metaclass=Singleton):
         points: List[PointModel] = PointModel.find_all()
         for point in points:
             point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(point.uuid)
-            point.publish_cov(point_store)
+            if not (point.disable_mqtt if isinstance(point, GenericPointModel) else False):
+                point.publish_cov(point_store)
         logger.info(f"Finished MQTT republish")

@@ -31,7 +31,6 @@ class PointModel(ModelBase):
     history_type = db.Column(db.Enum(HistoryType), nullable=False, default=HistoryType.INTERVAL)
     history_interval = db.Column(db.Integer, nullable=False, default=15)
     writable = db.Column(db.Boolean, nullable=False, default=True)
-    disable_mqtt = db.Column(db.Boolean, nullable=False, default=True)
     priority_array_write = db.relationship('PriorityArrayModel',
                                            backref='points',
                                            lazy=True,
@@ -147,17 +146,15 @@ class PointModel(ModelBase):
             raise ValueError("scale_min cannot be greater than scale_max")
         return value
 
-    def update(self, **kwargs):
-        super().update(**kwargs)
-
-        point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(self.uuid)
-        updated: bool = self.update_point_value(point_store, self.driver, 0)
-        self.point_store = point_store
-
-        if updated:
+    def update(self, **kwargs) -> bool:
+        from src.drivers.generic.models.point import GenericPointModel
+        publish_cov: bool = isinstance(self, GenericPointModel) and self.disable_mqtt != kwargs.get('disable_mqtt')
+        changed: bool = super().update(**kwargs)
+        updated: bool = self.update_point_value(self.point_store, self.driver, 0)
+        if updated or publish_cov:
             self.publish_cov(self.point_store)
 
-        return self
+        return changed
 
     def update_point_store(self, value: float, priority: int, priority_array_write: dict):
         self.update_priority_value(value, priority, priority_array_write)
@@ -208,7 +205,7 @@ class PointModel(ModelBase):
         return value
 
     def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,
-                    driver_name: str = None):
+                    driver_name: str = None, force_clear: bool = False):
         if point_store is None:
             raise Exception('Point.publish_cov point_store cannot be None')
         if device is None:
@@ -225,11 +222,12 @@ class PointModel(ModelBase):
             PointStoreHistoryModel.create_history(point_store)
 
         from src.event_dispatcher import EventDispatcher
-        if not self.disable_mqtt:
-            EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
-                'point': self,
-                'point_store': point_store,
-                'device': device,
-                'network': network,
-                'driver_name': driver_name
-            }))
+        from src.drivers.generic.models.point import GenericPointModel
+        EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
+            'point': self,
+            'point_store': point_store,
+            'device': device,
+            'network': network,
+            'driver_name': driver_name,
+            'clear_value': force_clear or (self.disable_mqtt if isinstance(self, GenericPointModel) else False)
+        }))

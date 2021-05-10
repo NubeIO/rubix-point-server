@@ -29,4 +29,5 @@ class ModbusPointBase(RubixResource):
             **data
         )
         point.save_to_db()
+        point.publish_cov(point.point_store)
         return point
