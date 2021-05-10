@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v1.6.7](https://github.com/NubeIO/rubix-point-server/tree/v1.6.7) (2020-05-10)
+### Added
+- Default points value update
+- Disable MQTT when disable_mqtt=True
+- Remove MQTT models publish
+
 ## [v1.6.6](https://github.com/NubeIO/rubix-point-server/tree/v1.6.6) (2020-05-05)
 ### Added
 - Optimization of point patch and point value patch
