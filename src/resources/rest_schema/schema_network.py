@@ -20,6 +20,9 @@ network_all_attributes = {
     'history_enable': {
         'type': bool,
     },
+    'tags': {
+        'type': str
+    }
 }
 
 network_return_attributes = {

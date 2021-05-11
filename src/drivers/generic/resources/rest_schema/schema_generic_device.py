@@ -2,9 +2,6 @@ from src.drivers.generic.resources.rest_schema.schema_generic_point import gener
 from src.resources.rest_schema.schema_device import *
 
 generic_device_all_attributes = deepcopy(device_all_attributes)
-generic_device_all_attributes['tags'] = {
-    'type': str,
-}
 generic_device_return_attributes = deepcopy(device_return_attributes)
 generic_device_return_attributes['tags'] = {
     'type': str,
