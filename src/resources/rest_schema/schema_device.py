@@ -24,6 +24,9 @@ device_all_attributes = {
     'history_enable': {
         'type': bool,
     },
+    'tags': {
+        'type': str
+    }
 }
 
 device_return_attributes = {
