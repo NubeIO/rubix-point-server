@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.6.8](https://github.com/NubeIO/rubix-point-server/tree/v1.6.8) (2020-05-11)
+### Added
+- Include tags for both modbus and generic types
+- Improvements on PostgreSQL schemas and value updates
+
 ## [v1.6.7](https://github.com/NubeIO/rubix-point-server/tree/v1.6.7) (2020-05-10)
 ### Added
 - Default points value update
