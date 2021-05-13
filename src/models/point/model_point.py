@@ -193,6 +193,8 @@ class PointModel(ModelBase):
             -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
+        if input_min == input_max or output_min == output_max:
+            return value
         scaled = ((value - input_min) / (input_max - input_min)) * (output_max - output_min) + output_min
         if scaled > max(output_max, output_min):
             return max(output_max, output_min)
