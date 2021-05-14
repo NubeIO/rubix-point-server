@@ -1,7 +1,6 @@
 import os
 from abc import ABC
 
-from flask_migrate import Migrate
 from gunicorn.app.base import BaseApplication
 from gunicorn.arbiter import Arbiter
 from gunicorn.glogging import Logger

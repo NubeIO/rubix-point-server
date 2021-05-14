@@ -1,10 +1,10 @@
 from flask_migrate import MigrateCommand, Migrate
 from flask_script import Manager
 
-from src import db, AppSetting, GunicornFlaskApplication
+from src import db, AppSetting, create_app
 
-setting = AppSetting().reload(AppSetting.default_setting_file)
-app = GunicornFlaskApplication(setting, {}).load()
+setting: AppSetting = AppSetting().reload(AppSetting.default_setting_file)
+app = create_app(setting)
 
 migrate = Migrate(app, db, compare_type=True, render_as_batch=True)
 
