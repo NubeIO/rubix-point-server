@@ -65,5 +65,8 @@ class HistoryLocal(EventServiceBase, metaclass=Singleton):
             point_store.ts_value = point_store.ts_value.replace(minute=minute, second=0, microsecond=0)
             PointStoreHistoryModel.create_history(point_store)
         elif (current_dt - latest_point_store_history.ts_value).total_seconds() >= point.history_interval * 60:
-            point_store.ts_value = current_dt.replace(second=0, microsecond=0)
+            """Minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45"""
+            minute: int = int(current_dt.minute / point.history_interval) * point.history_interval
+            current_dt = current_dt.replace(minute=minute, second=0, microsecond=0)
+            point_store.ts_value = current_dt
             PointStoreHistoryModel.create_history(point_store)
