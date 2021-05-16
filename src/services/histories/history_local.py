@@ -45,7 +45,9 @@ class HistoryLocal(EventServiceBase, metaclass=Singleton):
     @staticmethod
     def __get_all_enabled_interval_points():
         return db.session.query(PointModel, PointStoreModel).select_from(PointModel) \
-            .filter_by(history_enable=True, history_type=HistoryType.INTERVAL) \
+            .filter_by(history_enable=True) \
+            .filter((PointModel.history_type == HistoryType.COV_AND_INTERVAL) |
+                    (PointModel.history_type == HistoryType.INTERVAL)) \
             .join(DeviceModel).filter_by(history_enable=True) \
             .join(NetworkModel).filter_by(history_enable=True) \
             .join(PointStoreModel) \
