@@ -69,7 +69,7 @@
     batch_op.alter_column('new_column_name', new_column_name='old_column_name')
    ```
 
-5. Rename primary key column having relationship:
+4. Rename primary key column having relationship:
    ```bash
    naming_convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s"
@@ -116,5 +116,15 @@
       batch_op.create_foreign_key('old_constraint_name', 'source_table_name',
                                     ['local_cols'], ['remote_cols'])
    ```
+   
+6. To make batch migration works for inheritance (or when altering (drop & transform in real) table shows error)
+
+- Include below block at first, which turns off foreign key
+
+    ```bash
+    session = Session(bind=op.get_bind())
+    session.execute('PRAGMA foreign_keys = OFF;')
+    session.commit()
+    ```
 
 #### [For more details](https://alembic.sqlalchemy.org/en/latest/ops.html#alembic.operations.Operations)
