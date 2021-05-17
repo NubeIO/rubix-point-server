@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v1.6.9](https://github.com/NubeIO/rubix-point-server/tree/v1.6.9) (2020-05-17)
+### Added
+- History interval issue fix #347
+- updated scale function so that if the scaling factors are equal #346
+-Add Flask-Migrate #221 (so its dosnt break the DB on update)
+
 ## [v1.6.8](https://github.com/NubeIO/rubix-point-server/tree/v1.6.8) (2020-05-11)
 ### Added
 - Include tags for both modbus and generic types
