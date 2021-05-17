@@ -1,15 +1,15 @@
 """empty message
 
-Revision ID: aa20f6da604a
+Revision ID: 0d49c71ddb03
 Revises: 
-Create Date: 2021-05-14 13:39:02.456990
+Create Date: 2021-05-17 11:43:05.425502
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = 'aa20f6da604a'
+revision = '0d49c71ddb03'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -113,7 +113,8 @@ def upgrade():
                     sa.Column('device_uuid', sa.String(), nullable=False),
                     sa.Column('enable', sa.Boolean(), nullable=False),
                     sa.Column('history_enable', sa.Boolean(), nullable=False),
-                    sa.Column('history_type', sa.Enum('COV', 'INTERVAL', name='historytype'), nullable=False),
+                    sa.Column('history_type', sa.Enum('COV', 'INTERVAL', 'COV_AND_INTERVAL', name='historytype'),
+                              nullable=False),
                     sa.Column('history_interval', sa.Integer(), nullable=False),
                     sa.Column('writable', sa.Boolean(), nullable=False),
                     sa.Column('cov_threshold', sa.Float(), nullable=False),
