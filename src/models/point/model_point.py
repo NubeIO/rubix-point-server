@@ -219,8 +219,10 @@ class PointModel(ModelBase):
         if driver_name is None:
             driver_name = network.driver.name
 
-        if self.history_enable and self.history_type == HistoryType.COV and network.history_enable and \
-                device.history_enable:
+        if self.history_enable \
+                and (self.history_type == HistoryType.COV or self.history_type == HistoryType.COV_AND_INTERVAL) \
+                and network.history_enable \
+                and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
 
         from src.event_dispatcher import EventDispatcher
