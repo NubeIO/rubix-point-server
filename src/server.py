@@ -64,7 +64,7 @@ class GunicornFlaskApplication(BaseApplication, ABC):
     def run_migration(self):
         from flask_migrate import upgrade, Migrate
         Migrate(self.application, db)
-        upgrade(directory='./migrations')
+        upgrade(directory=resource_path('./migrations'))
 
     def wsgi(self):
         output = super(GunicornFlaskApplication, self).wsgi()
