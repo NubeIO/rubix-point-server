@@ -17,7 +17,7 @@ def init_logconfig_option(_app_setting: AppSetting, _options=None):
         logconfig = os.path.join(_app_setting.config_dir, (_options.get('logconfig') or
                                                            AppSetting.default_logging_conf))
         if not os.path.isfile(logconfig):
-            logconfig = AppSetting.fallback_prod_logging_conf if _app_setting.prod else AppSetting.fallback_logging_conf
+            logconfig = AppSetting.fallback_logging_prod_conf if _app_setting.prod else AppSetting.fallback_logging_conf
             logconfig = resource_path(logconfig)
         options.update({'logconfig': logconfig})
     return options

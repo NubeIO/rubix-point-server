@@ -14,7 +14,6 @@ data.db
 
 __pycache__/
 *.pyc
-logging.conf
 config.ini
 dist/
 *.egg-info
