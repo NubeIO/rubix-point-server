@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.6.7-rc1](https://github.com/NubeIO/rubix-point-server/tree/v1.6.7-rc1) (2020-05-05)
+### Added
+- InfluxDB _get_point_last_sync_id issue fix
+- MAX_ROWS for point history cleaner is set to 200
+
 ## [v1.6.6](https://github.com/NubeIO/rubix-point-server/tree/v1.6.6) (2020-05-05)
 ### Added
 - Optimization of point patch and point value patch

@@ -6,10 +6,12 @@ on:
     branches:
       - main
       - master
+      - hotfix-1.6.6
   push:
-    branches: 
+    branches:
       - main
       - master
+      - hotfix-1.6.6
     tags:
       - 'v*'
 
@@ -52,7 +54,7 @@ jobs:
         uses: zero88/gh-project-context@v1
         with:
           dry: false
-          defaultBranch: master
+          defaultBranch: hotfix-1.6.6
 
   build:
     runs-on: ubuntu-latest
