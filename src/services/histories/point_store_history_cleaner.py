@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class PointStoreHistoryCleaner(metaclass=Singleton):
-    MAX_ROWS = 1000
+    MAX_ROWS = 200
 
     def __init__(self):
         self.__config = None
