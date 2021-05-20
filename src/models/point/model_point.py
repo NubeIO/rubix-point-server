@@ -7,7 +7,7 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.drivers.enums.drivers import Drivers
-from src.enums.point import HistoryType
+from src.enums.point import HistoryType, Sources
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
@@ -47,6 +47,7 @@ class PointModel(ModelBase):
     point_store = db.relationship('PointStoreModel', backref='point', lazy=True, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=True, cascade="all,delete")
     driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
+    source = db.Column(db.Enum(Sources), default=Sources.OWN)
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',
@@ -82,6 +83,10 @@ class PointModel(ModelBase):
             .join(NetworkModel).filter_by(name=network_name) \
             .first()
         return results
+
+    @classmethod
+    def find_by_source(cls, source: str):
+        return cls.query.filter_by(source=source).all()
 
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
@@ -190,7 +195,7 @@ class PointModel(ModelBase):
 
     @classmethod
     def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
-            -> float or None:
+        -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
         if input_min == input_max or output_min == output_max:
@@ -220,9 +225,9 @@ class PointModel(ModelBase):
             driver_name = network.driver.name
 
         if self.history_enable \
-                and (self.history_type == HistoryType.COV or self.history_type == HistoryType.COV_AND_INTERVAL) \
-                and network.history_enable \
-                and device.history_enable:
+            and (self.history_type == HistoryType.COV or self.history_type == HistoryType.COV_AND_INTERVAL) \
+            and network.history_enable \
+            and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
 
         from src.event_dispatcher import EventDispatcher
