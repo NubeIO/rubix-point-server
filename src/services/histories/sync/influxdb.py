@@ -128,7 +128,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             logger.debug("Nothing to store, no new records")
 
     def _get_point_last_sync_id(self, point_uuid):
-        query = f"SELECT MAX(id), point_uuid FROM {self.config.measurement} WHERE point_uuid='{point_uuid}'"
+        query = f"SELECT MAX(id), point_uuid FROM {self.config.measurement} WHERE rubix_point_uuid='{point_uuid}'"
         result_set = self.__client.query(query)
         points = list(result_set.get_points())
         if len(points) == 0:
