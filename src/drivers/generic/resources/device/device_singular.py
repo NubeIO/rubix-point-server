@@ -59,10 +59,10 @@ class GenericDeviceSingular(GenericDeviceBase):
 class GenericDeviceSingularByUUID(GenericDeviceSingular):
     @classmethod
     def get_device(cls, **kwargs) -> GenericDeviceModel:
-        return GenericDeviceModel.find_by_uuid(kwargs.get('uuid'))
+        return GenericDeviceModel.find_by_uuid(kwargs.get('uuid'), **request.args)
 
 
 class GenericDeviceSingularByName(GenericDeviceSingular):
     @classmethod
     def get_device(cls, **kwargs) -> GenericDeviceModel:
-        return GenericDeviceModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'))
+        return GenericDeviceModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'), **request.args)

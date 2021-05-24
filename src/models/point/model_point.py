@@ -85,8 +85,10 @@ class PointModel(ModelBase):
         return results
 
     @classmethod
-    def find_by_source(cls, source: str):
-        return cls.query.filter_by(source=source).all()
+    def find_all(cls, *args, **kwargs):
+        if 'source' in kwargs:
+            return cls.query.filter_by(source=kwargs['source']).all()
+        return super().find_all()
 
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
@@ -195,7 +197,7 @@ class PointModel(ModelBase):
 
     @classmethod
     def apply_scale(cls, value: float, input_min: float, input_max: float, output_min: float, output_max: float) \
-        -> float or None:
+            -> float or None:
         if value is None or input_min is None or input_max is None or output_min is None or output_max is None:
             return value
         if input_min == input_max or output_min == output_max:
@@ -225,9 +227,9 @@ class PointModel(ModelBase):
             driver_name = network.driver.name
 
         if self.history_enable \
-            and (self.history_type == HistoryType.COV or self.history_type == HistoryType.COV_AND_INTERVAL) \
-            and network.history_enable \
-            and device.history_enable:
+                and (self.history_type == HistoryType.COV or self.history_type == HistoryType.COV_AND_INTERVAL) \
+                and network.history_enable \
+                and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
 
         from src.event_dispatcher import EventDispatcher

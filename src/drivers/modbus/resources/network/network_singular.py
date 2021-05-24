@@ -57,10 +57,10 @@ class ModbusNetworkSingular(ModbusNetworkBase):
 class ModbusNetworkSingularByUUID(ModbusNetworkSingular):
     @classmethod
     def find_network(cls, **kwargs) -> ModbusNetworkModel:
-        return ModbusNetworkModel.find_by_uuid(kwargs.get('uuid'))
+        return ModbusNetworkModel.find_by_uuid(kwargs.get('uuid'), **request.args)
 
 
 class ModbusNetworkSingularByName(ModbusNetworkSingular):
     @classmethod
     def find_network(cls, **kwargs) -> ModbusNetworkModel:
-        return ModbusNetworkModel.find_by_name(kwargs.get('name'))
+        return ModbusNetworkModel.find_by_name(kwargs.get('name'), **request.args)

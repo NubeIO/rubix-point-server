@@ -1,6 +1,6 @@
 import re
 
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, joinedload
 
 from src import db
 from src.drivers.enums.drivers import Drivers
@@ -49,9 +49,39 @@ class NetworkModel(ModelBase):
         return f"Network(uuid = {self.uuid})"
 
     @classmethod
-    def find_by_name(cls, network_name: str):
-        results = cls.query.filter_by(name=network_name).first()
-        return results
+    def find_all(cls, *args, **kwargs):
+        from src.models.point.model_point import PointModel
+        from src.models.device.model_device import DeviceModel
+        if 'source' in kwargs:
+            return db.session.query(cls) \
+                .options(joinedload(cls.devices)
+                         .lazyload(DeviceModel.points.and_(PointModel.source == kwargs['source']))) \
+                .all()
+        return super().find_all()
+
+    @classmethod
+    def find_by_uuid(cls, uuid: str, *args, **kwargs):
+        from src.models.point.model_point import PointModel
+        from src.models.device.model_device import DeviceModel
+        if 'source' in kwargs:
+            return db.session.query(cls) \
+                .options(joinedload(NetworkModel.devices)
+                         .lazyload(DeviceModel.points.and_(PointModel.source == kwargs['source']))) \
+                .filter_by(uuid=uuid) \
+                .first()
+        return super().find_by_uuid(uuid)
+
+    @classmethod
+    def find_by_name(cls, network_name: str, *args, **kwargs):
+        from src.models.point.model_point import PointModel
+        from src.models.device.model_device import DeviceModel
+        if 'source' in kwargs:
+            return db.session.query(cls) \
+                .options(joinedload(NetworkModel.devices)
+                         .lazyload(DeviceModel.points.and_(PointModel.source == kwargs['source']))) \
+                .filter_by(name=network_name) \
+                .first()
+        return cls.query.filter_by(name=network_name).first()
 
     def set_fault(self, is_fault: bool):
         self.fault = is_fault
