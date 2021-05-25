@@ -14,7 +14,7 @@ def device_marshaller(data: any, args: dict):
 class DeviceResourceByUUID(RubixResource):
     @classmethod
     def get(cls, uuid):
-        device: DeviceModel = DeviceModel.find_by_uuid(uuid)
+        device: DeviceModel = DeviceModel.find_by_uuid(uuid, **request.args)
         if not device:
             raise NotFoundException('Device not found')
         return device_marshaller(device, request.args)
@@ -23,7 +23,7 @@ class DeviceResourceByUUID(RubixResource):
 class DeviceResourceByName(RubixResource):
     @classmethod
     def get(cls, network_name: str, device_name: str):
-        device: DeviceModel = DeviceModel.find_by_name(network_name, device_name)
+        device: DeviceModel = DeviceModel.find_by_name(network_name, device_name, **request.args)
         if not device:
             raise NotFoundException('Device not found')
         return device_marshaller(device, request.args)
@@ -32,4 +32,4 @@ class DeviceResourceByName(RubixResource):
 class DeviceResourceList(RubixResource):
     @classmethod
     def get(cls):
-        return device_marshaller(DeviceModel.find_all(), request.args)
+        return device_marshaller(DeviceModel.find_all(**request.args), request.args)

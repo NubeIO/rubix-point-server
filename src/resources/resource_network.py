@@ -17,7 +17,7 @@ def network_marshaller(data: any, args: dict):
 class NetworkResourceByUUID(RubixResource):
     @classmethod
     def get(cls, uuid):
-        network = NetworkModel.find_by_uuid(uuid)
+        network = NetworkModel.find_by_uuid(uuid, **request.args)
         if not network:
             raise NotFoundException('Network not found')
         return network_marshaller(network, request.args)
@@ -26,7 +26,7 @@ class NetworkResourceByUUID(RubixResource):
 class NetworkResourceByName(RubixResource):
     @classmethod
     def get(cls, name):
-        network = NetworkModel.find_by_name(name)
+        network = NetworkModel.find_by_name(name, **request.args)
         if not network:
             raise NotFoundException('Network not found')
         return network_marshaller(network, request.args)
@@ -35,4 +35,4 @@ class NetworkResourceByName(RubixResource):
 class NetworkResourceList(RubixResource):
     @classmethod
     def get(cls):
-        return network_marshaller(NetworkModel.find_all(), request.args)
+        return network_marshaller(NetworkModel.find_all(**request.args), request.args)

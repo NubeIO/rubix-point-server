@@ -7,7 +7,7 @@ from sqlalchemy.orm import validates
 
 from src import db
 from src.drivers.enums.drivers import Drivers
-from src.enums.point import HistoryType
+from src.enums.point import HistoryType, Sources
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
@@ -47,6 +47,7 @@ class PointModel(ModelBase):
     point_store = db.relationship('PointStoreModel', backref='point', lazy=True, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=True, cascade="all,delete")
     driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
+    source = db.Column(db.Enum(Sources), default=Sources.OWN)
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',
@@ -82,6 +83,12 @@ class PointModel(ModelBase):
             .join(NetworkModel).filter_by(name=network_name) \
             .first()
         return results
+
+    @classmethod
+    def find_all(cls, *args, **kwargs):
+        if 'source' in kwargs:
+            return cls.query.filter_by(source=kwargs['source']).all()
+        return super().find_all()
 
     def save_to_db(self):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)

@@ -41,5 +41,10 @@ class ModbusDevicePointPluralPointStore(ModbusPointBase):
 
 
 def get_point_store(point: ModbusPointModel, point_store: PointStoreModel) -> dict:
-    return {'uuid': point.uuid, 'name': point.name, 'register': point.register,
-            'fault': point_store.fault, 'value': point_store.value}
+    return {
+        'uuid': point.uuid,
+        'name': point.name,
+        'register': point.register,
+        'fault': point_store.fault,
+        'value': point_store.value
+    }

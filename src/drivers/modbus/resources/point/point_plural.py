@@ -1,4 +1,5 @@
 from flask_restful import marshal_with
+from flask_restful.reqparse import request
 
 from src.drivers.modbus.models.point import ModbusPointModel
 from src.drivers.modbus.resources.point.point_base import ModbusPointBase
@@ -9,8 +10,7 @@ class ModbusPointPlural(ModbusPointBase):
     @classmethod
     @marshal_with(modbus_point_all_fields)
     def get(cls):
-        points = ModbusPointModel.find_all()
-        return points
+        return ModbusPointModel.find_all(**request.args)
 
     @classmethod
     @marshal_with(modbus_point_all_fields)
