@@ -2,7 +2,7 @@ ARG BASE_IMAGE_VERSION
 FROM python:$BASE_IMAGE_VERSION-slim as build
 
 RUN apt update -qq \
-    && apt install git curl gcc g++ make file musl-dev libffi6 libffi-dev zlib1g zlib1g-dev libpq-dev python-dev -y \
+    && apt install git curl gcc g++ make file musl-dev libffi6 libffi-dev zlib1g zlib1g-dev libpq-dev -y \
     && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 
 WORKDIR /usr/src/app/
@@ -14,6 +14,7 @@ ADD config config
 ADD migrations migrations
 ADD run.py VERSION ./
 RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-point --clean --onefile \
+    --add-data pyproject.toml:. \
     --add-data VERSION:. \
     --add-data config:config \
     --add-data migrations:migrations

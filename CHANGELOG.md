@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v1.7.2](https://github.com/NubeIO/rubix-point-server/tree/v1.7.2) (2020-05-25)
+### Added
+- Add field source ('OWN', 'MAPPING') for source filtration
+
 ## [v1.7.1](https://github.com/NubeIO/rubix-point-server/tree/v1.7.1) (2020-05-20)
 ### Added
 - InfluxDB _get_point_last_sync_id issue fix
