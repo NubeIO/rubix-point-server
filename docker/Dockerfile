@@ -14,6 +14,7 @@ ADD config config
 ADD migrations migrations
 ADD run.py VERSION ./
 RUN $HOME/.poetry/bin/poetry run pyinstaller run.py -n rubix-point --clean --onefile \
+    --add-data pyproject.toml:. \
     --add-data VERSION:. \
     --add-data config:config \
     --add-data migrations:migrations
