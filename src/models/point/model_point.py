@@ -225,6 +225,7 @@ class PointModel(ModelBase):
             raise Exception(f'Cannot find network or device for point {self.uuid}')
         if driver_name is None:
             driver_name = network.driver.name
+        priority = self._get_highest_priority_field()
 
         if self.history_enable \
                 and (self.history_type == HistoryType.COV or self.history_type == HistoryType.COV_AND_INTERVAL) \
@@ -240,5 +241,13 @@ class PointModel(ModelBase):
             'device': device,
             'network': network,
             'driver_name': driver_name,
-            'clear_value': force_clear or (self.disable_mqtt if isinstance(self, GenericPointModel) else False)
+            'clear_value': force_clear or (self.disable_mqtt if isinstance(self, GenericPointModel) else False),
+            'priority': priority
         }))
+
+    def _get_highest_priority_field(self):
+        for i in range(1, 17):
+            value = getattr(self.priority_array_write, f'_{i}', None)
+            if value is not None:
+                return i
+        return 16
