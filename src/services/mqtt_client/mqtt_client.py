@@ -52,7 +52,7 @@ class MqttClient(MqttListener, EventServiceBase):
         super().start(config, subscribe_topics, callback)
 
     def _publish_cov(self, driver_name, network_uuid: str, network_name: str, device_uuid: str, device_name: str,
-                     point: PointModel, point_store: PointStoreModel, clear_value: bool):
+                     point: PointModel, point_store: PointStoreModel, clear_value: bool, priority: int):
         if point is None or device_uuid is None or network_uuid is None or driver_name is None \
                 or network_name is None or device_name is None:
             raise Exception('Invalid MQTT publish arguments')
@@ -64,6 +64,7 @@ class MqttClient(MqttListener, EventServiceBase):
                 'value': point_store.value,
                 'value_raw': point_store.value_raw,
                 'ts': str(point_store.ts_value),
+                'priority': priority
             }
             if point_store.fault:
                 output = {**output, 'fault_message': point_store.fault_message, 'ts': str(point_store.ts_fault)}
@@ -98,7 +99,8 @@ class MqttClient(MqttListener, EventServiceBase):
                               event.data.get('network').uuid, event.data.get('network').name,
                               event.data.get('device').uuid, event.data.get('device').name,
                               event.data.get('point'), event.data.get('point_store'),
-                              event.data.get('clear_value'))
+                              event.data.get('clear_value'),
+                              event.data.get('priority'))
 
         elif event.event_type == EventType.SCHEDULES and self.config.publish_value:
             self._publish_mqtt_value(self.__make_topic((self.config.topic, 'schedules')), event.data)
