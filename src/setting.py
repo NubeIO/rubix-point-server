@@ -236,3 +236,16 @@ class AppSetting:
             return {}
         with open(s) as json_file:
             return json.load(json_file)
+
+    def create_settings(self):
+        from src.models.setting.model_setting_driver import DriverSettingModel
+        from src.models.setting.model_setting_service import ServiceSettingModel
+        from src.models.setting.model_setting_influx import InfluxSettingModel
+        from src.models.setting.model_setting_postgres import PostgresSettingModel
+        from src.models.setting.model_setting_mqtt import MqttSettingModel
+
+        self.__driver_setting = DriverSettingModel.create_default_if_does_not_exists(self.__driver_setting)
+        self.__service_setting = ServiceSettingModel.create_default_if_does_not_exists(self.__service_setting)
+        self.__influx_setting = InfluxSettingModel.create_default_if_does_not_exists(self.__influx_setting)
+        self.__postgres_setting = PostgresSettingModel.create_default_if_does_not_exists(self.__postgres_setting)
+        self.__mqtt_settings = MqttSettingModel.create_default_if_does_not_exists(self.__mqtt_settings)

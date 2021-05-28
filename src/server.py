@@ -70,6 +70,7 @@ class GunicornFlaskApplication(BaseApplication, ABC):
         output = super(GunicornFlaskApplication, self).wsgi()
         with self.application.app_context():
             self.run_migration()
+            self._app_setting.create_settings()
             from src.background import Background
             Background.run()
         return output

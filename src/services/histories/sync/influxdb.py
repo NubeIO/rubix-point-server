@@ -23,6 +23,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         self.__client = None
         self.__wires_plat = None
         self.__is_connected = False
+        self.__schedule_job = None
 
     @property
     def config(self) -> InfluxSetting:
@@ -34,21 +35,37 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     def disconnect(self):
         self.__is_connected = False
 
-    def setup(self, config: InfluxSetting):
+    def start_influx(self, config: InfluxSetting):
         self.__config = config
-        while not self.status():
-            self.connect()
-            time.sleep(self.config.attempt_reconnect_secs)
+        self.loop_forever()
 
-        if self.status():
-            logger.info("Registering InfluxDB for scheduler job")
-            # schedule.every(5).seconds.do(self.sync)  # for testing
-            schedule.every(self.config.timer).minutes.do(self.sync)
-            while True:
-                schedule.run_pending()
+    def loop_forever(self):
+        while True:
+            try:
+                while not self.status():
+                    self.connect()
+                    time.sleep(self.config.attempt_reconnect_secs)
+
+                if self.status():
+                    if not self.__schedule_job:
+                        logger.info("Registering InfluxDB for scheduler job")
+                        # self.__schedule_job = schedule.every(5).seconds.do(self.sync)  # for testing
+                        self.__schedule_job = schedule.every(self.config.timer).minutes.do(self.sync)
+                    schedule.run_pending()
+                else:
+                    logger.error("InfluxDB can't be registered with not working client details")
                 time.sleep(1)
-        else:
-            logger.error("InfluxDB can't be registered with not working client details")
+            except Exception as e:
+                logger.error(e)
+                logger.warning("InfluxDB is not connected, waiting for InfluxDB connection...")
+                time.sleep(self.config.attempt_reconnect_secs)
+
+    def restart_influx(self, config):
+        self.disconnect()
+        if self.__schedule_job:
+            schedule.clear()
+        self.__reset_variable()
+        self.__config = config
 
     def connect(self):
         if self.__client:
@@ -65,6 +82,11 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         except Exception as e:
             self.__is_connected = False
             logger.error(f'Connection Error: {str(e)}')
+
+    def __reset_variable(self):
+        self.__schedule_job = None
+        self.__wires_plat = None
+        self.__is_connected = False
 
     @exception_handler
     def sync(self):
