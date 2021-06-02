@@ -10,6 +10,7 @@ from sqlalchemy import and_, or_
 
 from src import db
 from src.drivers.enums.drivers import Drivers
+from src.drivers.modbus.enums.mapping.mapping import MapType, MappingState
 from src.drivers.modbus.models.mapping import MPGBPMapping
 from src.utils.model_utils import get_datetime
 
@@ -101,8 +102,8 @@ class PointStoreModel(PointStoreModelMixin):
         )
 
     def __sync_point_value_gp_to_mp_process(self):
-        mapping: MPGBPMapping = MPGBPMapping.find_by_generic_point_uuid(self.point_uuid)
-        if mapping:
+        mapping: MPGBPMapping = MPGBPMapping.find_by_mapped_point_uuid_type(self.point_uuid, MapType.GENERIC)
+        if mapping and mapping.mapping_state == MappingState.MAPPED:
             gevent.spawn(self.__sync_point_value_gp_to_mp, mapping.modbus_point_uuid)
 
     def __sync_point_value_gp_to_bp(self):
@@ -117,27 +118,27 @@ class PointStoreModel(PointStoreModelMixin):
     def __sync_point_value_gp_to_bp_process(self):
         gevent.spawn(self.__sync_point_value_gp_to_bp)
 
-    def sync_point_value_with_mapping_mp_to_gbp(self, generic_point_uuid: str, bacnet_point_uuid: str,
+    def sync_point_value_with_mapping_mp_to_gbp(self, map_type: str, mapped_point_uuid: str,
                                                 gp: bool = True, bp: bool = True):
-        if generic_point_uuid and gp:
+        if map_type in (MapType.GENERIC.name, MapType.GENERIC) and gp:
             gw_request(
-                api=f"/ps/api/generic/points_value/uuid/{generic_point_uuid}",
+                api=f"/ps/api/generic/points_value/uuid/{mapped_point_uuid}",
                 body={"value": self.value},
                 http_method=HttpMethod.PATCH
             )
-        elif bacnet_point_uuid and bp:
+        elif map_type in (MapType.BACNET.name, MapType.BACNET) and bp:
             gw_request(
-                api=f"/bacnet/api/bacnet/points/uuid/{bacnet_point_uuid}",
+                api=f"/bacnet/api/bacnet/points/uuid/{mapped_point_uuid}",
                 body={"priority_array_write": {"_16": self.value}},
                 http_method=HttpMethod.PATCH
             )
 
     def __sync_point_value_mp_to_gbp_process(self, gp: bool = True, bp: bool = True):
-        mapping: MPGBPMapping = MPGBPMapping.find_by_modbus_point_uuid(self.point_uuid)
-        if mapping:
+        mapping: MPGBPMapping = MPGBPMapping.find_by_point_uuid(self.point_uuid)
+        if mapping and mapping.mapping_state == MappingState.MAPPED:
             gevent.spawn(
                 self.sync_point_value_with_mapping_mp_to_gbp,
-                mapping.generic_point_uuid, mapping.bacnet_point_uuid,
+                mapping.type, mapping.mapped_point_uuid,
                 gp, bp
             )
 
@@ -145,6 +146,7 @@ class PointStoreModel(PointStoreModelMixin):
     def sync_points_values_mp_to_gbp_process(cls, gp: bool = True, bp: bool = True):
         mappings: List[MPGBPMapping] = MPGBPMapping.find_all()
         for mapping in mappings:
-            point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.modbus_point_uuid)
-            if point_store:
-                point_store.__sync_point_value_mp_to_gbp_process(gp, bp)
+            if mapping.mapping_state == MappingState.MAPPED:
+                point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.point_uuid)
+                if point_store:
+                    point_store.__sync_point_value_mp_to_gbp_process(gp, bp)

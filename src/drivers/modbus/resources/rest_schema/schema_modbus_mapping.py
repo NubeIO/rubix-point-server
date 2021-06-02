@@ -1,24 +1,84 @@
 from src.resources.rest_schema.schema_device import *
 
 mapping_mp_gbp_attributes = {
-    'modbus_point_uuid': {
+    'point_uuid': {
         'type': str,
         'required': True,
     },
-    'generic_point_uuid': {
+    'mapped_point_uuid': {
         'type': str,
+        'required': True,
     },
-    'bacnet_point_uuid': {
+    'point_name': {
         'type': str,
+        'required': True,
     },
-    'modbus_point_name': {
+    'mapped_point_name': {
         'type': str,
+        'required': True,
     },
-    'generic_point_name': {
+    'type': {
         'type': str,
+        'nested': True,
+        'dict': 'type.name',
+        'required': True,
     },
-    'bacnet_point_name': {
+    'mapping_state': {
         'type': str,
+        'nested': True,
+        'dict': 'mapping_state.name',
+        'required': True,
+    },
+}
+
+mapping_mp_gbp_uuid_attributes = {
+    'point_uuid': {
+        'type': str,
+        'required': True,
+    },
+    'mapped_point_uuid': {
+        'type': str,
+        'required': True,
+    },
+    'type': {
+        'type': str,
+        'nested': True,
+        'dict': 'type.name',
+        'required': True,
+    },
+}
+
+mapping_mp_gbp_name_attributes = {
+    'point_name': {
+        'type': str,
+        'required': True,
+    },
+    'mapped_point_name': {
+        'type': str,
+        'required': True,
+    },
+    'type': {
+        'type': str,
+        'nested': True,
+        'dict': 'type.name',
+        'required': True,
+    },
+}
+
+mapping_mp_gbp_patch_attributes = {
+    'point_uuid': {
+        'type': str,
+        'required': True,
+    },
+    'mapped_point_uuid': {
+        'type': str,
+        'required': True,
+    },
+    'type': {
+        'type': str,
+        'nested': True,
+        'dict': 'type.name',
+        'required': True,
     },
 }
 
