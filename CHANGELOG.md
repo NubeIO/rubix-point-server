@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.7.3](https://github.com/NubeIO/rubix-point-server/tree/v1.7.3) (2020-06-03)
+### Added
+- Add priority to MQTT message
+- Issue fix: value were not writing on COV (#324)
+
 ## [v1.7.2](https://github.com/NubeIO/rubix-point-server/tree/v1.7.2) (2020-05-25)
 ### Added
 - Add field source ('OWN', 'MAPPING') for source filtration
