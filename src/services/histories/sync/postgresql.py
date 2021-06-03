@@ -106,6 +106,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
+            if not self.status():
+                return
             _point: tuple = (point.device.uuid, point.uuid, point.name, point.driver.name)
             points_list.append(_point)
 
@@ -463,11 +465,18 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                     logger.error(str(e))
 
     def _get_point_last_sync_id(self, point_uuid):
+        """
+        This function will return point_last_sync_id and if connection is already closed then we try to reconnect too
+        """
         query = f"SELECT MAX(id) FROM {self.__points_values_table_name} WHERE point_uuid=%s;"
-        with self.__client:
-            with self.__client.cursor() as curs:
-                curs.execute(query, (point_uuid,))
-                last_sync_id = curs.fetchone()[0]
-                if last_sync_id:
-                    return last_sync_id
-                return 0
+        try:
+            with self.__client:
+                with self.__client.cursor() as curs:
+                    curs.execute(query, (point_uuid,))
+                    last_sync_id = curs.fetchone()[0]
+                    if last_sync_id:
+                        return last_sync_id
+        except Exception as e:
+            logger.error(f'Error: {e}')
+            self.connect()
+        return 0
