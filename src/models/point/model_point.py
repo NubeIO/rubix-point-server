@@ -232,6 +232,7 @@ class PointModel(ModelBase):
                 and network.history_enable \
                 and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
+            db.session.commit()
 
         from src.event_dispatcher import EventDispatcher
         from src.drivers.generic.models.point import GenericPointModel
