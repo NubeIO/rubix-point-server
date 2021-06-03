@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v1.7.4](https://github.com/NubeIO/rubix-point-server/tree/v1.7.4) (2020-06-04)
+### Added
+- Retry establishing connection on PostgreSQL connection gets down
+- Include device and network tags as well on InfluxDB sync
+
 ## [v1.7.3](https://github.com/NubeIO/rubix-point-server/tree/v1.7.3) (2020-06-03)
 ### Added
 - Add priority to MQTT message
