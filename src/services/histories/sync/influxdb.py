@@ -93,9 +93,19 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                 point: PointModel = point_store_history.point
                 if point.tags:
                     point_tags = json.loads(point.tags)
-                    # insert tags from point object
                     for point_tag in point_tags:
                         tags[point_tag] = point_tags[point_tag]
+
+                if point.device.tags:
+                    device_tags = json.loads(point.device.tags)
+                    for device_tag in device_tags:
+                        tags[device_tag] = device_tags[device_tag]
+
+                if point.device.network.tags:
+                    network_tags = json.loads(point.device.network.tags)
+                    for network_tag in network_tags:
+                        tags[network_tag] = network_tags[network_tag]
+
                 tags.update({
                     'rubix_point_uuid': point.uuid,
                     'rubix_point_name': point.name,
