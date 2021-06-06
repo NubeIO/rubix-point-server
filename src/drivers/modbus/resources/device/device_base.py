@@ -1,5 +1,4 @@
-import uuid
-
+import shortuuid
 from flask_restful import reqparse
 from rubix_http.resource import RubixResource
 
@@ -25,7 +24,7 @@ class ModbusDeviceBase(RubixResource):
 
     @classmethod
     def add_device(cls, data):
-        _uuid = str(uuid.uuid4())
-        device = ModbusDeviceModel(uuid=_uuid, **data)
+        uuid: str = shortuuid.uuid()
+        device = ModbusDeviceModel(uuid=uuid, **data)
         device.save_to_db()
         return device
