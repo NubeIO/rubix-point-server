@@ -45,6 +45,7 @@ class GenericPointSingular(GenericPointBase):
             highest_priority_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
                 updated_priority_array_write)
             point.point_store.value_original = highest_priority_value
+        if priority_array_write or data:
             changed: bool = point.update(**data)
             if changed:
                 PointsRegistry().update_point(point)

@@ -63,7 +63,8 @@ class PointStoreModel(PointStoreModelMixin):
                             ts_value=ts)
                     .where(and_(self.__table__.c.point_uuid == self.point_uuid,
                                 or_(self.__table__.c.value == None,
-                                    db.func.abs(self.__table__.c.value - self.value) > cov_threshold,
+                                    and_(db.func.abs(self.__table__.c.value - self.value) >= cov_threshold,
+                                         self.__table__.c.value != self.value),
                                     self.__table__.c.fault != self.fault))))
             if res.rowcount:  # WARNING: this could cause secondary write to db is store if fetched/linked from DB
                 self.ts_value = ts
