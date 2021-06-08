@@ -24,13 +24,29 @@ class PriorityArrayModel(db.Model):
     def __repr__(self):
         return f"PriorityArray(uuid = {self.point_uuid})"
 
-    @classmethod
-    def create_priority_array_model(cls, point_uuid, priority_array_write):
-        return PriorityArrayModel(point_uuid=point_uuid, **priority_array_write)
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        self.check_self()
+        db.session.commit()
+
+    def check_self(self) -> (bool, any):
+        if not self.get_highest_priority_value_from_priority_array(self):
+            from src.models.point.model_point import PointModel
+            point: PointModel = PointModel.find_by_uuid(self.point_uuid)
+            self._16 = point.fallback_value if point else 16
 
     @classmethod
-    def filter_by_point_uuid(cls, point_uuid):
-        return cls.query.filter_by(point_uuid=point_uuid)
+    def create_priority_array_model(cls, point_uuid, priority_array_write, fallback_value):
+        priority_array = PriorityArrayModel(point_uuid=point_uuid, **priority_array_write)
+        if not cls.get_highest_priority_value_from_priority_array(priority_array):
+            priority_array._16 = fallback_value
+        return priority_array
+
+    @classmethod
+    def find_by_point_uuid(cls, point_uuid):
+        return cls.query.filter_by(point_uuid=point_uuid).first()
 
     @classmethod
     def get_highest_priority_value(cls, point_uuid):

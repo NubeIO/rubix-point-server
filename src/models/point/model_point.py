@@ -48,6 +48,7 @@ class PointModel(ModelBase):
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=True, cascade="all,delete")
     driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
     source = db.Column(db.Enum(Sources), default=Sources.OWN)
+    fallback_value = db.Column(db.Float(), nullable=True, default=16)
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',
@@ -177,16 +178,18 @@ class PointModel(ModelBase):
 
     def update_priority_value(self, value: float, priority: int, priority_array_write: dict):
         if priority_array_write:
-            PriorityArrayModel.filter_by_point_uuid(self.uuid).update(priority_array_write)
-            db.session.commit()
+            priority_array: PriorityArrayModel = PriorityArrayModel.find_by_point_uuid(self.uuid)
+            if priority_array:
+                priority_array.update(**priority_array_write)
             return
         if not priority:
             priority = 16
         if priority not in range(1, 17):
             raise ValueError('priority should be in range(1, 17)')
         if priority:
-            PriorityArrayModel.filter_by_point_uuid(self.uuid).update({f"_{priority}": value})
-            db.session.commit()
+            priority_array: PriorityArrayModel = PriorityArrayModel.find_by_point_uuid(self.uuid)
+            if priority_array:
+                priority_array.update(**{f"_{priority}": value})
 
     @classmethod
     def apply_value_operation(cls, original_value, value_operation: str) -> float or None:

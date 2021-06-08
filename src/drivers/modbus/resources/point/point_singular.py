@@ -41,7 +41,9 @@ class ModbusPointSingular(ModbusPointBase):
     def update_point(cls, data: dict, point: ModbusPointModel) -> ModbusPointModel:
         priority_array_write: dict = data.pop('priority_array_write') if data.get('priority_array_write') else {}
         if priority_array_write:
-            PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
+            priority_array = PriorityArrayModel.find_by_point_uuid(point.uuid)
+            if priority_array:
+                priority_array.update(**priority_array_write)
         point.update(**data)
         return point
 
