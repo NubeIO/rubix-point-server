@@ -40,11 +40,12 @@ class GenericPointSingular(GenericPointBase):
     def update_point(cls, data: dict, point: GenericPointModel) -> GenericPointModel:
         priority_array_write: dict = data.pop('priority_array_write') if data.get('priority_array_write') else {}
         if priority_array_write:
-            PriorityArrayModel.filter_by_point_uuid(point.uuid).update(priority_array_write)
-            updated_priority_array_write: PriorityArrayModel = cls.get_priority_array_write(uuid=point.uuid)
+            updated_priority_array_write: PriorityArrayModel = PriorityArrayModel.find_by_point_uuid(point.uuid)
+            updated_priority_array_write.update(**priority_array_write)
             highest_priority_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
                 updated_priority_array_write)
             point.point_store.value_original = highest_priority_value
+        if priority_array_write or data:
             changed: bool = point.update(**data)
             if changed:
                 PointsRegistry().update_point(point)
@@ -89,7 +90,7 @@ class GenericPointSingularByUUID(GenericPointSingular):
     @classmethod
     @abstractmethod
     def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
-        return PriorityArrayModel.filter_by_point_uuid(kwargs.get('uuid')).first()
+        return PriorityArrayModel.find_by_point_uuid(kwargs.get('uuid'))
 
 
 class GenericPointSingularByName(GenericPointSingular):

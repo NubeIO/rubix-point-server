@@ -25,7 +25,7 @@ class GenericPointBase(RubixResource):
         _uuid: str = str(uuid.uuid4())
         priority_array_write: dict = data.pop('priority_array_write', {})
         priority_array_write_object: PriorityArrayModel = PriorityArrayModel. \
-            create_priority_array_model(_uuid, priority_array_write)
+            create_priority_array_model(_uuid, priority_array_write, data.get('fallback_value'))
         point = GenericPointModel(
             uuid=_uuid,
             priority_array_write=priority_array_write_object,
