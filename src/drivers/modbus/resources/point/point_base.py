@@ -26,7 +26,7 @@ class ModbusPointBase(RubixResource):
         point = ModbusPointModel(
             uuid=_uuid,
             priority_array_write=PriorityArrayModel.create_priority_array_model(_uuid, priority_array_write,
-                                                                                data.get('fallback_value', 16)),
+                                                                                data.get('fallback_value')),
             **data
         )
         point.save_to_db()

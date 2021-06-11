@@ -52,7 +52,7 @@ class ModbusPointPollNonExisting(RubixResource):
         priority_array_write: dict = point_data.pop('priority_array_write', {})
         point = ModbusPointModel.create_temporary(
             priority_array_write=PriorityArrayModel.create_priority_array_model(None, priority_array_write,
-                                                                                point_data.get('fallback_value', 16)),
+                                                                                point_data.get('fallback_value')),
             **point_data)
         network.check_self()
         device.check_self()

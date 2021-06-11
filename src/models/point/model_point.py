@@ -32,7 +32,7 @@ class PointModel(ModelBase):
     history_interval = db.Column(db.Integer, nullable=False, default=15)
     writable = db.Column(db.Boolean, nullable=False, default=True)
     priority_array_write = db.relationship('PriorityArrayModel',
-                                           backref='points',
+                                           backref='point',
                                            lazy=True,
                                            uselist=False,
                                            cascade="all,delete")

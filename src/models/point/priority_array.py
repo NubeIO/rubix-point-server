@@ -34,8 +34,8 @@ class PriorityArrayModel(db.Model):
     def check_self(self) -> (bool, any):
         if not self.get_highest_priority_value_from_priority_array(self):
             from src.models.point.model_point import PointModel
-            point: PointModel = PointModel.find_by_uuid(self.point_uuid)
-            self._16 = point.fallback_value if point else 16
+            point: PointModel = self.point
+            self._16 = point.fallback_value
 
     @classmethod
     def create_priority_array_model(cls, point_uuid, priority_array_write, fallback_value):
@@ -50,7 +50,7 @@ class PriorityArrayModel(db.Model):
 
     @classmethod
     def get_highest_priority_value(cls, point_uuid):
-        priority_array: PriorityArrayModel = cls.filter_by_point_uuid(point_uuid).first()
+        priority_array: PriorityArrayModel = cls.find_by_point_uuid(point_uuid)
         return cls.get_highest_priority_value_from_priority_array(priority_array)
 
     @classmethod
