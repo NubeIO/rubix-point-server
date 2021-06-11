@@ -1,5 +1,4 @@
-import uuid
-
+import shortuuid
 from flask_restful import reqparse
 from rubix_http.resource import RubixResource
 
@@ -27,7 +26,7 @@ class ModbusNetworkBase(RubixResource):
 
     @staticmethod
     def add_network(data):
-        _uuid = str(uuid.uuid4())
-        network = ModbusNetworkModel(uuid=_uuid, **data)
+        uuid: str = shortuuid.uuid()
+        network = ModbusNetworkModel(uuid=uuid, **data)
         network.save_to_db()
         return network

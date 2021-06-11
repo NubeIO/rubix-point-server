@@ -1,5 +1,4 @@
-import uuid
-
+import shortuuid
 from flask_restful import reqparse
 from rubix_http.resource import RubixResource
 
@@ -25,7 +24,7 @@ class GenericDeviceBase(RubixResource):
 
     @classmethod
     def add_device(cls, data):
-        _uuid = str(uuid.uuid4())
-        device = GenericDeviceModel(uuid=_uuid, **data)
+        uuid: str = shortuuid.uuid()
+        device = GenericDeviceModel(uuid=uuid, **data)
         device.save_to_db()
         return device

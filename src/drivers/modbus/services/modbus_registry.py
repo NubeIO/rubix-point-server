@@ -1,8 +1,8 @@
 import logging
-import uuid
 from abc import abstractmethod
 from typing import Dict
 
+import shortuuid
 from pymodbus.client.sync import BaseModbusClient
 
 from src.drivers.modbus.enums.network.network import ModbusType
@@ -20,7 +20,7 @@ class ModbusRegistryKey:
         self.connection_key: str = self.create_connection_key()
 
     def create_key(self):
-        return self.network.uuid or str(uuid.uuid4())  # there will be no uuid on poll_point
+        return self.network.uuid or shortuuid.uuid()  # there will be no uuid on poll_point
 
     @abstractmethod
     def create_connection_key(self) -> str:

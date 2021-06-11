@@ -1,5 +1,4 @@
-import uuid
-
+import shortuuid
 from flask_restful import reqparse
 from rubix_http.resource import RubixResource
 
@@ -22,12 +21,12 @@ class GenericPointBase(RubixResource):
 
     @classmethod
     def add_point(cls, data):
-        _uuid: str = str(uuid.uuid4())
+        uuid: str = shortuuid.uuid()
         priority_array_write: dict = data.pop('priority_array_write', {})
         priority_array_write_object: PriorityArrayModel = PriorityArrayModel. \
-            create_priority_array_model(_uuid, priority_array_write, data.get('fallback_value'))
+            create_priority_array_model(uuid, priority_array_write, data.get('fallback_value'))
         point = GenericPointModel(
-            uuid=_uuid,
+            uuid=uuid,
             priority_array_write=priority_array_write_object,
             **data
         )

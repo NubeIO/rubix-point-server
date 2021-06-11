@@ -1,5 +1,4 @@
-import uuid
-
+import shortuuid
 from flask_restful import reqparse
 from rubix_http.resource import RubixResource
 
@@ -21,11 +20,11 @@ class ModbusPointBase(RubixResource):
 
     @classmethod
     def add_point(cls, data):
-        _uuid = str(uuid.uuid4())
+        uuid: str = shortuuid.uuid()
         priority_array_write: dict = data.pop('priority_array_write', {})
         point = ModbusPointModel(
-            uuid=_uuid,
-            priority_array_write=PriorityArrayModel.create_priority_array_model(_uuid, priority_array_write,
+            uuid=uuid,
+            priority_array_write=PriorityArrayModel.create_priority_array_model(uuid, priority_array_write,
                                                                                 data.get('fallback_value')),
             **data
         )
