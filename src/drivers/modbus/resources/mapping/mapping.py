@@ -1,4 +1,4 @@
-import uuid as uuid_
+import shortuuid
 from abc import abstractmethod
 
 from flask_restful import marshal_with, reqparse
@@ -33,7 +33,7 @@ class MPGBPMappingResourceList(RubixResource):
                                 required=mapping_mp_gbp_attributes[attr].get('required', False),
                                 default=None)
         data = parser.parse_args()
-        data.uuid = str(uuid_.uuid4())
+        data.uuid = str(shortuuid.uuid())
         mapping: MPGBPMapping = MPGBPMapping(**data)
         mapping.save_to_db()
         sync_point_value(mapping)
