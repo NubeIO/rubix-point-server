@@ -21,12 +21,13 @@ if __name__ == '__main__':
         "database": "db",
         "username": "username",
         "password": "password",
+        "ssl": false,
         "verify_ssl": false,
         "timeout": 5,
         "retries": 3,
-        "timer": 1,
+        "timer": 5,
         "path": "",
-        "measurement": "history",
+        "measurement": "points",
         "attempt_reconnect_secs": 5
       },
       "postgres": {
@@ -37,34 +38,31 @@ if __name__ == '__main__':
         "password": "password",
         "ssl_mode": "allow",
         "connect_timeout": 5,
-        "timer": 1,
+        "timer": 5,
         "table_prefix": "tbl",
         "attempt_reconnect_secs": 5
-      },
-      "generic_point_listener": {
-        "enabled": true,
-        "name": "rubix_points_generic_point",
-        "host": "0.0.0.0",
-        "port": 1883,
-        "keepalive": 60,
-        "qos": 1,
-        "attempt_reconnect_on_unavailable": true,
-        "attempt_reconnect_secs": 5,
-        "publish_value": true,
-        "topic": "rubix/points/generic/cov"
       },
       "mqtt": [
         {
           "enabled": true,
-          "name": "rubix_points",
+          "name": "rubix-points",
           "host": "0.0.0.0",
           "port": 1883,
+          "authentication": false,
+          "username": "username",
+          "password": "password",
           "keepalive": 60,
           "qos": 1,
           "attempt_reconnect_on_unavailable": true,
           "attempt_reconnect_secs": 5,
+          "timeout": 10,
+          "retain_clear_interval": 10,
           "publish_value": true,
-          "topic": "rubix/points"
+          "topic": "rubix/points/value",
+          "listen": true,
+          "listen_topic": "rubix/points/listen",
+          "publish_debug": true,
+          "debug_topic": "rubix/points/debug"
         }
       ]
     }

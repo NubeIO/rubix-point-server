@@ -38,6 +38,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self.__points_tags_table_name: str = ''
         self.__networks_tags_table_name: str = ''
         self.__devices_tags_table_name: str = ''
+        self.__schedule_job = None
 
     @property
     def config(self) -> Union[PostgresSetting, None]:
@@ -49,29 +50,38 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
     def disconnect(self):
         self.__is_connected = False
 
-    def setup(self, config: PostgresSetting):
+    def start_postgres(self, config: PostgresSetting):
         self.__config = config
-        self.__wires_plat_table_name: str = f'{self.config.table_prefix}_wires_plats'
-        self.__networks_table_name: str = f'{self.config.table_prefix}_networks'
-        self.__devices_table_name: str = f'{self.config.table_prefix}_devices'
-        self.__points_table_name: str = f'{self.config.table_prefix}_points'
-        self.__points_values_table_name: str = f'{self.__points_table_name}_values'
-        self.__devices_tags_table_name: str = f'{self.__devices_table_name}_tags'
-        self.__networks_tags_table_name: str = f'{self.__networks_table_name}_tags'
-        self.__points_tags_table_name: str = f'{self.__points_table_name}_tags'
+        self.__set_tables()
+        self.loop_forever()
 
-        while not self.status():
-            self.connect()
-            time.sleep(self.config.attempt_reconnect_secs)
-        if self.status():
-            logger.info("Registering PostgreSQL for scheduler job")
-            # schedule.every(5).seconds.do(self.sync)  # for testing
-            schedule.every(self.config.timer).minutes.do(self.sync)
-            while True:
-                schedule.run_pending()
+    def loop_forever(self):
+        while True:
+            try:
+                while not self.status():
+                    self.connect()
+                    time.sleep(self.config.attempt_reconnect_secs)
+                if self.status():
+                    if not self.__schedule_job:
+                        logger.info("Registering PostgreSQL for scheduler job")
+                        # self.__schedule_job = schedule.every(5).seconds.do(self.sync)  # for testing
+                        self.__schedule_job = schedule.every(self.config.timer).minutes.do(self.sync)
+                    schedule.run_pending()
+                else:
+                    logger.error("PostgreSQL can't be registered with not working client details")
                 time.sleep(1)
-        else:
-            logger.error("PostgreSQL can't be registered with not working client details")
+            except Exception as e:
+                logger.error(e)
+                logger.warning("PostgreSQL is not connected, waiting for PostgreSQL connection...")
+                time.sleep(self.config.attempt_reconnect_secs)
+
+    def restart_postgres(self, config):
+        self.disconnect()
+        if self.__schedule_job:
+            schedule.clear()
+        self.__reset_variable()
+        self.__config = config
+        self.__set_tables()
 
     def connect(self):
         if self.__client:
@@ -89,6 +99,21 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         except Exception as e:
             self.__is_connected = False
             logger.error(f'Connection Error: {str(e)}')
+
+    def __set_tables(self):
+        self.__wires_plat_table_name: str = f'{self.config.table_prefix}_wires_plats'
+        self.__networks_table_name: str = f'{self.config.table_prefix}_networks'
+        self.__devices_table_name: str = f'{self.config.table_prefix}_devices'
+        self.__points_table_name: str = f'{self.config.table_prefix}_points'
+        self.__points_values_table_name: str = f'{self.__points_table_name}_values'
+        self.__devices_tags_table_name: str = f'{self.__devices_table_name}_tags'
+        self.__networks_tags_table_name: str = f'{self.__networks_table_name}_tags'
+        self.__points_tags_table_name: str = f'{self.__points_table_name}_tags'
+
+    def __reset_variable(self):
+        self.__schedule_job = None
+        self.__wires_plat = None
+        self.__is_connected = False
 
     @exception_handler
     def sync(self):

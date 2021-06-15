@@ -33,6 +33,8 @@ from src.resources.resource_device import DeviceResourceByUUID, DeviceResourceBy
 from src.resources.resource_network import NetworkResourceByUUID, NetworkResourceByName, NetworkResourceList
 from src.resources.resource_point import PointResourceByUUID, PointResourceByName, PointResourceList
 from src.resources.resource_schedule import ScheduleResourceByUUID, ScheduleResourceList, ScheduleResourceByName
+from src.resources.resource_setting import DriverSettingResource, ServiceSettingResource, InfluxSettingResource, \
+    PostgresSettingResource, MqttSettingResource, MqttSettingResourceByUUID
 from src.system.resources.memory import GetSystemMem
 from src.system.resources.ping import Ping
 
@@ -114,3 +116,13 @@ api_schedule = Api(bp_schedule)
 api_schedule.add_resource(ScheduleResourceList, '')
 api_schedule.add_resource(ScheduleResourceByUUID, '/uuid/<string:uuid>')
 api_schedule.add_resource(ScheduleResourceByName, '/name/<string:name>')
+
+
+bp_setting = Blueprint('settings', __name__, url_prefix='/api/settings')
+api_setting = Api(bp_setting)
+api_setting.add_resource(DriverSettingResource, '/drivers')
+api_setting.add_resource(ServiceSettingResource, '/services')
+api_setting.add_resource(InfluxSettingResource, '/influx')
+api_setting.add_resource(PostgresSettingResource, '/postgres')
+api_setting.add_resource(MqttSettingResource, '/mqtt')
+api_setting.add_resource(MqttSettingResourceByUUID, '/mqtt/uuid/<string:uuid>')
