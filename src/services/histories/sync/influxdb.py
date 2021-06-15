@@ -132,10 +132,13 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                 store.append(row)
         if len(store):
             logger.debug(f"Storing: {store}")
-            self.__client.write_points(store)
-            logger.info(f'Stored {len(store)} rows on {self.config.measurement} measurement')
+            try:
+                self.__client.write_points(store, batch_size=1000)
+                logger.info(f'Stored {len(store)} rows on {self.config.measurement} measurement')
+            except Exception as e:
+                logger.error(f"Exception: {str(e)}")
         else:
-            logger.debug("Nothing to store, no new records")
+            logger.info("Nothing to store, no new records")
 
     def _get_point_last_sync_id(self, point_uuid):
         query = f"SELECT MAX(id), point_uuid FROM {self.config.measurement} WHERE rubix_point_uuid='{point_uuid}'"
