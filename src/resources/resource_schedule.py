@@ -1,4 +1,4 @@
-import uuid as uuid_
+import shortuuid
 from abc import abstractmethod
 
 from flask_restful import marshal_with, reqparse
@@ -20,7 +20,7 @@ class ScheduleResourceBase(RubixResource):
 
     @classmethod
     def add_schedule(cls, data):
-        uuid = str(uuid_.uuid4())
+        uuid = str(shortuuid.uuid())
         schedule = ScheduleModel(uuid=uuid, **data)
         schedule.save_to_db()
         return schedule
