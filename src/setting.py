@@ -61,6 +61,7 @@ class MqttSetting(MqttSettingBase):
         self.debug_topic = 'rubix/points/debug'
         self.listen = True
         self.listen_topic = 'rubix/points/listen'
+        self.cloud = False
 
 
 class InfluxSetting(BaseSetting):

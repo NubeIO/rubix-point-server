@@ -58,7 +58,8 @@
       "listen": true,
       "listen_topic": "rubix/points/listen",
       "publish_debug": true,
-      "debug_topic": "rubix/points/debug"
+      "debug_topic": "rubix/points/debug",
+      "cloud": true
     }
   ]
 }
