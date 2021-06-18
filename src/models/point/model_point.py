@@ -20,8 +20,6 @@ from src.utils.model_utils import validate_json
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_FALLBACK_VALUE = 16
-
 
 class PointModel(ModelBase):
     __tablename__ = 'points'
@@ -50,7 +48,7 @@ class PointModel(ModelBase):
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=True, cascade="all,delete")
     driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
     source = db.Column(db.Enum(Sources), default=Sources.OWN)
-    fallback_value = db.Column(db.Float(), nullable=True, default=16)
+    fallback_value = db.Column(db.Float(), default=16)
 
     __mapper_args__ = {
         'polymorphic_identity': 'point',

@@ -4,7 +4,6 @@ from sqlalchemy.orm import validates
 from src import db
 from src.drivers.enums.drivers import Drivers
 from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
-from src.models.point.model_point import DEFAULT_FALLBACK_VALUE
 from src.models.point.model_point_mixin import PointMixinModel
 from src.models.point.priority_array import PriorityArrayModel
 
@@ -102,7 +101,7 @@ class ModbusPointModel(PointMixinModel):
         if self.is_writable(point_fc):
             self.writable = True
             if not self.priority_array_write:
-                self.priority_array_write = PriorityArrayModel(_16=self.fallback_value or DEFAULT_FALLBACK_VALUE)
+                self.priority_array_write = PriorityArrayModel(_16=self.fallback_value)
             if reg_length > 1 and point_fc == ModbusFunctionCode.WRITE_COIL:
                 self.function_code = ModbusFunctionCode.WRITE_COILS
             elif reg_length == 1 and point_fc == ModbusFunctionCode.WRITE_COILS:

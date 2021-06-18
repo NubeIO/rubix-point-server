@@ -5,7 +5,6 @@ from rubix_http.resource import RubixResource
 from src.drivers.modbus.models.point import ModbusPointModel
 from src.drivers.modbus.resources.rest_schema.schema_modbus_point import modbus_point_all_attributes, \
     add_nested_priority_array_write
-from src.models.point.model_point import DEFAULT_FALLBACK_VALUE
 from src.models.point.priority_array import PriorityArrayModel
 
 
@@ -28,7 +27,7 @@ class ModbusPointBase(RubixResource):
             paw = PriorityArrayModel.create_priority_array_model(
                 uuid,
                 priority_array_write,
-                data.get('fallback_value', DEFAULT_FALLBACK_VALUE))
+                data.get('fallback_value'))
         point = ModbusPointModel(
             uuid=uuid,
             priority_array_write=paw,
