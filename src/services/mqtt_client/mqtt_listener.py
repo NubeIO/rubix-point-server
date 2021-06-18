@@ -14,11 +14,13 @@ from rubix_mqtt.mqtt import MqttClientBase
 
 from src import FlaskThread
 from src.drivers.generic.models.point import GenericPointModel
+from src.event_dispatcher import EventDispatcher
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point import PointModel
 from src.models.schedule.model_schedule import ScheduleModel
+from src.services.event_service_base import Event, EventType
 from src.setting import MqttSetting
 
 logger = logging.getLogger(__name__)
@@ -48,6 +50,8 @@ class MqttListener(MqttClientBase):
             logger.error('Please add wires-plat on Rubix Service')
             return
         subscribe_topics: List[str] = []
+        topic: str = self.__make_topic((self.get_schedule_value_topic_prefix(), '#'))
+        subscribe_topics.append(topic)
         if self.config.listen:
             # Resubscribe logic is not necessary here, these topics are for this app and will clear out when we start
             topic: str = self.__make_topic((self.get_listener_topic_prefix(), '#'))
@@ -85,18 +89,29 @@ class MqttListener(MqttClientBase):
             self.config.topic
         ))
 
+    def get_schedule_value_topic_prefix(self) -> str:
+        return self.__make_topic((self.get_listener_topic_prefix(), 'schedules'))
+
     @exception_handler
     def _on_message(self, client, userdata, message: MQTTMessage):
         logger.debug(f'Listener Topic: {message.topic}, Message: {message.payload}')
         with self.__app_context():
             if not message.payload:
                 return
-            if self.get_listener_topic_prefix() in message.topic:
+            if self.get_schedule_value_topic_prefix() in message.topic:
+                self.__check_and_clear_schedule_value_topic(message)
+            elif self.get_listener_topic_prefix() in message.topic:
                 self.__check_and_clear_listener_topic(message)
             elif self.get_value_topic_prefix() in message.topic:
                 self.__check_and_clear_value_topic(message)
             else:
                 self.__clear_mqtt_retain_value(message)
+
+    def __check_and_clear_schedule_value_topic(self, message: MQTTMessage):
+        topic: List[str] = message.topic.split(self.SEPARATOR)
+        if len(topic) == self._mqtt_schedule_value_topic_length():
+            if not self.__check_and_clear_schedule(topic, message):
+                self.__dispatch_schedule_value_event(message)
 
     def __check_and_clear_listener_topic(self, message: MQTTMessage):
         topic: List[str] = message.topic.split(self.SEPARATOR)
@@ -165,6 +180,14 @@ class MqttListener(MqttClientBase):
                 schedule_type not in ['uuid', 'name']:
             logger.warning(f'No schedule with topic: {message.topic}')
             self.__clear_mqtt_retain_value(message)
+            return True
+        return False
+
+    def _mqtt_schedule_value_topic_length(self) -> int:
+        return len(self.__make_topic((
+            '<client_id>', '<site_id>', '<device_id>', self.config.listen_topic, '<function>', '<uuid|name>',
+            '<schedule_name|schedule_uuid>'
+        )).split(self.SEPARATOR))
 
     def _mqtt_listener_topic_by_uuid_length(self) -> int:
         return len(self.__make_topic((
@@ -210,6 +233,14 @@ class MqttListener(MqttClientBase):
         elif force_clear:
             logger.debug(f'Clearing topic: {message.topic}, having message: {message.payload}')
             self._publish_mqtt_value(message.topic, '', True)
+
+    def __dispatch_schedule_value_event(self, message: MQTTMessage):
+        if self.config.cloud and message.payload:
+            event = Event(EventType.SCHEDULE_VALUE, {
+                'topic': message.topic,
+                'payload': json.loads(message.payload)
+            })
+            EventDispatcher().dispatch_from_source(None, event)
 
     @staticmethod
     def __update_generic_point_store(message: MQTTMessage, point_uuid: str):
