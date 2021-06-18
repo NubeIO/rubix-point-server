@@ -41,6 +41,7 @@
   "mqtt": [
     {
       "enabled": true,
+      "cloud": false,
       "name": "rubix-points",
       "host": "0.0.0.0",
       "port": 1883,
@@ -58,8 +59,7 @@
       "listen": true,
       "listen_topic": "rubix/points/listen",
       "publish_debug": true,
-      "debug_topic": "rubix/points/debug",
-      "cloud": false
+      "debug_topic": "rubix/points/debug"
     }
   ]
 }

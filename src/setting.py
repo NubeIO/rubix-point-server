@@ -53,6 +53,7 @@ class MqttSetting(MqttSettingBase):
 
     def __init__(self):
         super(MqttSetting, self).__init__()
+        self.cloud = False
         self.name = 'rubix-points'
         self.retain_clear_interval = 60
         self.publish_value = True
@@ -61,7 +62,6 @@ class MqttSetting(MqttSettingBase):
         self.debug_topic = 'rubix/points/debug'
         self.listen = True
         self.listen_topic = 'rubix/points/listen'
-        self.cloud = False
 
 
 class InfluxSetting(BaseSetting):
