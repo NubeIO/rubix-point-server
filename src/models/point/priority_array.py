@@ -24,6 +24,10 @@ class PriorityArrayModel(db.Model):
     def __repr__(self):
         return f"PriorityArray(uuid = {self.point_uuid})"
 
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
+
     def update(self, **kwargs):
         for key, value in kwargs.items():
             if hasattr(self, key):
@@ -32,7 +36,7 @@ class PriorityArrayModel(db.Model):
         db.session.commit()
 
     def check_self(self) -> (bool, any):
-        if not self.get_highest_priority_value_from_priority_array(self):
+        if self.get_highest_priority_value_from_priority_array(self) is None:
             from src.models.point.model_point import PointModel
             point: PointModel = self.point
             self._16 = point.fallback_value
@@ -40,7 +44,7 @@ class PriorityArrayModel(db.Model):
     @classmethod
     def create_priority_array_model(cls, point_uuid, priority_array_write, fallback_value):
         priority_array = PriorityArrayModel(point_uuid=point_uuid, **priority_array_write)
-        if not cls.get_highest_priority_value_from_priority_array(priority_array):
+        if cls.get_highest_priority_value_from_priority_array(priority_array) is None:
             priority_array._16 = fallback_value
         return priority_array
 
