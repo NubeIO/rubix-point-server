@@ -5,7 +5,6 @@ from rubix_http.resource import RubixResource
 from src.drivers.generic.models.point import GenericPointModel
 from src.drivers.generic.resources.rest_schema.schema_generic_point import generic_point_all_attributes, \
     add_nested_priority_array_write
-from src.models.point.model_point import DEFAULT_FALLBACK_VALUE
 from src.models.point.priority_array import PriorityArrayModel
 from src.services.points_registry import PointsRegistry
 
@@ -25,7 +24,7 @@ class GenericPointBase(RubixResource):
         uuid: str = shortuuid.uuid()
         priority_array_write: dict = data.pop('priority_array_write', {})
         priority_array_write_object: PriorityArrayModel = PriorityArrayModel. \
-            create_priority_array_model(uuid, priority_array_write, data.get('fallback_value', DEFAULT_FALLBACK_VALUE))
+            create_priority_array_model(uuid, priority_array_write, data.get('fallback_value'))
         point = GenericPointModel(
             uuid=uuid,
             priority_array_write=priority_array_write_object,
