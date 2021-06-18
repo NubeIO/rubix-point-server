@@ -20,6 +20,8 @@ from src.utils.model_utils import validate_json
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_FALLBACK_VALUE = 16
+
 
 class PointModel(ModelBase):
     __tablename__ = 'points'

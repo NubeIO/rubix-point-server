@@ -4,6 +4,7 @@ from sqlalchemy.orm import validates
 from src import db
 from src.drivers.enums.drivers import Drivers
 from src.drivers.modbus.enums.point.points import ModbusFunctionCode, ModbusDataType, ModbusDataEndian
+from src.models.point.model_point import DEFAULT_FALLBACK_VALUE
 from src.models.point.model_point_mixin import PointMixinModel
 from src.models.point.priority_array import PriorityArrayModel
 
@@ -61,9 +62,6 @@ class ModbusPointModel(PointMixinModel):
             if not value or value not in ModbusFunctionCode.__members__:
                 raise ValueError("Invalid function code")
             function_code: ModbusFunctionCode = ModbusFunctionCode[value]
-        if self.is_writable(function_code):
-            if PriorityArrayModel.get_highest_priority_value_from_priority_array(self.priority_array_write) is None:
-                raise ValueError(f"priority_array_write shouldn't be null for {function_code}")
         return function_code
 
     @validates('register')
@@ -103,6 +101,8 @@ class ModbusPointModel(PointMixinModel):
 
         if self.is_writable(point_fc):
             self.writable = True
+            if not self.priority_array_write:
+                self.priority_array_write = PriorityArrayModel(_16=self.fallback_value or DEFAULT_FALLBACK_VALUE)
             if reg_length > 1 and point_fc == ModbusFunctionCode.WRITE_COIL:
                 self.function_code = ModbusFunctionCode.WRITE_COILS
             elif reg_length == 1 and point_fc == ModbusFunctionCode.WRITE_COILS:
@@ -113,7 +113,8 @@ class ModbusPointModel(PointMixinModel):
                 self.function_code = ModbusFunctionCode.WRITE_REGISTER
         else:
             self.writable = False
-            self.priority_array_write = None
+            if self.priority_array_write:
+                self.priority_array_write.delete_from_db()
 
         data_type = self.data_type
         if not isinstance(data_type, ModbusDataType):
@@ -135,3 +136,8 @@ class ModbusPointModel(PointMixinModel):
     def is_writable(value: ModbusFunctionCode) -> bool:
         return value in [ModbusFunctionCode.WRITE_COIL, ModbusFunctionCode.WRITE_COILS,
                          ModbusFunctionCode.WRITE_REGISTER, ModbusFunctionCode.WRITE_REGISTERS]
+
+    @staticmethod
+    def is_writable_by_str(value: str) -> bool:
+        return value in [ModbusFunctionCode.WRITE_COIL.name, ModbusFunctionCode.WRITE_COILS.name,
+                         ModbusFunctionCode.WRITE_REGISTER.name, ModbusFunctionCode.WRITE_REGISTERS.name]
