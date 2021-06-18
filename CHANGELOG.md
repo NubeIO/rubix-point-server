@@ -1,4 +1,13 @@
 # CHANGELOG
+## [v1.7.5](https://github.com/NubeIO/rubix-point-server/tree/v1.7.5) (2020-06-18)
+### Added
+- Fix: COV for Modbus/generic point
+- Have priority array support fallback values
+- Use shortuuid (uuid4 with URL supporting base57 encoding)
+- Issue fix: InfluxDB large data sync (added option batch) (#375)
+- Make server schedule available on the local broker (#376)
+- Fix: read write point switch (#378) (#379)
+
 ## [v1.7.4](https://github.com/NubeIO/rubix-point-server/tree/v1.7.4) (2020-06-04)
 ### Added
 - Retry establishing connection on PostgreSQL connection gets down
