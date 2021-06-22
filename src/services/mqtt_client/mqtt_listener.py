@@ -238,7 +238,7 @@ class MqttListener(MqttClientBase):
         if self.config.cloud and message.payload:
             event = Event(EventType.SCHEDULE_VALUE, {
                 'topic': message.topic,
-                'payload': json.loads(message.payload)
+                'payload': message.payload
             })
             EventDispatcher().dispatch_from_source(None, event)
 
