@@ -106,7 +106,7 @@ class MqttClient(MqttListener, EventServiceBase):
         elif event.event_type == EventType.SCHEDULES and self.config.publish_value:
             self._publish_mqtt_value(self.__make_topic((self.config.topic, 'schedules')), event.data)
         elif event.event_type == EventType.SCHEDULE_VALUE and not self.config.cloud:
-            self._publish_mqtt_value(event.data.get('topic'), event.data.get('payload'))
+            self._publish_mqtt_value(event.data.get('topic'), json.dumps(event.data.get('payload')))
 
     def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = True):
         if not self.status():
