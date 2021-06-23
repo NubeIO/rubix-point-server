@@ -20,6 +20,8 @@ from src.utils.string import rreplace
 
 logger = logging.getLogger(__name__)
 
+PAGE_SIZE: int = 100
+
 
 class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
@@ -206,7 +208,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_network, networks_list)
+                        execute_values(curs, query_network, networks_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(networks_list)} rows on {self.__networks_table_name} table')
@@ -236,7 +238,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_network, devices_list)
+                        execute_values(curs, query_network, devices_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(devices_list)} rows on {self.__devices_table_name} table')
@@ -269,7 +271,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                                        f'WHERE network_uuid IN {in_uuid} ' \
                                                        f'AND (network_uuid, tag_name) NOT IN {in_tags_list}'
                             curs.execute(query_delete_network_tag)
-                        execute_values(curs, query_network_tag, network_tags_list)
+                        execute_values(curs, query_network_tag, network_tags_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(network_tags_list)} rows on {self.__networks_tags_table_name} table')
@@ -302,7 +304,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                                       f'WHERE device_uuid IN {in_uuid} ' \
                                                       f'AND (device_uuid, tag_name) NOT IN {in_tags_list}'
                             curs.execute(query_delete_device_tag)
-                        execute_values(curs, query_device_tag, device_tags_list)
+                        execute_values(curs, query_device_tag, device_tags_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(device_tags_list)} rows on {self.__devices_tags_table_name} table')
@@ -322,7 +324,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_point, points_list)
+                        execute_values(curs, query_point, points_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(points_list)} rows on {self.__points_table_name} table')
@@ -339,7 +341,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_point_value_data, points_values_list)
+                        execute_values(curs, query_point_value_data, points_values_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored {len(list(set(points_values_list)))} rows on {self.__points_values_table_name} table')
@@ -365,7 +367,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                                      f'WHERE point_uuid IN {in_point_uuid} ' \
                                                      f'AND (point_uuid, tag_name) NOT IN {in_point_tags_list}'
                             curs.execute(query_delete_point_tag)
-                        execute_values(curs, query_point_tag, points_tags_list)
+                        execute_values(curs, query_point_tag, points_tags_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(points_tags_list)} rows on {self.__points_tags_table_name} table')
