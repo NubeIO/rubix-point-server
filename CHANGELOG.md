@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v1.7.7](https://github.com/NubeIO/rubix-point-server/tree/v1.7.7) (2020-06-23)
+- Include page size for large point value sync
+- Logger improvements on postgresql
+- Add sleep on postgres sync (don't make it heavy for single o/p)
+- Remove schedule package
+
 ## [v1.7.6](https://github.com/NubeIO/rubix-point-server/tree/v1.7.6) (2020-06-22)
 - Fix: schedule dispatch JSON (need to sync JSON)
 
