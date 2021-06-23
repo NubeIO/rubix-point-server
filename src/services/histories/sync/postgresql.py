@@ -3,8 +3,8 @@ import logging
 import time
 from typing import List, Union, Dict
 
+import gevent
 import psycopg2
-import schedule
 from psycopg2.extras import execute_values
 from registry.registry import RubixRegistry
 
@@ -19,6 +19,8 @@ from src.utils import Singleton
 from src.utils.string import rreplace
 
 logger = logging.getLogger(__name__)
+
+PAGE_SIZE: int = 100
 
 
 class PostgreSQL(HistoryBinding, metaclass=Singleton):
@@ -64,12 +66,10 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             self.connect()
             time.sleep(self.config.attempt_reconnect_secs)
         if self.status():
-            logger.info("Registering PostgreSQL for scheduler job")
-            # schedule.every(5).seconds.do(self.sync)  # for testing
-            schedule.every(self.config.timer).minutes.do(self.sync)
+            logger.info("Registering PostgreSQL for sync job")
             while True:
-                schedule.run_pending()
-                time.sleep(1)
+                gevent.sleep(self.config.timer * 60)
+                self.sync()
         else:
             logger.error("PostgreSQL can't be registered with not working client details")
 
@@ -125,7 +125,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                            point_store_history.fault, point_store_history.fault_message,
                                            point_store_history.ts_value, point_store_history.ts_fault)
                 points_values_list.append(point_value_data)
-
+            gevent.sleep(0.1)  # it becomes heavy on single loop, so being idle for some time to give other process time
+        logger.info("Sync service bulk data has been created...")
         self._update_wires_plats()
         self._update_networks()
         self._update_networks_tags()
@@ -136,8 +137,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self._update_points_tags(points_tags_list)
 
     def _update_wires_plats(self):
+        logger.info(f"Storing wires_plat...")
         if self.__wires_plat:
-            logger.debug(f"Storing wires_plat: {self.__wires_plat}")
+            logger.debug(f"Data: {self.__wires_plat}")
             query_wires_plat = f'INSERT INTO {self.__wires_plat_table_name} ' \
                                f'(global_uuid , client_id, client_name, site_id, site_name, device_id, device_name, ' \
                                f'site_address, site_city, site_state, site_zip, site_country, site_lat, site_lon, ' \
@@ -180,16 +182,17 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                         logger.error(str(e))
             logger.info(f'Stored/updated 1 rows on {self.__wires_plat_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__wires_plat_table_name}")
+            logger.info(f"Nothing to store on {self.__wires_plat_table_name}")
 
     def _update_networks(self):
+        logger.info(f"Storing networks_list...")
         networks_list: List[tuple] = []
         for network in NetworkModel.find_all():
             networks_list.append((network.uuid, network.name, network.enable, network.fault, network.history_enable,
                                   network.driver.name, network.created_on, network.updated_on,
                                   self.__wires_plat.get('global_uuid')))
         if len(networks_list):
-            logger.debug(f"Storing networks_list: {networks_list}")
+            logger.debug(f"Data: {networks_list}")
             query_network = f'INSERT INTO {self.__networks_table_name} ' \
                             f'(uuid, name, enable, fault, history_enable, driver, created_on, updated_on, ' \
                             f'wires_plat_global_uuid) ' \
@@ -206,20 +209,21 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_network, networks_list)
+                        execute_values(curs, query_network, networks_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(networks_list)} rows on {self.__networks_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__networks_table_name}")
+            logger.info(f"Nothing to store on {self.__networks_table_name}")
 
     def _update_devices(self):
+        logger.info(f"Storing devices_list...")
         devices_list: List[tuple] = []
         for device in DeviceModel.find_all():
             devices_list.append((device.uuid, device.network_uuid, device.name, device.enable, device.fault,
                                  device.history_enable, device.driver.name, device.created_on, device.updated_on))
         if len(devices_list):
-            logger.debug(f"Storing devices_list: {devices_list}")
+            logger.debug(f"Data: {devices_list}")
             query_network = f'INSERT INTO {self.__devices_table_name} ' \
                             f'(uuid, network_uuid, name, enable, fault, history_enable, driver, created_on, ' \
                             f'updated_on) ' \
@@ -236,14 +240,15 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_network, devices_list)
+                        execute_values(curs, query_network, devices_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(devices_list)} rows on {self.__devices_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__devices_table_name}")
+            logger.info(f"Nothing to store on {self.__devices_table_name}")
 
     def _update_networks_tags(self):
+        logger.info(f"Storing network_tags_list...")
         network_tags_list: List[tuple] = []
         for network in NetworkModel.find_all():
             if network.tags:
@@ -252,7 +257,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                 for network_tag in network_tags.keys():
                     network_tags_list.append((network.uuid, network_tag, network_tags[network_tag]))
         if len(network_tags_list):
-            logger.debug(f"Storing network_tags_list: {network_tags_list}")
+            logger.debug(f"Data: {network_tags_list}")
             query_network_tag = f'INSERT INTO {self.__networks_tags_table_name} ' \
                                 f'(network_uuid, tag_name, tag_value) ' \
                                 f'VALUES %s ON CONFLICT (network_uuid, tag_name) ' \
@@ -269,14 +274,15 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                                        f'WHERE network_uuid IN {in_uuid} ' \
                                                        f'AND (network_uuid, tag_name) NOT IN {in_tags_list}'
                             curs.execute(query_delete_network_tag)
-                        execute_values(curs, query_network_tag, network_tags_list)
+                        execute_values(curs, query_network_tag, network_tags_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(network_tags_list)} rows on {self.__networks_tags_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__networks_tags_table_name}")
+            logger.info(f"Nothing to store on {self.__networks_tags_table_name}")
 
     def _update_devices_tags(self):
+        logger.info(f"Storing device_tags_list...")
         device_tags_list: List[tuple] = []
         for device in DeviceModel.find_all():
             if device.tags:
@@ -285,7 +291,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                 for device_tag in device_tags.keys():
                     device_tags_list.append((device.uuid, device_tag, device_tags[device_tag]))
         if len(device_tags_list):
-            logger.debug(f"Storing device_tags_list: {device_tags_list}")
+            logger.debug(f"Data: {device_tags_list}")
             query_device_tag = f'INSERT INTO {self.__devices_tags_table_name} ' \
                                f'(device_uuid, tag_name, tag_value) ' \
                                f'VALUES %s ON CONFLICT (device_uuid, tag_name) ' \
@@ -302,16 +308,17 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                                       f'WHERE device_uuid IN {in_uuid} ' \
                                                       f'AND (device_uuid, tag_name) NOT IN {in_tags_list}'
                             curs.execute(query_delete_device_tag)
-                        execute_values(curs, query_device_tag, device_tags_list)
+                        execute_values(curs, query_device_tag, device_tags_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(device_tags_list)} rows on {self.__devices_tags_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__devices_tags_table_name}")
+            logger.info(f"Nothing to store on {self.__devices_tags_table_name}")
 
     def _update_points_list(self, points_list):
+        logger.info(f"Storing point_list...")
         if len(points_list):
-            logger.debug(f"Storing point_list: {points_list}")
+            logger.debug(f"Data: {points_list}")
             query_point = f'INSERT INTO {self.__points_table_name} ' \
                           f'(device_uuid, uuid, name, driver) ' \
                           f'VALUES %s ON CONFLICT (uuid) ' \
@@ -322,16 +329,17 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_point, points_list)
+                        execute_values(curs, query_point, points_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(points_list)} rows on {self.__points_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__points_table_name}")
+            logger.info(f"Nothing to store on {self.__points_table_name}")
 
     def _update_points_values(self, points_values_list):
+        logger.info(f"Storing point_value_data_list...")
         if len(points_values_list):
-            logger.debug(f"Storing point_value_data_list: {points_values_list}")
+            logger.debug(f"Data: {points_values_list}")
             query_point_value_data = f'INSERT INTO {self.__points_values_table_name} ' \
                                      f'(id, point_uuid, value, value_original, value_raw, fault, fault_message, ' \
                                      f'ts_value, ts_fault) ' \
@@ -339,16 +347,17 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        execute_values(curs, query_point_value_data, points_values_list)
+                        execute_values(curs, query_point_value_data, points_values_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored {len(list(set(points_values_list)))} rows on {self.__points_values_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__points_values_table_name}, no new records")
+            logger.info(f"Nothing to store on {self.__points_values_table_name}, no new records")
 
     def _update_points_tags(self, points_tags_list):
+        logger.info(f"Storing point_tag_list...")
         if len(points_tags_list):
-            logger.debug(f"Storing point_tag_list: {points_tags_list}")
+            logger.debug(f"Data: {points_tags_list}")
             query_point_tag = f'INSERT INTO {self.__points_tags_table_name} ' \
                               f'(point_uuid, tag_name, tag_value) ' \
                               f'VALUES %s ON CONFLICT (point_uuid, tag_name) ' \
@@ -365,12 +374,12 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                                      f'WHERE point_uuid IN {in_point_uuid} ' \
                                                      f'AND (point_uuid, tag_name) NOT IN {in_point_tags_list}'
                             curs.execute(query_delete_point_tag)
-                        execute_values(curs, query_point_tag, points_tags_list)
+                        execute_values(curs, query_point_tag, points_tags_list, page_size=PAGE_SIZE)
                     except psycopg2.Error as e:
                         logger.error(str(e))
             logger.info(f'Stored/updated {len(points_tags_list)} rows on {self.__points_tags_table_name} table')
         else:
-            logger.debug(f"Nothing to store on {self.__points_tags_table_name}")
+            logger.info(f"Nothing to store on {self.__points_tags_table_name}")
 
     def _create_table_if_not_exists(self):
         query_wires_plat = f'CREATE TABLE IF NOT EXISTS {self.__wires_plat_table_name} ' \

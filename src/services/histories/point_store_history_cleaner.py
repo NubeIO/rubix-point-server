@@ -1,7 +1,7 @@
 import logging
 import time
 
-import schedule
+import gevent
 from sqlalchemy import func, and_, or_
 
 from src.handlers.exception import exception_handler
@@ -24,11 +24,9 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
     def setup(self, config: CleanerSetting):
         logger.info("Register PointStoreHistoryCleaner")
         self.__config = config
-        # schedule.every(5).seconds.do(self.clean)  # for testing
-        schedule.every(self.config.frequency).minutes.do(self.clean)
         while True:
-            schedule.run_pending()
-            time.sleep(self.config.sleep)
+            gevent.sleep(self.config.frequency * 60)
+            self.clean()
 
     @exception_handler
     def clean(self):

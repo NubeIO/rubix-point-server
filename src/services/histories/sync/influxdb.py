@@ -2,7 +2,7 @@ import json
 import logging
 import time
 
-import schedule
+import gevent
 from influxdb import InfluxDBClient
 from registry.registry import RubixRegistry
 
@@ -41,12 +41,10 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             time.sleep(self.config.attempt_reconnect_secs)
 
         if self.status():
-            logger.info("Registering InfluxDB for scheduler job")
-            # schedule.every(5).seconds.do(self.sync)  # for testing
-            schedule.every(self.config.timer).minutes.do(self.sync)
+            logger.info("Registering InfluxDB for sync job")
             while True:
-                schedule.run_pending()
-                time.sleep(1)
+                gevent.sleep(self.config.timer * 60)
+                self.sync()
         else:
             logger.error("InfluxDB can't be registered with not working client details")
 
