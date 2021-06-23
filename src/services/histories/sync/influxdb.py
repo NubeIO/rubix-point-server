@@ -1,10 +1,12 @@
 import json
 import logging
 import time
+from typing import Union
 
 import gevent
 from influxdb import InfluxDBClient
-from registry.registry import RubixRegistry
+from registry.models.model_device_info import DeviceInfoModel
+from registry.resources.resource_device_info import get_device_info
 
 from src import InfluxSetting
 from src.handlers.exception import exception_handler
@@ -21,7 +23,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     def __init__(self):
         self.__config = None
         self.__client = None
-        self.__wires_plat = None
+        self.__device_info: Union[DeviceInfoModel, None] = None
         self.__is_connected = False
 
     @property
@@ -67,26 +69,26 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     @exception_handler
     def sync(self):
         logger.info('InfluxDB sync has is been called')
-        self.__wires_plat = RubixRegistry().read_wires_plat()
-        if not self.__wires_plat:
-            logger.error('Please add wires-plat on Rubix Service')
+        self.__device_info: Union[DeviceInfoModel, None] = get_device_info()
+        if not self.__device_info:
+            logger.error('Please add device-info on Rubix Service')
             return
         self._sync()
 
     def _sync(self):
         store = []
-        plat = {
-            'client_id': self.__wires_plat.get('client_id'),
-            'client_name': self.__wires_plat.get('client_name'),
-            'site_id': self.__wires_plat.get('site_id'),
-            'site_name': self.__wires_plat.get('site_name'),
-            'device_id': self.__wires_plat.get('device_id'),
-            'device_name': self.__wires_plat.get('device_name')
+        device_info: dict = {
+            'client_id': self.__device_info.client_id,
+            'client_name': self.__device_info.client_name,
+            'site_id': self.__device_info.site_id,
+            'site_name': self.__device_info.site_name,
+            'device_id': self.__device_info.device_id,
+            'device_name': self.__device_info.device_name
         }
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
             for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid):
-                tags = plat.copy()
+                tags = device_info.copy()
                 point_store_history: PointStoreHistoryModel = psh
                 point: PointModel = point_store_history.point
                 if point.tags:

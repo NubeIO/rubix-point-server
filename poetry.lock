@@ -496,7 +496,7 @@ documents = ["sphinx (>=1.1.3)", "sphinx-rtd-theme", "humanfriendly"]
 quality = ["coverage (>=3.5.3)", "nose (>=1.2.1)", "mock (>=1.0.0)", "pep8 (>=1.3.3)"]
 repl = ["click (>=7.0)", "prompt-toolkit (==2.0.4)", "pygments (>=2.2.0)", "click (>=7.0)", "prompt-toolkit (>=3.0.8)", "pygments (>=2.2.0)", "aiohttp (>=3.7.3)", "pyserial-asyncio (>=0.5)"]
 tornado = ["tornado (==4.5.3)"]
-twisted = ["Twisted[serial,conch] (>=20.3.0)", "Twisted[conch] (>=20.3.0)"]
+twisted = ["Twisted[conch,serial] (>=20.3.0)", "Twisted[conch] (>=20.3.0)"]
 
 [[package]]
 name = "pyparsing"
@@ -635,18 +635,22 @@ resolved_reference = "cd9070a4c4b6c352826b1a3dff1d1bc016285125"
 
 [[package]]
 name = "rubix-registry"
-version = "1.0.0"
+version = "1.1.1"
 description = "Rubix Registry"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 develop = false
 
+[package.dependencies]
+shortuuid = "1.0.1"
+tinydb = "4.4.0"
+
 [package.source]
 type = "git"
 url = "https://github.com/NubeIO/rubix-registry"
-reference = "v1.0.0"
-resolved_reference = "cbd039aac2eafc3bdeb10aead8a3180f86335a1b"
+reference = "v1.1.1"
+resolved_reference = "6f2d9ccca328ed6b202b17e0316b7dcfc25b6b7f"
 
 [[package]]
 name = "rx"
@@ -703,6 +707,14 @@ postgresql_psycopg2binary = ["psycopg2-binary"]
 postgresql_psycopg2cffi = ["psycopg2cffi"]
 pymysql = ["pymysql (<1)", "pymysql"]
 sqlcipher = ["sqlcipher3-binary"]
+
+[[package]]
+name = "tinydb"
+version = "4.4.0"
+description = "TinyDB is a tiny, document oriented database optimized for your happiness :)"
+category = "main"
+optional = false
+python-versions = ">=3.5,<4.0"
 
 [[package]]
 name = "toml"
@@ -787,7 +799,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "56f2839aeb36d6d9d410cdb1838ae7b768ebaea054254bc13729bebc48b30404"
+content-hash = "79235f7679ffd57d0bc94044435fc22c44a7c2278ae6211762b23880a19d7b00"
 
 [metadata.files]
 alembic = [
@@ -1228,6 +1240,10 @@ sqlalchemy = [
     {file = "SQLAlchemy-1.4.15-cp39-cp39-win32.whl", hash = "sha256:5642d64feeab65ae662c8e46eccc3db4a3100c9572dcfa29063751e2d1940e78"},
     {file = "SQLAlchemy-1.4.15-cp39-cp39-win_amd64.whl", hash = "sha256:17ce3009c69ac361d871bed3c9c30cf405d2739934d83322272bd455a697c874"},
     {file = "SQLAlchemy-1.4.15.tar.gz", hash = "sha256:0ff100c75cd175f35f4d24375a0b3d82461f5b1af5fc8d112ef0e5ceea8049e6"},
+]
+tinydb = [
+    {file = "tinydb-4.4.0-py3-none-any.whl", hash = "sha256:30b0f718ebb288e42d2f69f3e1b18928739f25153e6b5308a234e95c1673de71"},
+    {file = "tinydb-4.4.0.tar.gz", hash = "sha256:d57c29524ecacc081ebc24f96e0d787bba11dc20d52634a32a709b878be3545a"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
