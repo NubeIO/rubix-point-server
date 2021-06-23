@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [v1.7.7](https://github.com/NubeIO/rubix-point-server/tree/v1.7.7) (2020-06-23)
+- Include page size for postgres point value sync
+
 ## [v1.7.6](https://github.com/NubeIO/rubix-point-server/tree/v1.7.6) (2020-06-22)
 - Fix: schedule dispatch JSON (need to sync JSON)
 
