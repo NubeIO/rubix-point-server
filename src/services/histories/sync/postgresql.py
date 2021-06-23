@@ -3,8 +3,8 @@ import logging
 import time
 from typing import List, Union, Dict
 
+import gevent
 import psycopg2
-import schedule
 from psycopg2.extras import execute_values
 from registry.registry import RubixRegistry
 
@@ -66,12 +66,10 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             self.connect()
             time.sleep(self.config.attempt_reconnect_secs)
         if self.status():
-            logger.info("Registering PostgreSQL for scheduler job")
-            # schedule.every(5).seconds.do(self.sync)  # for testing
-            schedule.every(self.config.timer).minutes.do(self.sync)
+            logger.info("Registering PostgreSQL for sync job")
             while True:
-                schedule.run_pending()
-                time.sleep(1)
+                gevent.sleep(self.config.timer * 60)
+                self.sync()
         else:
             logger.error("PostgreSQL can't be registered with not working client details")
 
@@ -127,6 +125,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                            point_store_history.fault, point_store_history.fault_message,
                                            point_store_history.ts_value, point_store_history.ts_fault)
                 points_values_list.append(point_value_data)
+            gevent.sleep(0.1)  # it becomes heavy on single loop, so being idle for some time to give other process time
         logger.info("Sync service bulk data has been created...")
         self._update_wires_plats()
         self._update_networks()
