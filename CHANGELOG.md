@@ -1,4 +1,6 @@
 # CHANGELOG
+## [v1.8.0](https://github.com/NubeIO/rubix-point-server/tree/v1.8.0) (2020-06-24)
+- Upgrade rubix-registry to v1.1.1 (breaking change, use `rubix-service >= v1.7.7`)
 
 ## [v1.7.7](https://github.com/NubeIO/rubix-point-server/tree/v1.7.7) (2020-06-23)
 - Include page size for large point value sync
