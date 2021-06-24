@@ -1,8 +1,9 @@
 import json
 import logging
-from typing import Callable, List
+from typing import Callable, List, Union
 
-from registry.registry import RubixRegistry
+from registry.models.model_device_info import DeviceInfoModel
+from registry.resources.resource_device_info import get_device_info
 
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
@@ -117,13 +118,13 @@ class MqttClient(MqttListener, EventServiceBase):
 
     @classmethod
     def prefix_topic(cls) -> str:
-        wires_plat: dict = RubixRegistry().read_wires_plat()
-        if not wires_plat:
-            logger.error('Please add wires-plat on Rubix Service')
+        device_info: Union[DeviceInfoModel, None] = get_device_info()
+        if not device_info:
+            logger.error('Please add device_info on Rubix Service')
             return ''
-        return cls.SEPARATOR.join((wires_plat.get('client_id'), wires_plat.get('client_name'),
-                                   wires_plat.get('site_id'), wires_plat.get('site_name'),
-                                   wires_plat.get('device_id'), wires_plat.get('device_name')))
+        return cls.SEPARATOR.join((device_info.client_id, device_info.client_name,
+                                   device_info.site_id, device_info.site_name,
+                                   device_info.device_id, device_info.device_name))
 
     @classmethod
     def __make_topic(cls, parts: tuple) -> str:

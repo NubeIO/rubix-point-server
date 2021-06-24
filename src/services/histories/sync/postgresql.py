@@ -1,12 +1,13 @@
 import json
 import logging
 import time
-from typing import List, Union, Dict
+from typing import List, Union
 
 import gevent
 import psycopg2
 from psycopg2.extras import execute_values
-from registry.registry import RubixRegistry
+from registry.models.model_device_info import DeviceInfoModel
+from registry.resources.resource_device_info import get_device_info
 
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
@@ -28,9 +29,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
     def __init__(self):
         self.__config: Union[PostgresSetting, None] = None
         self.__client = None
-        self.__wires_plat: Union[Dict, None] = None
+        self.__device_info: Union[DeviceInfoModel, None] = None
         self.__is_connected = False
-        self.__wires_plat_table_name: str = ''
+        self.__device_info_table_name: str = ''
         self.__networks_table_name: str = ''
         self.__modbus_networks_table_name: str = ''
         self.__devices_table_name: str = ''
@@ -53,7 +54,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
     def setup(self, config: PostgresSetting):
         self.__config = config
-        self.__wires_plat_table_name: str = f'{self.config.table_prefix}_wires_plats'
+        self.__device_info_table_name: str = f'{self.config.table_prefix}_wires_plats'
         self.__networks_table_name: str = f'{self.config.table_prefix}_networks'
         self.__devices_table_name: str = f'{self.config.table_prefix}_devices'
         self.__points_table_name: str = f'{self.config.table_prefix}_points'
@@ -93,9 +94,9 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
     @exception_handler
     def sync(self):
         logger.info('PostgreSQL sync has is been called')
-        self.__wires_plat = RubixRegistry().read_wires_plat()
-        if not self.__wires_plat:
-            logger.error('Please add wires-plat on Rubix Service')
+        self.__device_info: Union[DeviceInfoModel, None] = get_device_info()
+        if not self.__device_info:
+            logger.error('Please add device-info on Rubix Service')
             return
         self._sync()
 
@@ -127,7 +128,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                 points_values_list.append(point_value_data)
             gevent.sleep(0.1)  # it becomes heavy on single loop, so being idle for some time to give other process time
         logger.info("Sync service bulk data has been created...")
-        self._update_wires_plats()
+        self._update_device_info()
         self._update_networks()
         self._update_networks_tags()
         self._update_devices()
@@ -136,53 +137,53 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self._update_points_values(points_values_list)
         self._update_points_tags(points_tags_list)
 
-    def _update_wires_plats(self):
-        logger.info(f"Storing wires_plat...")
-        if self.__wires_plat:
-            logger.debug(f"Data: {self.__wires_plat}")
-            query_wires_plat = f'INSERT INTO {self.__wires_plat_table_name} ' \
-                               f'(global_uuid , client_id, client_name, site_id, site_name, device_id, device_name, ' \
-                               f'site_address, site_city, site_state, site_zip, site_country, site_lat, site_lon, ' \
-                               f'time_zone, ' \
-                               f'created_on, updated_on) ' \
-                               f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ' \
-                               f'ON CONFLICT (global_uuid) DO UPDATE SET ' \
-                               f'client_id = excluded.client_id,' \
-                               f'client_name = excluded.client_name,' \
-                               f'site_id = excluded.site_id,' \
-                               f'site_name = excluded.site_name,' \
-                               f'device_id = excluded.device_id,' \
-                               f'device_name = excluded.device_name,' \
-                               f'site_address = excluded.site_address,' \
-                               f'site_city = excluded.site_city,' \
-                               f'site_state = excluded.site_state,' \
-                               f'site_zip = excluded.site_zip,' \
-                               f'site_country = excluded.site_country,' \
-                               f'site_lat = excluded.site_lat,' \
-                               f'site_lon = excluded.site_lon,' \
-                               f'time_zone = excluded.time_zone,' \
-                               f'created_on = excluded.created_on,' \
-                               f'updated_on = excluded.updated_on'
+    def _update_device_info(self):
+        logger.info(f"Storing device-info...")
+        if self.__device_info:
+            logger.debug(f"Data: {self.__device_info}")
+            query_device_info = f'INSERT INTO {self.__device_info_table_name} ' \
+                                f'(global_uuid , client_id, client_name, site_id, site_name, device_id, device_name, ' \
+                                f'site_address, site_city, site_state, site_zip, site_country, site_lat, site_lon, ' \
+                                f'time_zone, ' \
+                                f'created_on, updated_on) ' \
+                                f'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ' \
+                                f'ON CONFLICT (global_uuid) DO UPDATE SET ' \
+                                f'client_id = excluded.client_id,' \
+                                f'client_name = excluded.client_name,' \
+                                f'site_id = excluded.site_id,' \
+                                f'site_name = excluded.site_name,' \
+                                f'device_id = excluded.device_id,' \
+                                f'device_name = excluded.device_name,' \
+                                f'site_address = excluded.site_address,' \
+                                f'site_city = excluded.site_city,' \
+                                f'site_state = excluded.site_state,' \
+                                f'site_zip = excluded.site_zip,' \
+                                f'site_country = excluded.site_country,' \
+                                f'site_lat = excluded.site_lat,' \
+                                f'site_lon = excluded.site_lon,' \
+                                f'time_zone = excluded.time_zone,' \
+                                f'created_on = excluded.created_on,' \
+                                f'updated_on = excluded.updated_on'
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        wires_plat: tuple = (self.__wires_plat.get('global_uuid'),
-                                             self.__wires_plat.get('client_id'), self.__wires_plat.get('client_name'),
-                                             self.__wires_plat.get('site_id'), self.__wires_plat.get('site_name'),
-                                             self.__wires_plat.get('device_id'), self.__wires_plat.get('device_name'),
-                                             self.__wires_plat.get('site_address'), self.__wires_plat.get('site_city'),
-                                             self.__wires_plat.get('site_state'), self.__wires_plat.get('site_zip'),
-                                             self.__wires_plat.get('site_country'), self.__wires_plat.get('site_lat'),
-                                             self.__wires_plat.get('site_lon'), self.__wires_plat.get('time_zone'),
-                                             self.__wires_plat.get('created_on'),
-                                             self.__wires_plat.get('updated_on'))
-                        curs.execute(query_wires_plat, wires_plat)
+                        device_info: tuple = (self.__device_info.global_uuid,
+                                              self.__device_info.client_id, self.__device_info.client_name,
+                                              self.__device_info.site_id, self.__device_info.site_name,
+                                              self.__device_info.device_id, self.__device_info.device_name,
+                                              self.__device_info.site_address, self.__device_info.site_city,
+                                              self.__device_info.site_state, self.__device_info.site_zip,
+                                              self.__device_info.site_country, self.__device_info.site_lat,
+                                              self.__device_info.site_lon, self.__device_info.time_zone,
+                                              self.__device_info.created_on,
+                                              self.__device_info.updated_on)
+                        curs.execute(query_device_info, device_info)
 
                     except psycopg2.Error as e:
                         logger.error(str(e))
-            logger.info(f'Stored/updated 1 rows on {self.__wires_plat_table_name} table')
+            logger.info(f'Stored/updated 1 rows on {self.__device_info_table_name} table')
         else:
-            logger.info(f"Nothing to store on {self.__wires_plat_table_name}")
+            logger.info(f"Nothing to store on {self.__device_info_table_name}")
 
     def _update_networks(self):
         logger.info(f"Storing networks_list...")
@@ -190,7 +191,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         for network in NetworkModel.find_all():
             networks_list.append((network.uuid, network.name, network.enable, network.fault, network.history_enable,
                                   network.driver.name, network.created_on, network.updated_on,
-                                  self.__wires_plat.get('global_uuid')))
+                                  self.__device_info.global_uuid))
         if len(networks_list):
             logger.debug(f"Data: {networks_list}")
             query_network = f'INSERT INTO {self.__networks_table_name} ' \
@@ -382,24 +383,24 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             logger.info(f"Nothing to store on {self.__points_tags_table_name}")
 
     def _create_table_if_not_exists(self):
-        query_wires_plat = f'CREATE TABLE IF NOT EXISTS {self.__wires_plat_table_name} ' \
-                           f'(global_uuid VARCHAR PRIMARY KEY,' \
-                           f'client_id VARCHAR,' \
-                           f'client_name VARCHAR,' \
-                           f'site_id VARCHAR,' \
-                           f'site_name VARCHAR,' \
-                           f'device_id VARCHAR,' \
-                           f'device_name VARCHAR,' \
-                           f'site_address VARCHAR,' \
-                           f'site_city VARCHAR,' \
-                           f'site_state VARCHAR,' \
-                           f'site_zip VARCHAR,' \
-                           f'site_country VARCHAR,' \
-                           f'site_lat VARCHAR,' \
-                           f'site_lon VARCHAR,' \
-                           f'time_zone VARCHAR,' \
-                           f'created_on TIMESTAMP,' \
-                           f'updated_on TIMESTAMP);'
+        query_device_info = f'CREATE TABLE IF NOT EXISTS {self.__device_info_table_name} ' \
+                            f'(global_uuid VARCHAR PRIMARY KEY,' \
+                            f'client_id VARCHAR,' \
+                            f'client_name VARCHAR,' \
+                            f'site_id VARCHAR,' \
+                            f'site_name VARCHAR,' \
+                            f'device_id VARCHAR,' \
+                            f'device_name VARCHAR,' \
+                            f'site_address VARCHAR,' \
+                            f'site_city VARCHAR,' \
+                            f'site_state VARCHAR,' \
+                            f'site_zip VARCHAR,' \
+                            f'site_country VARCHAR,' \
+                            f'site_lat VARCHAR,' \
+                            f'site_lon VARCHAR,' \
+                            f'time_zone VARCHAR,' \
+                            f'created_on TIMESTAMP,' \
+                            f'updated_on TIMESTAMP);'
         query_network = f'CREATE TABLE IF NOT EXISTS {self.__networks_table_name} ' \
                         f'(uuid VARCHAR PRIMARY KEY,' \
                         f'name VARCHAR,' \
@@ -410,8 +411,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                         f'created_on TIMESTAMP,' \
                         f'updated_on TIMESTAMP,' \
                         f'wires_plat_global_uuid VARCHAR,' \
-                        f'CONSTRAINT fk_{self.__wires_plat_table_name} FOREIGN KEY(wires_plat_global_uuid) ' \
-                        f'REFERENCES {self.__wires_plat_table_name}(global_uuid) ON DELETE RESTRICT);'
+                        f'CONSTRAINT fk_{self.__device_info_table_name} FOREIGN KEY(wires_plat_global_uuid) ' \
+                        f'REFERENCES {self.__device_info_table_name}(global_uuid) ON DELETE RESTRICT);'
         query_network_tag = f'CREATE TABLE IF NOT EXISTS {self.__networks_tags_table_name} ' \
                             f'(network_uuid VARCHAR REFERENCES {self.__networks_table_name} ON DELETE RESTRICT, ' \
                             f'tag_name VARCHAR, ' \
@@ -462,7 +463,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         with self.__client:
             with self.__client.cursor() as curs:
                 try:
-                    curs.execute(query_wires_plat)
+                    curs.execute(query_device_info)
                     curs.execute(query_network)
                     curs.execute(query_network_tag)
                     curs.execute(query_device)

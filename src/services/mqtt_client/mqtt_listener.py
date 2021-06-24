@@ -7,7 +7,8 @@ import gevent
 from flask import current_app
 from gevent import sleep
 from paho.mqtt.client import MQTTMessage
-from registry.registry import RubixRegistry
+from registry.models.model_device_info import DeviceInfoModel
+from registry.resources.resource_device_info import get_device_info
 from rubix_http.method import HttpMethod
 from rubix_http.request import gw_request
 from rubix_mqtt.mqtt import MqttClientBase
@@ -31,7 +32,7 @@ class MqttListener(MqttClientBase):
 
     def __init__(self):
         self.__app_context = current_app.app_context
-        self.__wires_plat: Union[dict, None] = None
+        self.__device_info: Union[DeviceInfoModel, None] = None
         self.__config: Union[MqttSetting, None] = None
         MqttClientBase.__init__(self)
 
@@ -40,14 +41,14 @@ class MqttListener(MqttClientBase):
         return self.__config
 
     @property
-    def wires_plat(self) -> Union[dict, None]:
-        return self.__wires_plat
+    def device_info(self) -> Union[DeviceInfoModel, None]:
+        return self.__device_info
 
     def start(self, config: MqttSetting, subscribe_topics: List[str] = None, callback: Callable = lambda: None):
         self.__config = config
-        self.__wires_plat: dict = RubixRegistry().read_wires_plat()
-        if not self.__wires_plat:
-            logger.error('Please add wires-plat on Rubix Service')
+        self.__device_info: Union[DeviceInfoModel, None] = get_device_info()
+        if not self.__device_info:
+            logger.error('Please add device-info on Rubix Service')
             return
         subscribe_topics: List[str] = []
         topic: str = self.__make_topic((self.get_schedule_value_topic_prefix(), '#'))
@@ -77,15 +78,14 @@ class MqttListener(MqttClientBase):
 
     def get_listener_topic_prefix(self) -> str:
         return self.__make_topic((
-            self.wires_plat.get('client_id'), self.wires_plat.get('site_id'), self.wires_plat.get('device_id'),
-            self.config.listen_topic
+            self.device_info.client_id, self.device_info.site_id, self.device_info.device_id, self.config.listen_topic
         ))
 
     def get_value_topic_prefix(self) -> str:
         return self.__make_topic((
-            self.wires_plat.get('client_id'), self.wires_plat.get('client_name'),
-            self.wires_plat.get('site_id'), self.wires_plat.get('site_name'),
-            self.wires_plat.get('device_id'), self.wires_plat.get('device_name'),
+            self.device_info.client_id, self.device_info.client_name,
+            self.device_info.site_id, self.device_info.site_name,
+            self.device_info.device_id, self.device_info.device_name,
             self.config.topic
         ))
 
