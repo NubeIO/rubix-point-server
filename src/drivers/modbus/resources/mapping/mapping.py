@@ -1,6 +1,6 @@
-import shortuuid
 from abc import abstractmethod
 
+import shortuuid
 from flask_restful import marshal_with, reqparse
 from rubix_http.exceptions.exception import NotFoundException
 from rubix_http.resource import RubixResource
@@ -39,7 +39,7 @@ class MPGBPMappingResourceListByUUID(RubixResource):
                                 required=mapping_mp_gbp_attributes[attr].get('required', False),
                                 default=None)
         data = parser.parse_args()
-        data.uuid = str(uuid_.uuid4())
+        data.uuid = shortuuid.uuid()
         mapping: MPGBPMapping = MPGBPMapping(**data)
         mapping.save_to_db()
         sync_point_value(mapping)
@@ -57,7 +57,7 @@ class MPGBPMappingResourceListByName(RubixResource):
                                 required=mapping_mp_gbp_attributes[attr].get('required', False),
                                 default=None)
         data = parser.parse_args()
-        data.uuid = str(shortuuid.uuid())
+        data.uuid = shortuuid.uuid()
         mapping: MPGBPMapping = MPGBPMapping(**data)
         mapping.save_to_db()
         sync_point_value(mapping)
