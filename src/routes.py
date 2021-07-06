@@ -9,7 +9,7 @@ from src.drivers.generic.resources.network.network_singular import GenericNetwor
     GenericNetworkSingularByName
 from src.drivers.generic.resources.point.point_plural import GenericPointPlural
 from src.drivers.generic.resources.point.point_singular import GenericPointSingularByUUID, \
-    GenericPointSingularByName
+    GenericPointSingularByName, GenericPointNameByUUID
 from src.drivers.generic.resources.point.point_value_writer import GenericPointUUIDValueWriter, \
     GenericPointNameValueWriter
 from src.drivers.modbus.resources.device.device_plural import ModbusDevicePlural
@@ -70,6 +70,7 @@ api_generic.add_resource(GenericPointSingularByName,
 api_generic.add_resource(GenericPointUUIDValueWriter, '/points_value/uuid/<string:uuid>')
 api_generic.add_resource(GenericPointNameValueWriter,
                          '/points_value/name/<string:network_name>/<string:device_name>/<string:point_name>')
+api_generic.add_resource(GenericPointNameByUUID, '/points/get_name/uuid/<string:uuid>')
 
 bp_modbus = Blueprint('modbus', __name__, url_prefix='/api/modbus')
 api_modbus = Api(bp_modbus)

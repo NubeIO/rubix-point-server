@@ -2,6 +2,7 @@ from abc import abstractmethod
 
 from flask_restful import marshal_with, reqparse
 from rubix_http.exceptions.exception import NotFoundException
+from rubix_http.resource import RubixResource
 
 from src.drivers.generic.models.point import GenericPointModel
 from src.drivers.generic.resources.point.point_base import GenericPointBase
@@ -105,3 +106,12 @@ class GenericPointSingularByName(GenericPointSingular):
     def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
         return GenericPointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'),
                                               kwargs.get('point_name')).priority_array_write
+
+
+class GenericPointNameByUUID(RubixResource):
+    @classmethod
+    def get(cls, uuid):
+        point: GenericPointModel = GenericPointModel.find_by_uuid(uuid)
+        if not point:
+            raise NotFoundException('Generic Point not found')
+        return {'name': f'{point.device.network.name}:{point.device.name}:{point.name}'}
