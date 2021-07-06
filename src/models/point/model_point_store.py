@@ -111,7 +111,7 @@ class PointStoreModel(PointStoreModelMixin):
         response: Response = gw_request(api=f"/bacnet/api/mappings/bp_gp/generic/{self.point_uuid}")
         if response.status_code == 200:
             gw_request(
-                api=f"/bacnet/api/bacnet/points/uuid/{json.loads(response.data).get('bacnet_point_uuid')}",
+                api=f"/bacnet/api/bacnet/points/uuid/{json.loads(response.data).get('point_uuid')}",
                 body={"priority_array_write": priority_array_write},
                 http_method=HttpMethod.PATCH
             )
@@ -150,7 +150,10 @@ class PointStoreModel(PointStoreModelMixin):
         if priority_array_write:
             priority_array_write = priority_array_write.to_dict()
         else:
-            priority_array_write = PriorityArrayModel.create_priority_array_model(None, {"_16": self.value}).to_dict()
+            priority_array_write = PriorityArrayModel.create_priority_array_model(
+                None, {"_16": self.value},
+                self.point.fallback_value
+            ).to_dict()
         if 'point_uuid' in priority_array_write:
             del priority_array_write['point_uuid']
         return priority_array_write
