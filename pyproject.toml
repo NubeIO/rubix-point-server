@@ -7,10 +7,6 @@ authors = ["NubeIO <tech-support@nube-io.com>"]
 [tool.poetry.dependencies]
 python = "^3.6"
 gunicorn = "^20.0.4"
-gevent = [
-    { version = "20.12.1", markers = "platform_machine == 'x86_64'" },
-    { git = "https://github.com/gevent/gevent.git", tag = "20.12.1", markers = "platform_machine != 'x86_64'" }
-]
 pymodbus = "^2.4.0"
 influxdb = "^5.3.1"
 influxdb-client = "^1.13.0"
@@ -20,6 +16,7 @@ rubix-registry = { git = "https://github.com/NubeIO/rubix-registry", rev = "v1.1
 rubix-mqtt = { git = "https://github.com/NubeIO/rubix-mqtt", rev = "v1.2.0" }
 Flask-Migrate = "^2.6.0"
 shortuuid = "^1.0.1"
+gevent = "^21.1.2"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^4.1"
