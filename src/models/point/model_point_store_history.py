@@ -14,6 +14,14 @@ class PointStoreHistoryModel(PointStoreModelMixin):
     def __repr__(self):
         return f"PointStoreHistory(point_uuid = {self.point_uuid})"
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
+    @classmethod
+    def find_by_point_uuid(cls, point_uuid: str):
+        return cls.query.filter_by(point_uuid=point_uuid).all()
+
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
