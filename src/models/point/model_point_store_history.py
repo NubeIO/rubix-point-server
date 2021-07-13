@@ -1,5 +1,5 @@
 from flask import current_app
-from sqlalchemy import and_
+from sqlalchemy import and_, desc, asc
 
 from src import db
 from src.models.point.model_point_store import PointStoreModelMixin, PointStoreModel
@@ -13,6 +13,17 @@ class PointStoreHistoryModel(PointStoreModelMixin):
 
     def __repr__(self):
         return f"PointStoreHistory(point_uuid = {self.point_uuid})"
+
+    @classmethod
+    def find_by_pagination(cls, page: int, per_page: int, sort: str):
+        sort = desc('ts_value') if sort == 'desc' else asc('ts_value')
+        return cls.query.order_by(sort).paginate(page=page, per_page=per_page, error_out=False)
+
+    @classmethod
+    def find_by_point_uuid_pagination(cls, point_uuid: str, page: int, per_page: int, sort: str):
+        sort = desc('ts_value') if sort == 'desc' else asc('ts_value')
+        return cls.query.filter_by(point_uuid=point_uuid).order_by(sort).paginate(page=page, per_page=per_page,
+                                                                                  error_out=False)
 
     def save_to_db(self):
         db.session.add(self)
