@@ -16,8 +16,14 @@ from src.models.point.model_point_store import PointStoreModel
 def sync_point_value(mapping: MPGBPMapping):
     if mapping.mapping_state in (MappingState.MAPPED.name, MappingState.MAPPED):
         point_store: PointStoreModel = PointStoreModel.find_by_point_uuid(mapping.point_uuid)
-        point_store.sync_point_value_with_mapping_mp_to_gbp(mapping.type, mapping.mapped_point_uuid,
-                                                            point_store.get_priority_array_write())
+        priority_array_write_obj = point_store.point.priority_array_write
+        priority_array_write: dict = priority_array_write_obj.to_dict() if priority_array_write_obj \
+            else {"_16": point_store.value}
+        point_store.sync_point_value_with_mapping_mp_to_gbp(
+            mapping.type,
+            mapping.mapped_point_uuid,
+            priority_array_write
+        )
     return mapping
 
 

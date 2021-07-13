@@ -76,22 +76,12 @@ class GenericPointSingular(GenericPointBase):
     def get_point(cls, **kwargs) -> GenericPointModel:
         raise NotImplementedError
 
-    @classmethod
-    @abstractmethod
-    def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
-        raise NotImplementedError
-
 
 class GenericPointSingularByUUID(GenericPointSingular):
     @classmethod
     @abstractmethod
     def get_point(cls, **kwargs) -> GenericPointModel:
         return GenericPointModel.find_by_uuid(kwargs.get('uuid'))
-
-    @classmethod
-    @abstractmethod
-    def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
-        return PriorityArrayModel.find_by_point_uuid(kwargs.get('uuid'))
 
 
 class GenericPointSingularByName(GenericPointSingular):
@@ -100,12 +90,6 @@ class GenericPointSingularByName(GenericPointSingular):
     def get_point(cls, **kwargs) -> GenericPointModel:
         return GenericPointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'),
                                               kwargs.get('point_name'))
-
-    @classmethod
-    @abstractmethod
-    def get_priority_array_write(cls, **kwargs) -> PriorityArrayModel:
-        return GenericPointModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'),
-                                              kwargs.get('point_name')).priority_array_write
 
 
 class GenericPointNameByUUID(RubixResource):
