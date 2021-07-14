@@ -8,7 +8,7 @@ class GenericNetworkPlural(GenericNetworkBase):
 
     @classmethod
     def get(cls):
-        return generic_network_marshaller(GenericNetworkModel.find_all(**request.args), request.args)
+        return generic_network_marshaller(GenericNetworkModel.find_all(), request.args)
 
     @classmethod
     def post(cls):

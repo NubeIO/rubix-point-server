@@ -7,7 +7,7 @@ from src.drivers.modbus.resources.network.network_base import ModbusNetworkBase,
 class ModbusNetworkPlural(ModbusNetworkBase):
     @classmethod
     def get(cls):
-        return modbus_network_marshaller(ModbusNetworkModel.find_all(**request.args), request.args)
+        return modbus_network_marshaller(ModbusNetworkModel.find_all(), request.args)
 
     @classmethod
     def post(cls):

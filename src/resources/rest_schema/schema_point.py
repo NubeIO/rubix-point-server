@@ -88,11 +88,6 @@ point_all_attributes = {
     'tags': {
         'type': str
     },
-    'source': {
-        'type': str,
-        'nested': True,
-        'dict': 'source.name'
-    },
     'fallback_value': {
         'type': float,
     }

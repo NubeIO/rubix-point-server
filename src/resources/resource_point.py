@@ -1,7 +1,6 @@
 from abc import abstractmethod
 
 from flask_restful import marshal_with
-from flask_restful.reqparse import request
 from rubix_http.exceptions.exception import NotFoundException
 from rubix_http.resource import RubixResource
 
@@ -50,4 +49,4 @@ class PointResourceList(RubixResource):
     @classmethod
     @marshal_with(point_all_fields)
     def get(cls):
-        return PointModel.find_all(**request.args)
+        return PointModel.find_all()

@@ -1,7 +1,7 @@
 import re
 
 from sqlalchemy import UniqueConstraint
-from sqlalchemy.orm import validates, lazyload
+from sqlalchemy.orm import validates
 
 from src import db
 from src.drivers.enums.drivers import Drivers
@@ -56,37 +56,11 @@ class DeviceModel(ModelBase):
         return value
 
     @classmethod
-    def find_all(cls, *args, **kwargs):
-        from src.models.point.model_point import PointModel
-        if 'source' in kwargs:
-            return db.session.query(cls) \
-                .options(lazyload(DeviceModel.points.and_(PointModel.source == kwargs['source']))) \
-                .all()
-        return super().find_all()
-
-    @classmethod
-    def find_by_uuid(cls, uuid: str, *args, **kwargs):
-        from src.models.point.model_point import PointModel
-        if 'source' in kwargs:
-            return db.session.query(cls) \
-                .options(lazyload(DeviceModel.points.and_(PointModel.source == kwargs['source']))) \
-                .filter_by(uuid=uuid) \
-                .first()
-        return super().find_by_uuid(uuid)
-
-    @classmethod
-    def find_by_name(cls, network_name: str, device_name: str, *args, **kwargs):
-        from src.models.point.model_point import PointModel
-        if 'source' in kwargs:
-            return db.session.query(cls) \
-                .options(lazyload(DeviceModel.points.and_(PointModel.source == kwargs['source']))) \
-                .filter_by(name=device_name) \
-                .join(NetworkModel) \
-                .filter_by(name=network_name) \
-                .first()
-        return cls.query.filter_by(name=device_name) \
+    def find_by_name(cls, network_name: str, device_name: str):
+        results = cls.query.filter_by(name=device_name) \
             .join(NetworkModel).filter_by(name=network_name) \
             .first()
+        return results
 
     def set_fault(self, is_fault: bool):
         self.fault = is_fault

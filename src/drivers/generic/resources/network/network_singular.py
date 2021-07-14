@@ -59,10 +59,10 @@ class GenericNetworkSingular(GenericNetworkBase):
 class GenericNetworkSingularByUUID(GenericNetworkSingular):
     @classmethod
     def get_network(cls, **kwargs) -> GenericNetworkModel:
-        return GenericNetworkModel.find_by_uuid(kwargs.get('uuid'), **request.args)
+        return GenericNetworkModel.find_by_uuid(kwargs.get('uuid'))
 
 
 class GenericNetworkSingularByName(GenericNetworkSingular):
     @classmethod
     def get_network(cls, **kwargs) -> GenericNetworkModel:
-        return GenericNetworkModel.find_by_name(kwargs.get('name'), **request.args)
+        return GenericNetworkModel.find_by_name(kwargs.get('name'))
