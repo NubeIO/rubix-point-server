@@ -1,3 +1,5 @@
+from sqlalchemy import inspect
+
 from src import db
 
 
@@ -23,6 +25,10 @@ class PriorityArrayModel(db.Model):
 
     def __repr__(self):
         return f"PriorityArray(uuid = {self.point_uuid})"
+
+    def to_dict(self) -> dict:
+        return {c.key: getattr(self, c.key)
+                for c in inspect(self).mapper.column_attrs}
 
     def delete_from_db(self):
         db.session.delete(self)
