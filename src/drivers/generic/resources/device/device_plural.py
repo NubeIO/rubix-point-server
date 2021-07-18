@@ -8,7 +8,7 @@ class GenericDevicePlural(GenericDeviceBase):
 
     @classmethod
     def get(cls):
-        return generic_device_marshaller(GenericDeviceModel.find_all(**request.args), request.args)
+        return generic_device_marshaller(GenericDeviceModel.find_all(), request.args)
 
     @classmethod
     def post(cls):

@@ -57,10 +57,10 @@ class ModbusDeviceSingular(ModbusDeviceBase):
 class ModbusDeviceSingularByUUID(ModbusDeviceSingular):
     @classmethod
     def get_device(cls, **kwargs) -> ModbusDeviceModel:
-        return ModbusDeviceModel.find_by_uuid(kwargs.get('uuid'), **request.args)
+        return ModbusDeviceModel.find_by_uuid(kwargs.get('uuid'))
 
 
 class ModbusDeviceSingularByName(ModbusDeviceSingular):
     @classmethod
     def get_device(cls, **kwargs) -> ModbusDeviceModel:
-        return ModbusDeviceModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'), **request.args)
+        return ModbusDeviceModel.find_by_name(kwargs.get('network_name'), kwargs.get('device_name'))
