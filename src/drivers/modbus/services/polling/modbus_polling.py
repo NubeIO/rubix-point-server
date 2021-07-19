@@ -235,7 +235,7 @@ class ModbusPolling(EventServiceBase):
             for point in point_list:
                 write_value: float = PriorityArrayModel.get_highest_priority_value_from_priority_array(
                     point.priority_array_write) or 0
-                if point.function_code == point.is_writable(point.function_code) and point.write_value_once and \
+                if point.is_writable(point.function_code) and point.write_value_once and \
                         point.point_store is not None and not point.point_store.fault and \
                         point.point_store.value_original == write_value:
                     point_list.remove(point)

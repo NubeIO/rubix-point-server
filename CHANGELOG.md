@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v1.9.1](https://github.com/NubeIO/rubix-point-server/tree/v1.9.1) (2020-07-19)
+- Fix: write value once
+
 ## [v1.9.0](https://github.com/NubeIO/rubix-point-server/tree/v1.9.0) (2020-07-16)
 - Refactor point mappings
 
