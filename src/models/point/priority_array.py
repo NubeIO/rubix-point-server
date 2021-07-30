@@ -34,18 +34,25 @@ class PriorityArrayModel(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def update(self, **kwargs):
+    def update_with_no_commit(self, **kwargs):
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-        self.check_self()
-        db.session.commit()
+        return self.check_self()
 
-    def check_self(self) -> (bool, any):
-        if self.get_highest_priority_value_from_priority_array(self) is None:
+    def update(self, **kwargs):
+        highest_priority_value: float = self.update_with_no_commit(**kwargs)
+        db.session.commit()
+        return highest_priority_value
+
+    def check_self(self) -> float:
+        highest_priority_value: float = self.get_highest_priority_value_from_priority_array(self)
+        if highest_priority_value is None:
             from src.models.point.model_point import PointModel
             point: PointModel = self.point
             self._16 = point.fallback_value
+            highest_priority_value = point.fallback_value
+        return highest_priority_value
 
     @classmethod
     def create_priority_array_model(cls, point_uuid, priority_array_write, fallback_value):

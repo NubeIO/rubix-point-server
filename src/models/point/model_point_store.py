@@ -50,7 +50,8 @@ class PointStoreModel(PointStoreModelMixin):
         else:
             return None
 
-    def update(self, driver: Drivers, cov_threshold: float = None) -> bool:
+    def update(self, driver: Drivers, cov_threshold: float = None,
+               priority_array_write_obj: PriorityArrayModel = None) -> bool:
         ts = get_datetime()
         if not self.fault:
             self.fault = bool(self.fault)
@@ -85,7 +86,8 @@ class PointStoreModel(PointStoreModelMixin):
         db.session.commit()
         updated: bool = bool(res.rowcount)
         if updated:
-            priority_array_write_obj = PriorityArrayModel.find_by_point_uuid(self.point_uuid)
+            if not priority_array_write_obj:
+                priority_array_write_obj = PriorityArrayModel.find_by_point_uuid(self.point_uuid)
             priority_array_write: dict = priority_array_write_obj.to_dict() if priority_array_write_obj \
                 else {"_16": self.value}
             if driver == Drivers.GENERIC:
