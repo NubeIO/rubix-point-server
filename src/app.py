@@ -12,7 +12,7 @@ db = SQLAlchemy()
 
 def __db_setup(_app, _app_setting, db_pg: bool = False):
     if db_pg:
-        _app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/bac_rest"
+        _app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:root@localhost:5432/point-server"
         _app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_size': 10, 'max_overflow': 20}
     else:
         _app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}/data.db?timeout=60'.format(_app_setting.data_dir)
@@ -28,7 +28,7 @@ def create_app(app_setting) -> Flask:
     app_setting = app_setting.init_app(app)
     app.config['CORS_HEADERS'] = 'Content-Type'
     cors.init_app(app)
-    db.init_app(__db_setup(app, app_setting))
+    db.init_app(__db_setup(app, app_setting, True))
 
     def setup(self):
         gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -39,7 +39,7 @@ def create_app(app_setting) -> Flask:
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, _):
         cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
+        # cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 
     def register_router(_app) -> Flask:

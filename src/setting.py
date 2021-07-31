@@ -108,7 +108,7 @@ class CleanerSetting(BaseSetting):
 
 
 class AppSetting:
-    PORT: int = 1515
+    PORT: int = 1516
     GLOBAL_DIR_ENV = 'RUBIX_POINT_GLOBAL'
     DATA_DIR_ENV = 'RUBIX_POINT_DATA'
     CONFIG_DIR_ENV = 'RUBIX_POINT_CONFIG'
