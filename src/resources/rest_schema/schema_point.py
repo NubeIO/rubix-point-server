@@ -90,17 +90,23 @@ point_all_attributes = {
     },
     'fallback_value': {
         'type': float,
+    },
+    'disable_mqtt': {
+        'type': bool,
+    },
+    'type': {
+        'type': str,
+        'nested': True,
+        'dict': 'type.name'
+    },
+    'unit': {
+        'type': str,
     }
 }
 
 point_return_attributes = {
     'uuid': {
         'type': str,
-    },
-    'driver': {
-        'type': str,
-        'nested': True,
-        'dict': 'driver.name'
     },
     'created_on': {
         'type': str,

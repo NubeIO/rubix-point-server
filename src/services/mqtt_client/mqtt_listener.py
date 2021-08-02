@@ -14,7 +14,6 @@ from rubix_http.request import gw_request
 from rubix_mqtt.mqtt import MqttClientBase
 
 from src import FlaskThread
-from src.drivers.generic.models.point import GenericPointModel
 from src.event_dispatcher import EventDispatcher
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
@@ -126,7 +125,7 @@ class MqttListener(MqttClientBase):
 
     def __update_generic_point_by_uuid_process(self, topic: List[str], message: MQTTMessage):
         point_uuid: str = topic[-1]
-        point: GenericPointModel = GenericPointModel.find_by_uuid(point_uuid)
+        point: PointModel = PointModel.find_by_uuid(point_uuid)
         if point is None or (point and point.disable_mqtt):
             logger.warning(f'No generic point with disable_mqtt=False and point.uuid={point_uuid}')
         else:
@@ -136,7 +135,7 @@ class MqttListener(MqttClientBase):
         point_name: str = topic[-1]
         device_name: str = topic[-2]
         network_name: str = topic[-3]
-        point: GenericPointModel = GenericPointModel.find_by_name(network_name, device_name, point_name)
+        point: PointModel = PointModel.find_by_name(network_name, device_name, point_name)
         if point is None or (point and point.disable_mqtt):
             logger.warning(f'No point with disable_mqtt=False and network.name={network_name}, '
                            f'device.name={device_name}, point.name={point_name}')
@@ -168,7 +167,7 @@ class MqttListener(MqttClientBase):
                 NetworkModel.find_by_uuid(network_uuid) is None:
             logger.warning(f'No point with topic: {message.topic}')
             self.__clear_mqtt_retain_value(message)
-        elif point_by_uuid and point_by_uuid.disable_mqtt if isinstance(point_by_uuid, GenericPointModel) else False:
+        elif point_by_uuid and point_by_uuid.disable_mqtt:
             logger.warning(f'Flag disable_mqtt is true for point.uuid={point_uuid}')
             self.__clear_mqtt_retain_value(message)
 

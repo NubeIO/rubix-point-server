@@ -9,6 +9,7 @@ from registry.models.model_device_info import DeviceInfoModel
 from registry.resources.resource_device_info import get_device_info
 
 from src import InfluxSetting
+from src.enums.driver import Drivers
 from src.handlers.exception import exception_handler
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
@@ -113,7 +114,7 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                     'rubix_device_name': point.device.name,
                     'rubix_network_uuid': point.device.network.uuid,
                     'rubix_network_name': point.device.network.name,
-                    'rubix_driver': point.driver.name,
+                    'rubix_driver': Drivers.GENERIC.name,
                 })
                 fields = {
                     'id': point_store_history.id,

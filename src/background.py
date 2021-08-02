@@ -2,7 +2,6 @@ import logging
 from threading import Thread
 
 from flask import current_app
-from gevent import thread
 
 from .setting import AppSetting
 
@@ -58,19 +57,6 @@ class Background:
             FlaskThread(target=PostgreSQL().setup, daemon=True,
                         kwargs={'config': setting.postgres}).start()
 
-        # Drivers
-        thread.sleep(5)
-        logger.info("Starting Drivers...")
-        if setting.drivers.modbus_tcp:
-            from src.drivers.modbus.services.polling.modbus_polling import TcpPolling, ModbusTcpRegistry
-            ModbusTcpRegistry().register()
-            FlaskThread(target=TcpPolling().polling, daemon=True).start()
-
-        if setting.drivers.modbus_rtu:
-            from src.drivers.modbus.services.polling.modbus_polling import RtuPolling, ModbusRtuRegistry
-            ModbusRtuRegistry().register()
-            FlaskThread(target=RtuPolling().polling, daemon=True).start()
-
         # Sync
         logger.info("Starting Sync Services...")
 
@@ -87,13 +73,9 @@ class Background:
     @staticmethod
     def sync_on_start():
         from rubix_http.request import gw_request
-        from .models.point.model_point_store import PointStoreModel
-
+        
         """Sync mapped points values from LoRa > Generic points values"""
         gw_request(api='/lora/api/sync/lp_to_gp')
 
         """Sync mapped points values from BACnet > Generic points values"""
         gw_request(api='/bacnet/api/sync/bp_to_gp')
-
-        """Sync mapped points values from Modbus > Generic | BACnet points values"""
-        PointStoreModel.sync_points_values_mp_to_gbp_process()

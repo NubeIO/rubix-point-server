@@ -4,7 +4,6 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
-from src.drivers.enums.drivers import Drivers
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.utils.model_utils import validate_json
@@ -20,12 +19,6 @@ class DeviceModel(ModelBase):
     history_enable = db.Column(db.Boolean(), nullable=False, default=False)
     tags = db.Column(db.String(320), nullable=True)
     points = db.relationship('PointModel', cascade="all,delete", backref='device', lazy=True)
-    driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'device',
-        'polymorphic_on': driver
-    }
 
     __table_args__ = (
         UniqueConstraint('name', 'network_uuid'),

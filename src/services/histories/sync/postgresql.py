@@ -9,6 +9,7 @@ from psycopg2.extras import execute_values
 from registry.models.model_device_info import DeviceInfoModel
 from registry.resources.resource_device_info import get_device_info
 
+from src.enums.driver import Drivers
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
@@ -104,14 +105,12 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         points_list: List[tuple] = []
         points_values_list: List[tuple] = []
         points_tags_list: List[tuple] = []
-
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
             if not self.status():
                 return
-            _point: tuple = (point.device.uuid, point.uuid, point.name, point.driver.name)
+            _point: tuple = (point.device.uuid, point.uuid, point.name, Drivers.GENERIC.name)
             points_list.append(_point)
-
             if point.tags:
                 point_tags: dict = json.loads(point.tags)
                 # insert tags from point object
@@ -190,7 +189,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         networks_list: List[tuple] = []
         for network in NetworkModel.find_all():
             networks_list.append((network.uuid, network.name, network.enable, network.fault, network.history_enable,
-                                  network.driver.name, network.created_on, network.updated_on,
+                                  Drivers.GENERIC.name, network.created_on, network.updated_on,
                                   self.__device_info.global_uuid))
         if len(networks_list):
             logger.debug(f"Data: {networks_list}")
@@ -222,7 +221,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         devices_list: List[tuple] = []
         for device in DeviceModel.find_all():
             devices_list.append((device.uuid, device.network_uuid, device.name, device.enable, device.fault,
-                                 device.history_enable, device.driver.name, device.created_on, device.updated_on))
+                                 device.history_enable, Drivers.GENERIC.name, device.created_on, device.updated_on))
         if len(devices_list):
             logger.debug(f"Data: {devices_list}")
             query_network = f'INSERT INTO {self.__devices_table_name} ' \

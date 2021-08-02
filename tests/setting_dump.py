@@ -3,11 +3,6 @@ from src import AppSetting
 if __name__ == '__main__':
     setting = '''
     {
-      "drivers": {
-        "generic": false,
-        "modbus_rtu": false,
-        "modbus_tcp": false
-      },
       "services": {
         "mqtt": true,
         "histories": true,

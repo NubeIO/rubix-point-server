@@ -35,19 +35,6 @@ class ServiceSetting(BaseSetting):
         self.history_sync_postgres = False
 
 
-class DriverSetting(BaseSetting):
-    """
-    Declares an availability driver(enabled/disabled option)
-    """
-
-    KEY = 'drivers'
-
-    def __init__(self):
-        self.generic: bool = False
-        self.modbus_rtu: bool = True
-        self.modbus_tcp: bool = False
-
-
 class MqttSetting(MqttSettingBase):
     KEY = 'mqtt'
 
@@ -132,7 +119,6 @@ class AppSetting:
         self.__identifier = kwargs.get('identifier') or AppSetting.default_identifier
         self.__prod = kwargs.get('prod') or False
         self.__service_setting = ServiceSetting()
-        self.__driver_setting = DriverSetting()
         self.__influx_setting = InfluxSetting()
         self.__postgres_setting = PostgresSetting()
         self.__mqtt_settings: List[MqttSetting] = [MqttSetting()]
@@ -167,10 +153,6 @@ class AppSetting:
         return self.__service_setting
 
     @property
-    def drivers(self) -> DriverSetting:
-        return self.__driver_setting
-
-    @property
     def influx(self) -> InfluxSetting:
         return self.__influx_setting
 
@@ -188,7 +170,6 @@ class AppSetting:
 
     def serialize(self, pretty=True) -> str:
         m = {
-            DriverSetting.KEY: self.drivers,
             ServiceSetting.KEY: self.services,
             InfluxSetting.KEY: self.influx,
             PostgresSetting.KEY: self.postgres,
@@ -201,7 +182,6 @@ class AppSetting:
 
     def reload(self, setting_file: str, is_json_str: bool = False):
         data = self.__read_file(setting_file, self.__config_dir, is_json_str)
-        self.__driver_setting = self.__driver_setting.reload(data.get(DriverSetting.KEY))
         self.__service_setting = self.__service_setting.reload(data.get(ServiceSetting.KEY))
         self.__influx_setting = self.__influx_setting.reload(data.get(InfluxSetting.KEY))
         self.__postgres_setting = self.__postgres_setting.reload(data.get(PostgresSetting.KEY))

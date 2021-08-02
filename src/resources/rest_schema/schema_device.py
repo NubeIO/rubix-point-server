@@ -33,11 +33,6 @@ device_return_attributes = {
     'uuid': {
         'type': str,
     },
-    'driver': {
-        'type': str,
-        'nested': True,
-        'dict': 'driver.name'
-    },
     'created_on': {
         'type': str,
     },
