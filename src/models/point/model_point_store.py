@@ -47,9 +47,7 @@ class PointStoreModel(PointStoreModelMixin):
         else:
             return None
 
-    def update(self, driver: Drivers, cov_threshold: float = None,
-               priority_array_write_obj: PriorityArrayModel = None) -> bool:
-    def update(self, cov_threshold: float = None) -> bool:
+    def update(self, cov_threshold: float = None, priority_array_write_obj: PriorityArrayModel = None) -> bool:
         ts = get_datetime()
         if not self.fault:
             self.fault = bool(self.fault)

@@ -86,9 +86,8 @@ class PointModel(ModelBase):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         super().save_to_db()
 
-    def update_point_value(self, point_store: PointStoreModel, driver: Drivers, cov_threshold: float = None,
+    def update_point_value(self, point_store: PointStoreModel, cov_threshold: float = None,
                            priority_array_write_obj: PriorityArrayModel = None) -> bool:
-    def update_point_value(self, point_store: PointStoreModel, cov_threshold: float = None) -> bool:
         if not point_store.fault:
             if cov_threshold is None:
                 cov_threshold = self.cov_threshold
@@ -100,8 +99,7 @@ class PointModel(ModelBase):
                 value = self.apply_value_operation(value, self.value_operation)
                 value = round(value, self.value_round)
             point_store.value = self.apply_point_type(value)
-        return point_store.update(cov_threshold)
-        return point_store.update(driver, cov_threshold, priority_array_write_obj)
+        return point_store.update(cov_threshold, priority_array_write_obj)
 
     @validates('tags')
     def validate_tags(self, _, value):
@@ -161,15 +159,7 @@ class PointModel(ModelBase):
         priority_array_write_obj, highest_priority_value = self.update_priority_value_without_commit(
             value, priority, priority_array_write)
         point_store = PointStoreModel(point_uuid=self.uuid, value_original=highest_priority_value)
-        updated = self.update_point_value(point_store, self.driver, priority_array_write_obj=priority_array_write_obj)
-        self.update_priority_value(value, priority, priority_array_write)
-        highest_priority_value: float = PriorityArrayModel.get_highest_priority_value(self.uuid)
-        self.update_point_store_value(highest_priority_value)
-
-    def update_point_store_value(self, highest_priority_value: float):
-        point_store = PointStoreModel(point_uuid=self.uuid,
-                                      value_original=highest_priority_value)
-        updated = self.update_point_value(point_store)
+        updated = self.update_point_value(point_store, priority_array_write_obj=priority_array_write_obj)
         if updated:
             self.publish_cov(point_store)
 
