@@ -15,7 +15,6 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.point.priority_array import PriorityArrayModel
-from src.services.event_service_base import Event, EventType
 from src.utils.math_functions import eval_arithmetic_expression
 from src.utils.model_utils import validate_json
 
@@ -237,17 +236,9 @@ class PointModel(ModelBase):
                 and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
             db.session.commit()
-
-        from src.event_dispatcher import EventDispatcher
-        EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
-            'point': self,
-            'point_store': point_store,
-            'device': device,
-            'network': network,
-            'driver_name': Drivers.GENERIC.name,
-            'clear_value': force_clear or self.disable_mqtt,
-            'priority': priority
-        }))
+        from src.services.mqtt_client import MqttClient
+        MqttClient.publish_point_cov(
+            Drivers.GENERIC.name, network, device, self, point_store, force_clear or self.disable_mqtt, priority)
 
     def _get_highest_priority_field(self):
         for i in range(1, 17):
