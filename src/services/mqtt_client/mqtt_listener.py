@@ -14,6 +14,7 @@ from rubix_http.request import gw_request
 from rubix_mqtt.mqtt import MqttClientBase
 
 from src import FlaskThread
+from src.enums.driver import Drivers
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
@@ -83,7 +84,10 @@ class MqttListener(MqttClientBase):
             self.device_info.client_id, self.device_info.client_name,
             self.device_info.site_id, self.device_info.site_name,
             self.device_info.device_id, self.device_info.device_name,
-            self.config.topic
+            self.config.topic,
+            '+',
+            '+',
+            Drivers.GENERIC.name
         ))
 
     def get_schedule_value_topic_prefix(self) -> str:
@@ -99,7 +103,7 @@ class MqttListener(MqttClientBase):
                 self.__check_and_clear_schedule_value_topic(message)
             elif self.get_listener_topic_prefix() in message.topic:
                 self.__check_and_clear_listener_topic(message)
-            elif self.get_value_topic_prefix() in message.topic:
+            elif self.get_value_topic_prefix()[:-11] in message.topic:
                 self.__check_and_clear_value_topic(message)
             else:
                 self.__clear_mqtt_retain_value(message)
@@ -158,16 +162,18 @@ class MqttListener(MqttClientBase):
         device_uuid: str = topic[-4]
         network_name: str = topic[-5]
         network_uuid: str = topic[-6]
-        point_by_uuid: PointModel = PointModel.find_by_uuid(point_uuid)
-        if point_by_uuid is None or \
-                PointModel.find_by_name(network_name, device_name, point_name) is None or \
-                DeviceModel.find_by_uuid(device_uuid) is None or \
-                NetworkModel.find_by_uuid(network_uuid) is None:
-            logger.warning(f'No point with topic: {message.topic}')
-            self.__clear_mqtt_retain_value(message)
-        elif point_by_uuid and point_by_uuid.disable_mqtt:
-            logger.warning(f'Flag disable_mqtt is true for point.uuid={point_uuid}')
-            self.__clear_mqtt_retain_value(message)
+        driver: str = topic[-7]
+        if driver == Drivers.GENERIC.name:
+            point_by_uuid: PointModel = PointModel.find_by_uuid(point_uuid)
+            if point_by_uuid is None or \
+                    PointModel.find_by_name(network_name, device_name, point_name) is None or \
+                    DeviceModel.find_by_uuid(device_uuid) is None or \
+                    NetworkModel.find_by_uuid(network_uuid) is None:
+                logger.warning(f'No point with topic: {message.topic}')
+                self.__clear_mqtt_retain_value(message)
+            elif point_by_uuid and point_by_uuid.disable_mqtt:
+                logger.warning(f'Flag disable_mqtt is true for point.uuid={point_uuid}')
+                self.__clear_mqtt_retain_value(message)
 
     def __check_and_clear_schedule(self, topic: List[str], message: MQTTMessage):
         schedule_uuid_or_name: str = topic[-1]
