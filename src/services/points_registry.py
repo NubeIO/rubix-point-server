@@ -4,10 +4,7 @@ from typing import List, Dict
 
 from gevent import thread
 
-from src.event_dispatcher import EventDispatcher
 from src.models.point.model_point import PointModel
-from src.services.event_service_base import Event, EventType
-from src.services.mqtt_client import MqttRegistry
 from src.utils import Singleton
 
 logger = logging.getLogger(__name__)
@@ -26,10 +23,11 @@ class PointsRegistry(metaclass=Singleton):
         points: List[PointModel] = PointModel.find_all()
         for point in points:
             self._add_point(point)
+        from src.services.mqtt_client import MqttRegistry
         while not all(mqtt_client.status() for mqtt_client in MqttRegistry().clients()):
             logger.warning('Waiting for MQTT connection to be connected...')
             thread.sleep(2)
-        self._dispatch_event()
+        self._publish_point_registry()
         logger.info(f"Finished points registration")
 
     @staticmethod
@@ -43,7 +41,7 @@ class PointsRegistry(metaclass=Singleton):
     def add_point(self, point: PointModel):
         self._add_point(point)
         if not point.disable_mqtt:
-            self._dispatch_event()
+            self._publish_point_registry()
 
     def update_point(self, point: PointModel):
         is_new: bool = True
@@ -54,7 +52,7 @@ class PointsRegistry(metaclass=Singleton):
                 else:
                     self.__points[idx] = self._create_point_registry(point)
                 is_new = False
-                self._dispatch_event()
+                self._publish_point_registry()
                 break
         if is_new:
             self.add_point(point)
@@ -63,10 +61,9 @@ class PointsRegistry(metaclass=Singleton):
         for idx, pnt in enumerate(self.__points):
             if point.uuid == pnt['uuid']:
                 del self.__points[idx]
-                self._dispatch_event()
+                self._publish_point_registry()
                 break
 
-    def _dispatch_event(self):
-        # TODO: better use of dispatching
-        event = Event(EventType.POINT_REGISTRY_UPDATE, json.dumps(self.__points))
-        EventDispatcher().dispatch_from_service(None, event, None)
+    def _publish_point_registry(self):
+        from src.services.mqtt_client import MqttClient
+        MqttClient.publish_point_registry(json.dumps(self.__points))

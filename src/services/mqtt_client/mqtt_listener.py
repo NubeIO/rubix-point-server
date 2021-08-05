@@ -14,13 +14,11 @@ from rubix_http.request import gw_request
 from rubix_mqtt.mqtt import MqttClientBase
 
 from src import FlaskThread
-from src.event_dispatcher import EventDispatcher
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point import PointModel
 from src.models.schedule.model_schedule import ScheduleModel
-from src.services.event_service_base import Event, EventType
 from src.setting import MqttSetting
 
 logger = logging.getLogger(__name__)
@@ -110,7 +108,7 @@ class MqttListener(MqttClientBase):
         topic: List[str] = message.topic.split(self.SEPARATOR)
         if len(topic) == self._mqtt_schedule_value_topic_length():
             if not self.__check_and_clear_schedule(topic, message):
-                self.__dispatch_schedule_value_event(message)
+                self.__publish_schedule_value(message)
 
     def __check_and_clear_listener_topic(self, message: MQTTMessage):
         topic: List[str] = message.topic.split(self.SEPARATOR)
@@ -233,13 +231,9 @@ class MqttListener(MqttClientBase):
             logger.debug(f'Clearing topic: {message.topic}, having message: {message.payload}')
             self._publish_mqtt_value(message.topic, '', True)
 
-    def __dispatch_schedule_value_event(self, message: MQTTMessage):
+    def __publish_schedule_value(self, message: MQTTMessage):
         if self.config.cloud and message.payload:
-            event = Event(EventType.SCHEDULE_VALUE, {
-                'topic': message.topic,
-                'payload': json.loads(message.payload)
-            })
-            EventDispatcher().dispatch_from_source(None, event)
+            self.publish_schedule_value(message.topic, json.loads(message.payload))
 
     @staticmethod
     def __update_generic_point_store(message: MQTTMessage, point_uuid: str):
@@ -270,3 +264,7 @@ class MqttListener(MqttClientBase):
     @classmethod
     def __make_topic(cls, parts: tuple) -> str:
         return cls.SEPARATOR.join(parts)
+
+    @classmethod
+    def publish_schedule_value(cls, topic: str, payload: str):
+        pass
