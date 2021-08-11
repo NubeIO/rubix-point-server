@@ -42,7 +42,6 @@ class Ping(RubixResource):
             'influx_db_status': InfluxDB().status(),
             'postgre_sql_status': PostgreSQL().status(),
             'settings': {
-                setting.services.KEY: setting.services.to_dict(),
-                setting.drivers.KEY: setting.drivers.to_dict()
+                setting.services.KEY: setting.services.to_dict()
             }
         }

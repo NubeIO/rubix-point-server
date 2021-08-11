@@ -7,15 +7,14 @@ from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import validates
 
 from src import db
-from src.drivers.enums.drivers import Drivers
-from src.enums.point import HistoryType
+from src.enums.driver import Drivers
+from src.enums.point import HistoryType, GenericPointType
 from src.models.device.model_device import DeviceModel
 from src.models.model_base import ModelBase
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.point.priority_array import PriorityArrayModel
-from src.services.event_service_base import Event, EventType
 from src.utils.math_functions import eval_arithmetic_expression
 from src.utils.model_utils import validate_json
 
@@ -47,13 +46,10 @@ class PointModel(ModelBase):
     tags = db.Column(db.String(320), nullable=True)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=True, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=True, cascade="all,delete")
-    driver = db.Column(db.Enum(Drivers), default=Drivers.GENERIC)
     fallback_value = db.Column(db.Float(), default=16)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'point',
-        'polymorphic_on': driver
-    }
+    disable_mqtt = db.Column(db.Boolean, nullable=False, default=True)
+    type = db.Column(db.Enum(GenericPointType), nullable=False, default=GenericPointType.FLOAT)
+    unit = db.Column(db.String, nullable=True)
 
     __table_args__ = (
         UniqueConstraint('name', 'device_uuid'),
@@ -89,7 +85,7 @@ class PointModel(ModelBase):
         self.point_store = PointStoreModel.create_new_point_store_model(self.uuid)
         super().save_to_db()
 
-    def update_point_value(self, point_store: PointStoreModel, driver: Drivers, cov_threshold: float = None,
+    def update_point_value(self, point_store: PointStoreModel, cov_threshold: float = None,
                            priority_array_write_obj: PriorityArrayModel = None) -> bool:
         if not point_store.fault:
             if cov_threshold is None:
@@ -102,7 +98,7 @@ class PointModel(ModelBase):
                 value = self.apply_value_operation(value, self.value_operation)
                 value = round(value, self.value_round)
             point_store.value = self.apply_point_type(value)
-        return point_store.update(driver, cov_threshold, priority_array_write_obj)
+        return point_store.update(cov_threshold, priority_array_write_obj)
 
     @validates('tags')
     def validate_tags(self, _, value):
@@ -150,10 +146,9 @@ class PointModel(ModelBase):
         return value
 
     def update(self, **kwargs) -> bool:
-        from src.drivers.generic.models.point import GenericPointModel
-        publish_cov: bool = isinstance(self, GenericPointModel) and self.disable_mqtt != kwargs.get('disable_mqtt')
+        publish_cov: bool = self.disable_mqtt != kwargs.get('disable_mqtt')
         changed: bool = super().update(**kwargs)
-        updated: bool = self.update_point_value(self.point_store, self.driver, 0)
+        updated: bool = self.update_point_value(self.point_store, 0)
         if updated or publish_cov:
             self.publish_cov(self.point_store)
 
@@ -163,7 +158,7 @@ class PointModel(ModelBase):
         priority_array_write_obj, highest_priority_value = self.update_priority_value_without_commit(
             value, priority, priority_array_write)
         point_store = PointStoreModel(point_uuid=self.uuid, value_original=highest_priority_value)
-        updated = self.update_point_value(point_store, self.driver, priority_array_write_obj=priority_array_write_obj)
+        updated = self.update_point_value(point_store, priority_array_write_obj=priority_array_write_obj)
         if updated:
             self.publish_cov(point_store)
 
@@ -213,11 +208,18 @@ class PointModel(ModelBase):
         else:
             return scaled
 
-    def apply_point_type(self, value: float) -> float:
+    def apply_point_type(self, value: float):
+        if value is not None:
+            if self.type == GenericPointType.STRING:
+                value = None
+            elif self.type == GenericPointType.INT:
+                value = round(value, 0)
+            elif self.type == GenericPointType.BOOL:
+                value = float(bool(value))
         return value
 
     def publish_cov(self, point_store: PointStoreModel, device: DeviceModel = None, network: NetworkModel = None,
-                    driver_name: str = None, force_clear: bool = False):
+                    force_clear: bool = False):
         if point_store is None:
             raise Exception('Point.publish_cov point_store cannot be None')
         if device is None:
@@ -226,8 +228,6 @@ class PointModel(ModelBase):
             network = NetworkModel.find_by_uuid(device.network_uuid)
         if device is None or network is None:
             raise Exception(f'Cannot find network or device for point {self.uuid}')
-        if driver_name is None:
-            driver_name = network.driver.name
         priority = self._get_highest_priority_field()
 
         if self.history_enable \
@@ -236,18 +236,9 @@ class PointModel(ModelBase):
                 and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
             db.session.commit()
-
-        from src.event_dispatcher import EventDispatcher
-        from src.drivers.generic.models.point import GenericPointModel
-        EventDispatcher().dispatch_from_source(None, Event(EventType.POINT_COV, {
-            'point': self,
-            'point_store': point_store,
-            'device': device,
-            'network': network,
-            'driver_name': driver_name,
-            'clear_value': force_clear or (self.disable_mqtt if isinstance(self, GenericPointModel) else False),
-            'priority': priority
-        }))
+        from src.services.mqtt_client import MqttClient
+        MqttClient.publish_point_cov(
+            Drivers.GENERIC.name, network, device, self, point_store, force_clear or self.disable_mqtt, priority)
 
     def _get_highest_priority_field(self):
         for i in range(1, 17):
