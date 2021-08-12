@@ -61,22 +61,21 @@ class MqttClient(MqttListener):
 
         from .mqtt_registry import MqttRegistry
         for client in MqttRegistry().clients():
-            if client.config.publish_debug:
-                if client.config.publish_value:
-                    topic: str = client.__make_topic((client.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL,
+            if client.config.publish_value:
+                topic: str = client.__make_topic((client.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_ALL,
+                                                  driver_name,
+                                                  network.uuid, network.name,
+                                                  device.uuid, device.name,
+                                                  point.uuid, point.name))
+                client._publish_mqtt_value(topic, payload)
+
+                if not point_store.fault:
+                    topic: str = client.__make_topic((client.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE,
                                                       driver_name,
                                                       network.uuid, network.name,
                                                       device.uuid, device.name,
                                                       point.uuid, point.name))
-                    client._publish_mqtt_value(topic, payload)
-
-                    if not point_store.fault:
-                        topic: str = client.__make_topic((client.config.topic, MQTT_TOPIC_COV, MQTT_TOPIC_COV_VALUE,
-                                                          driver_name,
-                                                          network.uuid, network.name,
-                                                          device.uuid, device.name,
-                                                          point.uuid, point.name))
-                        client._publish_mqtt_value(topic, '' if clear_value else str(point_store.value))
+                    client._publish_mqtt_value(topic, '' if clear_value else str(point_store.value))
 
     @classmethod
     @allow_only_on_prefix
@@ -91,7 +90,7 @@ class MqttClient(MqttListener):
     def publish_point_registry(cls, payload: str):
         from .mqtt_registry import MqttRegistry
         for client in MqttRegistry().clients():
-            if client.config.publish_debug:
+            if client.config.publish_value:
                 client._publish_mqtt_value(client.__make_topic((client.config.topic, 'points')), payload)
 
     @classmethod
@@ -99,7 +98,7 @@ class MqttClient(MqttListener):
     def publish_schedules(cls, payload: str):
         from .mqtt_registry import MqttRegistry
         for client in MqttRegistry().clients():
-            if client.config.publish_debug:
+            if client.config.publish_value:
                 client._publish_mqtt_value(client.__make_topic((client.config.topic, 'schedules')), payload)
 
     @classmethod
@@ -107,7 +106,7 @@ class MqttClient(MqttListener):
     def publish_schedule_value(cls, topic: str, payload: str):
         from .mqtt_registry import MqttRegistry
         for client in MqttRegistry().clients():
-            if client.config.publish_debug:
+            if client.config.publish_value:
                 client._publish_mqtt_value(topic, payload)
 
     def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = True):
