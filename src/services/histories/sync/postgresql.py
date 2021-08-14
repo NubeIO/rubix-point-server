@@ -10,8 +10,11 @@ from registry.models.model_device_info import DeviceInfoModel
 from registry.resources.resource_device_info import get_device_info
 
 from src.enums.driver import Drivers
+from src.enums.history_sync import HistorySyncType
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
+from src.models.history_sync.model_history_sync_detail import HistorySyncDetailModel
+from src.models.history_sync.model_history_sync_log import HistorySyncLogModel
 from src.models.network.model_network import NetworkModel
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
@@ -40,6 +43,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self.__points_tags_table_name: str = ''
         self.__networks_tags_table_name: str = ''
         self.__devices_tags_table_name: str = ''
+        self.__postgres_details: str = ''
+        self.__postgres_details_changed: bool = False
 
     @property
     def config(self) -> Union[PostgresSetting, None]:
@@ -61,7 +66,10 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self.__devices_tags_table_name: str = f'{self.__devices_table_name}_tags'
         self.__networks_tags_table_name: str = f'{self.__networks_table_name}_tags'
         self.__points_tags_table_name: str = f'{self.__points_table_name}_tags'
-
+        self.__postgres_details: str = f'{self.config.host}:{self.config.port}:{self.config.dbname}:' \
+                                       f'{self.__points_values_table_name}'
+        self.__postgres_details_changed = HistorySyncDetailModel.find_details_by_type(
+            HistorySyncType.POSTGRES.name) != self.__postgres_details
         while not self.status():
             self.connect()
             time.sleep(self.config.attempt_reconnect_secs)
@@ -103,6 +111,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         points_list: List[tuple] = []
         points_values_list: List[tuple] = []
         points_tags_list: List[tuple] = []
+        history_sync_log_list: List[dict] = []
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
             if not self.status():
@@ -114,8 +123,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                 # insert tags from point object
                 for point_tag in point_tags.keys():
                     points_tags_list.append((point.uuid, point_tag, point_tags[point_tag]))
-
-            for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid):
+            point_store_histories = PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid)
+            for psh in point_store_histories:
                 point_store_history: PointStoreHistoryModel = psh
                 point_value_data: tuple = (point_store_history.id, point_store_history.point_uuid,
                                            point_store_history.value, point_store_history.value_original,
@@ -123,6 +132,11 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                                            point_store_history.fault, point_store_history.fault_message,
                                            point_store_history.ts_value, point_store_history.ts_fault)
                 points_values_list.append(point_value_data)
+            if point_store_histories:
+                history_sync_log = {'type': HistorySyncType.POSTGRES.name,
+                                    'point_uuid': point.uuid,
+                                    'last_sync_id': point_store_histories[-1].id}
+                history_sync_log_list.append(history_sync_log)
             gevent.sleep(0.1)  # it becomes heavy on single loop, so being idle for some time to give other process time
         logger.info("Sync service bulk data has been created...")
         self._update_device_info()
@@ -133,6 +147,12 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         self._update_points_list(points_list)
         self._update_points_values(points_values_list)
         self._update_points_tags(points_tags_list)
+        if len(history_sync_log_list):
+            HistorySyncLogModel.update_history_sync_logs(history_sync_log_list)
+            if self.__postgres_details_changed:
+                HistorySyncDetailModel.update_history_sync_details(
+                    {'type': HistorySyncType.POSTGRES.name, 'details': self.__postgres_details})
+                self.__postgres_details_changed = False
 
     def _update_device_info(self):
         logger.info(f"Storing device-info...")
@@ -472,6 +492,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                     logger.error(str(e))
 
     def _get_point_last_sync_id(self, point_uuid):
+        if not self.__postgres_details_changed:
+            return HistorySyncLogModel.find_last_sync_id_by_type_point_uuid(HistorySyncType.POSTGRES.name, point_uuid)
         """
         This function will return point_last_sync_id and if connection is already closed then we try to reconnect too
         """
