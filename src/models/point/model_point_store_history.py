@@ -38,7 +38,8 @@ class PointStoreHistoryModel(PointStoreModelMixin):
 
     @classmethod
     def get_all_after(cls, _id: int, point_uuid: str):
-        return cls.query.filter(and_(cls.id > _id, cls.point_uuid == point_uuid)).all()
+        return cls.query.filter(and_(cls.id > _id, cls.point_uuid == point_uuid)).order_by(
+            cls.__table__.c.id.asc()).all()
 
     @classmethod
     def get_latest(cls, point_uuid):

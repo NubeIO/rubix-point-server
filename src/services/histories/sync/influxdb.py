@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from typing import Union
+from typing import Union, List
 
 import gevent
 from influxdb import InfluxDBClient
@@ -10,7 +10,10 @@ from registry.resources.resource_device_info import get_device_info
 
 from src import InfluxSetting
 from src.enums.driver import Drivers
+from src.enums.history_sync import HistorySyncType
 from src.handlers.exception import exception_handler
+from src.models.history_sync.model_history_sync_detail import HistorySyncDetailModel
+from src.models.history_sync.model_history_sync_log import HistorySyncLogModel
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.services.histories.history_binding import HistoryBinding
@@ -26,6 +29,8 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
         self.__client = None
         self.__device_info: Union[DeviceInfoModel, None] = None
         self.__is_connected = False
+        self.__influx_details = ''
+        self.__influx_details_changed = False
 
     @property
     def config(self) -> InfluxSetting:
@@ -39,6 +44,10 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
 
     def setup(self, config: InfluxSetting):
         self.__config = config
+        self.__influx_details: str = f'{self.config.host}:{self.config.port}:{self.config.database}:' \
+                                     f'{self.config.measurement}'
+        self.__influx_details_changed = HistorySyncDetailModel.find_details_by_type(
+            HistorySyncType.INFLUX.name) != self.__influx_details
         while not self.status():
             self.connect()
             time.sleep(self.config.attempt_reconnect_secs)
@@ -86,9 +95,11 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             'device_id': self.__device_info.device_id,
             'device_name': self.__device_info.device_name
         }
+        history_sync_log_list: List[dict] = []
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
-            for psh in PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid):
+            point_store_histories = PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid)
+            for psh in point_store_histories:
                 tags = device_info.copy()
                 point_store_history: PointStoreHistoryModel = psh
                 point: PointModel = point_store_history.point
@@ -131,10 +142,21 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                     'fields': fields
                 }
                 store.append(row)
+            if point_store_histories:
+                history_sync_log = {'type': HistorySyncType.INFLUX.name,
+                                    'point_uuid': point.uuid,
+                                    'last_sync_id': point_store_histories[-1].id}
+                history_sync_log_list.append(history_sync_log)
         if len(store):
             logger.debug(f"Storing: {store}")
             try:
                 self.__client.write_points(store, batch_size=1000)
+                if len(history_sync_log_list):
+                    HistorySyncLogModel.update_history_sync_logs(history_sync_log_list)
+                    if self.__influx_details_changed:
+                        HistorySyncDetailModel.update_history_sync_details(
+                            {'type': HistorySyncType.INFLUX.name, 'details': self.__influx_details})
+                        self.__influx_details_changed = False
                 logger.info(f'Stored {len(store)} rows on {self.config.measurement} measurement')
             except Exception as e:
                 logger.error(f"Exception: {str(e)}")
@@ -142,6 +164,8 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
             logger.info("Nothing to store, no new records")
 
     def _get_point_last_sync_id(self, point_uuid):
+        if not self.__influx_details_changed:
+            return HistorySyncLogModel.find_last_sync_id_by_type_point_uuid(HistorySyncType.INFLUX.name, point_uuid)
         query = f"SELECT MAX(id), point_uuid FROM {self.config.measurement} WHERE rubix_point_uuid='{point_uuid}'"
         result_set = self.__client.query(query)
         points = list(result_set.get_points())
