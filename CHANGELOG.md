@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.0.2](https://github.com/NubeIO/rubix-point-server/tree/v2.0.2) (2020-08-16)
+- Improvement on PostgreSQL and Influx history sync (don't query much to server)
+
 ## [v2.0.1](https://github.com/NubeIO/rubix-point-server/tree/v2.0.1) (2020-08-12)
 - Fix: MQTT data push
 
