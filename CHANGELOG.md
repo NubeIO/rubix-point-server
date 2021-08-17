@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.0.3](https://github.com/NubeIO/rubix-point-server/tree/v2.0.3) (2020-08-17)
+- Fix: PostgreSQL reconnection issue
+
 ## [v2.0.2](https://github.com/NubeIO/rubix-point-server/tree/v2.0.2) (2020-08-16)
 - Improvement on PostgreSQL and Influx history sync (don't query much to server)
 

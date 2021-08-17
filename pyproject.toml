@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rubix-point"
-version = "2.0.2"
+version = "2.0.3"
 description = "Rubix Point Service"
 authors = ["NubeIO <tech-support@nube-io.com>"]
 

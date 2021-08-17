@@ -113,8 +113,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         points_tags_list: List[tuple] = []
         history_sync_log_list: List[dict] = []
         for point in PointModel.find_all():
-            point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
-            if not self.status():
+            point_last_sync_id: Union[int, None] = self._get_point_last_sync_id(point.uuid)
+            if not self.status() or point_last_sync_id is None:
                 return
             _point: tuple = (point.device.uuid, point.uuid, point.name, Drivers.GENERIC.name)
             points_list.append(_point)
@@ -139,7 +139,12 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                 history_sync_log_list.append(history_sync_log)
             gevent.sleep(0.1)  # it becomes heavy on single loop, so being idle for some time to give other process time
         logger.info("Sync service bulk data has been created...")
-        self._update_device_info()
+        try:
+            self._update_device_info()
+        except Exception as e:
+            logger.error(f'Error: {e}')
+            self.connect()
+            return
         self._update_networks()
         self._update_networks_tags()
         self._update_devices()
@@ -491,7 +496,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                 except psycopg2.Error as e:
                     logger.error(str(e))
 
-    def _get_point_last_sync_id(self, point_uuid):
+    def _get_point_last_sync_id(self, point_uuid) -> Union[int, None]:
         if not self.__postgres_details_changed:
             return HistorySyncLogModel.find_last_sync_id_by_type_point_uuid(HistorySyncType.POSTGRES.name, point_uuid)
         """
@@ -508,4 +513,5 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         except Exception as e:
             logger.error(f'Error: {e}')
             self.connect()
+            return None
         return 0
