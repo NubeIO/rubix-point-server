@@ -137,36 +137,6 @@ jobs:
             cd $folder; zip -r /tmp/zip/$artifact.zip ./; cd -
           done
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.NUBEIO_CI_GITHUB_PACKAGES_PAT }}
-
-      - name: Docker build
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: docker/Dockerfile
-          platforms: ${{ env.PLATFORMS }}
-          build-args: |
-            BASE_IMAGE_VERSION=3.9
-            APP_VERSION=${{ needs.context.outputs.version }}
-            COMMIT_SHA=${{ needs.context.outputs.sha }}
-          cache-from: type=registry,ref=localhost:5000/${{ env.APP_NAME }}:buildcache
-          cache-to: type=registry,ref=localhost:5000/${{ env.APP_NAME }}:buildcache,mode=max
-          tags: ${{ steps.docker_meta.outputs.tags }}
-          labels: ${{ steps.docker_meta.outputs.labels }}
-          pull: true
-          push: true
-
-      - name: Cleanup Docker build cache if any
-        run: |
-          docker buildx imagetools inspect localhost:5000/${{ env.APP_NAME }}:buildcache
-          echo "======================================================"
-          docker buildx prune --filter until=72h --keep-storage 5GB -f
-
       - name: Create Release
         if: ${{ needs.context.outputs.isRelease == 'true' }}
         uses: softprops/action-gh-release@v1
