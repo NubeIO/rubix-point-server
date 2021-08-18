@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.0.4](https://github.com/NubeIO/rubix-point-server/tree/v2.0.4) (2020-08-19)
+- Fallback should be able to set to be null
+
 ## [v2.0.3](https://github.com/NubeIO/rubix-point-server/tree/v2.0.3) (2020-08-17)
 - Fix: PostgreSQL reconnection issue
 
