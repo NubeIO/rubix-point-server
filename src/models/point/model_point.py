@@ -46,7 +46,7 @@ class PointModel(ModelBase):
     tags = db.Column(db.String(320), nullable=True)
     point_store = db.relationship('PointStoreModel', backref='point', lazy=True, uselist=False, cascade="all,delete")
     point_store_history = db.relationship('PointStoreHistoryModel', backref='point', lazy=True, cascade="all,delete")
-    fallback_value = db.Column(db.Float(), default=16)
+    fallback_value = db.Column(db.Float(), nullable=True)
     disable_mqtt = db.Column(db.Boolean, nullable=False, default=True)
     type = db.Column(db.Enum(GenericPointType), nullable=False, default=GenericPointType.FLOAT)
     unit = db.Column(db.String, nullable=True)
