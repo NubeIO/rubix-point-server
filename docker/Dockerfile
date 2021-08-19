@@ -1,5 +1,5 @@
 ARG BASE_IMAGE_VERSION
-FROM python:$BASE_IMAGE_VERSION-slim as build
+FROM python:$BASE_IMAGE_VERSION-buster as build
 
 RUN apt update -qq \
     && apt install git curl gcc g++ make file musl-dev libffi-dev zlib1g zlib1g-dev libpq-dev -y \
