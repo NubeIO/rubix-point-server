@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.0.5](https://github.com/NubeIO/rubix-point-server/tree/v2.0.5) (2020-08-19)
+- Change buster to slim-buster
+
 ## [v2.0.4](https://github.com/NubeIO/rubix-point-server/tree/v2.0.4) (2020-08-19)
 - Fallback should be able to set to be null
 
