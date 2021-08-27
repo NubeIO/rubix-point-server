@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.0.6](https://github.com/NubeIO/rubix-point-server/tree/v2.0.6) (2020-08-27)
+- Fix fallback_value migration
+
 ## [v2.0.5](https://github.com/NubeIO/rubix-point-server/tree/v2.0.5) (2020-08-19)
 - Change buster to slim-buster
 
