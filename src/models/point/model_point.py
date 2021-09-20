@@ -237,9 +237,10 @@ class PointModel(ModelBase):
                 and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
             db.session.commit()
-        from src.services.mqtt_client import MqttClient
-        MqttClient.publish_point_cov(
-            Drivers.GENERIC.name, network, device, self, point_store, force_clear or self.disable_mqtt, priority)
+        if not self.disable_mqtt:
+            from src.services.mqtt_client import MqttClient
+            MqttClient.publish_point_cov(
+                Drivers.GENERIC.name, network, device, self, point_store, force_clear, priority)
 
     def _get_highest_priority_field(self):
         for i in range(1, 17):
