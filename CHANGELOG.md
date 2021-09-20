@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.0.7](https://github.com/NubeIO/rubix-point-server/tree/v2.0.7) (2020-09-20)
+- Improvement on MQTT data push (don't send any data when MQTT disable is ON)
+
 ## [v2.0.6](https://github.com/NubeIO/rubix-point-server/tree/v2.0.6) (2020-08-27)
 - Fix fallback_value migration
 
