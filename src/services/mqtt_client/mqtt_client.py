@@ -106,7 +106,7 @@ class MqttClient(MqttListener):
     def publish_schedule_value(cls, topic: str, payload: str):
         from .mqtt_registry import MqttRegistry
         for client in MqttRegistry().clients():
-            if client.config.publish_value:
+            if client.config.publish_value and not client.config.cloud:
                 client._publish_mqtt_value(topic, payload)
 
     def _publish_mqtt_value(self, topic: str, payload: str, retain: bool = True):

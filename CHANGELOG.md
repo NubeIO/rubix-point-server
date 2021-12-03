@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.0.8](https://github.com/NubeIO/rubix-point-server/tree/v2.0.8) (2020-12-03)
+- Schedule issue fix: it was sending dictionary instead of JSON
+
 ## [v2.0.7](https://github.com/NubeIO/rubix-point-server/tree/v2.0.7) (2020-09-20)
 - Improvement on MQTT data push (don't send any data when MQTT disable is ON)
 
