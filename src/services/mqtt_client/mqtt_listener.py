@@ -239,7 +239,7 @@ class MqttListener(MqttClientBase):
 
     def __publish_schedule_value(self, message: MQTTMessage):
         if self.config.cloud and message.payload:
-            self.publish_schedule_value(message.topic, json.loads(message.payload))
+            self.publish_schedule_value(message.topic, json.dumps(json.loads(message.payload)))
 
     @staticmethod
     def __update_generic_point_store(message: MQTTMessage, point_uuid: str):
