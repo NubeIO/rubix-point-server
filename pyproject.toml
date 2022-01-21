@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rubix-point"
-version = "2.0.8"
+version = "2.1.0"
 description = "Rubix Point Service"
 authors = ["NubeIO <tech-support@nube-io.com>"]
 
@@ -13,7 +13,7 @@ influxdb-client = "^1.13.0"
 psycopg2-binary = "^2.8.6"
 rubix-http = { git = "https://github.com/NubeIO/rubix-http", rev = "v1.1.1" }
 rubix-registry = { git = "https://github.com/NubeIO/rubix-registry", rev = "v1.1.1" }
-rubix-mqtt = { git = "https://github.com/NubeIO/rubix-mqtt", rev = "v1.2.0" }
+rubix-mqtt = { git = "https://github.com/NubeIO/rubix-mqtt", rev = "v1.3.0" }
 Flask-Migrate = "^2.6.0"
 shortuuid = "^1.0.1"
 gevent = "^21.1.2"
