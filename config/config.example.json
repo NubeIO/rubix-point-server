@@ -6,6 +6,10 @@
     "history_sync_influxdb": false,
     "history_sync_postgres": false
   },
+  "cleaner": {
+    "frequency": 10,
+    "data_persisting_hours": 24
+  },
   "influx": {
     "host": "0.0.0.0",
     "port": 8086,

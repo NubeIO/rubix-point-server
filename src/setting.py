@@ -90,8 +90,8 @@ class CleanerSetting(BaseSetting):
     KEY = 'cleaner'
 
     def __init__(self):
-        self.frequency = 5
-        self.sleep = 10
+        self.frequency = 10
+        self.data_persisting_hours = 24
 
 
 class AppSetting:
