@@ -1,10 +1,9 @@
 import logging
 
-logger = logging.getLogger(__name__)
-
 
 def exception_handler(func):
     def inner_function(*args, **kwargs):
+        logger = logging.getLogger(__name__)
         try:
             func(*args, **kwargs)
         except Exception as e:
