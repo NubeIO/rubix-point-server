@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, timedelta
 
 import gevent
-from sqlalchemy import func, and_
 
 from src.handlers.exception import exception_handler
 from src.setting import CleanerSetting
@@ -30,14 +29,7 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
     def clean(self):
         from src import db
         from src.models.point.model_point_store_history import PointStoreHistoryModel
-        latest_point_id_rows = db.session.query(
-            PointStoreHistoryModel,
-            func.max(PointStoreHistoryModel.id).label('id')
-        ).group_by(PointStoreHistoryModel.point_uuid).all()
-        latest_point_ids = list(map(lambda x: x.id, latest_point_id_rows))
         persistence_ts = datetime.utcnow() - timedelta(hours=self.config.data_persisting_hours)
-        db.session.query(PointStoreHistoryModel).filter(
-            and_((PointStoreHistoryModel.ts_value < persistence_ts),
-                 ~PointStoreHistoryModel.id.in_(latest_point_ids))).delete()
+        db.session.query(PointStoreHistoryModel).filter(PointStoreHistoryModel.ts_value < persistence_ts).delete()
         db.session.commit()
         logger.info("Finished PointStoreCleaner cleaning process!")
