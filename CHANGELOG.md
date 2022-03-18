@@ -1,5 +1,10 @@
 # CHANGELOG
 ## [v2.1.0](https://github.com/NubeIO/rubix-point-server/tree/v2.1.0) (2022-01-21)
+- Improvement on history_persistency
+  - Changed from rows to hours
+- Fix: exception handler is not showing error logs
+
+## [v2.1.0](https://github.com/NubeIO/rubix-point-server/tree/v2.1.0) (2022-01-21)
 - MQTT SSL support
 
 ## [v2.0.8](https://github.com/NubeIO/rubix-point-server/tree/v2.0.8) (2021-12-03)
