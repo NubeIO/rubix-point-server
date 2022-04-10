@@ -20,6 +20,8 @@ MQTT_TOPIC_COV = 'cov'
 MQTT_TOPIC_COV_ALL = 'all'
 MQTT_TOPIC_COV_VALUE = 'value'
 
+device_info: Union[DeviceInfoModel, None] = get_device_info()
+
 
 def allow_only_on_prefix(func):
     def inner_function(*args, **kwargs):
@@ -118,7 +120,6 @@ class MqttClient(MqttListener):
 
     @classmethod
     def prefix_topic(cls) -> str:
-        device_info: Union[DeviceInfoModel, None] = get_device_info()
         if not device_info:
             logger.error('Please add device_info on Rubix Service')
             return ''
