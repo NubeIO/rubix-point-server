@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.1.2](https://github.com/NubeIO/rubix-point-server/tree/v2.1.2) (2022-04-10)
+- Fix: Too many open files issues
+
 ## [v2.1.0](https://github.com/NubeIO/rubix-point-server/tree/v2.1.0) (2022-01-21)
 - Improvement on history_persistency
   - Changed from rows to hours
