@@ -163,7 +163,7 @@ jobs:
 
       - name: Cleanup Docker build cache if any
         run: |
-          docker buildx imagetools inspect localhost:5000/${{ env.APP_NAME }}:buildcache
+          docker buildx imagetools inspect localhost:5000/${{ env.APP_NAME }}:buildcache || echo "Inspection is not working"
           echo "======================================================"
           docker buildx prune --filter until=72h --keep-storage 5GB -f
 
