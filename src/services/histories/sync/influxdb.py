@@ -21,13 +21,14 @@ from src.utils import Singleton
 
 logger = logging.getLogger(__name__)
 
+device_info: Union[DeviceInfoModel, None] = get_device_info()
+
 
 class InfluxDB(HistoryBinding, metaclass=Singleton):
 
     def __init__(self):
         self.__config = None
         self.__client = None
-        self.__device_info: Union[DeviceInfoModel, None] = None
         self.__is_connected = False
         self.__influx_details = ''
         self.__influx_details_changed = False
@@ -79,28 +80,27 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
     @exception_handler
     def sync(self):
         logger.info('InfluxDB sync has is been called')
-        self.__device_info: Union[DeviceInfoModel, None] = get_device_info()
-        if not self.__device_info:
+        if not device_info:
             logger.error('Please add device-info on Rubix Service')
             return
         self._sync()
 
     def _sync(self):
         store = []
-        device_info: dict = {
-            'client_id': self.__device_info.client_id,
-            'client_name': self.__device_info.client_name,
-            'site_id': self.__device_info.site_id,
-            'site_name': self.__device_info.site_name,
-            'device_id': self.__device_info.device_id,
-            'device_name': self.__device_info.device_name
+        device_info_dict: dict = {
+            'client_id': device_info.client_id,
+            'client_name': device_info.client_name,
+            'site_id': device_info.site_id,
+            'site_name': device_info.site_name,
+            'device_id': device_info.device_id,
+            'device_name': device_info.device_name
         }
         history_sync_log_list: List[dict] = []
         for point in PointModel.find_all():
             point_last_sync_id: int = self._get_point_last_sync_id(point.uuid)
             point_store_histories = PointStoreHistoryModel.get_all_after(point_last_sync_id, point.uuid)
             for psh in point_store_histories:
-                tags = device_info.copy()
+                tags = device_info_dict.copy()
                 point_store_history: PointStoreHistoryModel = psh
                 point: PointModel = point_store_history.point
                 if point.tags:

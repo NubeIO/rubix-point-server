@@ -27,13 +27,14 @@ logger = logging.getLogger(__name__)
 
 PAGE_SIZE: int = 100
 
+device_info: Union[DeviceInfoModel, None] = get_device_info()
+
 
 class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
     def __init__(self):
         self.__config: Union[PostgresSetting, None] = None
         self.__client = None
-        self.__device_info: Union[DeviceInfoModel, None] = None
         self.__is_connected = False
         self.__device_info_table_name: str = ''
         self.__networks_table_name: str = ''
@@ -101,8 +102,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
     @exception_handler
     def sync(self):
         logger.info('PostgreSQL sync has is been called')
-        self.__device_info: Union[DeviceInfoModel, None] = get_device_info()
-        if not self.__device_info:
+        if not device_info:
             logger.error('Please add device-info on Rubix Service')
             return
         self._sync()
@@ -161,8 +161,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
 
     def _update_device_info(self):
         logger.info(f"Storing device-info...")
-        if self.__device_info:
-            logger.debug(f"Data: {self.__device_info}")
+        if device_info:
+            logger.debug(f"Data: {device_info}")
             query_device_info = f'INSERT INTO {self.__device_info_table_name} ' \
                                 f'(global_uuid , client_id, client_name, site_id, site_name, device_id, device_name, ' \
                                 f'site_address, site_city, site_state, site_zip, site_country, site_lat, site_lon, ' \
@@ -189,17 +189,17 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
             with self.__client:
                 with self.__client.cursor() as curs:
                     try:
-                        device_info: tuple = (self.__device_info.global_uuid,
-                                              self.__device_info.client_id, self.__device_info.client_name,
-                                              self.__device_info.site_id, self.__device_info.site_name,
-                                              self.__device_info.device_id, self.__device_info.device_name,
-                                              self.__device_info.site_address, self.__device_info.site_city,
-                                              self.__device_info.site_state, self.__device_info.site_zip,
-                                              self.__device_info.site_country, self.__device_info.site_lat,
-                                              self.__device_info.site_lon, self.__device_info.time_zone,
-                                              self.__device_info.created_on,
-                                              self.__device_info.updated_on)
-                        curs.execute(query_device_info, device_info)
+                        device_info_dict: tuple = (device_info.global_uuid,
+                                                   device_info.client_id, device_info.client_name,
+                                                   device_info.site_id, device_info.site_name,
+                                                   device_info.device_id, device_info.device_name,
+                                                   device_info.site_address, device_info.site_city,
+                                                   device_info.site_state, device_info.site_zip,
+                                                   device_info.site_country, device_info.site_lat,
+                                                   device_info.site_lon, device_info.time_zone,
+                                                   device_info.created_on,
+                                                   device_info.updated_on)
+                        curs.execute(query_device_info, device_info_dict)
 
                     except psycopg2.Error as e:
                         logger.error(str(e))
@@ -213,7 +213,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         for network in NetworkModel.find_all():
             networks_list.append((network.uuid, network.name, network.enable, network.fault, network.history_enable,
                                   Drivers.GENERIC.name, network.created_on, network.updated_on,
-                                  self.__device_info.global_uuid))
+                                  device_info.global_uuid))
         if len(networks_list):
             logger.debug(f"Data: {networks_list}")
             query_network = f'INSERT INTO {self.__networks_table_name} ' \
