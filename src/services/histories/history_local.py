@@ -1,8 +1,10 @@
+import logging
 from datetime import datetime
 
+from flask import current_app
 from gevent import sleep
 
-from src import db
+from src import db, AppSetting
 from src.enums.point import HistoryType
 from src.handlers.exception import exception_handler
 from src.models.device.model_device import DeviceModel
@@ -15,24 +17,29 @@ from src.utils.model_utils import get_datetime
 
 SERVICE_NAME_HISTORIES_LOCAL = 'histories_local'
 
+logger = logging.getLogger(__name__)
+
 
 class HistoryLocal(metaclass=Singleton):
     """
     A simple history saving protocol for those points which has `history_type=INTERVAL`
     """
-    SYNC_PERIOD = 5
-
     binding = None
 
     def sync_interval(self):
+        setting: AppSetting = current_app.config[AppSetting.KEY]
         while True:
-            sleep(self.SYNC_PERIOD)
-            results = self.__get_all_enabled_interval_points()
-            for point, point_store in results:
-                latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
-                self.__sync_on_interval(point, point_store, latest_point_store_history)
+            sleep(setting.services.history_create_loop_frequency_secs)
+            logger.info("HistoryLocal > sync_interval is started...")
+            self.__sync_interval()
 
-            db.session.commit()
+    @exception_handler
+    def __sync_interval(self):
+        results = self.__get_all_enabled_interval_points()
+        for point, point_store in results:
+            latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
+            self.__sync_on_interval(point, point_store, latest_point_store_history)
+        db.session.commit()
 
     @staticmethod
     def __get_all_enabled_interval_points():

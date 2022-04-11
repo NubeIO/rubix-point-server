@@ -4,7 +4,8 @@
     "histories": false,
     "cleaner": false,
     "history_sync_influxdb": false,
-    "history_sync_postgres": false
+    "history_sync_postgres": false,
+    "history_create_loop_frequency_secs": 10
   },
   "cleaner": {
     "frequency": 10,

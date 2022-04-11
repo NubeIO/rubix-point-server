@@ -33,6 +33,7 @@ class ServiceSetting(BaseSetting):
         self.cleaner = False
         self.history_sync_influxdb = False
         self.history_sync_postgres = False
+        self.history_create_loop_frequency_secs = 10
 
 
 class MqttSetting(MqttSettingBase):
