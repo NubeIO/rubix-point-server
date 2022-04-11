@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v2.1.3](https://github.com/NubeIO/rubix-point-server/tree/v2.1.3) (2022-04-11)
+- Fix: sync_interval exception crashes the loop
+  - Sometimes Database Locked issue happens
+
 ## [v2.1.2](https://github.com/NubeIO/rubix-point-server/tree/v2.1.2) (2022-04-10)
 - Fix: Too many open files issues
 
