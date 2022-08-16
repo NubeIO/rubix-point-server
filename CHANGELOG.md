@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.1.4](https://github.com/NubeIO/rubix-point-server/tree/v2.1.4) (2022-08-16)
+- Fix: history cleaner deleting all histories issue
+
 ## [v2.1.3](https://github.com/NubeIO/rubix-point-server/tree/v2.1.3) (2022-04-11)
 - Fix: sync_interval exception crashes the loop
   - Sometimes Database Locked issue happens
