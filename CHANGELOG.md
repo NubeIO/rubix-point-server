@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.1.5](https://github.com/NubeIO/rubix-point-server/tree/v2.1.5) (2022-12-08)
+- Fix (#438): autoflush false
+
 ## [v2.1.4](https://github.com/NubeIO/rubix-point-server/tree/v2.1.4) (2022-08-16)
 - Fix: history cleaner deleting all histories issue
 
