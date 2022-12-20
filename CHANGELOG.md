@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [v2.1.7](https://github.com/NubeIO/rubix-point-server/tree/v2.1.7) (2022-12-20)
+- Fix: transaction issue and needed to rollback (#438)
+
 ## [v2.1.6](https://github.com/NubeIO/rubix-point-server/tree/v2.1.6) (2022-12-20)
 - Reconnect in case of postgres connection gets down
 - Revert "Fix (#438): autoflush false"
