@@ -45,7 +45,3 @@ class NetworkModel(ModelBase):
     def find_by_name(cls, network_name: str):
         results = cls.query.filter_by(name=network_name).first()
         return results
-
-    def set_fault(self, is_fault: bool):
-        self.fault = is_fault
-        db.session.commit()

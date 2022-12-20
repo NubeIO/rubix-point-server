@@ -3,6 +3,7 @@ from sqlalchemy import and_, desc, asc
 
 from src import db
 from src.models.point.model_point_store import PointStoreModelMixin, PointStoreModel
+from src.utils import dbsession
 from src.utils.model_utils import ModelUtils
 
 
@@ -27,14 +28,14 @@ class PointStoreHistoryModel(PointStoreModelMixin):
 
     def save_to_db(self):
         db.session.add(self)
-        db.session.commit()
+        dbsession.commit(db)
 
     def save_to_db_no_commit(self):
         db.session.add(self)
 
     def delete_from_db(self):
         db.session.delete(self)
-        db.session.commit()
+        dbsession.commit(db)
 
     @classmethod
     def get_all_after(cls, _id: int, point_uuid: str):

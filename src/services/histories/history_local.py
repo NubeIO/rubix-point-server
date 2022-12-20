@@ -12,7 +12,7 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point import PointModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
-from src.utils import Singleton
+from src.utils import Singleton, dbsession
 from src.utils.model_utils import get_datetime
 
 SERVICE_NAME_HISTORIES_LOCAL = 'histories_local'
@@ -39,7 +39,7 @@ class HistoryLocal(metaclass=Singleton):
         for point, point_store in results:
             latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
             self.__sync_on_interval(point, point_store, latest_point_store_history)
-        db.session.commit()
+        dbsession.commit(db)
 
     @staticmethod
     def __get_all_enabled_interval_points():

@@ -1,6 +1,7 @@
 from sqlalchemy import inspect
 
 from src import db
+from src.utils import dbsession
 
 
 class PriorityArrayModel(db.Model):
@@ -32,7 +33,7 @@ class PriorityArrayModel(db.Model):
 
     def delete_from_db(self):
         db.session.delete(self)
-        db.session.commit()
+        dbsession.commit(db)
 
     def update_with_no_commit(self, **kwargs):
         for key, value in kwargs.items():
@@ -42,7 +43,7 @@ class PriorityArrayModel(db.Model):
 
     def update(self, **kwargs):
         highest_priority_value: float = self.update_with_no_commit(**kwargs)
-        db.session.commit()
+        dbsession.commit(db)
         return highest_priority_value
 
     def check_self(self) -> float:
