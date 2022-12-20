@@ -6,7 +6,7 @@ from sqlalchemy import func
 
 from src.handlers.exception import exception_handler
 from src.setting import CleanerSetting
-from src.utils import Singleton
+from src.utils import Singleton, dbsession
 
 logger = logging.getLogger(__name__)
 
@@ -35,5 +35,5 @@ class PointStoreHistoryCleaner(metaclass=Singleton):
             persistence_ts = datetime.utcnow() - timedelta(hours=self.config.data_persisting_hours)
             db.session.query(PointStoreHistoryModel).filter(PointStoreHistoryModel.ts_value < persistence_ts) \
                 .filter(PointStoreHistoryModel.id < max_id[0]).delete()
-            db.session.commit()
+            dbsession.commit(db)
         logger.info("Finished PointStoreCleaner cleaning process!")

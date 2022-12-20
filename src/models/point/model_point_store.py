@@ -10,6 +10,7 @@ from sqlalchemy import and_, or_
 from src import db
 from src.enums.mapping import MappingState
 from src.models.point.priority_array import PriorityArrayModel
+from src.utils import dbsession
 from src.utils.model_utils import get_datetime
 
 
@@ -79,7 +80,7 @@ class PointStoreModel(PointStoreModelMixin):
                                     self.__table__.c.fault_message != self.fault_message))))
             if res.rowcount:  # WARNING: this could cause secondary write to db is store if fetched/linked from DB
                 self.ts_fault = ts
-        db.session.commit()
+        dbsession.commit(db)
         updated: bool = bool(res.rowcount)
         if updated:
             if not priority_array_write_obj:

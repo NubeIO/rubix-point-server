@@ -2,6 +2,7 @@ from sqlalchemy import inspect
 from sqlalchemy.orm import validates
 
 from src import db
+from src.utils import dbsession
 
 
 class ModelBase(db.Model):
@@ -25,19 +26,15 @@ class ModelBase(db.Model):
     def save_to_db(self):
         self.check_self()
         db.session.add(self)
-        db.session.commit()
+        dbsession.commit(db)
 
     def save_to_db_no_commit(self):
         self.check_self()
         db.session.add(self)
 
-    @classmethod
-    def commit(cls):
-        db.session.commit()
-
     def delete_from_db(self):
         db.session.delete(self)
-        db.session.commit()
+        dbsession.commit(db)
 
     @classmethod
     def create_temporary(cls, **kwargs):
@@ -54,7 +51,7 @@ class ModelBase(db.Model):
                 setattr(self, key, value)
         changed: bool = self.inspect_changes()
         self.check_self()
-        db.session.commit()
+        dbsession.commit(db)
         return changed
 
     def check_self(self) -> (bool, any):

@@ -15,6 +15,7 @@ from src.models.network.model_network import NetworkModel
 from src.models.point.model_point_store import PointStoreModel
 from src.models.point.model_point_store_history import PointStoreHistoryModel
 from src.models.point.priority_array import PriorityArrayModel
+from src.utils import dbsession
 from src.utils.math_functions import eval_arithmetic_expression
 from src.utils.model_utils import validate_json
 
@@ -183,10 +184,6 @@ class PointModel(ModelBase):
                 return priority_array, highest_priority_value
         return None, None
 
-    def update_priority_value(self, value: float, priority: int, priority_array_write: dict):
-        self.update_priority_value_without_commit(value, priority, priority_array_write)
-        db.session.commit()
-
     @classmethod
     def apply_value_operation(cls, original_value, value_operation: str) -> float or None:
         """Do calculations on original value with the help of point details"""
@@ -236,7 +233,7 @@ class PointModel(ModelBase):
                 and network.history_enable \
                 and device.history_enable:
             PointStoreHistoryModel.create_history(point_store)
-            db.session.commit()
+            dbsession.commit(db)
         if not self.disable_mqtt:
             from src.services.mqtt_client import MqttClient
             MqttClient.publish_point_cov(
