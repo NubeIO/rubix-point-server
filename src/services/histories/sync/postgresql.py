@@ -113,6 +113,8 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         points_tags_list: List[tuple] = []
         history_sync_log_list: List[dict] = []
         for point in PointModel.find_all():
+            if not self.status():  # reconnect in case of postgres connection gets down
+                self.connect()
             point_last_sync_id: Union[int, None] = self._get_point_last_sync_id(point.uuid)
             if not self.status() or point_last_sync_id is None:
                 return
@@ -512,6 +514,5 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
                         return last_sync_id
         except Exception as e:
             logger.error(f'Error: {e}')
-            self.connect()
             return None
         return 0

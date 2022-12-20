@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
-db = SQLAlchemy(session_options={"autoflush": False})
+db = SQLAlchemy()
 
 
 def __db_setup(_app, _app_setting, db_pg: bool = False):
