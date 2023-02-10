@@ -52,7 +52,7 @@ class PostgreSQL(HistoryBinding, metaclass=Singleton):
         return self.__config
 
     def status(self) -> bool:
-        return self.__is_connected
+        return self.__is_connected and self.__client and not self.__client.close
 
     def disconnect(self):
         self.__is_connected = False
