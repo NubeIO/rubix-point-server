@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2.1.8](https://github.com/NubeIO/rubix-point-server/tree/v2.1.8) (2023-02-10)
+- Improvement on Postgres status check
+  - For slow devices postgres connection used to get down but our program was unaware of it
+
 ## [v2.1.7](https://github.com/NubeIO/rubix-point-server/tree/v2.1.7) (2022-12-20)
 - Fix: transaction issue and needed to rollback (#438)
 

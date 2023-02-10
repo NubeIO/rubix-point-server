@@ -2,8 +2,10 @@ ARG BASE_IMAGE_VERSION
 FROM python:$BASE_IMAGE_VERSION-slim-buster as build
 
 RUN apt update -qq \
-    && apt install git curl gcc g++ make file musl-dev libffi-dev zlib1g zlib1g-dev libpq-dev -y \
-    && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | POETRY_VERSION=1.1.13 python3
+    && apt install git curl gcc g++ make file musl-dev libffi-dev zlib1g zlib1g-dev libpq-dev -y
+
+COPY docker/get-poetry.py get-poetry.py
+RUN POETRY_VERSION=1.1.13 python3 get-poetry.py
 
 WORKDIR /usr/src/app/
 ADD poetry.lock pyproject.toml ./
