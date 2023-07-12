@@ -35,10 +35,11 @@ class HistoryLocal(metaclass=Singleton):
 
     @exception_handler
     def __sync_interval(self):
-        results = self.__get_all_enabled_interval_points()
-        for point, point_store in results:
-            latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
-            self.__sync_on_interval(point, point_store, latest_point_store_history)
+        with db.session.no_autoflush:
+            results = self.__get_all_enabled_interval_points()
+            for point, point_store in results:
+                latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
+                self.__sync_on_interval(point, point_store, latest_point_store_history)
         dbsession.commit(db)
 
     @staticmethod
