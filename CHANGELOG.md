@@ -1,4 +1,6 @@
 # CHANGELOG
+## [v2.1.9](https://github.com/NubeIO/rubix-point-server/tree/v2.1.9) (2023-07-12)
+- Fix: This Session's transaction has been rolled back due to a previous exception during flush
 
 ## [v2.1.8](https://github.com/NubeIO/rubix-point-server/tree/v2.1.8) (2023-02-10)
 - Improvement on Postgres status check
