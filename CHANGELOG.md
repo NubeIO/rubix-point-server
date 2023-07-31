@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.2.0](https://github.com/NubeIO/rubix-point-server/tree/v2.2.0) (2023-07-31)
+- Fix: Gunicorn timeout issue
+
 ## [v2.1.9](https://github.com/NubeIO/rubix-point-server/tree/v2.1.9) (2023-07-12)
 - Fix: This Session's transaction has been rolled back due to a previous exception during flush
 
