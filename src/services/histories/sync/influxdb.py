@@ -148,16 +148,19 @@ class InfluxDB(HistoryBinding, metaclass=Singleton):
                                     'last_sync_id': point_store_histories[-1].id}
                 history_sync_log_list.append(history_sync_log)
         if len(store):
+            time.sleep(0.1)  # Gunicorn worker timeout
             logger.debug(f"Storing: {store}")
             try:
+                logger.info(f'Storing {len(store)} rows on {self.config.measurement} measurement')
                 self.__client.write_points(store, batch_size=1000)
+                time.sleep(0.1)  # Gunicorn worker timeout
+                logger.info(f'Stored {len(store)} rows on {self.config.measurement} measurement')
                 if len(history_sync_log_list):
                     HistorySyncLogModel.update_history_sync_logs(history_sync_log_list)
                     if self.__influx_details_changed:
                         HistorySyncDetailModel.update_history_sync_details(
                             {'type': HistorySyncType.INFLUX.name, 'details': self.__influx_details})
                         self.__influx_details_changed = False
-                logger.info(f'Stored {len(store)} rows on {self.config.measurement} measurement')
             except Exception as e:
                 logger.error(f"Exception: {str(e)}")
         else:
