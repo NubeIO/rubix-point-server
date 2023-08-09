@@ -42,8 +42,8 @@ class HistoryLocal(metaclass=Singleton):
             i = 0
             for point, point_store in results:
                 if i % 10 == 0:
-                    time.sleep(0.01)
-                latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
+                    time.sleep(0.1)  # Gunicorn worker timeout
+                    latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
                 self.__sync_on_interval(point, point_store, latest_point_store_history)
                 i += 1
         dbsession.commit(db)

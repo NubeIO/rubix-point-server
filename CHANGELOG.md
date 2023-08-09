@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.2.1](https://github.com/NubeIO/rubix-point-server/tree/v2.2.1) (2023-09-09)
+- Fix: app freeze on history local sync interval
+
 ## [v2.2.0](https://github.com/NubeIO/rubix-point-server/tree/v2.2.0) (2023-07-31)
 - Fix: Gunicorn timeout issue
 
