@@ -1,4 +1,5 @@
 import logging
+import time
 from datetime import datetime
 
 from flask import current_app
@@ -32,14 +33,19 @@ class HistoryLocal(metaclass=Singleton):
             sleep(setting.services.history_create_loop_frequency_secs)
             logger.info("HistoryLocal > sync_interval is started...")
             self.__sync_interval()
+            logger.info("HistoryLocal > sync_interval is ended...")
 
     @exception_handler
     def __sync_interval(self):
         with db.session.no_autoflush:
             results = self.__get_all_enabled_interval_points()
+            i = 0
             for point, point_store in results:
+                if i % 10 == 0:
+                    time.sleep(0.01)
                 latest_point_store_history: PointStoreHistoryModel = PointStoreHistoryModel.get_latest(point.uuid)
                 self.__sync_on_interval(point, point_store, latest_point_store_history)
+                i += 1
         dbsession.commit(db)
 
     @staticmethod
