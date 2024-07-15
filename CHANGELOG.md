@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v2.2.2](https://github.com/NubeIO/rubix-point-server/tree/v2.2.2) (2023-09-15)
+- Fix: latest point store history on sync interval
+
 ## [v2.2.1](https://github.com/NubeIO/rubix-point-server/tree/v2.2.1) (2023-09-09)
 - Fix: app freeze on history local sync interval
 
